@@ -6,13 +6,13 @@ import {
   Settings, MessageSquare, CheckSquare, Phone, Building, Globe, Percent, Tags, 
   Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // IMPORTUJEMY FIREBASE Z NASZEGO NOWEGO PLIKU
 import { auth, db } from './firebase'; 
-import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
-const appId = "wasolinio-menedzer-1"; 
 
 
 // --- WSPÓLNE HELPERY I DANE ---
@@ -41,6 +41,7 @@ const getIconComponent = (name, className) => {
 
 // --- GŁÓWNA APLIKACJA ---
 export default function RentalManager() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [rentals, setRentals] = useState([]);
@@ -129,34 +130,30 @@ export default function RentalManager() {
     }
   }, [isDarkMode]);
 
-useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        // Użytkownik jest już zalogowany (np. w LoginPanelu)
+        // Ktoś jest zalogowany - wpuszczamy do panelu
         setUser(currentUser);
       } else {
-        // Awaryjne logowanie anonimowe TYLKO gdy ktoś nie ma konta
-        try { 
-          await signInAnonymously(auth); 
-        } catch (error) { 
-          console.error("Błąd autoryzacji:", error); 
-        }
+        // Brak logowania - odsyłamy na stronę główną do logowania!
+        navigate('/login');
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (!user) return;
     
     // Subskrypcje Firebase
-    const rentalsRef = collection(db, 'artifacts', appId, 'public', 'data', 'rentals');
+    const rentalsRef = collection(db, 'users', user.uid, 'rentals');
     const unsubRentals = onSnapshot(rentalsRef, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), property: typeof doc.data().property === 'object' ? doc.data().property.name : doc.data().property }));
       setRentals(data); setLoading(false);
     });
 
-    const settingsRef = collection(db, 'artifacts', appId, 'public', 'data', 'settings');
+    const settingsRef = collection(db, 'users', user.uid, 'settings');
     const unsubSettings = onSnapshot(settingsRef, (snapshot) => {
       snapshot.docs.forEach(docSnap => {
         const id = docSnap.id;
@@ -407,7 +404,7 @@ useEffect(() => {
             if (!exists) {
               const newId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
               const isBlocked = e.summary?.toLowerCase().includes('blocked') || e.summary?.toLowerCase().includes('niedostępne');
-              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', newId), {
+              await setDoc(doc(db, 'users', user.uid, 'rentals', newId), {
                 type: 'booking', property: propName, source: source.name,
                 guest: isBlocked ? `Blokada (${source.name})` : (e.summary || `Gość ${source.name}`),
                 date: startDate, endDate: endDate, income: 0, advancePayment: 0, isAdvancePaid: false,
@@ -524,16 +521,16 @@ useEffect(() => {
       entry.income = Number(entry.income) || 0; entry.advancePayment = Number(entry.advancePayment) || 0;
       entry.commission = Number(entry.commission) || 0; entry.tax = Number(entry.tax) || 0; entry.vat = Number(entry.vat) || 0;
     } else if (entry.type === 'utility') { entry.utilities = Number(entry.utilities) || 0; }
-    const docRef = editingId ? doc(db, 'artifacts', appId, 'public', 'data', 'rentals', editingId) : doc(db, 'artifacts', appId, 'public', 'data', 'rentals', Date.now().toString());
+    const docRef = editingId ? doc(db, 'users', user.uid, 'rentals', editingId) : doc(db, 'users', user.uid, 'rentals', Date.now().toString());
     await (editingId ? updateDoc : setDoc)(docRef, entry);
     handleCloseModal();
   };
 
-  const confirmDelete = async () => { if (!user || !itemToDelete) return; await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', itemToDelete)); setItemToDelete(null); };
+  const confirmDelete = async () => { if (!user || !itemToDelete) return; await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete)); setItemToDelete(null); };
 
   const toggleStatus = async (id, field) => {
     const r = rentals.find(r => r.id === id);
-    if (r && user) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', id), { [field]: !r[field] });
+    if (r && user) await updateDoc(doc(db, 'users', user.uid, 'rentals', id), { [field]: !r[field] });
   };
 
   const completeTask = async (id, taskId, current) => {
@@ -541,7 +538,7 @@ useEffect(() => {
     const updates = taskId === 'manual' ? { isCompleted: true } : { [`completedTasks.${taskId}`]: current !== undefined ? !current : true };
     if (taskId === 'directions') updates.directionsSent = true;
     if (taskId === 'keycode') updates.keycodeSent = true;
-    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', id), updates);
+    await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
   };
 
   const toggleDynamicTask = async (id, taskId, currentValue) => {
@@ -549,7 +546,7 @@ useEffect(() => {
     const updates = { [`completedTasks.${taskId}`]: !currentValue };
     if (taskId === 'directions') updates.directionsSent = !currentValue;
     if (taskId === 'keycode') updates.keycodeSent = !currentValue;
-    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', id), updates);
+    await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
   };
 
   const exportToCSV = () => {
@@ -572,12 +569,12 @@ useEffect(() => {
 
   const saveSettings = async () => {
     if (!user) return;
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'reminders'), { items: editingTemplates });
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'properties'), { items: editingProperties });
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'sources'), { items: editingSources });
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'categories'), { items: editingCategories });
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'tax'), editingTaxSettings);
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'syncLinks'), { links: editingSyncLinks });
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'reminders'), { items: editingTemplates });
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'properties'), { items: editingProperties });
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'sources'), { items: editingSources });
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'categories'), { items: editingCategories });
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'tax'), editingTaxSettings);
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'syncLinks'), { links: editingSyncLinks });
     setShowSettingsModal(false);
   };
 
@@ -585,6 +582,15 @@ useEffect(() => {
     const newDate = new Date(calendarDate);
     newDate.setMonth(newDate.getMonth() + offset);
     setCalendarDate(newDate);
+  };
+
+  // Dodana brakująca funkcja wylogowania!
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Błąd podczas wylogowywania:", error);
+    }
   };
 
   // Funkcje pomocnicze ustawień
@@ -717,6 +723,11 @@ useEffect(() => {
             {/* PRZYCISK TRYBU CIEMNEGO */}
             <button onClick={() => setIsDarkMode(!isDarkMode)} className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-600 dark:text-slate-300 transition-all shadow-sm" title="Zmień motyw">
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+            </button>
+
+            {/* PRZYCISK WYLOGOWANIA */}
+            <button onClick={handleLogout} className="flex items-center justify-center gap-2 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-700 px-4 py-3 rounded-2xl hover:bg-rose-100 dark:hover:bg-rose-500/20 font-medium text-rose-600 dark:text-rose-400 transition-all shadow-sm" title="Wyloguj się">
+              <LogOut className="w-4 h-4" />
             </button>
 
             <button onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white px-6 py-3 rounded-2xl hover:from-blue-700 hover:to-indigo-700 font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"><Plus className="w-5 h-5" /> Dodaj wpis</button>
