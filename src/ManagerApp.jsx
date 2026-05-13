@@ -129,13 +129,20 @@ export default function RentalManager() {
     }
   }, [isDarkMode]);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try { await signInAnonymously(auth); } 
-      catch (error) { console.error("Błąd autoryzacji:", error); }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Użytkownik jest już zalogowany (np. w LoginPanelu)
+        setUser(currentUser);
+      } else {
+        // Awaryjne logowanie anonimowe TYLKO gdy ktoś nie ma konta
+        try { 
+          await signInAnonymously(auth); 
+        } catch (error) { 
+          console.error("Błąd autoryzacji:", error); 
+        }
+      }
+    });
     return () => unsubscribe();
   }, []);
 
