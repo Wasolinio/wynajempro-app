@@ -7,27 +7,13 @@ import {
   Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon
 } from 'lucide-react';
 
-// ZMIANA: Dodano getApps i getApp, aby zapobiec crashowi podwójnej inicjalizacji
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+// IMPORTUJEMY FIREBASE Z NASZEGO NOWEGO PLIKU
+import { auth, db } from './firebase'; 
+import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
-// --- KONFIGURACJA FIREBASE ---
-const firebaseConfig = {
-  apiKey: "AIzaSyDPvqp0lnIQaC-bHZG1HlTyhdFWxhnlF74",
-  authDomain: "moje-domki-6c77d.firebaseapp.com",
-  projectId: "moje-domki-6c77d",
-  storageBucket: "moje-domki-6c77d.firebasestorage.app",
-  messagingSenderId: "379384522806",
-  appId: "1:379384522806:web:c1d1e59c01f995402d9097",
-  measurementId: "G-BZ0SJC201Z"
-};
-
-// ZMIANA: Bezpieczna inicjalizacja (inicjuj tylko, jeśli jeszcze nie istnieje)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
 const appId = "wasolinio-menedzer-1"; 
+
 
 // --- WSPÓLNE HELPERY I DANE ---
 const propColors = {
@@ -143,21 +129,13 @@ export default function RentalManager() {
     }
   }, [isDarkMode]);
 
-  // ZMIANA: Zabezpieczony system autoryzacji (współpracujący z LoginPanel)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        // Jeśli nie ma zalogowanego użytkownika (np. bezpośrednie wejście na stronę),
-        // wtedy i TYLKO wtedy logujemy anonimowo, aby nie psuć sesji logowania.
-        try { 
-          await signInAnonymously(auth); 
-        } catch (error) { 
-          console.error("Błąd autoryzacji:", error); 
-        }
-      }
-    });
+    const initAuth = async () => {
+      try { await signInAnonymously(auth); } 
+      catch (error) { console.error("Błąd autoryzacji:", error); }
+    };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
 

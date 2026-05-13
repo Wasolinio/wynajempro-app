@@ -4,8 +4,8 @@ import { useNavigate, Link, BrowserRouter, useInRouterContext } from 'react-rout
 // --- UWAGA: IMPORTY FIREBASE ---
 // Na potrzeby podglądu wizualnego, oryginalne importy zostały zakomentowane.
 // ODKOMENTUJ poniższe linie w swoim właściwym projekcie w VSCode:
-// import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
-// import { auth } from './firebase'; 
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
+import { auth } from '../firebase'; 
 
 // --- MOCK FIREBASE (Tylko do podglądu, USUŃ TEN BLOK w swoim projekcie) ---
 
