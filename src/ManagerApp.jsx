@@ -8,12 +8,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// IMPORTUJEMY FIREBASE Z NASZEGO NOWEGO PLIKU
+// IMPORTUJEMY FIREBASE
 import { auth, db } from './firebase'; 
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-
-
 
 // --- WSPÓLNE HELPERY I DANE ---
 const propColors = {
@@ -35,8 +33,33 @@ const getIconComponent = (name, className) => {
     case 'MessageSquare': return <MessageSquare className={className} />;
     case 'Phone': return <Phone className={className} />;
     case 'CheckSquare': return <CheckSquare className={className} />;
+    case 'Settings': return <Settings className={className} />;
     default: return <Bell className={className} />;
   }
+};
+
+// --- DOMYŚLNE WARTOŚCI STARTOWE (DLA NOWYCH UŻYTKOWNIKÓW) ---
+const DEFAULT_PROPERTIES = [
+  { name: 'Domek nad Jeziorem', color: 'blue' },
+  { name: 'Apartament Centrum', color: 'emerald' },
+  { name: 'Domek w Górach', color: 'amber' }
+];
+const DEFAULT_SOURCES = ['Booking.com', 'Airbnb', 'Facebook', 'Strona www', 'Z polecenia', 'Inne'];
+const DEFAULT_CATEGORIES = ['Prąd', 'Woda', 'Sprzątanie', 'Środki czystości', 'Naprawy', 'Gaz', 'Internet', 'Inne'];
+const DEFAULT_TEMPLATES = [
+  { id: 'directions', text: 'Wyślij wskazówki dojazdu', shortName: 'Dojazd', daysBefore: 3, icon: 'Mail' },
+  { id: 'keycode', text: 'Wyślij kod do drzwi', shortName: 'Kod', daysBefore: 1, icon: 'Key' },
+  { id: 'cleaning', text: 'Zleć sprzątanie', shortName: 'Sprzątanie', daysBefore: 0, icon: 'CheckSquare' }
+];
+const defaultTaxSettings = { 
+  taxForm: 'lump_sum', 
+  autoThreshold: true, 
+  rate: 8.5, 
+  isVatPayer: false,
+  zusHealth: 0,
+  zusSocial: 0,
+  taxFreeAmount: 30000,
+  includeZusInCosts: true
 };
 
 // --- GŁÓWNA APLIKACJA ---
@@ -65,32 +88,33 @@ export default function RentalManager() {
     return false;
   });
 
-  // Stany Edycji i Ustawień
+  // Stany Edycji i Ustawień z domyślnymi wartościami
   const [editingId, setEditingId] = useState(null);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState(DEFAULT_TEMPLATES);
   const [editingTemplates, setEditingTemplates] = useState([]);
-  const [properties, setProperties] = useState([]);
+  
+  const [properties, setProperties] = useState(DEFAULT_PROPERTIES);
   const [editingProperties, setEditingProperties] = useState([]);
   const [newPropertyName, setNewPropertyName] = useState('');
   const [newPropertyColor, setNewPropertyColor] = useState('blue');
-  const [sources, setSources] = useState([]);
+  
+  const [sources, setSources] = useState(DEFAULT_SOURCES);
   const [editingSources, setEditingSources] = useState([]);
   const [newSourceName, setNewSourceName] = useState('');
-  const [categories, setCategories] = useState([]);
+  
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [editingCategories, setEditingCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   
-  // Stan Synchronizacji iCal
   const [syncLinks, setSyncLinks] = useState({});
   const [editingSyncLinks, setEditingSyncLinks] = useState({});
 
-  const defaultTaxSettings = { taxForm: 'lump_sum', autoThreshold: true, rate: 8.5, isVatPayer: false };
   const [taxSettings, setTaxSettings] = useState(defaultTaxSettings);
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
 
   // --- NOWY SYSTEM NAWIGACJI ---
-  const [mainTab, setMainTab] = useState('bookings'); // 'bookings' | 'calendar' | 'utilities' | 'reminders'
-  const [bookingFilter, setBookingFilter] = useState('upcoming'); // 'all' | 'upcoming' | 'archived'
+  const [mainTab, setMainTab] = useState('bookings'); 
+  const [bookingFilter, setBookingFilter] = useState('upcoming'); 
   
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [bookingSortOrder, setBookingSortOrder] = useState('upcoming'); 
@@ -119,7 +143,6 @@ export default function RentalManager() {
     } catch { return ''; }
   };
 
-  // Efekt zapisu i stosowania motywu
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -133,10 +156,8 @@ export default function RentalManager() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        // Ktoś jest zalogowany - wpuszczamy do panelu
         setUser(currentUser);
       } else {
-        // Brak logowania - odsyłamy na stronę główną do logowania!
         navigate('/login');
       }
     });
@@ -155,19 +176,30 @@ export default function RentalManager() {
 
     const settingsRef = collection(db, 'users', user.uid, 'settings');
     const unsubSettings = onSnapshot(settingsRef, (snapshot) => {
-      snapshot.docs.forEach(docSnap => {
-        const id = docSnap.id;
-        const data = docSnap.data();
-        if (id === 'reminders') setTemplates(data.items || []);
-        if (id === 'properties') {
-           const formatted = (data.items || []).map((p, i) => typeof p === 'string' ? { name: p, color: availableColors[i % availableColors.length] } : p);
-           setProperties(formatted);
-        }
-        if (id === 'sources') setSources(data.items || []);
-        if (id === 'categories') setCategories(data.items || []);
-        if (id === 'tax') setTaxSettings({ taxForm: data.taxForm || 'lump_sum', autoThreshold: data.autoThreshold !== false, rate: data.rate || 8.5, isVatPayer: data.isVatPayer || false });
-        if (id === 'syncLinks') setSyncLinks(data.links || {});
-      });
+      if (!snapshot.empty) {
+        let hasProps = false, hasSources = false, hasCats = false, hasReminders = false, hasTax = false;
+        snapshot.docs.forEach(docSnap => {
+          const id = docSnap.id;
+          const data = docSnap.data();
+          if (id === 'reminders' && data.items) { setTemplates(data.items); hasReminders = true; }
+          if (id === 'properties' && data.items) {
+             const formatted = data.items.map((p, i) => typeof p === 'string' ? { name: p, color: availableColors[i % availableColors.length] } : p);
+             setProperties(formatted);
+             hasProps = true;
+          }
+          if (id === 'sources' && data.items) { setSources(data.items); hasSources = true; }
+          if (id === 'categories' && data.items) { setCategories(data.items); hasCats = true; }
+          if (id === 'tax') { setTaxSettings({ ...defaultTaxSettings, ...data }); hasTax = true; }
+          if (id === 'syncLinks') setSyncLinks(data.links || {});
+        });
+        
+        // Zabezpieczenie przed pustymi wartościami po pierwszej inicjalizacji
+        if (!hasProps) setProperties(DEFAULT_PROPERTIES);
+        if (!hasSources) setSources(DEFAULT_SOURCES);
+        if (!hasCats) setCategories(DEFAULT_CATEGORIES);
+        if (!hasReminders) setTemplates(DEFAULT_TEMPLATES);
+        if (!hasTax) setTaxSettings(defaultTaxSettings);
+      }
     });
 
     return () => { unsubRentals(); unsubSettings(); };
@@ -225,8 +257,8 @@ export default function RentalManager() {
             const diffDays = Math.ceil((arr - todayMidnight) / 86400000);
             templates.forEach(t => {
               const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
-              if (diffDays <= t.daysBefore && diffDays >= -30 && !isCompleted) {
-                tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: diffDays, icon: getIconComponent(t.icon, `w-5 h-5 text-blue-500`), text: t.text });
+              if (diffDays <= (t.daysBefore || 0) && diffDays >= -30 && !isCompleted) {
+                tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: diffDays, icon: getIconComponent(t.icon || 'Bell', `w-5 h-5 text-blue-500`), text: t.text || t.shortName });
               }
             });
           }
@@ -280,7 +312,6 @@ export default function RentalManager() {
   const paginatedUtilities = getPaginated(utilitiesList);
   const paginatedReminders = getPaginated(remindersList);
 
-  // Zabezpieczenie przed pokazywaniem pustego kalendarza podczas wyszukiwania
   const renderMainTab = searchQuery && mainTab === 'calendar' ? 'bookings' : mainTab;
 
   let currentTotalPages = 1;
@@ -351,6 +382,13 @@ export default function RentalManager() {
   // --- LOGIKA SYNCHRONIZACJI ICAL ---
   const handleSyncCalendars = async () => {
     if (!user) return;
+    
+    // Zabezpieczenie przed brakiem linków
+    if (Object.keys(syncLinks).length === 0) {
+      alert('Najpierw dodaj linki iCal w Ustawieniach (zakładka Integracje), aby móc zsynchronizować kalendarze.');
+      return;
+    }
+
     setIsSyncing(true);
     let newBookingsCount = 0;
 
@@ -399,6 +437,7 @@ export default function RentalManager() {
             const startDate = `${e.start.substring(0,4)}-${e.start.substring(4,6)}-${e.start.substring(6,8)}`;
             const endDate = `${e.end.substring(0,4)}-${e.end.substring(4,6)}-${e.end.substring(6,8)}`;
             const syncId = `sync_${source.name}_${propName}_${startDate}_${endDate}`;
+            
             const exists = rentals.some(r => r.syncId === syncId || (r.property === propName && r.date === startDate && r.source === source.name));
 
             if (!exists) {
@@ -417,11 +456,13 @@ export default function RentalManager() {
       }
     }
     setIsSyncing(false);
-    if(newBookingsCount > 0) alert(`Synchronizacja zakończona! Dodano ${newBookingsCount} rezerwacji.`);
+    if(newBookingsCount > 0) alert(`Synchronizacja zakończona! Dodano ${newBookingsCount} nowych rezerwacji.`);
+    else alert(`Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.`);
   };
 
   // --- AKCJE FIREBASE I FUNKCJE ---
   
+  // ROZBUDOWANY KALKULATOR PODATKÓW (Z ZUS i kwotą wolną)
   const calculateTaxes = (rentalObj, allRentals, settings, currentEditingId) => {
     const inc = Number(rentalObj.income) || 0;
     const comm = Number(rentalObj.commission) || 0;
@@ -468,7 +509,57 @@ export default function RentalManager() {
         const aboveThreshold = netInc - belowThreshold;
         taxAmt = (belowThreshold * 0.085) + (aboveThreshold * 0.125);
       }
+    } else if (settings.taxForm === 'general') {
+        // Skala podatkowa z kwotą wolną
+        let ytdNetIncome = 0;
+        let ytdCosts = 0;
+        const currentYear = new Date(rentalObj.date || new Date()).getFullYear();
+        const currentDate = new Date(rentalObj.date || new Date()).getTime();
+        const currIdNum = Number(currentEditingId || Date.now());
+
+        allRentals.forEach(r => {
+          if (r.id !== currentEditingId && r.date) {
+            const rDateObj = new Date(r.date);
+            if (rDateObj.getFullYear() === currentYear) {
+              const rTime = rDateObj.getTime();
+              if (rTime < currentDate || (rTime === currentDate && Number(r.id) < currIdNum)) {
+                 if (r.type === 'booking') {
+                     const rInc = Number(r.income) || 0;
+                     const rVat = settings.isVatPayer ? (rInc - (rInc / 1.08)) : 0;
+                     ytdNetIncome += (rInc - rVat);
+                     ytdCosts += (Number(r.commission) || 0);
+                 } else if (r.type === 'utility') {
+                     ytdCosts += (Number(r.utilities) || 0);
+                 }
+              }
+            }
+          }
+        });
+        
+        let yearlyZusDeduction = 0;
+        if (settings.includeZusInCosts) {
+           const monthNum = new Date(rentalObj.date || new Date()).getMonth() + 1;
+           yearlyZusDeduction = (Number(settings.zusSocial) || 0) * monthNum;
+        }
+
+        const currentCumulativeProfit = Math.max(0, ytdNetIncome - ytdCosts - yearlyZusDeduction);
+        const newCumulativeProfit = Math.max(0, ytdNetIncome + netInc - ytdCosts - comm - yearlyZusDeduction);
+        
+        const taxFree = Number(settings.taxFreeAmount) || 30000;
+        let oldTax = 0; let newTax = 0;
+
+        if (currentCumulativeProfit > taxFree) {
+            if (currentCumulativeProfit <= 120000) oldTax = (currentCumulativeProfit - taxFree) * 0.12;
+            else oldTax = ((120000 - taxFree) * 0.12) + ((currentCumulativeProfit - 120000) * 0.32);
+        }
+        if (newCumulativeProfit > taxFree) {
+            if (newCumulativeProfit <= 120000) newTax = (newCumulativeProfit - taxFree) * 0.12;
+            else newTax = ((120000 - taxFree) * 0.12) + ((newCumulativeProfit - 120000) * 0.32);
+        }
+        taxAmt = Math.max(0, newTax - oldTax);
+
     } else {
+      // Stała stawka (np. 19% liniowy)
       taxAmt = taxBase * (Number(settings.rate) / 100);
     }
     
@@ -562,9 +653,13 @@ export default function RentalManager() {
 
   const openSettingsModal = () => {
     setEditingTemplates(JSON.parse(JSON.stringify(templates)));
-    setEditingProperties([...properties]); setEditingSources([...sources]); setEditingCategories([...categories]);
-    setEditingTaxSettings(taxSettings); setEditingSyncLinks(JSON.parse(JSON.stringify(syncLinks)));
-    setSettingsTab('sync'); setShowSettingsModal(true);
+    setEditingProperties([...properties]); 
+    setEditingSources([...sources]); 
+    setEditingCategories([...categories]);
+    setEditingTaxSettings(taxSettings); 
+    setEditingSyncLinks(JSON.parse(JSON.stringify(syncLinks)));
+    setSettingsTab('sync'); 
+    setShowSettingsModal(true);
   };
 
   const saveSettings = async () => {
@@ -584,7 +679,6 @@ export default function RentalManager() {
     setCalendarDate(newDate);
   };
 
-  // Dodana brakująca funkcja wylogowania!
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -593,22 +687,49 @@ export default function RentalManager() {
     }
   };
 
-  // Funkcje pomocnicze ustawień
+  // Funkcje pomocnicze ustawień (NAPRAWIONE DODAWANIE)
   const updateProperty = (index, newValue) => { const updated = [...editingProperties]; updated[index] = newValue; setEditingProperties(updated); };
   const removeProperty = (index) => { const updated = [...editingProperties]; updated.splice(index, 1); setEditingProperties(updated); };
-  const handleAddProperty = () => { if (newPropertyName.trim() !== '') { setEditingProperties([...editingProperties, { name: newPropertyName.trim(), color: newPropertyColor }]); setNewPropertyName(''); setNewPropertyColor('blue'); } };
+  const handleAddProperty = (e) => { 
+    e.preventDefault();
+    if (newPropertyName.trim() !== '') { 
+      setEditingProperties([...editingProperties, { name: newPropertyName.trim(), color: newPropertyColor }]); 
+      setNewPropertyName(''); 
+      setNewPropertyColor('blue'); 
+    } 
+  };
 
   const updateSource = (index, value) => { const updated = [...editingSources]; updated[index] = value; setEditingSources(updated); };
   const removeSource = (index) => { const updated = [...editingSources]; updated.splice(index, 1); setEditingSources(updated); };
-  const handleAddSource = () => { if (newSourceName.trim() !== '') { setEditingSources([...editingSources, newSourceName.trim()]); setNewSourceName(''); } };
+  const handleAddSource = (e) => { 
+    e.preventDefault();
+    if (newSourceName.trim() !== '') { 
+      setEditingSources([...editingSources, newSourceName.trim()]); 
+      setNewSourceName(''); 
+    } 
+  };
 
   const updateCategory = (index, value) => { const updated = [...editingCategories]; updated[index] = value; setEditingCategories(updated); };
   const removeCategory = (index) => { const updated = [...editingCategories]; updated.splice(index, 1); setEditingCategories(updated); };
-  const handleAddCategory = () => { if (newCategoryName.trim() !== '') { setEditingCategories([...editingCategories, newCategoryName.trim()]); setNewCategoryName(''); } };
+  const handleAddCategory = (e) => { 
+    e.preventDefault();
+    if (newCategoryName.trim() !== '') { 
+      setEditingCategories([...editingCategories, newCategoryName.trim()]); 
+      setNewCategoryName(''); 
+    } 
+  };
 
   const updateTemplate = (index, field, value) => { const updated = [...editingTemplates]; updated[index][field] = value; setEditingTemplates(updated); };
   const removeTemplate = (index) => { const updated = [...editingTemplates]; updated.splice(index, 1); setEditingTemplates(updated); };
-  const addTemplate = () => { setEditingTemplates([...editingTemplates, { id: Date.now().toString(), text: 'Nowe zadanie...', shortName: 'Zadanie', daysBefore: 3, icon: 'CheckSquare' }]); };
+  const addTemplate = () => { 
+    setEditingTemplates([...editingTemplates, { 
+      id: `task_${Date.now()}`, 
+      text: 'Nowe zadanie...', 
+      shortName: 'Zadanie', 
+      daysBefore: 3, 
+      icon: 'CheckSquare' 
+    }]); 
+  };
 
   // --- RENDEROWANIE KALENDARZA SIATKOWEGO ---
   const renderCalendar = () => {
@@ -1044,7 +1165,7 @@ export default function RentalManager() {
 
               <div className="flex flex-wrap bg-slate-100/80 dark:bg-slate-800 p-1.5 rounded-2xl mb-8 gap-1 shadow-inner">
                 {['sync', 'properties', 'sources', 'categories', 'tax', 'reminders'].map(tab => (
-                  <button key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-1 text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
+                  <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-1 text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
                     {tab === 'sync' ? 'Integracje' : tab === 'properties' ? 'Obiekty' : tab === 'sources' ? 'Źródła' : tab === 'categories' ? 'Kategorie' : tab === 'tax' ? 'Podatki' : 'Zadania'}
                   </button>
                 ))}
@@ -1078,58 +1199,142 @@ export default function RentalManager() {
                     <div key={idx} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
                       <div className={`w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-white ${propColors[prop.color || 'blue'].bg}`}><Building className="w-5 h-5"/></div>
                       <input value={prop.name} onChange={(e) => updateProperty(idx, { ...prop, name: e.target.value })} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 outline-none transition-all" />
-                      <button onClick={() => removeProperty(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"><Trash2 className="w-5 h-5" /></button>
+                      <button type="button" onClick={() => removeProperty(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"><Trash2 className="w-5 h-5" /></button>
                     </div>
                   ))}
-                  <div className="flex flex-col gap-4 mt-6 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 border-dashed">
+                  <form onSubmit={handleAddProperty} className="flex flex-col gap-4 mt-6 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 border-dashed">
                     <div className="flex items-center gap-3">
                        <input value={newPropertyName} onChange={(e) => setNewPropertyName(e.target.value)} className="flex-1 p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm text-slate-800 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="Nazwa nowego obiektu..." />
-                       <button onClick={handleAddProperty} className="px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all"><Plus className="w-5 h-5" /></button>
+                       <button type="submit" disabled={!newPropertyName.trim()} className="px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"><Plus className="w-5 h-5" /></button>
                     </div>
                     <div className="flex flex-wrap gap-2 items-center">
                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mr-2">Kolor:</span>
                        {availableColors.map(c => (
-                         <button key={c} onClick={() => setNewPropertyColor(c)} className={`w-8 h-8 rounded-full shadow-sm transition-all ${propColors[c].bg} ${newPropertyColor === c ? 'ring-4 ring-offset-2 ring-slate-800 dark:ring-slate-300 scale-110' : 'opacity-40 hover:opacity-100'}`} />
+                         <button type="button" key={c} onClick={() => setNewPropertyColor(c)} className={`w-8 h-8 rounded-full shadow-sm transition-all ${propColors[c].bg} ${newPropertyColor === c ? 'ring-4 ring-offset-2 ring-slate-800 dark:ring-slate-300 scale-110' : 'opacity-40 hover:opacity-100'}`} />
                        ))}
                     </div>
-                  </div>
+                  </form>
                 </div>
               )}
               {settingsTab === 'sources' && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingSources.map((src, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Globe className="w-5 h-5"/></div><input value={src} onChange={(e) => updateSource(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button onClick={() => removeSource(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
-                  <div className="flex items-center gap-3 mt-6"><input value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowe źródło (np. Booking)..." /><button onClick={handleAddSource} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40"><Plus className="w-5 h-5" /></button></div>
+                  {editingSources.map((src, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Globe className="w-5 h-5"/></div><input value={src} onChange={(e) => updateSource(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button type="button" onClick={() => removeSource(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
+                  <form onSubmit={handleAddSource} className="flex items-center gap-3 mt-6">
+                    <input value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowe źródło (np. Booking)..." />
+                    <button type="submit" disabled={!newSourceName.trim()} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40 disabled:opacity-50"><Plus className="w-5 h-5" /></button>
+                  </form>
                 </div>
               )}
               {settingsTab === 'categories' && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingCategories.map((cat, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Tags className="w-5 h-5"/></div><input value={cat} onChange={(e) => updateCategory(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button onClick={() => removeCategory(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
-                  <div className="flex items-center gap-3 mt-6"><input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowa kategoria kosztów..." /><button onClick={handleAddCategory} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40"><Plus className="w-5 h-5" /></button></div>
+                  {editingCategories.map((cat, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Tags className="w-5 h-5"/></div><input value={cat} onChange={(e) => updateCategory(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button type="button" onClick={() => removeCategory(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
+                  <form onSubmit={handleAddCategory} className="flex items-center gap-3 mt-6">
+                    <input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowa kategoria kosztów..." />
+                    <button type="submit" disabled={!newCategoryName.trim()} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40 disabled:opacity-50"><Plus className="w-5 h-5" /></button>
+                  </form>
                 </div>
               )}
               {settingsTab === 'tax' && (
                  <div className="space-y-5 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 animate-in slide-in-from-right-4 duration-300">
-                    <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"><input type="checkbox" checked={editingTaxSettings.isVatPayer} onChange={e => setEditingTaxSettings({...editingTaxSettings, isVatPayer: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> <span className="font-bold text-slate-800 dark:text-slate-200">Jestem płatnikiem czynnym VAT</span></label>
-                    <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"><input type="radio" checked={editingTaxSettings.taxForm === 'lump_sum'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'lump_sum'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> <span className="font-bold text-slate-800 dark:text-slate-200">Ryczałt ewidencjonowany</span></label>
-                    <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"><input type="radio" checked={editingTaxSettings.taxForm === 'general'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'general'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> <span className="font-bold text-slate-800 dark:text-slate-200">Zasady ogólne (odlicza prowizję)</span></label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm">
+                        <input type="radio" checked={editingTaxSettings.taxForm === 'lump_sum'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'lump_sum'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Ryczałt</span>
+                      </label>
+                      <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm">
+                        <input type="radio" checked={editingTaxSettings.taxForm === 'general'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'general'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Zasady ogólne (Skala)</span>
+                      </label>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                      <label className="flex items-center gap-4 cursor-pointer">
+                        <input type="checkbox" checked={editingTaxSettings.isVatPayer} onChange={e => setEditingTaxSettings({...editingTaxSettings, isVatPayer: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Jestem czynnym płatnikiem VAT (Podatek liczony od kwoty Netto)</span>
+                      </label>
+                      <label className="flex items-center gap-4 cursor-pointer">
+                        <input type="checkbox" checked={editingTaxSettings.includeZusInCosts} onChange={e => setEditingTaxSettings({...editingTaxSettings, includeZusInCosts: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
+                        <span className="font-bold text-slate-800 dark:text-slate-200">Uwzględniaj składki ZUS w kosztach obniżających podatek</span>
+                      </label>
+                    </div>
+
+                    {editingTaxSettings.taxForm === 'general' && (
+                      <div className="bg-blue-50 dark:bg-blue-500/10 p-5 rounded-2xl border border-blue-200 dark:border-blue-500/30 space-y-4">
+                        <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">Ustawienia Skali Podatkowej</h4>
+                        <div>
+                          <label className="block text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-2">Kwota Wolna od Podatku (rocznie)</label>
+                          <input type="number" value={editingTaxSettings.taxFreeAmount} onChange={e => setEditingTaxSettings({...editingTaxSettings, taxFreeAmount: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-500/50 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/20 transition-all" />
+                        </div>
+                      </div>
+                    )}
+
+                    {editingTaxSettings.taxForm === 'lump_sum' && (
+                      <div className="bg-amber-50 dark:bg-amber-500/10 p-5 rounded-2xl border border-amber-200 dark:border-amber-500/30 space-y-4">
+                         <h4 className="font-bold text-amber-900 dark:text-amber-300 mb-2">Ustawienia Ryczałtu</h4>
+                         <label className="flex items-center gap-4 cursor-pointer">
+                          <input type="checkbox" checked={editingTaxSettings.autoThreshold} onChange={e => setEditingTaxSettings({...editingTaxSettings, autoThreshold: e.target.checked})} className="w-5 h-5 text-amber-600 focus:ring-amber-500 rounded bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-600"/> 
+                          <span className="font-bold text-amber-900 dark:text-amber-200 text-sm">Automatyczny próg (8.5% do 100k, 12.5% powyżej)</span>
+                        </label>
+                        {!editingTaxSettings.autoThreshold && (
+                          <div>
+                            <label className="block text-[10px] font-extrabold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-2 mt-4">Stała Stawka Ryczałtu (%)</label>
+                            <input type="number" step="0.1" value={editingTaxSettings.rate} onChange={e => setEditingTaxSettings({...editingTaxSettings, rate: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-500/50 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-amber-500/20 transition-all" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                      <div>
+                        <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Składka ZUS Zdrowotna (Miesięcznie)</label>
+                        <input type="number" value={editingTaxSettings.zusHealth} onChange={e => setEditingTaxSettings({...editingTaxSettings, zusHealth: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-slate-500/10 transition-all" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Składka ZUS Społeczna (Miesięcznie)</label>
+                        <input type="number" value={editingTaxSettings.zusSocial} onChange={e => setEditingTaxSettings({...editingTaxSettings, zusSocial: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-slate-500/10 transition-all" />
+                      </div>
+                    </div>
                  </div>
               )}
               {settingsTab === 'reminders' && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                   {editingTemplates.map((t, idx) => (
-                    <div key={idx} className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                      <input value={t.shortName} onChange={(e) => updateTemplate(idx, 'shortName', e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Krótka Nazwa" />
-                      <input type="number" value={t.daysBefore} onChange={(e) => updateTemplate(idx, 'daysBefore', Number(e.target.value))} className="w-24 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none text-center" placeholder="Dni" title="Dni przed przyjazdem" />
-                      <button onClick={() => removeTemplate(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button>
+                    <div key={idx} className="grid grid-cols-12 gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)] items-center">
+                      <div className="col-span-12 md:col-span-3">
+                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Krótka Nazwa</label>
+                         <input value={t.shortName} onChange={(e) => updateTemplate(idx, 'shortName', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="np. Kod" />
+                      </div>
+                      <div className="col-span-12 md:col-span-4">
+                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Pełna treść (np. na liście)</label>
+                         <input value={t.text} onChange={(e) => updateTemplate(idx, 'text', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Wyślij kod do drzwi" />
+                      </div>
+                      <div className="col-span-12 md:col-span-2">
+                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Dni przed</label>
+                         <input type="number" value={t.daysBefore} onChange={(e) => updateTemplate(idx, 'daysBefore', Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none text-center" title="Liczba dni przed przyjazdem" />
+                      </div>
+                      <div className="col-span-12 md:col-span-2">
+                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Ikona</label>
+                         <select value={t.icon || 'Bell'} onChange={(e) => updateTemplate(idx, 'icon', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none cursor-pointer">
+                           <option value="Bell">Dzwonek</option>
+                           <option value="Mail">Mail</option>
+                           <option value="Key">Klucz</option>
+                           <option value="MessageSquare">Wiadomość</option>
+                           <option value="Phone">Telefon</option>
+                           <option value="CheckSquare">Zadanie</option>
+                         </select>
+                      </div>
+                      <div className="col-span-12 md:col-span-1 flex justify-end mt-4 md:mt-0">
+                        <button type="button" onClick={() => removeTemplate(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"><Trash2 className="w-5 h-5" /></button>
+                      </div>
                     </div>
                   ))}
-                  <button onClick={addTemplate} className="w-full py-5 mt-4 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-extrabold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-400 transition-colors flex justify-center items-center gap-2"><Plus className="w-5 h-5" /> Dodaj przypomnienie</button>
+                  <button type="button" onClick={addTemplate} className="w-full py-5 mt-4 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-extrabold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-400 transition-colors flex justify-center items-center gap-2"><Plus className="w-5 h-5" /> Dodaj przypomnienie</button>
                 </div>
               )}
 
               <div className="flex gap-4 pt-8 mt-8 border-t border-slate-100 dark:border-slate-700">
-                <button onClick={() => setShowSettingsModal(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Anuluj</button>
-                <button onClick={saveSettings} className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 transition-all">Zapisz Ustawienia</button>
+                <button type="button" onClick={() => setShowSettingsModal(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Anuluj</button>
+                <button type="button" onClick={saveSettings} className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 transition-all">Zapisz Ustawienia</button>
               </div>
             </div>
           </div>
