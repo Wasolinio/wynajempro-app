@@ -123,8 +123,8 @@ export default function LandingPage() {
       <div className="absolute bottom-[-10%] left-[20%] w-[40rem] h-[40rem] bg-cyan-300/20 rounded-full mix-blend-multiply filter blur-[120px] opacity-60"></div>
 
       {/* NAWIGACJA */}
-      <nav className="fixed w-full bg-white/80 backdrop-blur-xl z-50 border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="fixed w-full bg-white/80 backdrop-blur-xl z-50 border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex items-center gap-2.5 hover:opacity-80 transition-opacity cursor-pointer z-50" onClick={() => window.scrollTo(0, 0)}>
@@ -147,9 +147,9 @@ export default function LandingPage() {
             {/* Desktop Buttons */}
             <div className="hidden md:flex gap-4 items-center">
               <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors"> Zaloguj się  </Link>
-              <Link to="/login" className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-xl shadow-slate-900/20 transition-all hover:scale-105 hover:-translate-y-0.5">
-  Wypróbuj za darmo
-</Link>
+              <Link to="/login" className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-xl shadow-slate-900/20 transition-all hover:scale-105 hover:-translate-y-0.5" aria-label="Testuj 14 dni za darmo">
+                Testuj 14 dni za darmo
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -162,7 +162,7 @@ export default function LandingPage() {
               </button>
             </div>
           </div>
-        </div>
+        </nav>
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
@@ -173,12 +173,14 @@ export default function LandingPage() {
             <a href="#cennik" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-600 hover:text-blue-600">Cennik</a>
             <div className="h-px bg-slate-100 w-full my-2"></div>
             <button onClick={() => { setIsMobileMenuOpen(false); handleAction(); }} className="text-lg font-bold text-slate-600 text-left">Zaloguj się</button>
-            <button onClick={() => { setIsMobileMenuOpen(false); handleAction(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg shadow-blue-600/20 text-center">
-              Wypróbuj za darmo (14 dni)
+            <button onClick={() => { setIsMobileMenuOpen(false); handleAction(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg shadow-blue-600/20 text-center" aria-label="Testuj 14 dni za darmo">
+              Testuj 14 dni za darmo
             </button>
           </div>
         )}
-      </nav>
+      </header>
+
+      <main>
 
       {/* SEKCJA HERO */}
       <section className="pt-32 pb-20 md:pt-40 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
@@ -202,16 +204,21 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-            <Link to="/login" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white px-8 py-4 rounded-2xl text-base font-bold shadow-xl shadow-blue-600/25 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 group">
-  Rozpocznij 14-dniowy test <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-</Link>
+            <Link to="/login" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white px-8 py-4 rounded-2xl text-base font-bold shadow-xl shadow-blue-600/25 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 group" aria-label="Rozpocznij 14-dniowy test bez podpinania karty">
+              Testuj 14 dni za darmo (bez karty) <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
             <a href="#jak-to-dziala" className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-8 py-4 rounded-2xl text-base font-bold shadow-sm transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
               Zobacz, jak to działa
             </a>
           </div>
-          <p className="text-xs text-slate-500 mt-5 font-medium flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-green-500" /> Bez podpinania karty. Później tylko 29,99 zł / miesiąc.
-          </p>
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs font-medium">
+            <p className="text-slate-500 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-green-500" /> Bez podpinania karty
+            </p>
+            <p className="text-slate-500 flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-blue-500" /> Dołącz do setek zadowolonych gospodarzy
+            </p>
+          </div>
         </div>
 
         {/* NOWOCZESNY MOCKUP "BENTO BOX" BAZUJĄCY NA REALNEJ APLIKACJI */}
@@ -631,6 +638,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-10 relative z-10">
