@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 
 // Konfiguracja pobierana bezpiecznie ze zmiennych środowiskowych (.env.local)
 const firebaseConfig = {
@@ -17,5 +18,6 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app); // Instancja Cloud Functions do wywołań httpsCallable
 
-export { auth, db };
+export { auth, db, functions };

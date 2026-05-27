@@ -8,10 +8,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// IMPORTUJEMY FIREBASE ORAZ STRIPE (DO DOKUMENTÓW)
-import { auth, db } from './firebase'; 
+// IMPORTUJEMY FIREBASE ORAZ STRIPE
+import { auth, db, functions } from './firebase'; 
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, addDoc } from 'firebase/firestore'; // Dodano addDoc
+import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
 // --- WSPÓLNE HELPERY I DANE ---
 const propColors = {
@@ -230,6 +231,8 @@ export default function RentalManager() {
   // --- ZABEZPIECZENIE DOSTĘPU (PAYWALL STRIPE) ---
   const isAccessLocked = () => {
     if (accountStatus === 'active') return false; // Konto aktywne (opłacone), wpuszczamy
+    if (accountStatus === 'past_due') return true; // Zaległa płatność, blokujemy
+    if (accountStatus === 'canceled') return true; // Subskrypcja anulowana, blokujemy
     
     // Konto w okresie próbnym, sprawdzamy datę
     if (trialEndsAt) {
@@ -242,29 +245,22 @@ export default function RentalManager() {
   const handleSubscribe = async () => {
     setIsCheckoutLoading(true);
     try {
-        // 1. Tworzymy żądanie płatności w kolekcji użytkownika
-        const checkoutRef = await addDoc(collection(db, 'users', user.uid, 'checkout_sessions'), {
-            // TUTAJ PODMIEŃ NA SWÓJ KLUCZ ZE STRIPE!
-            price: 'price_1TZULu8D7fwsePNBa7aXaP92', 
-            success_url: window.location.origin + '/dashboard',
-            cancel_url: window.location.origin + '/dashboard',
+        // Wywołujemy Cloud Function, która bezpiecznie tworzy sesję Stripe Checkout
+        const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
+        const result = await createCheckoutSession({
+            successUrl: window.location.origin + '/dashboard',
+            cancelUrl: window.location.origin + '/dashboard',
         });
 
-        // 2. Nasłuchujemy odpowiedzi od rozszerzenia Firebase (które generuje URL do bramki płatności)
-        onSnapshot(checkoutRef, (snap) => {
-            const { error, url } = snap.data() || {};
-            if (error) {
-                alert(`Wystąpił błąd płatności: ${error.message}`);
-                setIsCheckoutLoading(false);
-            }
-            if (url) {
-                // Mamy bezpieczny link Stripe, przekierowujemy
-                window.location.assign(url);
-            }
-        });
+        // Przekierowujemy do bramki płatności Stripe
+        if (result.data?.url) {
+            window.location.assign(result.data.url);
+        } else {
+            throw new Error('Nie otrzymano URL sesji płatności');
+        }
     } catch (err) {
         console.error("Błąd tworzenia sesji checkoutu:", err);
-        alert("Wystąpił problem z wczytaniem płatności.");
+        alert("Wystąpił problem z wczytaniem płatności. Spróbuj ponownie.");
         setIsCheckoutLoading(false);
     }
   };

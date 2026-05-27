@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =====================================================================
+    // PROFIL UŻYTKOWNIKA — users/{userId}
+    // =====================================================================
+    // Odczyt: tylko właściciel
+    // Tworzenie: tylko właściciel, status MUSI być 'trialing'
+    // Aktualizacja: właściciel może zmieniać pola (np. name),
+    //   ale NIE MOŻE zmieniać pól: status, trialEndsAt, stripeCustomerId,
+    //   stripeSubscriptionId, paidAt, canceledAt, lastPaymentAt
+    //   (te pola zmienia TYLKO backend Cloud Functions przez Admin SDK)
+    // =====================================================================
+    match /users/{userId} {
+
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.status == 'trialing';
+
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.status == resource.data.status
+                    && request.resource.data.trialEndsAt == resource.data.trialEndsAt;
+
+      // Rezerwacje, wydatki, zadania
+      match /rentals/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Ustawienia użytkownika
+      match /settings/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Sesje checkout (klient tworzy, nasłuchuje odpowiedzi)
+      match /checkout_sessions/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
