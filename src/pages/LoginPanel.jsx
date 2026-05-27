@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase'; 
+import { auth, db } from '../firebase'; // DODANE: db
+import { doc, setDoc, getDoc } from 'firebase/firestore'; // DODANE: funkcje firestore
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2 } from 'lucide-react';
 
 export default function LoginPanel() {
@@ -23,6 +24,26 @@ export default function LoginPanel() {
     setError(''); 
   };
 
+  // DODANE: Funkcja tworząca profil użytkownika ze statusem triala w bazie
+  const initializeUserInDatabase = async (user) => {
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    // Tworzymy dokument tylko, jeśli nie istnieje (nowa rejestracja)
+    if (!userDoc.exists()) {
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 14); // 14 dni za darmo
+
+      await setDoc(userDocRef, {
+        email: user.email,
+        name: formData.name || user.displayName || 'Nowy Użytkownik',
+        status: 'trialing', // Status początkowy
+        trialEndsAt: trialEndDate.toISOString(), // Zapis w standardowym formacie daty
+        createdAt: new Date().toISOString()
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -38,6 +59,7 @@ export default function LoginPanel() {
             displayName: formData.name
           });
         }
+        await initializeUserInDatabase(userCredential.user); // Zapis do bazy
       }
       navigate('/dashboard'); 
       
@@ -63,7 +85,8 @@ export default function LoginPanel() {
     const provider = new GoogleAuthProvider();
     
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      await initializeUserInDatabase(result.user); // Google login to też potencjalnie nowa rejestracja
       navigate('/dashboard'); 
     } catch (err) {
       console.error("Błąd Google Auth:", err);
@@ -213,7 +236,7 @@ export default function LoginPanel() {
   );
 }
 
-// BRAKUJĄCE IKONY (Bez nich wywalało stronę!)
+// Ikony SVG
 function HomeIcon(props) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>

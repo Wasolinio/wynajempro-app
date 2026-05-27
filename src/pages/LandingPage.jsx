@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   CheckCircle, CalendarDays, Calculator, Bell, BarChart3, 
   ArrowRight, ShieldCheck, XCircle, Coffee, TrendingUp, 

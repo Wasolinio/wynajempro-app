@@ -4,14 +4,14 @@ import {
   XCircle, Landmark, Bell, Mail, Key, Loader2, BarChart3, CalendarDays, List, 
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit, ArrowDown, ArrowUp, 
   Settings, MessageSquare, CheckSquare, Phone, Building, Globe, Percent, Tags, 
-  Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon
+  Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock // Dodano Lock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// IMPORTUJEMY FIREBASE
+// IMPORTUJEMY FIREBASE ORAZ STRIPE (DO DOKUMENTÓW)
 import { auth, db } from './firebase'; 
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, addDoc } from 'firebase/firestore'; // Dodano addDoc
 
 // --- WSPÓLNE HELPERY I DANE ---
 const propColors = {
@@ -69,6 +69,11 @@ export default function RentalManager() {
   const [loading, setLoading] = useState(true);
   const [rentals, setRentals] = useState([]);
   
+  // NOWE: STANY SUBSKRYPCJI
+  const [accountStatus, setAccountStatus] = useState('active'); // active, trialing
+  const [trialEndsAt, setTrialEndsAt] = useState(null);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
   // Stany UI
   const [showAddModal, setShowAddModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -122,7 +127,11 @@ export default function RentalManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 15;
 
-  useEffect(() => { setCurrentPage(1); }, [mainTab, bookingFilter, selectedYear, bookingSortOrder, utilitySortOrder, searchQuery]);
+  const changeTab = (tab) => { setMainTab(tab); setCurrentPage(1); };
+  const changeBookingFilter = (filter) => { setBookingFilter(filter); setCurrentPage(1); };
+  const changeBookingSortOrder = (updater) => { setBookingSortOrder(updater); setCurrentPage(1); };
+  const changeUtilitySortOrder = (updater) => { setUtilitySortOrder(updater); setCurrentPage(1); };
+  const changeSearchQuery = (val) => { setSearchQuery(val); setCurrentPage(1); };
 
   const getDefaultRentalState = () => ({
     type: 'booking', source: sources.length > 0 ? sources[0] : '', property: properties.length > 0 ? properties[0].name : '', 
@@ -167,7 +176,19 @@ export default function RentalManager() {
   useEffect(() => {
     if (!user) return;
     
-    // Subskrypcje Firebase
+    // NASŁUCHIWANIE STATUSU SUBSKRYPCJI
+    const userProfileRef = doc(db, 'users', user.uid);
+    const unsubProfile = onSnapshot(userProfileRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setAccountStatus(data.status || 'trialing'); // status podawany przez Stripe lub tworzony przy rejestracji
+        if (data.trialEndsAt) {
+          setTrialEndsAt(new Date(data.trialEndsAt));
+        }
+      }
+    });
+
+    // Subskrypcje Firebase - Tabele
     const rentalsRef = collection(db, 'users', user.uid, 'rentals');
     const unsubRentals = onSnapshot(rentalsRef, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), property: typeof doc.data().property === 'object' ? doc.data().property.name : doc.data().property }));
@@ -193,7 +214,6 @@ export default function RentalManager() {
           if (id === 'syncLinks') setSyncLinks(data.links || {});
         });
         
-        // Zabezpieczenie przed pustymi wartościami po pierwszej inicjalizacji
         if (!hasProps) setProperties(DEFAULT_PROPERTIES);
         if (!hasSources) setSources(DEFAULT_SOURCES);
         if (!hasCats) setCategories(DEFAULT_CATEGORIES);
@@ -202,18 +222,53 @@ export default function RentalManager() {
       }
     });
 
-    return () => { unsubRentals(); unsubSettings(); };
+    return () => { unsubRentals(); unsubSettings(); unsubProfile(); };
   }, [user]);
 
-  useEffect(() => {
-    setNewRental(prev => {
-      const updates = {};
-      if (properties.length > 0 && !prev.property) updates.property = properties[0].name;
-      if (sources.length > 0 && !prev.source) updates.source = sources[0];
-      if (categories.length > 0 && !prev.category) updates.category = categories[0];
-      return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
-    });
-  }, [properties, sources, categories]);
+
+
+  // --- ZABEZPIECZENIE DOSTĘPU (PAYWALL STRIPE) ---
+  const isAccessLocked = () => {
+    if (accountStatus === 'active') return false; // Konto aktywne (opłacone), wpuszczamy
+    
+    // Konto w okresie próbnym, sprawdzamy datę
+    if (trialEndsAt) {
+        const now = new Date();
+        if (now > trialEndsAt) return true; // Czas minął, blokujemy
+    }
+    return false; // Trial nadal trwa, wpuszczamy
+  };
+
+  const handleSubscribe = async () => {
+    setIsCheckoutLoading(true);
+    try {
+        // 1. Tworzymy żądanie płatności w kolekcji użytkownika
+        const checkoutRef = await addDoc(collection(db, 'users', user.uid, 'checkout_sessions'), {
+            // TUTAJ PODMIEŃ NA SWÓJ KLUCZ ZE STRIPE!
+            price: 'price_1TZULu8D7fwsePNBa7aXaP92', 
+            success_url: window.location.origin + '/dashboard',
+            cancel_url: window.location.origin + '/dashboard',
+        });
+
+        // 2. Nasłuchujemy odpowiedzi od rozszerzenia Firebase (które generuje URL do bramki płatności)
+        onSnapshot(checkoutRef, (snap) => {
+            const { error, url } = snap.data() || {};
+            if (error) {
+                alert(`Wystąpił błąd płatności: ${error.message}`);
+                setIsCheckoutLoading(false);
+            }
+            if (url) {
+                // Mamy bezpieczny link Stripe, przekierowujemy
+                window.location.assign(url);
+            }
+        });
+    } catch (err) {
+        console.error("Błąd tworzenia sesji checkoutu:", err);
+        alert("Wystąpił problem z wczytaniem płatności.");
+        setIsCheckoutLoading(false);
+    }
+  };
+
 
   // --- OBLICZANIE DANYCH ---
   const availableYears = useMemo(() => {
@@ -228,6 +283,7 @@ export default function RentalManager() {
 
   const handleYearChange = (newYearStr) => {
     setSelectedYear(newYearStr);
+    setCurrentPage(1);
     const newYear = parseInt(newYearStr, 10);
     const currYear = new Date().getFullYear();
     if (newYear === currYear) {
@@ -315,16 +371,12 @@ export default function RentalManager() {
   const renderMainTab = searchQuery && mainTab === 'calendar' ? 'bookings' : mainTab;
 
   let currentTotalPages = 1;
-  let currentTotalItems = 0;
   if (renderMainTab === 'utilities') {
     currentTotalPages = Math.ceil(utilitiesList.length / ITEMS_PER_PAGE) || 1;
-    currentTotalItems = utilitiesList.length;
   } else if (renderMainTab === 'reminders') {
     currentTotalPages = Math.ceil(remindersList.length / ITEMS_PER_PAGE) || 1;
-    currentTotalItems = remindersList.length;
   } else {
     currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
-    currentTotalItems = displayedBookings.length;
   }
 
   const stats = useMemo(() => {
@@ -687,7 +739,6 @@ export default function RentalManager() {
     }
   };
 
-  // Funkcje pomocnicze ustawień (NAPRAWIONE DODAWANIE)
   const updateProperty = (index, newValue) => { const updated = [...editingProperties]; updated[index] = newValue; setEditingProperties(updated); };
   const removeProperty = (index) => { const updated = [...editingProperties]; updated.splice(index, 1); setEditingProperties(updated); };
   const handleAddProperty = (e) => { 
@@ -786,8 +837,50 @@ export default function RentalManager() {
     );
   };
 
+  // --- EKRAN ŁADOWANIA ---
   if (loading) return <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center"><Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-500 animate-spin" /></div>;
 
+  // --- EKRAN BLOKADY (PAYWALL) ---
+  if (isAccessLocked()) {
+      return (
+          <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center p-4 font-sans text-slate-900 dark:text-slate-100 relative overflow-hidden">
+            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/10 rounded-full filter blur-[100px] pointer-events-none"></div>
+            
+            <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 md:p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 text-center border border-slate-100 dark:border-slate-700 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-blue-500/30">
+                    <Lock className="w-10 h-10" />
+                </div>
+                
+                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">Koniec okresu próbnego</h2>
+                <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 leading-relaxed">
+                    Twój darmowy 14-dniowy dostęp do WynajemPro dobiegł końca. Odblokuj pełen panel zarządzania rezerwacjami, integracje z kalendarzami i automatyczne raporty księgowe.
+                </p>
+                
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 mb-8">
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Plan Gospodarza</p>
+                    <p className="text-4xl font-black text-slate-900 dark:text-white">29.99 <span className="text-lg text-slate-500 dark:text-slate-400 font-bold">zł / msc</span></p>
+                </div>
+
+                <button 
+                    onClick={handleSubscribe} 
+                    disabled={isCheckoutLoading}
+                    className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                    {isCheckoutLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Odblokuj dostęp'}
+                </button>
+                
+                <button 
+                    onClick={handleLogout} 
+                    className="mt-6 text-sm font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                >
+                    Wyloguj się
+                </button>
+            </div>
+          </div>
+      );
+  }
+
+  // --- ZWYKŁY RENDER APLIKACJI (JEŚLI ODBLOKOWANE) ---
   return (
     <div className={`min-h-screen bg-[#f8fafc] dark:bg-slate-900 relative font-sans text-slate-800 dark:text-slate-200 overflow-x-hidden transition-colors duration-300`}>
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-300/10 dark:bg-blue-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] pointer-events-none transition-colors duration-300"></div>
@@ -811,8 +904,8 @@ export default function RentalManager() {
             {/* Wyszukiwarka */}
             <div className="flex-1 lg:flex-none flex items-center bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl p-1.5 border border-slate-200/60 dark:border-slate-700/60 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-sm">
               <Search className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
-              <input type="text" placeholder="Szukaj wpisów..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent font-bold text-slate-700 dark:text-slate-200 text-sm outline-none px-3 py-1.5 w-full md:w-36 lg:w-48 placeholder-slate-400 dark:placeholder-slate-500" />
-              {searchQuery && <button onClick={() => setSearchQuery('')} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-400 mr-1"><XCircle className="w-4 h-4" /></button>}
+              <input type="text" placeholder="Szukaj wpisów..." value={searchQuery} onChange={(e) => changeSearchQuery(e.target.value)} className="bg-transparent font-bold text-slate-700 dark:text-slate-200 text-sm outline-none px-3 py-1.5 w-full md:w-36 lg:w-48 placeholder-slate-400 dark:placeholder-slate-500" />
+              {searchQuery && <button onClick={() => changeSearchQuery('')} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-400 mr-1"><XCircle className="w-4 h-4" /></button>}
             </div>
 
             {/* Wybór Roku */}
@@ -851,7 +944,7 @@ export default function RentalManager() {
               <LogOut className="w-4 h-4" />
             </button>
 
-            <button onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white px-6 py-3 rounded-2xl hover:from-blue-700 hover:to-indigo-700 font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"><Plus className="w-5 h-5" /> Dodaj wpis</button>
+            <button onClick={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }} className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white px-6 py-3 rounded-2xl hover:from-blue-700 hover:to-indigo-700 font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"><Plus className="w-5 h-5" /> Dodaj wpis</button>
           </div>
         </div>
 
@@ -887,10 +980,10 @@ export default function RentalManager() {
         {/* GŁÓWNA NAWIGACJA (SEGMENTED CONTROL) */}
         <div className="flex justify-center md:justify-start">
           <div className="bg-slate-200/60 dark:bg-slate-900/50 p-1.5 rounded-2xl inline-flex flex-wrap gap-1 shadow-inner transition-colors duration-300">
-            <button onClick={() => setMainTab('bookings')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'bookings' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><List className="w-4 h-4 shrink-0" /> Rezerwacje</button>
-            <button onClick={() => setMainTab('calendar')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'calendar' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CalendarIcon className="w-4 h-4 shrink-0" /> Kalendarz</button>
-            <button onClick={() => setMainTab('utilities')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'utilities' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><DollarSign className="w-4 h-4 shrink-0" /> Wydatki <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{utilitiesList.length}</span></button>
-            <button onClick={() => setMainTab('reminders')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'reminders' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CheckSquare className="w-4 h-4 shrink-0" /> Zadania <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{remindersList.length}</span></button>
+            <button onClick={() => changeTab('bookings')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'bookings' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><List className="w-4 h-4 shrink-0" /> Rezerwacje</button>
+            <button onClick={() => changeTab('calendar')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'calendar' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CalendarIcon className="w-4 h-4 shrink-0" /> Kalendarz</button>
+            <button onClick={() => changeTab('utilities')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'utilities' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><DollarSign className="w-4 h-4 shrink-0" /> Wydatki <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{utilitiesList.length}</span></button>
+            <button onClick={() => changeTab('reminders')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'reminders' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CheckSquare className="w-4 h-4 shrink-0" /> Zadania <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{remindersList.length}</span></button>
           </div>
         </div>
 
@@ -902,9 +995,9 @@ export default function RentalManager() {
             {renderMainTab === 'bookings' && (
               <div className="bg-slate-50/50 dark:bg-slate-800/50 px-6 pt-6 pb-2 border-b border-slate-100 dark:border-slate-700">
                  <div className="flex bg-slate-200/50 dark:bg-slate-900/50 p-1.5 rounded-2xl gap-1 overflow-x-auto no-scrollbar shrink-0 w-max max-w-full shadow-inner">
-                    <button onClick={() => setBookingFilter('all')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'all' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Wszystkie ({allBookings.length})</button>
-                    <button onClick={() => setBookingFilter('upcoming')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'upcoming' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Nadchodzące ({upcomingBookings.length})</button>
-                    <button onClick={() => setBookingFilter('archived')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'archived' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Archiwalne ({archivedBookings.length})</button>
+                    <button onClick={() => changeBookingFilter('all')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'all' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Wszystkie ({allBookings.length})</button>
+                    <button onClick={() => changeBookingFilter('upcoming')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'upcoming' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Nadchodzące ({upcomingBookings.length})</button>
+                    <button onClick={() => changeBookingFilter('archived')} className={`px-5 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${bookingFilter === 'archived' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Archiwalne ({archivedBookings.length})</button>
                  </div>
               </div>
             )}
@@ -915,7 +1008,7 @@ export default function RentalManager() {
                   <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
                     <tr>
                       <th className="p-5 font-extrabold">Opis Kosztu</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
+                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => changeUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
                          <div className="flex items-center gap-1">Data {utilitySortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
                       </th>
                       <th className="p-5 text-right font-extrabold">Kwota</th>
@@ -941,7 +1034,7 @@ export default function RentalManager() {
                   <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
                     <tr>
                       <th className="p-5 font-extrabold">Zadanie</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-center" onClick={() => setUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
+                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-center" onClick={() => changeUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
                          <div className="flex items-center justify-center gap-1">Termin {utilitySortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
                       </th>
                       <th className="p-5 text-center font-extrabold">Status</th>
@@ -967,7 +1060,7 @@ export default function RentalManager() {
                   <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
                     <tr>
                       <th className="p-5 font-extrabold">Domek / Gość</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => setBookingSortOrder(prev => prev === 'upcoming' ? 'desc' : prev === 'desc' ? 'asc' : 'upcoming')}>
+                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => changeBookingSortOrder(prev => prev === 'upcoming' ? 'desc' : prev === 'desc' ? 'asc' : 'upcoming')}>
                          <div className="flex items-center gap-1">Termin {bookingSortOrder === 'upcoming' ? <CalendarDays className="w-3.5 h-3.5 text-blue-500"/> : bookingSortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
                       </th>
                       <th className="p-5 text-right font-extrabold">Przychód</th>
