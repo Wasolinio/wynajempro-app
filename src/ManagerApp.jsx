@@ -779,7 +779,7 @@ export default function RentalManager() {
   };
 
   // --- RENDEROWANIE KALENDARZA SIATKOWEGO ---
-  const renderCalendar = () => {
+  const calendarView = useMemo(() => {
     const year = calendarDate.getFullYear(); const month = calendarDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
@@ -795,8 +795,8 @@ export default function RentalManager() {
             <button onClick={() => changeMonth(1)} className="p-2 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-white dark:hover:bg-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-sm"><ChevronRight className="w-5 h-5" /></button>
           </div>
         </div>
-        <div className="p-5">
-          <div className="grid grid-cols-7 border-t border-l border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-5 overflow-x-auto">
+          <div className="grid grid-cols-7 min-w-[700px] border-t border-l border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
             {['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'].map(d => <div key={d} className="bg-slate-50/80 dark:bg-slate-800/80 p-3 text-center text-[11px] font-extrabold text-slate-500 dark:text-slate-400 border-r border-b border-slate-100 dark:border-slate-700 uppercase tracking-widest">{d}</div>)}
             {blanks.map((_, i) => <div key={`b-${i}`} className="bg-slate-50/30 dark:bg-slate-900/30 border-r border-b border-slate-100 dark:border-slate-700 min-h-[140px]"></div>)}
             {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -831,7 +831,7 @@ export default function RentalManager() {
         </div>
       </div>
     );
-  };
+  }, [calendarDate, rentals, properties]);
 
   // --- EKRAN ŁADOWANIA ---
   if (loading) return <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center"><Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-500 animate-spin" /></div>;
@@ -1144,7 +1144,7 @@ export default function RentalManager() {
               <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === currentTotalPages} className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-sm text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors shadow-sm">Następna</button>
             </div>
           </div>
-        ) : renderCalendar()}
+        ) : calendarView}
 
         {/* --- MODALE --- */}
         
@@ -1165,7 +1165,7 @@ export default function RentalManager() {
                 </div>
               </div>
               <div className="p-8 overflow-y-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                   <div className="bg-emerald-50/50 dark:bg-emerald-500/10 p-5 rounded-3xl border border-emerald-100 dark:border-emerald-500/20"><p className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Przychód</p><p className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{currentYearData.total.income.toLocaleString('pl-PL')} zł</p></div>
                   <div className="bg-rose-50/50 dark:bg-rose-500/10 p-5 rounded-3xl border border-rose-100 dark:border-rose-500/20"><p className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Koszty</p><p className="text-2xl font-black text-rose-700 dark:text-rose-300">{currentYearData.total.costs.toLocaleString('pl-PL')} zł</p></div>
                   <div className="bg-violet-50/50 dark:bg-violet-500/10 p-5 rounded-3xl border border-violet-100 dark:border-violet-500/20"><p className="text-[10px] font-extrabold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Podatek</p><p className="text-2xl font-black text-violet-700 dark:text-violet-300">{currentYearData.total.tax.toLocaleString('pl-PL')} zł</p></div>

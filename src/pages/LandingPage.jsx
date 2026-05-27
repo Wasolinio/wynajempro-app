@@ -658,7 +658,7 @@ export default function LandingPage() {
       {isReviewModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsReviewModalOpen(false)}></div>
-          <div className="relative bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-3xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
             <div className="p-6 sm:p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-extrabold text-slate-900">Dodaj opinię</h3>

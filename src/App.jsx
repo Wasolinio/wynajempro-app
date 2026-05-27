@@ -1,31 +1,29 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// Importujemy nasze nowe strony z folderu pages
-import LandingPage from './pages/LandingPage';
-import LoginPanel from './pages/LoginPanel';
+// Importujemy nasze strony asynchronicznie, by zmniejszyć początkowy rozmiar paczki
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPanel = lazy(() => import('./pages/LoginPanel'));
+const ManagerApp = lazy(() => import('./ManagerApp')); 
 
-// Importujemy Twój stary kod menedżera
-// (Jeśli zmieniłeś jego nazwę na ManagerApp.jsx, upewnij się, że ścieżka jest poprawna)
-import ManagerApp from './ManagerApp'; 
+// Prosty loader podczas doczytywania paczek
+const Loader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+  </div>
+);
 
 export default function App() {
   return (
-    // BrowserRouter to nasza "mapa". To on pozwala używać Link i useNavigate!
     <BrowserRouter>
-      <Routes>
-        {/* 1. Strona główna - Wizytówka */}
-        <Route path="/" element={<LandingPage />} />
-        
-        {/* 2. Strona Logowania/Rejestracji */}
-        <Route path="/login" element={<LoginPanel />} />
-        
-        {/* 3. Właściwa aplikacja (Twój Menedżer) */}
-        <Route path="/dashboard/*" element={<ManagerApp />} />
-        
-        {/* 4. Bezpiecznik: błędny adres cofa na stronę główną */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPanel />} />
+          <Route path="/dashboard/*" element={<ManagerApp />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
