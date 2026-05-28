@@ -16,7 +16,7 @@ const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 // 1. TWORZENIE SESJI STRIPE CHECKOUT (Callable Function)
 // =============================================================================
 exports.createCheckoutSession = onCall(
-  { secrets: [stripeSecretKey], enforceAppCheck: true },
+  { secrets: [stripeSecretKey], enforceAppCheck: true, maxInstances: 5 },
   async (request) => {
     // Sprawdzenie uwierzytelnienia
     if (!request.auth) {
@@ -102,6 +102,7 @@ exports.stripeWebhook = onRequest(
     secrets: [stripeSecretKey, stripeWebhookSecret],
     // Wyłączamy automatyczne parsowanie body — potrzebujemy rawBody do weryfikacji
     invoker: "public",
+    maxInstances: 5,
   },
   async (req, res) => {
     if (req.method !== "POST") {
