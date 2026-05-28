@@ -24,6 +24,29 @@ service cloud.firestore {
     }
 
     // =====================================================================
+    // FUNKCJE WALIDACJI SCHEMATU (Schema Validation)
+    // =====================================================================
+    function isValidRental(data) {
+      return (data.type == 'booking' || data.type == 'utility' || data.type == 'reminder')
+        && data.date is string
+        && (!('income' in data) || data.income is number)
+        && (!('advancePayment' in data) || data.advancePayment is number)
+        && (!('commission' in data) || data.commission is number)
+        && (!('tax' in data) || data.tax is number)
+        && (!('vat' in data) || data.vat is number)
+        && (!('utilities' in data) || data.utilities is number);
+    }
+
+    function isValidSettings(docId, data) {
+      return (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
+          && (docId == 'properties' ? (!('items' in data) || data.items is list) : true)
+          && (docId == 'sources' ? (!('items' in data) || data.items is list) : true)
+          && (docId == 'categories' ? (!('items' in data) || data.items is list) : true)
+          && (docId == 'syncLinks' ? (!('links' in data) || data.links is map) : true)
+          && (docId == 'tax' ? (!('rate' in data) || data.rate is number) : true);
+    }
+
+    // =====================================================================
     // PROFIL UŻYTKOWNIKA — users/{userId}
     // =====================================================================
     // Odczyt: tylko właściciel (niezależnie od weryfikacji i subskrypcji)
@@ -45,12 +68,16 @@ service cloud.firestore {
 
       // Rezerwacje, wydatki, zadania (zasoby biznesowe) - wymagają subskrypcji
       match /rentals/{docId} {
-        allow read, write: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidRental(request.resource.data);
+        allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
       }
 
       // Ustawienia użytkownika - wymagają subskrypcji
       match /settings/{docId} {
-        allow read, write: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidSettings(docId, request.resource.data);
+        allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
       }
 
       // Sesje checkout - NIE wymagają subskrypcji (aby móc opłacić)
