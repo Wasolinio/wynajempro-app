@@ -156,13 +156,13 @@ exports.stripeWebhook = onRequest(
         // ---------------------------------------------------------------
         case "invoice.payment_succeeded": {
           const invoice = event.data.object;
-          const subscriptionId = invoice.subscription;
+          const customerId = invoice.customer;
 
-          if (subscriptionId) {
-            // Znajdź użytkownika po stripeSubscriptionId
+          if (customerId) {
+            // Znajdź użytkownika po stripeCustomerId, który jest gwarantowany w bazie
             const snapshot = await db
               .collection("users")
-              .where("stripeSubscriptionId", "==", subscriptionId)
+              .where("stripeCustomerId", "==", customerId)
               .limit(1)
               .get();
 
@@ -172,6 +172,8 @@ exports.stripeWebhook = onRequest(
               await userDoc.ref.update({
                 status: "active",
                 lastPaymentAt: new Date().toISOString(),
+                // Na wszelki wypadek (obsługa wyścigu), ustawiamy też subscription id jeśli to pierwsza płatność
+                stripeSubscriptionId: invoice.subscription,
               });
             }
           }
@@ -183,12 +185,12 @@ exports.stripeWebhook = onRequest(
         // ---------------------------------------------------------------
         case "invoice.payment_failed": {
           const invoice = event.data.object;
-          const subscriptionId = invoice.subscription;
+          const customerId = invoice.customer;
 
-          if (subscriptionId) {
+          if (customerId) {
             const snapshot = await db
               .collection("users")
-              .where("stripeSubscriptionId", "==", subscriptionId)
+              .where("stripeCustomerId", "==", customerId)
               .limit(1)
               .get();
 
