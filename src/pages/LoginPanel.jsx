@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase'; // DODANE: db
-import { doc, setDoc, getDoc } from 'firebase/firestore'; // DODANE: funkcje firestore
+import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore'; // DODANE: funkcje firestore + Timestamp
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2, MailCheck, RefreshCw } from 'lucide-react';
 
 export default function LoginPanel() {
@@ -41,8 +41,8 @@ export default function LoginPanel() {
         email: user.email,
         name: formData.name || user.displayName || 'Nowy Użytkownik',
         status: 'trialing', // Status początkowy
-        trialEndsAt: trialEndDate.toISOString(), // Zapis w standardowym formacie daty
-        createdAt: new Date().toISOString()
+        trialEndsAt: Timestamp.fromDate(trialEndDate), // Firestore Timestamp — wymagany przez reguły bezpieczeństwa
+        createdAt: Timestamp.fromDate(new Date())
       });
     }
   };

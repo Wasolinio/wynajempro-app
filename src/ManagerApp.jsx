@@ -190,7 +190,9 @@ export default function RentalManager() {
         const data = docSnap.data();
         setAccountStatus(data.status || 'trialing'); // status podawany przez Stripe lub tworzony przy rejestracji
         if (data.trialEndsAt) {
-          setTrialEndsAt(new Date(data.trialEndsAt));
+          // Obsługa obu formatów: Firestore Timestamp (nowe konta) i ISO string (stare konta)
+          const endDate = data.trialEndsAt.toDate ? data.trialEndsAt.toDate() : new Date(data.trialEndsAt);
+          setTrialEndsAt(endDate);
         }
       }
     });
@@ -200,6 +202,11 @@ export default function RentalManager() {
     const unsubRentals = onSnapshot(rentalsRef, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), property: typeof doc.data().property === 'object' ? doc.data().property.name : doc.data().property }));
       setRentals(data); setLoading(false);
+    }, (error) => {
+      // Gdy subskrypcja wygasła, reguły Firestore odrzucą odczyt — obsługujemy to łagodnie
+      console.warn('Brak dostępu do rezerwacji (subskrypcja nieaktywna):', error.code);
+      setRentals([]);
+      setLoading(false);
     });
 
     const settingsRef = collection(db, 'users', user.uid, 'settings');
@@ -227,6 +234,9 @@ export default function RentalManager() {
         if (!hasReminders) setTemplates(DEFAULT_TEMPLATES);
         if (!hasTax) setTaxSettings(defaultTaxSettings);
       }
+    }, (error) => {
+      // Gdy subskrypcja wygasła, reguły Firestore odrzucą odczyt ustawień — ignorujemy łagodnie
+      console.warn('Brak dostępu do ustawień (subskrypcja nieaktywna):', error.code);
     });
 
     return () => { unsubRentals(); unsubSettings(); unsubProfile(); };
@@ -251,6 +261,11 @@ export default function RentalManager() {
   const handleSubscribe = async () => {
     setIsCheckoutLoading(true);
     try {
+        // Odświeżamy token użytkownika, aby App Check i auth claims były aktualne
+        if (auth.currentUser) {
+          await auth.currentUser.getIdToken(true);
+        }
+
         // Wywołujemy Cloud Function, która bezpiecznie tworzy sesję Stripe Checkout
         const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
         const result = await createCheckoutSession({
@@ -266,7 +281,17 @@ export default function RentalManager() {
         }
     } catch (err) {
         console.error("Błąd tworzenia sesji checkoutu:", err);
-        alert("Wystąpił problem z wczytaniem płatności. Spróbuj ponownie.");
+        
+        let message = 'Wystąpił problem z wczytaniem płatności. Spróbuj ponownie.';
+        if (err.code === 'functions/unauthenticated') {
+          message = 'Sesja wygasła. Wyloguj się i zaloguj ponownie.';
+        } else if (err.code === 'functions/permission-denied') {
+          message = 'Brak uprawnień. Upewnij się, że Twój adres email jest zweryfikowany.';
+        } else if (err.message?.includes('app-check')) {
+          message = 'Weryfikacja bezpieczeństwa nie powiodła się. Wyłącz blokady reklam i spróbuj ponownie.';
+        }
+        
+        alert(message);
         setIsCheckoutLoading(false);
     }
   };

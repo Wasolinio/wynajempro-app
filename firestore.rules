@@ -16,11 +16,16 @@ service cloud.firestore {
 
     // =====================================================================
     // FUNKCJA SUBSKRYPCJI
-    // Pobiera status z dokumentu użytkownika i sprawdza czy jest aktywny
+    // Pobiera status z dokumentu użytkownika i sprawdza czy jest aktywny.
+    // Dla statusu 'trialing' dodatkowo weryfikuje, czy data trialEndsAt
+    // nie minęła (porównanie z request.time — czasem serwera Firestore).
     // =====================================================================
     function hasActiveSubscription(userId) {
-      let userStatus = get(/databases/$(database)/documents/users/$(userId)).data.status;
-      return userStatus == 'trialing' || userStatus == 'active';
+      let userData = get(/databases/$(database)/documents/users/$(userId)).data;
+      return userData.status == 'active'
+        || (userData.status == 'trialing' 
+            && userData.trialEndsAt is timestamp 
+            && userData.trialEndsAt > request.time);
     }
 
     // =====================================================================
