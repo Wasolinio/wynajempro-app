@@ -2,7 +2,7 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 // Inicjalizacja Firebase Admin
 const app = initializeApp();
@@ -11,6 +11,53 @@ const db = getFirestore(app);
 // Sekrety (ustaw przez: firebase functions:secrets:set STRIPE_SECRET_KEY)
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+
+// =============================================================================
+// HELPER: Usuwanie wszystkich dokumentów w subkolekcji (batch delete)
+// =============================================================================
+async function deleteSubcollection(parentRef, subcollectionName) {
+  const collRef = parentRef.collection(subcollectionName);
+  const batchSize = 100;
+  let totalDeleted = 0;
+
+  // Usuwamy w partiach po 100 dokumentów, aż kolekcja będzie pusta
+  while (true) {
+    const snapshot = await collRef.limit(batchSize).get();
+    if (snapshot.empty) break;
+
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+    totalDeleted += snapshot.size;
+  }
+
+  return totalDeleted;
+}
+
+// Funkcja czyszcząca wszystkie dane biznesowe użytkownika
+async function cleanupUserData(uid) {
+  const userRef = db.collection("users").doc(uid);
+
+  // Usuwamy subkolekcje z danymi biznesowymi
+  const rentalsDeleted = await deleteSubcollection(userRef, "rentals");
+  const settingsDeleted = await deleteSubcollection(userRef, "settings");
+  const checkoutDeleted = await deleteSubcollection(userRef, "checkout_sessions");
+
+  console.log(
+    `🧹 Dane użytkownika ${uid} wyczyszczone: ` +
+    `${rentalsDeleted} rezerwacji, ${settingsDeleted} ustawień, ${checkoutDeleted} sesji checkout`
+  );
+
+  // Czyścimy pola Stripe z profilu, ale zostawiamy sam dokument
+  await userRef.update({
+    stripeSubscriptionId: FieldValue.delete(),
+    paidAt: FieldValue.delete(),
+    lastPaymentAt: FieldValue.delete(),
+    dataCleanedAt: new Date().toISOString(),
+  });
+
+  return { rentalsDeleted, settingsDeleted, checkoutDeleted };
+}
 
 // =============================================================================
 // 1. TWORZENIE SESJI STRIPE CHECKOUT (Callable Function)
@@ -212,6 +259,7 @@ exports.stripeWebhook = onRequest(
         case "customer.subscription.deleted": {
           const subscription = event.data.object;
           const uid = subscription.metadata?.firebaseUID;
+          let resolvedUid = uid;
 
           if (uid) {
             console.log(`❌ Subskrypcja anulowana dla użytkownika: ${uid}`);
@@ -229,11 +277,23 @@ exports.stripeWebhook = onRequest(
 
             if (!snapshot.empty) {
               const userDoc = snapshot.docs[0];
-              console.log(`❌ Subskrypcja anulowana dla: ${userDoc.id}`);
+              resolvedUid = userDoc.id;
+              console.log(`❌ Subskrypcja anulowana dla: ${resolvedUid}`);
               await userDoc.ref.update({
                 status: "canceled",
                 canceledAt: new Date().toISOString(),
               });
+            }
+          }
+
+          // Sprzątanie danych biznesowych użytkownika po rezygnacji
+          if (resolvedUid) {
+            try {
+              const result = await cleanupUserData(resolvedUid);
+              console.log(`🧹 Zakończono czyszczenie danych dla ${resolvedUid}:`, result);
+            } catch (cleanupErr) {
+              // Logujemy błąd, ale nie blokujemy odpowiedzi webhooka
+              console.error(`⚠️ Błąd czyszczenia danych dla ${resolvedUid}:`, cleanupErr);
             }
           }
           break;
