@@ -1,5 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
@@ -192,6 +193,7 @@ exports.stripeWebhook = onRequest(
               stripeCustomerId: session.customer,
               stripeSubscriptionId: session.subscription,
               paidAt: new Date().toISOString(),
+              scheduledDeletionAt: FieldValue.delete(),
             });
           } else {
             console.warn("⚠️ checkout.session.completed bez firebaseUID w metadata");
@@ -222,6 +224,7 @@ exports.stripeWebhook = onRequest(
                 lastPaymentAt: new Date().toISOString(),
                 // Na wszelki wypadek (obsługa wyścigu), ustawiamy też subscription id jeśli to pierwsza płatność
                 stripeSubscriptionId: invoice.subscription,
+                scheduledDeletionAt: FieldValue.delete(),
               });
             }
           }
@@ -261,11 +264,15 @@ exports.stripeWebhook = onRequest(
           const uid = subscription.metadata?.firebaseUID;
           let resolvedUid = uid;
 
+          const deletionDate = new Date();
+          deletionDate.setDate(deletionDate.getDate() + 30);
+
           if (uid) {
-            console.log(`❌ Subskrypcja anulowana dla użytkownika: ${uid}`);
+            console.log(`❌ Subskrypcja anulowana dla użytkownika: ${uid}. Planowane usunięcie danych: ${deletionDate.toISOString()}`);
             await db.collection("users").doc(uid).update({
               status: "canceled",
               canceledAt: new Date().toISOString(),
+              scheduledDeletionAt: deletionDate,
             });
           } else {
             // Fallback: szukaj po stripeSubscriptionId
@@ -278,22 +285,12 @@ exports.stripeWebhook = onRequest(
             if (!snapshot.empty) {
               const userDoc = snapshot.docs[0];
               resolvedUid = userDoc.id;
-              console.log(`❌ Subskrypcja anulowana dla: ${resolvedUid}`);
+              console.log(`❌ Subskrypcja anulowana dla: ${resolvedUid}. Planowane usunięcie danych: ${deletionDate.toISOString()}`);
               await userDoc.ref.update({
                 status: "canceled",
                 canceledAt: new Date().toISOString(),
+                scheduledDeletionAt: deletionDate,
               });
-            }
-          }
-
-          // Sprzątanie danych biznesowych użytkownika po rezygnacji
-          if (resolvedUid) {
-            try {
-              const result = await cleanupUserData(resolvedUid);
-              console.log(`🧹 Zakończono czyszczenie danych dla ${resolvedUid}:`, result);
-            } catch (cleanupErr) {
-              // Logujemy błąd, ale nie blokujemy odpowiedzi webhooka
-              console.error(`⚠️ Błąd czyszczenia danych dla ${resolvedUid}:`, cleanupErr);
             }
           }
           break;
@@ -367,3 +364,55 @@ exports.createBillingPortalSession = onCall(
     }
   }
 );
+
+// =============================================================================
+// 4. CYKLICZNE USUWANIE PRZEDAWNIONYCH DANYCH (Soft Delete Cleanup)
+// Uruchamiane raz na dobę. Pobiera konta 'canceled', gdzie scheduledDeletionAt minęło
+// i kasuje ich dane biznesowe.
+// =============================================================================
+exports.deleteExpiredAccountsData = onSchedule(
+  {
+    schedule: "every day 02:00",
+    timeZone: "Europe/Warsaw",
+    maxInstances: 1,
+  },
+  async (event) => {
+    const now = new Date();
+    console.log(`🧹 Uruchomiono cykliczne czyszczenie bazy danych: ${now.toISOString()}`);
+
+    try {
+      const snapshot = await db
+        .collection("users")
+        .where("status", "==", "canceled")
+        .where("scheduledDeletionAt", "<=", now)
+        .get();
+
+      if (snapshot.empty) {
+        console.log("🧹 Brak kont kwalifikujących się do usunięcia danych.");
+        return;
+      }
+
+      console.log(`🧹 Znaleziono ${snapshot.size} kont do wyczyszczenia.`);
+
+      for (const docSnap of snapshot.docs) {
+        const uid = docSnap.id;
+        try {
+          console.log(`🧹 Rozpoczynanie usuwania danych dla użytkownika: ${uid}`);
+          const result = await cleanupUserData(uid);
+          
+          // Usuwamy również pole scheduledDeletionAt, aby zapobiec ponownemu czyszczeniu
+          await docSnap.ref.update({
+            scheduledDeletionAt: FieldValue.delete(),
+          });
+          
+          console.log(`✅ Pomyślnie wyczyszczono dane dla ${uid}:`, result);
+        } catch (err) {
+          console.error(`❌ Błąd czyszczenia danych dla użytkownika ${uid}:`, err);
+        }
+      }
+    } catch (error) {
+      console.error("❌ Błąd krytyczny podczas cyklicznego czyszczenia baz danych:", error);
+    }
+  }
+);
+
