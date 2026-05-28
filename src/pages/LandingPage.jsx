@@ -107,7 +107,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafcff] font-sans text-slate-900 selection:bg-blue-200 overflow-x-hidden relative scroll-smooth">
+    <div className="min-h-screen bg-[#fafcff] font-sans text-slate-900 selection:bg-blue-200 relative">
       
       {/* Tost (Zastępcze powiadomienie zamiast alertu) */}
       {showToast && (
@@ -118,9 +118,9 @@ export default function LandingPage() {
       )}
 
       {/* TŁO - NOWOCZESNE ROZMYTE ŚWIATŁA (GLOWING ORBS) */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[100px] opacity-70"></div>
-      <div className="absolute top-[10%] right-[-5%] w-[30rem] h-[30rem] bg-violet-400/20 rounded-full mix-blend-multiply filter blur-[120px] opacity-70"></div>
-      <div className="absolute bottom-[-10%] left-[20%] w-[40rem] h-[40rem] bg-cyan-300/20 rounded-full mix-blend-multiply filter blur-[120px] opacity-60"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 transform-gpu will-change-transform"></div>
+      <div className="absolute top-[10%] right-[-5%] w-[30rem] h-[30rem] bg-violet-400/20 rounded-full mix-blend-multiply filter blur-[120px] opacity-70 transform-gpu will-change-transform"></div>
+      <div className="absolute bottom-[-10%] left-[20%] w-[40rem] h-[40rem] bg-cyan-300/20 rounded-full mix-blend-multiply filter blur-[120px] opacity-60 transform-gpu will-change-transform"></div>
 
       {/* NAWIGACJA */}
       <header className="fixed w-full bg-white/80 backdrop-blur-xl z-50 border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">

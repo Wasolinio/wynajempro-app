@@ -878,9 +878,9 @@ export default function RentalManager() {
 
   // --- ZWYKŁY RENDER APLIKACJI (JEŚLI ODBLOKOWANE) ---
   return (
-    <div className={`min-h-screen bg-[#f8fafc] dark:bg-slate-900 relative font-sans text-slate-800 dark:text-slate-200 overflow-x-hidden transition-colors duration-300`}>
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-300/10 dark:bg-blue-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] pointer-events-none transition-colors duration-300"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40rem] h-[40rem] bg-indigo-300/10 dark:bg-indigo-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] pointer-events-none transition-colors duration-300"></div>
+    <div className={`min-h-screen bg-[#f8fafc] dark:bg-slate-900 relative font-sans text-slate-800 dark:text-slate-200 transition-colors duration-300`}>
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-300/10 dark:bg-blue-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] pointer-events-none transition-colors duration-300 transform-gpu will-change-transform"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40rem] h-[40rem] bg-indigo-300/10 dark:bg-indigo-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] pointer-events-none transition-colors duration-300 transform-gpu will-change-transform"></div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8 relative z-10">
         

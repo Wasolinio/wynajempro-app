@@ -202,10 +202,10 @@ export default function LoginPanel() {
         </div>
       </div>
 
-      <div className="hidden lg:flex flex-1 relative w-full bg-slate-900 overflow-hidden items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 relative w-full bg-slate-900 items-center justify-center p-12">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-violet-600/20 rounded-full mix-blend-screen filter blur-[100px]"></div>
+          <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] transform-gpu will-change-transform"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-violet-600/20 rounded-full mix-blend-screen filter blur-[100px] transform-gpu will-change-transform"></div>
           <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:20px_20px] opacity-20"></div>
         </div>
 
