@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth, db } from '../firebase'; // DODANE: db
 import { doc, setDoc, getDoc } from 'firebase/firestore'; // DODANE: funkcje firestore
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2, MailCheck, RefreshCw } from 'lucide-react';
 
 export default function LoginPanel() {
   const navigate = useNavigate();
@@ -12,6 +12,9 @@ export default function LoginPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showVerificationScreen, setShowVerificationScreen] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -44,6 +47,21 @@ export default function LoginPanel() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (resendCooldown) return;
+    try {
+      // Logujemy się ponownie, żeby mieć dostęp do obiektu user
+      const userCredential = await signInWithEmailAndPassword(auth, verificationEmail, formData.password);
+      await sendEmailVerification(userCredential.user);
+      await signOut(auth);
+      setResendCooldown(true);
+      setTimeout(() => setResendCooldown(false), 60000); // 60 sek cooldown
+    } catch (err) {
+      console.error("Błąd ponownego wysyłania:", err);
+      setError('Nie udało się wysłać ponownie. Spróbuj za chwilę.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -51,17 +69,40 @@ export default function LoginPanel() {
     
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        // === LOGOWANIE ===
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        
+        // Odśwież token, żeby mieć aktualny emailVerified
+        await userCredential.user.reload();
+        
+        if (!userCredential.user.emailVerified) {
+          setError('Twój adres email nie został jeszcze zweryfikowany. Sprawdź swoją skrzynkę pocztową.');
+          await signOut(auth);
+          setIsLoading(false);
+          return;
+        }
+        
+        navigate('/dashboard'); 
       } else {
+        // === REJESTRACJA ===
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         if (formData.name) {
           await updateProfile(userCredential.user, {
             displayName: formData.name
           });
         }
-        await initializeUserInDatabase(userCredential.user); // Zapis do bazy
+        await initializeUserInDatabase(userCredential.user);
+        
+        // Wysyłka linku weryfikacyjnego
+        await sendEmailVerification(userCredential.user);
+        
+        // Wyloguj — konto nieaktywne do weryfikacji
+        await signOut(auth);
+        
+        // Pokaż ekran weryfikacji
+        setVerificationEmail(formData.email);
+        setShowVerificationScreen(true);
       }
-      navigate('/dashboard'); 
       
     } catch (err) {
       console.error("Błąd autoryzacji:", err);
@@ -95,6 +136,61 @@ export default function LoginPanel() {
       setIsLoading(false);
     }
   };
+
+  // ===== EKRAN WERYFIKACJI EMAIL =====
+  if (showVerificationScreen) {
+    return (
+      <div className="min-h-screen flex font-sans text-slate-900 bg-white selection:bg-blue-200">
+        <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-emerald-200/50">
+              <MailCheck className="w-10 h-10 text-emerald-600" />
+            </div>
+            
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-4">
+              Sprawdź swoją skrzynkę
+            </h2>
+            
+            <p className="text-slate-600 font-medium mb-2">
+              Wysłaliśmy link weryfikacyjny na adres:
+            </p>
+            <p className="text-blue-600 font-bold text-lg mb-8">
+              {verificationEmail}
+            </p>
+            
+            <div className="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100">
+              <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                Kliknij w link w mailu, aby aktywować swoje konto. 
+                Po weryfikacji wróć tutaj i zaloguj się normalnie.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => { setShowVerificationScreen(false); setIsLogin(true); setError(''); }}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              >
+                Przejdź do logowania <ArrowRight className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={handleResendVerification}
+                disabled={resendCooldown}
+                className="w-full text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 py-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${resendCooldown ? 'animate-spin' : ''}`} />
+                {resendCooldown ? 'Wysłano ponownie (poczekaj 60s)' : 'Wyślij link ponownie'}
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 mt-8 font-medium">
+              Nie widzisz maila? Sprawdź folder SPAM.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex font-sans text-slate-900 bg-white selection:bg-blue-200">

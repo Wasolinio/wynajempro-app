@@ -166,6 +166,12 @@ export default function RentalManager() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
+        // Dodatkowa bariera: jeśli mail nie jest zweryfikowany (konto email/hasło), wyloguj
+        if (!currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
+          signOut(auth);
+          navigate('/login');
+          return;
+        }
         setUser(currentUser);
       } else {
         navigate('/login');

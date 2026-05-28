@@ -16,13 +16,21 @@ const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 // 1. TWORZENIE SESJI STRIPE CHECKOUT (Callable Function)
 // =============================================================================
 exports.createCheckoutSession = onCall(
-  { secrets: [stripeSecretKey] },
+  { secrets: [stripeSecretKey], enforceAppCheck: true },
   async (request) => {
     // Sprawdzenie uwierzytelnienia
     if (!request.auth) {
       throw new HttpsError(
         "unauthenticated",
         "Musisz być zalogowany, aby dokonać płatności."
+      );
+    }
+
+    // Sprawdzenie weryfikacji email
+    if (!request.auth.token.email_verified) {
+      throw new HttpsError(
+        "permission-denied",
+        "Musisz zweryfikować swój adres email przed dokonaniem płatności."
       );
     }
 

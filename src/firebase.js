@@ -1,7 +1,8 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 // Konfiguracja pobierana bezpiecznie ze zmiennych środowiskowych (.env.local)
 const firebaseConfig = {
@@ -16,8 +17,27 @@ const firebaseConfig = {
 
 // Zapobiega podwójnej inicjalizacji w środowisku deweloperskim
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// ===== APP CHECK — OCHRONA PRZED BOTAMI =====
+// W trybie deweloperskim włączamy debug token (ustawiony w konsoli Firebase)
+if (import.meta.env.DEV) {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+  isTokenAutoRefreshEnabled: true,
+});
+
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Firestore z trwałym cache w IndexedDB
+// Powracający użytkownicy czytają dane z cache, nie z serwera
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  }),
+});
+
 const functions = getFunctions(app); // Instancja Cloud Functions do wywołań httpsCallable
 
-export { auth, db, functions };
+export { auth, db, functions, appCheck };

@@ -4,41 +4,50 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // =====================================================================
+    // GLOBALNA FUNKCJA BEZPIECZEŃSTWA
+    // Sprawdza: czy użytkownik jest zalogowany, jest właścicielem dokumentu,
+    // ORAZ ma zweryfikowany adres email.
+    // =====================================================================
+    function isOwnerAndVerified(userId) {
+      return request.auth != null
+        && request.auth.uid == userId
+        && request.auth.token.email_verified == true;
+    }
+
+    // =====================================================================
     // PROFIL UŻYTKOWNIKA — users/{userId}
     // =====================================================================
-    // Odczyt: tylko właściciel
-    // Tworzenie: tylko właściciel, status MUSI być 'trialing'
-    // Aktualizacja: właściciel może zmieniać pola (np. name),
-    //   ale NIE MOŻE zmieniać pól: status, trialEndsAt, stripeCustomerId,
-    //   stripeSubscriptionId, paidAt, canceledAt, lastPaymentAt
-    //   (te pola zmienia TYLKO backend Cloud Functions przez Admin SDK)
+    // Odczyt: tylko właściciel z zweryfikowanym mailem
+    // Tworzenie: właściciel (BEZ wymogu email_verified, bo profil tworzony jest
+    //   w trakcie rejestracji PRZED weryfikacją), status MUSI być 'trialing'
+    // Aktualizacja: właściciel z zweryfikowanym mailem, ale NIE MOŻE zmieniać
+    //   pól chronionych (status, trialEndsAt) — te zmienia TYLKO backend
     // =====================================================================
     match /users/{userId} {
 
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwnerAndVerified(userId);
 
       allow create: if request.auth != null
                     && request.auth.uid == userId
                     && request.resource.data.status == 'trialing';
 
-      allow update: if request.auth != null
-                    && request.auth.uid == userId
+      allow update: if isOwnerAndVerified(userId)
                     && request.resource.data.status == resource.data.status
                     && request.resource.data.trialEndsAt == resource.data.trialEndsAt;
 
       // Rezerwacje, wydatki, zadania
       match /rentals/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwnerAndVerified(userId);
       }
 
       // Ustawienia użytkownika
       match /settings/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwnerAndVerified(userId);
       }
 
       // Sesje checkout (klient tworzy, nasłuchuje odpowiedzi)
       match /checkout_sessions/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwnerAndVerified(userId);
       }
     }
   }
