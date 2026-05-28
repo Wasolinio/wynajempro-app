@@ -250,3 +250,60 @@ exports.stripeWebhook = onRequest(
     }
   }
 );
+
+// =============================================================================
+// 3. PANEL ZARZĄDZANIA SUBSKRYPCJĄ (Stripe Customer Portal)
+// =============================================================================
+exports.createBillingPortalSession = onCall(
+  { secrets: [stripeSecretKey], enforceAppCheck: true, maxInstances: 5 },
+  async (request) => {
+    // Sprawdzenie uwierzytelnienia
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Musisz być zalogowany, aby zarządzać subskrypcją."
+      );
+    }
+
+    // Sprawdzenie weryfikacji email
+    if (!request.auth.token.email_verified) {
+      throw new HttpsError(
+        "permission-denied",
+        "Musisz zweryfikować swój adres email."
+      );
+    }
+
+    const uid = request.auth.uid;
+    const stripe = require("stripe")(stripeSecretKey.value());
+
+    try {
+      // Pobierz ID klienta Stripe z profilu użytkownika
+      const userDoc = await db.collection("users").doc(uid).get();
+      const userData = userDoc.data();
+
+      if (!userData?.stripeCustomerId) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Nie znaleziono aktywnej subskrypcji do zarządzania."
+        );
+      }
+
+      // Tworzymy sesję Billing Portal
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: userData.stripeCustomerId,
+        return_url: request.data.returnUrl || "https://wynajempro.pl/dashboard",
+      });
+
+      return { url: portalSession.url };
+    } catch (error) {
+      // Jeśli to już nasz HttpsError, rzuć go dalej
+      if (error instanceof HttpsError) throw error;
+
+      console.error("Błąd tworzenia sesji Billing Portal:", error);
+      throw new HttpsError(
+        "internal",
+        "Nie udało się otworzyć panelu zarządzania subskrypcją."
+      );
+    }
+  }
+);

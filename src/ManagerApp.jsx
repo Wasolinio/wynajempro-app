@@ -4,7 +4,7 @@ import {
   XCircle, Landmark, Bell, Mail, Key, Loader2, BarChart3, CalendarDays, List, 
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit, ArrowDown, ArrowUp, 
   Settings, MessageSquare, CheckSquare, Phone, Building, Globe, Percent, Tags, 
-  Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock // Dodano Lock
+  Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock, CreditCard, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -74,6 +74,7 @@ export default function RentalManager() {
   const [accountStatus, setAccountStatus] = useState('active'); // active, trialing
   const [trialEndsAt, setTrialEndsAt] = useState(null);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
 
   // Stany UI
   const [showAddModal, setShowAddModal] = useState(false);
@@ -766,6 +767,34 @@ export default function RentalManager() {
     }
   };
 
+  // --- STRIPE CUSTOMER PORTAL (zarządzanie subskrypcją) ---
+  const handleManageSubscription = async () => {
+    setIsBillingPortalLoading(true);
+    try {
+      if (auth.currentUser) {
+        await auth.currentUser.getIdToken(true);
+      }
+      const createBillingPortalSession = httpsCallable(functions, 'createBillingPortalSession');
+      const result = await createBillingPortalSession({
+        returnUrl: window.location.origin + '/dashboard',
+      });
+      if (result.data?.url) {
+        window.location.assign(result.data.url);
+      } else {
+        throw new Error('Nie otrzymano URL panelu zarządzania');
+      }
+    } catch (err) {
+      console.error('Błąd otwierania panelu subskrypcji:', err);
+      let message = 'Nie udało się otworzyć panelu zarządzania subskrypcją.';
+      if (err.code === 'functions/failed-precondition') {
+        message = 'Nie masz jeszcze aktywnej subskrypcji do zarządzania.';
+      }
+      alert(message);
+    } finally {
+      setIsBillingPortalLoading(false);
+    }
+  };
+
   const updateProperty = (index, newValue) => { const updated = [...editingProperties]; updated[index] = newValue; setEditingProperties(updated); };
   const removeProperty = (index) => { const updated = [...editingProperties]; updated.splice(index, 1); setEditingProperties(updated); };
   const handleAddProperty = (e) => { 
@@ -1284,9 +1313,9 @@ export default function RentalManager() {
               </div>
 
               <div className="flex flex-wrap bg-slate-100/80 dark:bg-slate-800 p-1.5 rounded-2xl mb-8 gap-1 shadow-inner">
-                {['sync', 'properties', 'sources', 'categories', 'tax', 'reminders'].map(tab => (
+                {['sync', 'properties', 'sources', 'categories', 'tax', 'reminders', 'subscription'].map(tab => (
                   <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-1 text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
-                    {tab === 'sync' ? 'Integracje' : tab === 'properties' ? 'Obiekty' : tab === 'sources' ? 'Źródła' : tab === 'categories' ? 'Kategorie' : tab === 'tax' ? 'Podatki' : 'Zadania'}
+                    {tab === 'sync' ? 'Integracje' : tab === 'properties' ? 'Obiekty' : tab === 'sources' ? 'Źródła' : tab === 'categories' ? 'Kategorie' : tab === 'tax' ? 'Podatki' : tab === 'reminders' ? 'Zadania' : '💳 Plan'}
                   </button>
                 ))}
               </div>
@@ -1449,6 +1478,68 @@ export default function RentalManager() {
                     </div>
                   ))}
                   <button type="button" onClick={addTemplate} className="w-full py-5 mt-4 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-extrabold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-400 transition-colors flex justify-center items-center gap-2"><Plus className="w-5 h-5" /> Dodaj przypomnienie</button>
+                </div>
+              )}
+              {settingsTab === 'subscription' && (
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                  {/* Status subskrypcji */}
+                  <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className={`p-3 rounded-2xl ${accountStatus === 'active' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : accountStatus === 'trialing' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
+                        <CreditCard className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Status subskrypcji</h3>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                          {accountStatus === 'active' && 'Twoja subskrypcja jest aktywna'}
+                          {accountStatus === 'trialing' && `Okres próbny${trialEndsAt ? ` — do ${trialEndsAt.toLocaleDateString('pl-PL')}` : ''}`}
+                          {accountStatus === 'past_due' && 'Płatność zaległa — zaktualizuj metodę płatności'}
+                          {accountStatus === 'canceled' && 'Subskrypcja anulowana'}
+                        </p>
+                      </div>
+                      <div className="ml-auto">
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                          accountStatus === 'active' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
+                          accountStatus === 'trialing' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' :
+                          'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400'
+                        }`}>
+                          {accountStatus === 'active' ? 'Aktywna' : accountStatus === 'trialing' ? 'Trial' : accountStatus === 'past_due' ? 'Zaległa' : 'Anulowana'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-3xl font-black text-slate-900 dark:text-white">29.99</span>
+                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">zł / miesiąc</span>
+                      </div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Plan Gospodarza — pełen dostęp do systemu</p>
+                    </div>
+                  </div>
+
+                  {/* Akcje zarządzania */}
+                  <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-lg mb-2">Zarządzaj subskrypcją</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-5">
+                      W panelu Stripe możesz zmienić kartę płatniczą, anulować subskrypcję lub pobrać faktury VAT.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleManageSubscription}
+                      disabled={isBillingPortalLoading}
+                      className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {isBillingPortalLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ExternalLink className="w-5 h-5" /> Otwórz panel zarządzania</>}
+                    </button>
+                  </div>
+
+                  {/* Info o koncie */}
+                  <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 p-5 rounded-3xl text-sm font-medium text-blue-900 dark:text-blue-300 leading-relaxed shadow-sm">
+                    <p className="flex items-start gap-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Zmiana metody płatności</strong> — zaktualizuj kartę lub dodaj nową bez przerwy w dostępie.</p>
+                    <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Faktury VAT</strong> — pobierz faktury za dowolny miesiąc w formacie PDF.</p>
+                    <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Anulowanie</strong> — anuluj subskrypcję w dowolnym momencie. Dostęp pozostanie do końca opłaconego okresu.</p>
+                  </div>
                 </div>
               )}
 
