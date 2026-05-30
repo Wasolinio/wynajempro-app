@@ -19,22 +19,22 @@ export const useFirebaseData = (user, selectedYear) => {
     enabled: !!user,
   });
 
-  const { data: settings = { 
-    properties: DEFAULT_PROPERTIES, 
-    sources: DEFAULT_SOURCES, 
-    categories: DEFAULT_CATEGORIES, 
-    templates: DEFAULT_TEMPLATES, 
-    taxSettings: defaultTaxSettings, 
-    syncLinks: {} 
-  } } = useQuery({
+  const { data: settings } = useQuery({
     queryKey: ['settings', user?.uid],
-    queryFn: () => null, 
+    queryFn: () => ({ 
+      properties: DEFAULT_PROPERTIES, 
+      sources: DEFAULT_SOURCES, 
+      categories: DEFAULT_CATEGORIES, 
+      templates: DEFAULT_TEMPLATES, 
+      taxSettings: defaultTaxSettings, 
+      syncLinks: {} 
+    }), 
     enabled: !!user,
   });
 
-  const { data: profile = { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null } } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ['profile', user?.uid],
-    queryFn: () => null,
+    queryFn: () => ({ accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null }),
     enabled: !!user,
   });
 
