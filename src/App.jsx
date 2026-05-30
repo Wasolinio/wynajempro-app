@@ -47,9 +47,34 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+import { Toaster } from 'react-hot-toast';
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <>
+      <Toaster 
+        position="bottom-right" 
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            borderRadius: '16px',
+            background: '#333',
+            color: '#fff',
+            fontWeight: 'bold',
+          },
+          success: {
+            style: {
+              background: '#10b981', // Tailwind emerald-500
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444', // Tailwind red-500
+            },
+          },
+        }}
+      />
+      <BrowserRouter>
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -69,5 +94,6 @@ export default function App() {
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </>
   );
 }

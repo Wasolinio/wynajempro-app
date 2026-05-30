@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, ChevronLeft, Download, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function GuestGuideView() {
   const { guideId } = useParams();
@@ -36,6 +37,7 @@ export default function GuestGuideView() {
 
   const copyToClipboard = (text, setter) => {
     navigator.clipboard.writeText(text);
+    toast.success('Skopiowano do schowka!', { position: 'top-center' });
     setter(true);
     setTimeout(() => setter(false), 2000);
   };

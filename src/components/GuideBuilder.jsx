@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, doc, setDoc, deleteDoc, serverTimest
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { QRCodeSVG } from 'qrcode.react';
 import { Plus, Edit2, Trash2, Link as LinkIcon, Save, X, Image as ImageIcon, Copy, MapPin, Wifi, Key, BookOpen, Navigation, Loader2, FileText, Upload, File as FileIcon } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function GuideBuilder({ user, properties }) {
   const [guides, setGuides] = useState([]);
@@ -56,9 +57,11 @@ export default function GuideBuilder({ user, properties }) {
     if (window.confirm('Czy na pewno chcesz usunąć ten przewodnik? Ten link przestanie działać dla gości.')) {
       try {
         await deleteDoc(doc(db, 'guides', id));
+        toast.success('Usunięto przewodnik');
         setGuides(guides.filter(g => g.id !== id));
       } catch (err) {
         console.error("Błąd usuwania przewodnika:", err);
+        toast.error('Błąd podczas usuwania');
       }
     }
   };
@@ -127,22 +130,22 @@ export default function GuideBuilder({ user, properties }) {
         updatedAt: serverTimestamp()
       };
       
-      await setDoc(doc(db, 'guides', editingGuide.id), guideData);
-      
-      // Update local state
-      const existingIdx = guides.findIndex(g => g.id === editingGuide.id);
-      if (existingIdx >= 0) {
-        const newGuides = [...guides];
-        newGuides[existingIdx] = guideData;
-        setGuides(newGuides);
+      if (isNew) {
+        await setDoc(docRef, {
+          ...guideData,
+          createdAt: serverTimestamp()
+        });
+        toast.success('Przewodnik został zapisany');
       } else {
-        setGuides([guideData, ...guides]);
+        await updateDoc(docRef, guideData);
+        toast.success('Przewodnik został zaktualizowany');
       }
-      
+
       setEditingGuide(null);
+      fetchGuides();
     } catch (err) {
-      console.error("Błąd zapisywania przewodnika:", err);
-      alert("Nie udało się zapisać przewodnika.");
+      console.error("Błąd zapisu przewodnika:", err);
+      toast.error('Wystąpił błąd podczas zapisywania');
     } finally {
       setIsSaving(false);
     }
@@ -365,7 +368,7 @@ export default function GuideBuilder({ user, properties }) {
                   
                   <div className="relative group">
                     <input readOnly value={publicUrl} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 pr-10" />
-                    <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Kopiuj link">
+                    <button type="button" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success('Skopiowano link'); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Kopiuj link">
                       <Copy className="w-4 h-4" />
                     </button>
                   </div>
@@ -445,7 +448,7 @@ export default function GuideBuilder({ user, properties }) {
                     </button>
                   </div>
                   
-                  <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/guide/${guide.id}`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg transition-colors">
+                  <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/guide/${guide.id}`); toast.success('Skopiowano link'); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-lg transition-colors">
                     <Copy className="w-3.5 h-3.5" /> Kopiuj Link
                   </button>
                 </div>

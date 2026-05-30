@@ -8,6 +8,7 @@ import {
   AlertTriangle, Clock, BookOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 // IMPORTUJEMY FIREBASE ORAZ STRIPE
 import { auth, db, functions } from './firebase'; 
@@ -454,11 +455,29 @@ export default function RentalManager() {
       entry.commission = Number(entry.commission) || 0; entry.tax = Number(entry.tax) || 0; entry.vat = Number(entry.vat) || 0;
     } else if (entry.type === 'utility') { entry.utilities = Number(entry.utilities) || 0; }
     const docRef = editingId ? doc(db, 'users', user.uid, 'rentals', editingId) : doc(db, 'users', user.uid, 'rentals', Date.now().toString());
-    await (editingId ? updateDoc : setDoc)(docRef, entry);
-    handleCloseModal();
+    
+    try {
+      await (editingId ? updateDoc : setDoc)(docRef, entry);
+      toast.success(editingId ? 'Zaktualizowano pomyślnie!' : 'Dodano pomyślnie!');
+      handleCloseModal();
+    } catch (err) {
+      console.error(err);
+      toast.error('Wystąpił błąd podczas zapisywania');
+    }
   };
 
-  const confirmDelete = async () => { if (!user || !itemToDelete) return; await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete)); setItemToDelete(null); };
+  const confirmDelete = async () => { 
+    if (!user || !itemToDelete) return; 
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete)); 
+      toast.success('Pomyślnie usunięto wpis');
+    } catch (err) {
+      console.error(err);
+      toast.error('Błąd podczas usuwania');
+    } finally {
+      setItemToDelete(null); 
+    }
+  };
 
   const toggleStatus = async (id, field) => {
     const r = rentals.find(r => r.id === id);
@@ -505,13 +524,19 @@ export default function RentalManager() {
 
   const saveSettings = async () => {
     if (!user) return;
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'reminders'), { items: editingTemplates });
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'properties'), { items: editingProperties });
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'sources'), { items: editingSources });
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'categories'), { items: editingCategories });
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'tax'), editingTaxSettings);
-    await setDoc(doc(db, 'users', user.uid, 'settings', 'syncLinks'), { links: editingSyncLinks });
-    setShowSettingsModal(false);
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'reminders'), { items: editingTemplates });
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'properties'), { items: editingProperties });
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'sources'), { items: editingSources });
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'categories'), { items: editingCategories });
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'tax'), editingTaxSettings);
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'syncLinks'), { links: editingSyncLinks });
+      toast.success('Ustawienia zostały zapisane');
+      setShowSettingsModal(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Błąd podczas zapisywania ustawień');
+    }
   };
 
   const changeMonth = (offset) => {
