@@ -7,12 +7,19 @@
   html {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    color-scheme: light;
+    background-color: #f8fafc;
+  }
+  html.dark {
+    color-scheme: dark;
+    background-color: #0f172a;
   }
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden; /* Zapobiega pojawianiu się paska poziomego i złemu skalowaniu na mobilkach */
     width: 100%;
+    @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100;
   }
 }
 

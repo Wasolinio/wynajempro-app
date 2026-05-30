@@ -16,11 +16,9 @@ service cloud.firestore {
 
     // =====================================================================
     // FUNKCJA SUBSKRYPCJI
-    // Pobiera status z dokumentu użytkownika i sprawdza czy jest aktywny.
-    // Dla statusu 'trialing' dodatkowo weryfikuje, czy data trialEndsAt
-    // nie minęła (porównanie z request.time — czasem serwera Firestore).
+    // Pobiera status z Custom Claims (token), z fallbackiem na odczyt dokumentu.
     // =====================================================================
-    function hasActiveSubscription(userId) {
+    function checkFallbackSubscription(userId) {
       let userData = get(/databases/$(database)/documents/users/$(userId)).data;
       return userData.status == 'active'
         || (userData.status == 'trialing' 
@@ -28,22 +26,39 @@ service cloud.firestore {
             && userData.trialEndsAt > request.time);
     }
 
+    function hasActiveSubscription(userId) {
+      let token = request.auth.token;
+      return ('stripeStatus' in token && (
+          token.stripeStatus == 'active' || 
+          (token.stripeStatus == 'trialing' && 'trialEndsAt' in token && token.trialEndsAt > request.time.toMillis())
+        )) ||
+        (!('stripeStatus' in token) && checkFallbackSubscription(userId));
+    }
+
     // =====================================================================
     // FUNKCJE WALIDACJI SCHEMATU (Schema Validation)
     // =====================================================================
     function isValidRental(data) {
-      return (data.type == 'booking' || data.type == 'utility' || data.type == 'reminder')
+      return data.keys().hasAll(['type', 'date'])
+        && (data.type == 'booking' || data.type == 'utility' || data.type == 'reminder')
         && data.date is string
+        && data.date.size() >= 10
         && (!('income' in data) || data.income is number)
         && (!('advancePayment' in data) || data.advancePayment is number)
         && (!('commission' in data) || data.commission is number)
         && (!('tax' in data) || data.tax is number)
         && (!('vat' in data) || data.vat is number)
-        && (!('utilities' in data) || data.utilities is number);
+        && (!('utilities' in data) || data.utilities is number)
+        && (!('guest' in data) || data.guest is string)
+        && (!('property' in data) || data.property is string)
+        && (!('source' in data) || data.source is string)
+        && (!('endDate' in data) || data.endDate is string);
     }
 
     function isValidSettings(docId, data) {
-      return (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
+      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax'];
+      return docId in knownIds
+          && (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'properties' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'sources' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'categories' ? (!('items' in data) || data.items is list) : true)

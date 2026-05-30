@@ -14,20 +14,20 @@ import { auth, db, functions } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
+import { useFirebaseData } from './hooks/useFirebaseData';
 
-// --- WSPÓLNE HELPERY I DANE ---
-const propColors = {
-  blue: { bg: 'bg-blue-500', solid: 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20', advance: 'bg-blue-50 dark:bg-blue-500/20 border-blue-500 text-blue-800 dark:text-blue-300 border-[2px] border-solid font-bold', dashed: 'bg-blue-50 dark:bg-transparent border-blue-400 dark:border-blue-500/50 text-blue-700 dark:text-blue-400 border-2 border-dashed' },
-  emerald: { bg: 'bg-emerald-500', solid: 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20', advance: 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-500 text-emerald-800 dark:text-emerald-300 border-[2px] border-solid font-bold', dashed: 'bg-emerald-50 dark:bg-transparent border-emerald-400 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 border-2 border-dashed' },
-  violet: { bg: 'bg-violet-500', solid: 'bg-violet-500 border-violet-500 text-white shadow-md shadow-violet-500/20', advance: 'bg-violet-50 dark:bg-violet-500/20 border-violet-500 text-violet-800 dark:text-violet-300 border-[2px] border-solid font-bold', dashed: 'bg-violet-50 dark:bg-transparent border-violet-400 dark:border-violet-500/50 text-violet-700 dark:text-violet-400 border-2 border-dashed' },
-  amber: { bg: 'bg-amber-500', solid: 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-500/20', advance: 'bg-amber-50 dark:bg-amber-500/20 border-amber-500 text-amber-900 dark:text-amber-300 border-[2px] border-solid font-bold', dashed: 'bg-amber-50 dark:bg-transparent border-amber-400 dark:border-amber-500/50 text-amber-700 dark:text-amber-400 border-2 border-dashed' },
-  rose: { bg: 'bg-rose-500', solid: 'bg-rose-500 border-rose-500 text-white shadow-md shadow-rose-500/20', advance: 'bg-rose-50 dark:bg-rose-500/20 border-rose-500 text-rose-800 dark:text-rose-300 border-[2px] border-solid font-bold', dashed: 'bg-rose-50 dark:bg-transparent border-rose-400 dark:border-rose-500/50 text-rose-700 dark:text-rose-400 border-2 border-dashed' },
-  cyan: { bg: 'bg-cyan-500', solid: 'bg-cyan-500 border-cyan-500 text-white shadow-md shadow-cyan-500/20', advance: 'bg-cyan-50 dark:bg-cyan-500/20 border-cyan-500 text-cyan-800 dark:text-cyan-300 border-[2px] border-solid font-bold', dashed: 'bg-cyan-50 dark:bg-transparent border-cyan-400 dark:border-cyan-500/50 text-cyan-700 dark:text-cyan-400 border-2 border-dashed' },
-  pink: { bg: 'bg-pink-500', solid: 'bg-pink-500 border-pink-500 text-white shadow-md shadow-pink-500/20', advance: 'bg-pink-50 dark:bg-pink-500/20 border-pink-500 text-pink-800 dark:text-pink-300 border-[2px] border-solid font-bold', dashed: 'bg-pink-50 dark:bg-transparent border-pink-400 dark:border-pink-500/50 text-pink-700 dark:text-pink-400 border-2 border-dashed' },
-  slate: { bg: 'bg-slate-500', solid: 'bg-slate-600 border-slate-600 text-white shadow-md shadow-slate-500/20', advance: 'bg-slate-50 dark:bg-slate-500/20 border-slate-500 text-slate-800 dark:text-slate-300 border-[2px] border-solid font-bold', dashed: 'bg-slate-50 dark:bg-transparent border-slate-400 dark:border-slate-500/50 text-slate-700 dark:text-slate-400 border-2 border-dashed' },
-};
-const availableColors = Object.keys(propColors);
+// STAŁE I LOGIKA BIZNESOWA — wydzielone do osobnych modułów
+import { 
+  propColors, availableColors, DEFAULT_PROPERTIES, DEFAULT_SOURCES, 
+  DEFAULT_CATEGORIES, DEFAULT_TEMPLATES, defaultTaxSettings, monthNames, ITEMS_PER_PAGE 
+} from './utils/constants';
+import { calculateTaxes } from './utils/taxCalculator';
+import CalendarView from './components/CalendarView';
+import PaywallScreen from './components/PaywallScreen';
+import DeleteConfirmModal from './components/modals/DeleteConfirmModal';
+import StatCard from './components/StatCard';
 
+// --- WSPÓLNE HELPERY ---
 const getIconComponent = (name, className) => {
   switch(name) {
     case 'Mail': return <Mail className={className} />;
@@ -40,41 +40,17 @@ const getIconComponent = (name, className) => {
   }
 };
 
-// --- DOMYŚLNE WARTOŚCI STARTOWE (DLA NOWYCH UŻYTKOWNIKÓW) ---
-const DEFAULT_PROPERTIES = [
-  { name: 'Domek nad Jeziorem', color: 'blue' },
-  { name: 'Apartament Centrum', color: 'emerald' },
-  { name: 'Domek w Górach', color: 'amber' }
-];
-const DEFAULT_SOURCES = ['Booking.com', 'Airbnb', 'Facebook', 'Strona www', 'Z polecenia', 'Inne'];
-const DEFAULT_CATEGORIES = ['Prąd', 'Woda', 'Sprzątanie', 'Środki czystości', 'Naprawy', 'Gaz', 'Internet', 'Inne'];
-const DEFAULT_TEMPLATES = [
-  { id: 'directions', text: 'Wyślij wskazówki dojazdu', shortName: 'Dojazd', daysBefore: 3, icon: 'Mail' },
-  { id: 'keycode', text: 'Wyślij kod do drzwi', shortName: 'Kod', daysBefore: 1, icon: 'Key' },
-  { id: 'cleaning', text: 'Zleć sprzątanie', shortName: 'Sprzątanie', daysBefore: 0, icon: 'CheckSquare' }
-];
-const defaultTaxSettings = { 
-  taxForm: 'lump_sum', 
-  autoThreshold: true, 
-  rate: 8.5, 
-  isVatPayer: false,
-  zusHealth: 0,
-  zusSocial: 0,
-  taxFreeAmount: 30000,
-  includeZusInCosts: true
-};
-
 // --- GŁÓWNA APLIKACJA ---
 export default function RentalManager() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [rentals, setRentals] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const { rentals, settings, profile, loading } = useFirebaseData(user, selectedYear);
   
   // NOWE: STANY SUBSKRYPCJI
-  const [accountStatus, setAccountStatus] = useState('active'); // active, trialing
-  const [trialEndsAt, setTrialEndsAt] = useState(null);
-  const [scheduledDeletionAt, setScheduledDeletionAt] = useState(null);
+  const accountStatus = profile.accountStatus;
+  const trialEndsAt = profile.trialEndsAt;
+  const scheduledDeletionAt = profile.scheduledDeletionAt;
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
 
@@ -85,7 +61,6 @@ export default function RentalManager() {
   const [showDailyReportModal, setShowDailyReportModal] = useState(false);
   const [settingsTab, setSettingsTab] = useState('sync'); 
   const [itemToDelete, setItemToDelete] = useState(null); 
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [searchQuery, setSearchQuery] = useState(''); 
   const [isSyncing, setIsSyncing] = useState(false); 
 
@@ -99,26 +74,26 @@ export default function RentalManager() {
 
   // Stany Edycji i Ustawień z domyślnymi wartościami
   const [editingId, setEditingId] = useState(null);
-  const [templates, setTemplates] = useState(DEFAULT_TEMPLATES);
+  const templates = settings.templates;
   const [editingTemplates, setEditingTemplates] = useState([]);
   
-  const [properties, setProperties] = useState(DEFAULT_PROPERTIES);
+  const properties = settings.properties;
   const [editingProperties, setEditingProperties] = useState([]);
   const [newPropertyName, setNewPropertyName] = useState('');
   const [newPropertyColor, setNewPropertyColor] = useState('blue');
   
-  const [sources, setSources] = useState(DEFAULT_SOURCES);
+  const sources = settings.sources;
   const [editingSources, setEditingSources] = useState([]);
   const [newSourceName, setNewSourceName] = useState('');
   
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const categories = settings.categories;
   const [editingCategories, setEditingCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   
-  const [syncLinks, setSyncLinks] = useState({});
+  const syncLinks = settings.syncLinks;
   const [editingSyncLinks, setEditingSyncLinks] = useState({});
 
-  const [taxSettings, setTaxSettings] = useState(defaultTaxSettings);
+  const taxSettings = settings.taxSettings;
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
 
   // --- NOWY SYSTEM NAWIGACJI ---
@@ -129,7 +104,6 @@ export default function RentalManager() {
   const [bookingSortOrder, setBookingSortOrder] = useState('upcoming'); 
   const [utilitySortOrder, setUtilitySortOrder] = useState('desc'); 
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 15;
 
   const changeTab = (tab) => { setMainTab(tab); setCurrentPage(1); };
   const changeBookingFilter = (filter) => { setBookingFilter(filter); setCurrentPage(1); };
@@ -183,73 +157,7 @@ export default function RentalManager() {
     return () => unsubscribe();
   }, [navigate]);
 
-  useEffect(() => {
-    if (!user) return;
-    
-    // NASŁUCHIWANIE STATUSU SUBSKRYPCJI
-    const userProfileRef = doc(db, 'users', user.uid);
-    const unsubProfile = onSnapshot(userProfileRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setAccountStatus(data.status || 'trialing'); // status podawany przez Stripe lub tworzony przy rejestracji
-        if (data.trialEndsAt) {
-          // Obsługa obu formatów: Firestore Timestamp (nowe konta) i ISO string (stare konta)
-          const endDate = data.trialEndsAt.toDate ? data.trialEndsAt.toDate() : new Date(data.trialEndsAt);
-          setTrialEndsAt(endDate);
-        }
-        if (data.scheduledDeletionAt) {
-          const deleteDate = data.scheduledDeletionAt.toDate ? data.scheduledDeletionAt.toDate() : new Date(data.scheduledDeletionAt);
-          setScheduledDeletionAt(deleteDate);
-        } else {
-          setScheduledDeletionAt(null);
-        }
-      }
-    });
 
-    // Subskrypcje Firebase - Tabele
-    const rentalsRef = collection(db, 'users', user.uid, 'rentals');
-    const unsubRentals = onSnapshot(rentalsRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), property: typeof doc.data().property === 'object' ? doc.data().property.name : doc.data().property }));
-      setRentals(data); setLoading(false);
-    }, (error) => {
-      // Gdy subskrypcja wygasła, reguły Firestore odrzucą odczyt — obsługujemy to łagodnie
-      console.warn('Brak dostępu do rezerwacji (subskrypcja nieaktywna):', error.code);
-      setRentals([]);
-      setLoading(false);
-    });
-
-    const settingsRef = collection(db, 'users', user.uid, 'settings');
-    const unsubSettings = onSnapshot(settingsRef, (snapshot) => {
-      if (!snapshot.empty) {
-        let hasProps = false, hasSources = false, hasCats = false, hasReminders = false, hasTax = false;
-        snapshot.docs.forEach(docSnap => {
-          const id = docSnap.id;
-          const data = docSnap.data();
-          if (id === 'reminders' && data.items) { setTemplates(data.items); hasReminders = true; }
-          if (id === 'properties' && data.items) {
-             const formatted = data.items.map((p, i) => typeof p === 'string' ? { name: p, color: availableColors[i % availableColors.length] } : p);
-             setProperties(formatted);
-             hasProps = true;
-          }
-          if (id === 'sources' && data.items) { setSources(data.items); hasSources = true; }
-          if (id === 'categories' && data.items) { setCategories(data.items); hasCats = true; }
-          if (id === 'tax') { setTaxSettings({ ...defaultTaxSettings, ...data }); hasTax = true; }
-          if (id === 'syncLinks') setSyncLinks(data.links || {});
-        });
-        
-        if (!hasProps) setProperties(DEFAULT_PROPERTIES);
-        if (!hasSources) setSources(DEFAULT_SOURCES);
-        if (!hasCats) setCategories(DEFAULT_CATEGORIES);
-        if (!hasReminders) setTemplates(DEFAULT_TEMPLATES);
-        if (!hasTax) setTaxSettings(defaultTaxSettings);
-      }
-    }, (error) => {
-      // Gdy subskrypcja wygasła, reguły Firestore odrzucą odczyt ustawień — ignorujemy łagodnie
-      console.warn('Brak dostępu do ustawień (subskrypcja nieaktywna):', error.code);
-    });
-
-    return () => { unsubRentals(); unsubSettings(); unsubProfile(); };
-  }, [user]);
 
 
 
@@ -308,14 +216,14 @@ export default function RentalManager() {
 
   // --- OBLICZANIE DANYCH ---
   const availableYears = useMemo(() => {
-    const years = new Set(rentals.map(r => {
-      if (!r.date) return null;
-      const d = new Date(r.date);
-      return isNaN(d.getTime()) ? null : d.getFullYear().toString();
-    }).filter(Boolean));
-    years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a,b) => b - a);
-  }, [rentals]);
+    const currentYear = new Date().getFullYear();
+    const years = new Set();
+    for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+      years.add(i.toString());
+    }
+    years.add(selectedYear); // Zapewnia, że wybrany rok zawsze jest dostępny
+    return Array.from(years).sort((a, b) => b - a);
+  }, [selectedYear]);
 
   const handleYearChange = (newYearStr) => {
     setSelectedYear(newYearStr);
@@ -465,198 +373,42 @@ export default function RentalManager() {
     return yearlyStats[selectedYear] || { total: { income: 0, costs: 0, tax: 0, profit: 0 }, months: Array.from({length: 12}, () => ({ income: 0, costs: 0, tax: 0, profit: 0, active: false })) };
   }, [yearlyStats, selectedYear]);
 
-  const monthNames = useMemo(() => ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'], []);
-
-  // --- LOGIKA SYNCHRONIZACJI ICAL ---
+  // --- LOGIKA SYNCHRONIZACJI ICAL (przez bezpieczną Cloud Function) ---
   const handleSyncCalendars = async () => {
     if (!user) return;
     
-    // Zabezpieczenie przed brakiem linków
     if (Object.keys(syncLinks).length === 0) {
       alert('Najpierw dodaj linki iCal w Ustawieniach (zakładka Integracje), aby móc zsynchronizować kalendarze.');
       return;
     }
 
     setIsSyncing(true);
-    let newBookingsCount = 0;
-
-    for (const propName of Object.keys(syncLinks)) {
-      const links = syncLinks[propName];
-      if (!links) continue;
-
-      const sourcesToSync = [];
-      if (links.booking) sourcesToSync.push({ name: 'Booking', url: links.booking });
-      if (links.airbnb) sourcesToSync.push({ name: 'Airbnb', url: links.airbnb });
-
-      for (const source of sourcesToSync) {
-        try {
-          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url)}`;
-          const response = await fetch(proxyUrl);
-          const data = await response.text();
-
-          const events = [];
-          const lines = data.split(/\r\n|\n|\r/);
-          let currentEvent = null;
-
-          lines.forEach(line => {
-            if (line.startsWith('BEGIN:VEVENT')) currentEvent = {};
-            else if (line.startsWith('END:VEVENT') && currentEvent) {
-              events.push(currentEvent);
-              currentEvent = null;
-            }
-            else if (currentEvent) {
-              if (line.startsWith('DTSTART')) {
-                  const match = line.match(/DTSTART(?:;[^:]+)?:(.*)/);
-                  if(match) currentEvent.start = match[1].substring(0,8);
-              }
-              if (line.startsWith('DTEND')) {
-                  const match = line.match(/DTEND(?:;[^:]+)?:(.*)/);
-                  if(match) currentEvent.end = match[1].substring(0,8);
-              }
-              if (line.startsWith('SUMMARY')) {
-                  const match = line.match(/SUMMARY(?:;[^:]+)?:(.*)/);
-                  if(match) currentEvent.summary = match[1];
-              }
-            }
-          });
-
-          for (const e of events) {
-            if (!e.start || !e.end) continue;
-            const startDate = `${e.start.substring(0,4)}-${e.start.substring(4,6)}-${e.start.substring(6,8)}`;
-            const endDate = `${e.end.substring(0,4)}-${e.end.substring(4,6)}-${e.end.substring(6,8)}`;
-            const syncId = `sync_${source.name}_${propName}_${startDate}_${endDate}`;
-            
-            const exists = rentals.some(r => r.syncId === syncId || (r.property === propName && r.date === startDate && r.source === source.name));
-
-            if (!exists) {
-              const newId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
-              const isBlocked = e.summary?.toLowerCase().includes('blocked') || e.summary?.toLowerCase().includes('niedostępne');
-              await setDoc(doc(db, 'users', user.uid, 'rentals', newId), {
-                type: 'booking', property: propName, source: source.name,
-                guest: isBlocked ? `Blokada (${source.name})` : (e.summary || `Gość ${source.name}`),
-                date: startDate, endDate: endDate, income: 0, advancePayment: 0, isAdvancePaid: false,
-                commission: 0, tax: 0, vat: 0, utilities: 0, isPaid: false, completedTasks: {}, syncId: syncId, guestNote: ''
-              });
-              newBookingsCount++;
-            }
-          }
-        } catch (err) { console.error(`Błąd synchronizacji dla ${source.name}:`, err); }
+    try {
+      if (auth.currentUser) {
+        await auth.currentUser.getIdToken(true);
       }
+
+      const syncICalCalendars = httpsCallable(functions, 'syncICalCalendars');
+      const result = await syncICalCalendars({ syncLinks });
+
+      const count = result.data?.newBookingsCount || 0;
+      if (count > 0) alert(`Synchronizacja zakończona! Dodano ${count} nowych rezerwacji.`);
+      else alert('Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.');
+    } catch (err) {
+      console.error('Błąd synchronizacji kalendarzy:', err);
+      let message = 'Wystąpił błąd podczas synchronizacji kalendarzy.';
+      if (err.code === 'functions/unauthenticated') {
+        message = 'Sesja wygasła. Wyloguj się i zaloguj ponownie.';
+      } else if (err.message?.includes('app-check')) {
+        message = 'Weryfikacja bezpieczeństwa nie powiodła się. Wyłącz blokady reklam i spróbuj ponownie.';
+      }
+      alert(message);
+    } finally {
+      setIsSyncing(false);
     }
-    setIsSyncing(false);
-    if(newBookingsCount > 0) alert(`Synchronizacja zakończona! Dodano ${newBookingsCount} nowych rezerwacji.`);
-    else alert(`Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.`);
   };
 
   // --- AKCJE FIREBASE I FUNKCJE ---
-  
-  // ROZBUDOWANY KALKULATOR PODATKÓW (Z ZUS i kwotą wolną)
-  const calculateTaxes = (rentalObj, allRentals, settings, currentEditingId) => {
-    const inc = Number(rentalObj.income) || 0;
-    const comm = Number(rentalObj.commission) || 0;
-    
-    let vatAmt = 0;
-    if (settings.isVatPayer) {
-      vatAmt = inc - (inc / 1.08); 
-    }
-    const netInc = inc - vatAmt; 
-    
-    let taxBase = netInc;
-    if (settings.taxForm === 'general') {
-      taxBase = Math.max(0, netInc - comm);
-    }
-
-    let taxAmt = 0;
-    if (settings.taxForm === 'lump_sum' && settings.autoThreshold) {
-      let ytdNetInc = 0;
-      const currentYear = new Date(rentalObj.date || new Date()).getFullYear();
-      const currentDate = new Date(rentalObj.date || new Date()).getTime();
-      const currIdNum = Number(currentEditingId || Date.now());
-
-      allRentals.forEach(r => {
-        if (r.type === 'booking' && r.id !== currentEditingId) {
-          if (!r.date) return;
-          const rDateObj = new Date(r.date);
-          if (rDateObj.getFullYear() === currentYear) {
-            const rTime = rDateObj.getTime();
-            if (rTime < currentDate || (rTime === currentDate && Number(r.id) < currIdNum)) {
-               const rInc = Number(r.income) || 0;
-               const rVat = settings.isVatPayer ? (rInc - (rInc / 1.08)) : 0;
-               ytdNetInc += (rInc - rVat);
-            }
-          }
-        }
-      });
-      
-      if (ytdNetInc >= 100000) {
-        taxAmt = taxBase * 0.125; 
-      } else if (ytdNetInc + netInc <= 100000) {
-        taxAmt = taxBase * 0.085; 
-      } else {
-        const belowThreshold = 100000 - ytdNetInc;
-        const aboveThreshold = netInc - belowThreshold;
-        taxAmt = (belowThreshold * 0.085) + (aboveThreshold * 0.125);
-      }
-    } else if (settings.taxForm === 'general') {
-        // Skala podatkowa z kwotą wolną
-        let ytdNetIncome = 0;
-        let ytdCosts = 0;
-        const currentYear = new Date(rentalObj.date || new Date()).getFullYear();
-        const currentDate = new Date(rentalObj.date || new Date()).getTime();
-        const currIdNum = Number(currentEditingId || Date.now());
-
-        allRentals.forEach(r => {
-          if (r.id !== currentEditingId && r.date) {
-            const rDateObj = new Date(r.date);
-            if (rDateObj.getFullYear() === currentYear) {
-              const rTime = rDateObj.getTime();
-              if (rTime < currentDate || (rTime === currentDate && Number(r.id) < currIdNum)) {
-                 if (r.type === 'booking') {
-                     const rInc = Number(r.income) || 0;
-                     const rVat = settings.isVatPayer ? (rInc - (rInc / 1.08)) : 0;
-                     ytdNetIncome += (rInc - rVat);
-                     ytdCosts += (Number(r.commission) || 0);
-                 } else if (r.type === 'utility') {
-                     ytdCosts += (Number(r.utilities) || 0);
-                 }
-              }
-            }
-          }
-        });
-        
-        let yearlyZusDeduction = 0;
-        if (settings.includeZusInCosts) {
-           const monthNum = new Date(rentalObj.date || new Date()).getMonth() + 1;
-           yearlyZusDeduction = (Number(settings.zusSocial) || 0) * monthNum;
-        }
-
-        const currentCumulativeProfit = Math.max(0, ytdNetIncome - ytdCosts - yearlyZusDeduction);
-        const newCumulativeProfit = Math.max(0, ytdNetIncome + netInc - ytdCosts - comm - yearlyZusDeduction);
-        
-        const taxFree = Number(settings.taxFreeAmount) || 30000;
-        let oldTax = 0; let newTax = 0;
-
-        if (currentCumulativeProfit > taxFree) {
-            if (currentCumulativeProfit <= 120000) oldTax = (currentCumulativeProfit - taxFree) * 0.12;
-            else oldTax = ((120000 - taxFree) * 0.12) + ((currentCumulativeProfit - 120000) * 0.32);
-        }
-        if (newCumulativeProfit > taxFree) {
-            if (newCumulativeProfit <= 120000) newTax = (newCumulativeProfit - taxFree) * 0.12;
-            else newTax = ((120000 - taxFree) * 0.12) + ((newCumulativeProfit - 120000) * 0.32);
-        }
-        taxAmt = Math.max(0, newTax - oldTax);
-
-    } else {
-      // Stała stawka (np. 19% liniowy)
-      taxAmt = taxBase * (Number(settings.rate) / 100);
-    }
-    
-    return {
-      vat: vatAmt > 0 ? vatAmt.toFixed(2) : '',
-      tax: taxAmt > 0 ? taxAmt.toFixed(2) : ''
-    };
-  };
-
   const handleCloseModal = () => { setShowAddModal(false); setEditingId(null); setNewRental(getDefaultRentalState()); };
   
   const openEditModal = (r) => { 
@@ -846,167 +598,25 @@ export default function RentalManager() {
     }]); 
   };
 
-  // --- RENDEROWANIE KALENDARZA SIATKOWEGO ---
-  const calendarView = useMemo(() => {
-    const year = calendarDate.getFullYear(); const month = calendarDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDay = new Date(year, month, 1).getDay();
-    const blanks = Array.from({ length: firstDay === 0 ? 6 : firstDay - 1 });
-    
-    return (
-      <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-          <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 capitalize tracking-wide">{calendarDate.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}</h3>
-          <div className="flex gap-2">
-            <button onClick={() => changeMonth(-1)} className="p-2 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-white dark:hover:bg-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-sm"><ChevronLeft className="w-5 h-5" /></button>
-            <button onClick={() => setCalendarDate(new Date())} className="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold hover:bg-white dark:hover:bg-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-sm">Dzisiaj</button>
-            <button onClick={() => changeMonth(1)} className="p-2 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-white dark:hover:bg-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-sm"><ChevronRight className="w-5 h-5" /></button>
-          </div>
-        </div>
-        <div className="p-5 overflow-x-auto">
-          <div className="grid grid-cols-7 min-w-[700px] border-t border-l border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
-            {['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'].map(d => <div key={d} className="bg-slate-50/80 dark:bg-slate-800/80 p-3 text-center text-[11px] font-extrabold text-slate-500 dark:text-slate-400 border-r border-b border-slate-100 dark:border-slate-700 uppercase tracking-widest">{d}</div>)}
-            {blanks.map((_, i) => <div key={`b-${i}`} className="bg-slate-50/30 dark:bg-slate-900/30 border-r border-b border-slate-100 dark:border-slate-700 min-h-[140px]"></div>)}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const dayStart = new Date(year, month, i + 1).setHours(0,0,0,0);
-              const isToday = new Date().setHours(0,0,0,0) === dayStart;
-              const dayRentals = rentals.filter(r => r.type === 'booking' && r.date && r.endDate && dayStart >= new Date(r.date).setHours(0,0,0,0) && dayStart <= new Date(r.endDate).setHours(0,0,0,0));
-              
-              return (
-                <div key={i} className={`bg-white dark:bg-slate-800 min-h-[140px] p-2.5 flex flex-col gap-1.5 border-r border-b border-slate-100 dark:border-slate-700 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-700/50 ${isToday ? 'bg-blue-50/40 dark:bg-blue-900/20' : ''}`}>
-                  <span className={`text-xs font-extrabold self-end mb-1 ${isToday ? 'bg-blue-600 dark:bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md shadow-blue-500/30' : 'text-slate-400 dark:text-slate-500'}`}>{i + 1}</span>
-                  <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
-                    {dayRentals.map(r => {
-                      const col = propColors[properties.find(p => p.name === r.property)?.color || 'slate'];
-                      const isStart = dayStart === new Date(r.date).setHours(0,0,0,0);
-                      const isEnd = dayStart === new Date(r.endDate).setHours(0,0,0,0);
-                      const timeLabel = (isStart && isEnd) ? '(1 d.)' : isStart ? '↘ Przyj.' : isEnd ? '↖ Wyj.' : '';
-                      return (
-                        <div key={r.id} onClick={() => openEditModal(r)} className={`text-[10px] px-2 py-1.5 rounded-lg cursor-pointer leading-tight transition-all hover:opacity-80 hover:scale-[1.02] ${r.isPaid ? col.solid : r.isAdvancePaid ? col.advance : col.dashed}`}>
-                          <span className="font-extrabold truncate block">{r.property}</span>
-                          <div className="flex justify-between items-center gap-1 mt-1">
-                            <span className="truncate font-medium opacity-90">{r.guest}</span>
-                            {timeLabel && <span className="bg-black/15 dark:bg-black/30 px-1.5 py-0.5 rounded-md font-bold">{timeLabel}</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  }, [calendarDate, rentals, properties]);
+  // --- RENDEROWANIE KALENDARZA (wydzielony komponent) ---
+
 
   // --- EKRAN ŁADOWANIA ---
   if (loading) return <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center"><Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-500 animate-spin" /></div>;
 
   // --- EKRAN BLOKADY (PAYWALL) ---
   if (isAccessLocked()) {
-      const getDaysRemaining = (targetDate) => {
-          if (!targetDate) return 0;
-          const diffTime = targetDate.getTime() - new Date().getTime();
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return diffDays > 0 ? diffDays : 0;
-      };
-
-      const daysRemaining = scheduledDeletionAt ? getDaysRemaining(scheduledDeletionAt) : 0;
-
-      let paywallTitle = "Koniec okresu próbnego";
-      let paywallDesc = "Twój darmowy 14-dniowy dostęp do WynajemPro dobiegł końca. Odblokuj pełen panel zarządzania rezerwacjami, integracje z kalendarzami i automatyczne raporty księgowe.";
-      let lockIcon = <Lock className="w-10 h-10" />;
-      let showBanner = false;
-
-      if (accountStatus === 'canceled') {
-          paywallTitle = "Subskrypcja wygasła";
-          paywallDesc = "Dostęp do panelu WynajemPro został zablokowany, ponieważ Twoja subskrypcja wygasła. Twoje dane biznesowe zostały zamrożone i są bezpieczne.";
-          lockIcon = <Clock className="w-10 h-10" />;
-          showBanner = true;
-      } else if (accountStatus === 'past_due') {
-          paywallTitle = "Zaległa płatność";
-          paywallDesc = "Nie mogliśmy automatycznie odnowić Twojej subskrypcji. Prawdopodobnie wystąpił problem z Twoją kartą płatniczą. Zaktualizuj dane płatności w bezpiecznym panelu Stripe, aby natychmiast przywrócić dostęp.";
-          lockIcon = <AlertTriangle className="w-10 h-10 text-amber-500" />;
-      }
-
-      return (
-          <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center p-4 font-sans text-slate-900 dark:text-slate-100 relative overflow-hidden">
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/10 rounded-full filter blur-[100px] pointer-events-none"></div>
-            
-            <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 md:p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 text-center border border-slate-100 dark:border-slate-700 relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-blue-500/30">
-                    {lockIcon}
-                </div>
-                
-                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">{paywallTitle}</h2>
-                <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 leading-relaxed">
-                    {paywallDesc}
-                </p>
-
-                {showBanner && scheduledDeletionAt && (
-                    <div className="mb-8 p-5 rounded-3xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex flex-col items-center gap-3 text-amber-800 dark:text-amber-300">
-                        <div className="flex items-center gap-2 font-bold text-sm">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
-                            <span>Planowana kasacja danych</span>
-                        </div>
-                        <p className="text-xs text-center leading-relaxed">
-                            Wszystkie Twoje rezerwacje, ustawienia i klienci zostaną trwale i bezpowrotnie usunięci dnia <strong>{scheduledDeletionAt.toLocaleDateString('pl-PL')}</strong>.
-                        </p>
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-xs font-bold mt-1 text-amber-900 dark:text-amber-200">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>Pozostało: {daysRemaining} {daysRemaining === 1 ? 'dzień' : 'dni'}</span>
-                        </div>
-                    </div>
-                )}
-
-                {accountStatus === 'past_due' && (
-                    <div className="mb-8 p-5 rounded-3xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 flex flex-col items-center gap-2 text-rose-800 dark:text-rose-300">
-                        <div className="flex items-center gap-2 font-bold text-sm">
-                            <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
-                            <span>Zaległość w płatności</span>
-                        </div>
-                        <p className="text-xs text-center leading-relaxed">
-                            Twoja karta odrzuciła płatność za kolejny cykl rozliczeniowy. Zaktualizuj kartę w panelu Stripe, aby odzyskać pełen dostęp.
-                        </p>
-                    </div>
-                )}
-                
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 mb-8">
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Plan Gospodarza</p>
-                    <p className="text-4xl font-black text-slate-900 dark:text-white">29.99 <span className="text-lg text-slate-500 dark:text-slate-400 font-bold">zł / msc</span></p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                    <button 
-                        onClick={handleSubscribe} 
-                        disabled={isCheckoutLoading}
-                        className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {isCheckoutLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Aktywuj subskrypcję i odzyskaj dane'}
-                    </button>
-
-                    {(accountStatus === 'canceled' || accountStatus === 'past_due') && (
-                        <button 
-                            onClick={handleManageSubscription} 
-                            disabled={isBillingPortalLoading}
-                            className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-2xl transition-all"
-                        >
-                            {isBillingPortalLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Otwórz panel zarządzania</>}
-                        </button>
-                    )}
-                </div>
-                
-                <button 
-                    onClick={handleLogout} 
-                    className="mt-6 text-sm font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                >
-                    Wyloguj się
-                </button>
-            </div>
-          </div>
-      );
+    return (
+      <PaywallScreen
+        accountStatus={accountStatus}
+        scheduledDeletionAt={scheduledDeletionAt}
+        onSubscribe={handleSubscribe}
+        isCheckoutLoading={isCheckoutLoading}
+        onManageSubscription={handleManageSubscription}
+        isBillingPortalLoading={isBillingPortalLoading}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   // --- ZWYKŁY RENDER APLIKACJI (JEŚLI ODBLOKOWANE) ---
@@ -1277,7 +887,14 @@ export default function RentalManager() {
               <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === currentTotalPages} className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-sm text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors shadow-sm">Następna</button>
             </div>
           </div>
-        ) : calendarView}
+        ) : <CalendarView 
+          calendarDate={calendarDate} 
+          rentals={rentals} 
+          properties={properties} 
+          onChangeMonth={changeMonth} 
+          onSetToday={() => setCalendarDate(new Date())} 
+          onEditRental={openEditModal} 
+        />}
 
         {/* --- MODALE --- */}
         
@@ -1763,44 +1380,12 @@ export default function RentalManager() {
 
         {/* MODAL: POTWIERDZENIE USUNIĘCIA */}
         {itemToDelete && (
-          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center border border-white/50 dark:border-slate-700">
-              <div className="w-20 h-20 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"><Trash2 className="w-10 h-10" /></div>
-              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Usuwanie wpisu</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 leading-relaxed">Czy na pewno chcesz bezpowrotnie usunąć ten wpis z bazy danych? Tej akcji nie da się cofnąć.</p>
-              <div className="flex gap-4">
-                <button onClick={() => setItemToDelete(null)} className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Anuluj</button>
-                <button onClick={confirmDelete} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-700 transition-colors">Tak, usuń</button>
-              </div>
-            </div>
-          </div>
+          <DeleteConfirmModal 
+            onCancel={() => setItemToDelete(null)} 
+            onConfirm={confirmDelete} 
+          />
         )}
 
-      </div>
-    </div>
-  );
-}
-
-// --- POMOCNICZA KARTA STATYSTYK ---
-function StatCard({ icon, label, value, color, sub, onClick }) {
-  const styles = {
-    green: { bg: "bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20", iconBg: "bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-emerald-500/30", text: "text-emerald-900 dark:text-emerald-100" },
-    red: { bg: "bg-rose-50/50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20", iconBg: "bg-gradient-to-br from-rose-400 to-rose-500 shadow-rose-500/30", text: "text-rose-900 dark:text-rose-100" },
-    purple: { bg: "bg-violet-50/50 dark:bg-violet-500/10 border-violet-100 dark:border-violet-500/20", iconBg: "bg-gradient-to-br from-violet-400 to-violet-500 shadow-violet-500/30", text: "text-violet-900 dark:text-violet-100" },
-    blue: { bg: "bg-blue-50/50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20", iconBg: "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30", text: "text-blue-900 dark:text-blue-100" },
-  };
-  const style = styles[color];
-  return (
-    <div onClick={onClick} className={`p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-pointer border bg-white dark:bg-slate-800 border-slate-100/60 dark:border-slate-700 group`}>
-      <div className="flex items-center gap-5">
-        <div className={`p-4 rounded-2xl text-white shadow-lg ${style.iconBg} group-hover:scale-110 transition-transform duration-300`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold mb-1 uppercase tracking-widest">{label}</p>
-          <p className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">{Number(value).toLocaleString('pl-PL')} <span className="text-lg text-slate-400 dark:text-slate-500 font-bold">zł</span></p>
-          {sub && <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-bold">{sub}</p>}
-        </div>
       </div>
     </div>
   );

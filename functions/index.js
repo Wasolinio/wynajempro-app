@@ -3,7 +3,9 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
 // Inicjalizacja Firebase Admin
 const app = initializeApp();
@@ -54,7 +56,7 @@ async function cleanupUserData(uid) {
     stripeSubscriptionId: FieldValue.delete(),
     paidAt: FieldValue.delete(),
     lastPaymentAt: FieldValue.delete(),
-    dataCleanedAt: new Date().toISOString(),
+    dataCleanedAt: Timestamp.now(),
   });
 
   return { rentalsDeleted, settingsDeleted, checkoutDeleted };
@@ -192,9 +194,10 @@ exports.stripeWebhook = onRequest(
               status: "active",
               stripeCustomerId: session.customer,
               stripeSubscriptionId: session.subscription,
-              paidAt: new Date().toISOString(),
+              paidAt: Timestamp.now(),
               scheduledDeletionAt: FieldValue.delete(),
             });
+            await getAuth().setCustomUserClaims(uid, { stripeStatus: 'active' });
           } else {
             console.warn("⚠️ checkout.session.completed bez firebaseUID w metadata");
           }
@@ -221,11 +224,12 @@ exports.stripeWebhook = onRequest(
               console.log(`✅ Odnowienie subskrypcji dla: ${userDoc.id}`);
               await userDoc.ref.update({
                 status: "active",
-                lastPaymentAt: new Date().toISOString(),
+                lastPaymentAt: Timestamp.now(),
                 // Na wszelki wypadek (obsługa wyścigu), ustawiamy też subscription id jeśli to pierwsza płatność
                 stripeSubscriptionId: invoice.subscription,
                 scheduledDeletionAt: FieldValue.delete(),
               });
+              await getAuth().setCustomUserClaims(userDoc.id, { stripeStatus: 'active' });
             }
           }
           break;
@@ -251,6 +255,7 @@ exports.stripeWebhook = onRequest(
               await userDoc.ref.update({
                 status: "past_due",
               });
+              await getAuth().setCustomUserClaims(userDoc.id, { stripeStatus: 'past_due' });
             }
           }
           break;
@@ -271,9 +276,10 @@ exports.stripeWebhook = onRequest(
             console.log(`❌ Subskrypcja anulowana dla użytkownika: ${uid}. Planowane usunięcie danych: ${deletionDate.toISOString()}`);
             await db.collection("users").doc(uid).update({
               status: "canceled",
-              canceledAt: new Date().toISOString(),
-              scheduledDeletionAt: deletionDate,
+              canceledAt: Timestamp.now(),
+              scheduledDeletionAt: Timestamp.fromDate(deletionDate),
             });
+            await getAuth().setCustomUserClaims(uid, { stripeStatus: 'canceled' });
           } else {
             // Fallback: szukaj po stripeSubscriptionId
             const snapshot = await db
@@ -288,9 +294,10 @@ exports.stripeWebhook = onRequest(
               console.log(`❌ Subskrypcja anulowana dla: ${resolvedUid}. Planowane usunięcie danych: ${deletionDate.toISOString()}`);
               await userDoc.ref.update({
                 status: "canceled",
-                canceledAt: new Date().toISOString(),
-                scheduledDeletionAt: deletionDate,
+                canceledAt: Timestamp.now(),
+                scheduledDeletionAt: Timestamp.fromDate(deletionDate),
               });
+              await getAuth().setCustomUserClaims(resolvedUid, { stripeStatus: 'canceled' });
             }
           }
           break;
@@ -303,10 +310,32 @@ exports.stripeWebhook = onRequest(
       res.status(200).json({ received: true });
     } catch (error) {
       console.error("❌ Błąd obsługi webhooka:", error);
-      res.status(500).json({ error: "Wewnętrzny błąd serwera" });
+      res.status(500).json({ error: "Błąd serwera" });
     }
   }
 );
+
+// =============================================================================
+// 5. TRIGGER: USTAWIANIE CUSTOM CLAIMS PRZY REJESTRACJI (TRIAL)
+// =============================================================================
+exports.onUserDocumentCreated = onDocumentCreated("users/{userId}", async (event) => {
+  const snapshot = event.data;
+  if (!snapshot) return;
+  const data = snapshot.data();
+  const uid = event.params.userId;
+  
+  if (data.status === 'trialing' && data.trialEndsAt) {
+    try {
+      await getAuth().setCustomUserClaims(uid, { 
+        stripeStatus: 'trialing',
+        trialEndsAt: data.trialEndsAt.toMillis()
+      });
+      console.log(`✅ Custom claim (trialing) ustawiony dla: ${uid}`);
+    } catch (error) {
+      console.error("❌ Błąd ustawiania custom claim:", error);
+    }
+  }
+});
 
 // =============================================================================
 // 3. PANEL ZARZĄDZANIA SUBSKRYPCJĄ (Stripe Customer Portal)
@@ -416,3 +445,189 @@ exports.deleteExpiredAccountsData = onSchedule(
   }
 );
 
+// =============================================================================
+// 5. SYNCHRONIZACJA KALENDARZY iCAL (Booking, Airbnb itp.)
+// Pobiera pliki iCal z podanych linków, parsuje zdarzenia VEVENT,
+// sprawdza duplikaty po syncId i dodaje nowe rezerwacje do Firestore.
+// =============================================================================
+exports.syncICalCalendars = onCall(
+  { enforceAppCheck: true, maxInstances: 3 },
+  async (request) => {
+    // Sprawdzenie uwierzytelnienia
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Musisz być zalogowany, aby synchronizować kalendarze."
+      );
+    }
+
+    const uid = request.auth.uid;
+    const { syncLinks } = request.data;
+
+    // Walidacja danych wejściowych
+    if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Brak linków synchronizacji. Podaj obiekt syncLinks."
+      );
+    }
+
+    let newBookingsCount = 0;
+
+    try {
+      // Iteracja po nieruchomościach i ich linkach
+      for (const [propertyName, links] of Object.entries(syncLinks)) {
+        // Każda nieruchomość może mieć linki: booking, airbnb itp.
+        for (const [sourceName, url] of Object.entries(links)) {
+          if (!url || typeof url !== "string") continue;
+
+          // Pobieranie pliku iCal za pomocą wbudowanego fetch (Node 20+)
+          let icalText;
+          try {
+            const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+            if (!response.ok) {
+              console.warn(`⚠️ Nie udało się pobrać iCal dla ${propertyName}/${sourceName}: HTTP ${response.status}`);
+              continue;
+            }
+            icalText = await response.text();
+          } catch (fetchErr) {
+            console.warn(`⚠️ Błąd pobierania iCal dla ${propertyName}/${sourceName}:`, fetchErr.message);
+            continue;
+          }
+
+          // Parsowanie bloków VEVENT z pliku iCal
+          const events = parseICalEvents(icalText);
+
+          for (const event of events) {
+            // Formatowanie dat do YYYY-MM-DD
+            const startDate = formatICalDate(event.dtstart);
+            const endDate = formatICalDate(event.dtend);
+            if (!startDate || !endDate) continue;
+
+            // Normalizacja nazwy źródła (pierwsza litera wielka)
+            const normalizedSource = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
+
+            // Generowanie unikalnego identyfikatora synchronizacji
+            const syncId = `sync_${sourceName}_${propertyName}_${startDate}_${endDate}`;
+
+            // Sprawdzenie duplikatów — szukamy dokumentu z takim samym syncId
+            const duplicateSnapshot = await db
+              .collection("users")
+              .doc(uid)
+              .collection("rentals")
+              .where("syncId", "==", syncId)
+              .limit(1)
+              .get();
+
+            if (!duplicateSnapshot.empty) continue; // Już istnieje — pomijamy
+
+            // Ustalenie nazwy gościa na podstawie SUMMARY
+            const summary = (event.summary || "").trim();
+            let guest;
+            const lowerSummary = summary.toLowerCase();
+            if (lowerSummary.includes("blocked") || lowerSummary.includes("niedostępne")) {
+              guest = `Blokada (${normalizedSource})`;
+            } else {
+              guest = summary || `Gość ${normalizedSource}`;
+            }
+
+            // Tworzenie nowego dokumentu rezerwacji w Firestore
+            await db
+              .collection("users")
+              .doc(uid)
+              .collection("rentals")
+              .add({
+                type: "booking",
+                property: propertyName,
+                source: normalizedSource,
+                guest: guest,
+                date: startDate,
+                endDate: endDate,
+                income: 0,
+                advancePayment: 0,
+                isAdvancePaid: false,
+                commission: 0,
+                tax: 0,
+                vat: 0,
+                utilities: 0,
+                isPaid: false,
+                completedTasks: {},
+                guestNote: "",
+                syncId: syncId,
+              });
+
+            newBookingsCount++;
+          }
+        }
+      }
+
+      console.log(`✅ Synchronizacja iCal dla ${uid}: dodano ${newBookingsCount} nowych rezerwacji.`);
+      return { newBookingsCount };
+    } catch (error) {
+      console.error("❌ Błąd synchronizacji iCal:", error);
+      throw new HttpsError(
+        "internal",
+        "Wystąpił błąd podczas synchronizacji kalendarzy."
+      );
+    }
+  }
+);
+
+// =============================================================================
+// HELPER: Parsowanie zdarzeń VEVENT z tekstu iCal
+// Wyodrębnia DTSTART, DTEND, SUMMARY i UID z każdego bloku VEVENT.
+// =============================================================================
+function parseICalEvents(icalText) {
+  const events = [];
+  // Normalizacja łamania linii (unfold kontynuacji RFC 5545)
+  const normalized = icalText.replace(/\r\n[ \t]/g, "").replace(/\r/g, "");
+  const blocks = normalized.split("BEGIN:VEVENT");
+
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i].split("END:VEVENT")[0];
+    const event = {};
+
+    // Wyciąganie wartości z pól iCal (ignorowanie parametrów po średniku)
+    const lines = block.split("\n");
+    for (const line of lines) {
+      const colonIdx = line.indexOf(":");
+      if (colonIdx === -1) continue;
+
+      const key = line.substring(0, colonIdx).split(";")[0].trim().toUpperCase();
+      const value = line.substring(colonIdx + 1).trim();
+
+      switch (key) {
+        case "DTSTART":
+          event.dtstart = value;
+          break;
+        case "DTEND":
+          event.dtend = value;
+          break;
+        case "SUMMARY":
+          event.summary = value;
+          break;
+        case "UID":
+          event.uid = value;
+          break;
+      }
+    }
+
+    // Dodajemy tylko zdarzenia z datą rozpoczęcia
+    if (event.dtstart) {
+      events.push(event);
+    }
+  }
+
+  return events;
+}
+
+// =============================================================================
+// HELPER: Konwersja daty iCal (np. 20250615 lub 20250615T140000Z) na YYYY-MM-DD
+// =============================================================================
+function formatICalDate(dateStr) {
+  if (!dateStr || dateStr.length < 8) return null;
+  // Wyciągamy pierwsze 8 znaków (YYYYMMDD) niezależnie od formatu
+  const raw = dateStr.replace(/[^\d]/g, "").substring(0, 8);
+  if (raw.length < 8) return null;
+  return `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
+}

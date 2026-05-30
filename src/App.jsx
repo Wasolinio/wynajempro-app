@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPanel = lazy(() => import('./pages/LoginPanel'));
 const ManagerApp = lazy(() => import('./ManagerApp')); 
+import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 
 // Prosty loader podczas doczytywania paczek
 const Loader = () => (
@@ -55,9 +56,11 @@ export default function App() {
           <Route 
             path="/dashboard/*" 
             element={
-              <ProtectedRoute>
-                <ManagerApp />
-              </ProtectedRoute>
+              <GlobalErrorBoundary>
+                <ProtectedRoute>
+                  <ManagerApp />
+                </ProtectedRoute>
+              </GlobalErrorBoundary>
             } 
           />
           <Route path="*" element={<Navigate to="/" />} />
