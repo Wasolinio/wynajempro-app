@@ -40,8 +40,15 @@ export function GlobalErrorBoundary({ children }) {
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onReset={() => {
-        // Zresetowanie stanu aplikacji lub twarde odświeżenie strony po wywołaniu błędu
-        window.location.reload();
+        // Wymuszenie usunięcia cache PWA przed odświeżeniem strony, by uciec z pętli błędu
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach(registration => registration.unregister());
+            window.location.reload(true);
+          }).catch(() => window.location.reload(true));
+        } else {
+          window.location.reload(true);
+        }
       }}
     >
       {children}
