@@ -124,6 +124,9 @@ export default function GuideBuilder({ user, properties }) {
     
     setIsSaving(true);
     try {
+      const isNew = !guides.some(g => g.id === editingGuide.id);
+      const docRef = doc(db, 'guides', editingGuide.id);
+      
       const guideData = {
         ...editingGuide,
         ownerId: user.uid,
