@@ -631,3 +631,71 @@ function formatICalDate(dateStr) {
   if (raw.length < 8) return null;
   return `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
 }
+
+// =============================================================================
+// 7. EKSPORT KALENDARZA (iCal Channel Manager)
+// Umożliwia pobranie kalendarza w formacie .ics dla konkretnego obiektu
+// =============================================================================
+exports.exportIcal = onRequest(async (req, res) => {
+  const userId = req.query.u;
+  const propertyId = req.query.p;
+
+  if (!userId || !propertyId) {
+    return res.status(400).send("Brak parametrów u (userId) lub p (propertyId).");
+  }
+
+  try {
+    const rentalsRef = db.collection('users').doc(userId).collection('rentals');
+    const snapshot = await rentalsRef
+      .where('type', '==', 'booking')
+      .where('property', '==', propertyId)
+      .get();
+
+    let icalContent = "BEGIN:VCALENDAR\r\n";
+    icalContent += "VERSION:2.0\r\n";
+    icalContent += "PRODID:-//WynajemPRO//ChannelManager//PL\r\n";
+    icalContent += "CALSCALE:GREGORIAN\r\n";
+    icalContent += "METHOD:PUBLISH\r\n";
+
+    const formatDateToICal = (dateStr) => {
+      if (!dateStr) return null;
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return null;
+      return `${parts[0]}${parts[1]}${parts[2]}`;
+    };
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (!data.date) return;
+      
+      const dtstart = formatDateToICal(data.date);
+      let dtend = formatDateToICal(data.endDate);
+      if (!dtend) {
+        const startDateObj = new Date(data.date);
+        startDateObj.setDate(startDateObj.getDate() + 1);
+        dtend = startDateObj.toISOString().split('T')[0].replace(/-/g, '');
+      }
+
+      if (dtstart && dtend) {
+        icalContent += "BEGIN:VEVENT\r\n";
+        icalContent += `UID:${docSnap.id}@wynajempro.pl\r\n`;
+        const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
+        icalContent += `DTSTAMP:${now}\r\n`;
+        icalContent += `DTSTART;VALUE=DATE:${dtstart}\r\n`;
+        icalContent += `DTEND;VALUE=DATE:${dtend}\r\n`;
+        icalContent += "SUMMARY:Rezerwacja z WynajemPRO\r\n";
+        icalContent += "STATUS:CONFIRMED\r\n";
+        icalContent += "END:VEVENT\r\n";
+      }
+    });
+
+    icalContent += "END:VCALENDAR\r\n";
+
+    res.set('Content-Type', 'text/calendar; charset=utf-8');
+    res.set('Content-Disposition', `attachment; filename="kalendarz_${propertyId}.ics"`);
+    res.status(200).send(icalContent);
+  } catch (error) {
+    console.error("Błąd generowania pliku iCal:", error);
+    res.status(500).send("Wystąpił błąd serwera.");
+  }
+});

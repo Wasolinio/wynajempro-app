@@ -5,7 +5,7 @@ import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit, ArrowDown, ArrowUp, 
   Settings, MessageSquare, CheckSquare, Phone, Building, Globe, Percent, Tags, 
   Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock, CreditCard, ExternalLink,
-  AlertTriangle, Clock, BookOpen
+  AlertTriangle, Clock, BookOpen, Copy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -1052,6 +1052,17 @@ export default function RentalManager() {
                         <div>
                            <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Link iCal Airbnb</label>
                            <input value={editingSyncLinks[p.name]?.airbnb || ''} onChange={e => setEditingSyncLinks(prev => ({...prev, [p.name]: {...(prev[p.name] || {}), airbnb: e.target.value}}))} className="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none placeholder-slate-400 dark:placeholder-slate-600" placeholder="https://www.airbnb.pl/..." />
+                        </div>
+                      </div>
+                      
+                      {/* EKSPORT ICAL (CHANNEL MANAGER) */}
+                      <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
+                        <label className="block text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><CalendarIcon className="w-3 h-3"/> Eksportuj Kalendarz (iCal)</label>
+                        <div className="flex gap-3 items-center">
+                          <input readOnly value={`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user.uid}&p=${encodeURIComponent(p.name)}`} className="flex-1 p-3.5 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl text-xs font-mono text-indigo-800 dark:text-indigo-300 outline-none truncate" />
+                          <button type="button" onClick={() => { navigator.clipboard.writeText(`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user.uid}&p=${encodeURIComponent(p.name)}`); toast.success('Link iCal skopiowany!'); }} className="px-5 py-3.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-400 font-bold rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
+                            <Copy className="w-4 h-4" /> Kopiuj Link
+                          </button>
                         </div>
                       </div>
                     </div>
