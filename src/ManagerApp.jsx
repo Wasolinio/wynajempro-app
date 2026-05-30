@@ -48,9 +48,9 @@ export default function RentalManager() {
   const { rentals, settings, profile, loading } = useFirebaseData(user, selectedYear);
   
   // NOWE: STANY SUBSKRYPCJI
-  const accountStatus = profile.accountStatus;
-  const trialEndsAt = profile.trialEndsAt;
-  const scheduledDeletionAt = profile.scheduledDeletionAt;
+  const accountStatus = profile?.accountStatus;
+  const trialEndsAt = profile?.trialEndsAt;
+  const scheduledDeletionAt = profile?.scheduledDeletionAt;
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
 
