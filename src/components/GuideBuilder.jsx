@@ -3,7 +3,7 @@ import { db, storage } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Edit2, Trash2, Link as LinkIcon, Save, X, Image as ImageIcon, Copy, MapPin, Wifi, Key, BookOpen, Navigation, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Link as LinkIcon, Save, X, Image as ImageIcon, Copy, MapPin, Wifi, Key, BookOpen, Navigation, Loader2, FileText, Upload, File as FileIcon } from 'lucide-react';
 
 export default function GuideBuilder({ user, properties }) {
   const [guides, setGuides] = useState([]);
@@ -11,6 +11,7 @@ export default function GuideBuilder({ user, properties }) {
   const [editingGuide, setEditingGuide] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     fetchGuides();
@@ -42,6 +43,7 @@ export default function GuideBuilder({ user, properties }) {
       doorPin: '',
       checkInInfo: '',
       houseRules: '',
+      houseRulesFile: null,
       attractions: []
     });
   };
@@ -81,6 +83,35 @@ export default function GuideBuilder({ user, properties }) {
       alert("Nie udało się przesłać zdjęcia.");
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Plik jest za duży. Maksymalny rozmiar to 5MB.");
+      return;
+    }
+
+    setUploadingFile(true);
+    try {
+      const storageRef = ref(storage, `guides/${editingGuide.id}/rules_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setEditingGuide({ ...editingGuide, houseRulesFile: { name: file.name, url } });
+    } catch (err) {
+      console.error("Błąd przesyłania pliku:", err);
+      alert("Nie udało się przesłać pliku. Upewnij się, że ma format PDF lub DOC/DOCX.");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleRemoveFile = async () => {
+    if (window.confirm("Czy na pewno usunąć ten plik regulaminu?")) {
+      setEditingGuide({ ...editingGuide, houseRulesFile: null });
     }
   };
 
@@ -242,7 +273,39 @@ export default function GuideBuilder({ user, properties }) {
                <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-indigo-500" /> Ważne Zasady / Regulamin
                 </h3>
-                <textarea rows="4" value={editingGuide.houseRules} onChange={e => setEditingGuide({...editingGuide, houseRules: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="1. Cisza nocna obowiązuje w godzinach...&#10;2. Zakaz palenia wewnątrz obiektu..." />
+                <textarea rows="4" value={editingGuide.houseRules} onChange={e => setEditingGuide({...editingGuide, houseRules: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 mb-2" placeholder="1. Cisza nocna obowiązuje w godzinach...&#10;2. Zakaz palenia wewnątrz obiektu..." />
+                
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-3">Lub wgraj plik z regulaminem (PDF, DOC)</label>
+                  {editingGuide.houseRulesFile ? (
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-100 dark:border-blue-500/20">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <FileText className="w-6 h-6 text-blue-500 shrink-0" />
+                        <span className="text-sm font-bold text-blue-700 dark:text-blue-400 truncate">{editingGuide.houseRulesFile.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a href={editingGuide.houseRulesFile.url} target="_blank" rel="noreferrer" className="p-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 rounded-lg shadow-sm transition-colors" title="Podgląd">
+                          <LinkIcon className="w-4 h-4" />
+                        </a>
+                        <button type="button" onClick={handleRemoveFile} className="p-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 rounded-lg shadow-sm transition-colors" title="Usuń plik">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 w-full p-4 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                      {uploadingFile ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                      ) : (
+                        <>
+                          <Upload className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Wybierz plik z urządzenia (.pdf, .doc)</span>
+                        </>
+                      )}
+                      <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleFileUpload} className="hidden" disabled={uploadingFile} />
+                    </label>
+                  )}
+                </div>
             </div>
 
             {/* Atrakcje */}

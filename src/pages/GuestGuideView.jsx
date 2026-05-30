@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, ChevronLeft } from 'lucide-react';
+import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, ChevronLeft, Download, FileText } from 'lucide-react';
 
 export default function GuestGuideView() {
   const { guideId } = useParams();
@@ -160,15 +160,30 @@ export default function GuestGuideView() {
         )}
 
         {/* HOUSE RULES */}
-        {guide.houseRules && (
+        {(guide.houseRules || guide.houseRulesFile) && (
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
             <h2 className="font-black text-lg text-slate-800 mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-rose-500" />
               Ważne Zasady / Regulamin
             </h2>
-            <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed">
-              {guide.houseRules}
-            </div>
+            {guide.houseRules && (
+              <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed mb-4">
+                {guide.houseRules}
+              </div>
+            )}
+            
+            {guide.houseRulesFile && (
+              <a href={guide.houseRulesFile.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 transition-colors group">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100 text-rose-500 group-hover:scale-110 transition-transform">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <h3 className="text-sm font-bold text-slate-800 truncate">Pobierz Regulamin Obiektu</h3>
+                  <p className="text-xs text-slate-500 truncate">{guide.houseRulesFile.name}</p>
+                </div>
+                <Download className="w-5 h-5 text-slate-400 group-hover:text-rose-500 transition-colors" />
+              </a>
+            )}
           </div>
         )}
 
