@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, ChevronLeft, Download, FileText } from 'lucide-react';
+import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, ChevronLeft, Download, FileText, Home } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function GuestGuideView() {
@@ -68,34 +68,25 @@ export default function GuestGuideView() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-12">
       {/* HEADER / COVER */}
-      <div className="relative bg-white shadow-sm">
+      <div className="w-full relative flex flex-col items-center justify-center pt-8 pb-12 px-4 bg-gradient-to-br from-slate-100 to-slate-200 border-b border-slate-200 shadow-sm">
         {guide.coverImage ? (
-          <div className="h-64 md:h-80 w-full relative">
-            <img src={guide.coverImage} alt={guide.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              {guide.propertyId && (
-                <span className="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
-                  {guide.propertyId}
-                </span>
-              )}
-              <h1 className="text-3xl md:text-4xl font-black text-white leading-tight">
-                {guide.name}
-              </h1>
-            </div>
-          </div>
+          <img src={guide.coverImage} alt={guide.name} className="w-11/12 max-w-md aspect-video object-cover rounded-2xl shadow-lg border border-white/50 mb-6" />
         ) : (
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 pt-20 pb-12 px-6 rounded-b-3xl text-center">
-            {guide.propertyId && (
-              <span className="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                {guide.propertyId}
-              </span>
-            )}
-            <h1 className="text-3xl md:text-4xl font-black text-white leading-tight max-w-2xl mx-auto">
-              {guide.name}
-            </h1>
+          <div className="w-11/12 max-w-md aspect-video bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl shadow-lg border border-white/50 flex items-center justify-center mb-6">
+            <Home className="w-16 h-16 text-slate-400 opacity-50" />
           </div>
         )}
+        
+        <div className="text-center w-11/12 max-w-md">
+           {guide.propertyId && (
+             <span className="inline-block bg-white shadow-sm border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full mb-3">
+               {guide.propertyId}
+             </span>
+           )}
+           <h1 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight">
+             {guide.name}
+           </h1>
+        </div>
       </div>
 
       {/* CONTENT */}
