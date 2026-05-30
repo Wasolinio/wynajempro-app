@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 // Importujemy nasze strony asynchronicznie, by zmniejszyć początkowy rozmiar paczki
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPanel = lazy(() => import('./pages/LoginPanel'));
+const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ManagerApp = lazy(() => import('./ManagerApp')); 
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 
@@ -53,6 +54,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPanel />} />
+          <Route path="/guide/:guideId" element={<GuestGuideView />} />
           <Route 
             path="/dashboard/*" 
             element={

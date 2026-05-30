@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
@@ -39,5 +40,6 @@ const db = initializeFirestore(app, {
 });
 
 const functions = getFunctions(app); // Instancja Cloud Functions do wywołań httpsCallable
+const storage = getStorage(app);
 
-export { auth, db, functions, appCheck };
+export { auth, db, functions, appCheck, storage };

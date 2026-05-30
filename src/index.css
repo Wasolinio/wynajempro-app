@@ -9,6 +9,7 @@
     -webkit-overflow-scrolling: touch;
     color-scheme: light;
     background-color: #f8fafc;
+    height: 100%;
   }
   html.dark {
     color-scheme: dark;
@@ -19,7 +20,17 @@
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden; /* Zapobiega pojawianiu się paska poziomego i złemu skalowaniu na mobilkach */
     width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
     @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+  }
+  #root {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 }
 

@@ -105,5 +105,14 @@ service cloud.firestore {
         allow read, write: if isOwnerAndVerified(userId);
       }
     }
+
+    // =====================================================================
+    // PRZEWODNIKI (Guest Guides) — guides/{guideId}
+    // =====================================================================
+    match /guides/{guideId} {
+      allow read: if true; // Publiczny dostęp dla gości
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+    }
   }
 }

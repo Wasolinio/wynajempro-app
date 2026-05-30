@@ -17,6 +17,7 @@ import { httpsCallable } from 'firebase/functions';
 import { useFirebaseData } from './hooks/useFirebaseData';
 
 // STAŁE I LOGIKA BIZNESOWA — wydzielone do osobnych modułów
+import GuideBuilder from './components/GuideBuilder';
 import { 
   propColors, availableColors, DEFAULT_PROPERTIES, DEFAULT_SOURCES, 
   DEFAULT_CATEGORIES, DEFAULT_TEMPLATES, defaultTaxSettings, monthNames, ITEMS_PER_PAGE 
@@ -598,9 +599,6 @@ export default function RentalManager() {
     }]); 
   };
 
-  // --- RENDEROWANIE KALENDARZA (wydzielony komponent) ---
-
-
   // --- EKRAN ŁADOWANIA ---
   if (loading) return <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex items-center justify-center"><Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-500 animate-spin" /></div>;
 
@@ -723,11 +721,12 @@ export default function RentalManager() {
             <button onClick={() => changeTab('calendar')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'calendar' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CalendarIcon className="w-4 h-4 shrink-0" /> Kalendarz</button>
             <button onClick={() => changeTab('utilities')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'utilities' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><DollarSign className="w-4 h-4 shrink-0" /> Wydatki <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{utilitiesList.length}</span></button>
             <button onClick={() => changeTab('reminders')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'reminders' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CheckSquare className="w-4 h-4 shrink-0" /> Zadania <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{remindersList.length}</span></button>
+            <button onClick={() => changeTab('guides')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'guides' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><BookOpen className="w-4 h-4 shrink-0" /> Przewodniki</button>
           </div>
         </div>
 
         {/* ZAWARTOŚĆ GŁÓWNA */}
-        {renderMainTab !== 'calendar' ? (
+        {renderMainTab !== 'calendar' && renderMainTab !== 'guides' ? (
           <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col transition-colors duration-300">
             
             {/* ZAKŁADKI REZERWACJI (TABS) - Widoczne tylko dla rezerwacji */}
@@ -887,6 +886,8 @@ export default function RentalManager() {
               <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === currentTotalPages} className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-sm text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors shadow-sm">Następna</button>
             </div>
           </div>
+        ) : renderMainTab === 'guides' ? (
+          <GuideBuilder user={user} properties={properties} />
         ) : <CalendarView 
           calendarDate={calendarDate} 
           rentals={rentals} 
@@ -995,7 +996,7 @@ export default function RentalManager() {
           <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-3xl p-8 overflow-y-auto max-h-[90vh] border border-white/50 dark:border-slate-700">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:white flex items-center gap-3">
                   <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl"><Settings className="w-6 h-6" /></div>
                   Ustawienia Systemu
                 </h2>
