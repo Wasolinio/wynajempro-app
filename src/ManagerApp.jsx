@@ -5,7 +5,7 @@ import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit, ArrowDown, ArrowUp, 
   Settings, MessageSquare, CheckSquare, Phone, Building, Globe, Percent, Tags, 
   Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock, CreditCard, ExternalLink,
-  AlertTriangle, Clock
+  AlertTriangle, Clock, BookOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
