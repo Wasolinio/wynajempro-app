@@ -23,6 +23,7 @@ import {
   propColors, availableColors, DEFAULT_PROPERTIES, DEFAULT_SOURCES, 
   DEFAULT_CATEGORIES, DEFAULT_TEMPLATES, defaultTaxSettings, monthNames, ITEMS_PER_PAGE 
 } from './utils/constants';
+import FloatingTaskWidget from './components/FloatingTaskWidget';
 import { calculateTaxes } from './utils/taxCalculator';
 import CalendarView from './components/CalendarView';
 import PaywallScreen from './components/PaywallScreen';
@@ -1423,6 +1424,7 @@ export default function RentalManager() {
           />
         )}
 
+        <FloatingTaskWidget rentals={rentals} />
       </div>
     </div>
   );
