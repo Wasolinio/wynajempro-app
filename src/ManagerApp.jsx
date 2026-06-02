@@ -1424,7 +1424,7 @@ export default function RentalManager() {
           />
         )}
 
-        <FloatingTaskWidget rentals={rentals} />
+        <FloatingTaskWidget tasks={dailyReport.tasks} />
       </div>
     </div>
   );
