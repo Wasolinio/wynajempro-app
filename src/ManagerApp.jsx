@@ -29,6 +29,7 @@ import CalendarView from './components/CalendarView';
 import PaywallScreen from './components/PaywallScreen';
 import DeleteConfirmModal from './components/modals/DeleteConfirmModal';
 import StatCard from './components/StatCard';
+import TaxSummaryPanel from './components/TaxSummaryPanel';
 
 // --- WSPÓLNE HELPERY ---
 const getIconComponent = (name, className) => {
@@ -756,11 +757,12 @@ export default function RentalManager() {
             <button onClick={() => changeTab('utilities')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'utilities' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><DollarSign className="w-4 h-4 shrink-0" /> Wydatki <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{utilitiesList.length}</span></button>
             <button onClick={() => changeTab('reminders')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'reminders' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><CheckSquare className="w-4 h-4 shrink-0" /> Zadania <span className="bg-slate-100 dark:bg-slate-700 px-1.5 rounded-md text-xs">{remindersList.length}</span></button>
             <button onClick={() => changeTab('guides')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'guides' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><BookOpen className="w-4 h-4 shrink-0" /> Przewodniki</button>
+            <button onClick={() => changeTab('taxes')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${mainTab === 'taxes' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}><Landmark className="w-4 h-4 shrink-0" /> Podatki</button>
           </div>
         </div>
 
         {/* ZAWARTOŚĆ GŁÓWNA */}
-        {renderMainTab !== 'calendar' && renderMainTab !== 'guides' ? (
+        {renderMainTab !== 'calendar' && renderMainTab !== 'guides' && renderMainTab !== 'taxes' ? (
           <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col transition-colors duration-300">
             
             {/* ZAKŁADKI REZERWACJI (TABS) - Widoczne tylko dla rezerwacji */}
@@ -1027,6 +1029,14 @@ export default function RentalManager() {
           </div>
         ) : renderMainTab === 'guides' ? (
           <GuideBuilder user={user} properties={properties} />
+        ) : renderMainTab === 'taxes' ? (
+          <div className="p-8">
+            <TaxSummaryPanel 
+              rentals={rentals} 
+              taxSettings={taxSettings} 
+              selectedYear={selectedYear} 
+            />
+          </div>
         ) : <CalendarView 
           calendarDate={calendarDate} 
           rentals={rentals} 
@@ -1316,6 +1326,23 @@ export default function RentalManager() {
                         <input type="checkbox" checked={editingTaxSettings.includeZusInCosts} onChange={e => setEditingTaxSettings({...editingTaxSettings, includeZusInCosts: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
                         <span className="font-bold text-slate-800 dark:text-slate-200">Uwzględniaj składki ZUS w kosztach obniżających podatek</span>
                       </label>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                      <h4 className="font-bold text-slate-900 dark:text-white mb-4">Dane do Mikrorachunku Podatkowego</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Typ Identyfikatora</label>
+                          <select value={editingTaxSettings.identifierType || 'NIP'} onChange={e => setEditingTaxSettings({...editingTaxSettings, identifierType: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer">
+                            <option value="NIP">NIP</option>
+                            <option value="PESEL">PESEL</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Twój NIP / PESEL</label>
+                          <input type="text" placeholder="np. 1234567890" value={editingTaxSettings.taxIdentifier || ''} onChange={e => setEditingTaxSettings({...editingTaxSettings, taxIdentifier: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400" />
+                        </div>
+                      </div>
                     </div>
 
                     {editingTaxSettings.taxForm === 'general' && (

@@ -40,7 +40,9 @@ export const defaultTaxSettings = {
   zusHealth: 0,
   zusSocial: 0,
   taxFreeAmount: 30000,
-  includeZusInCosts: true
+  includeZusInCosts: true,
+  identifierType: 'NIP',
+  taxIdentifier: ''
 };
 
 export const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
