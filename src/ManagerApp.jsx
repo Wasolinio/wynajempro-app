@@ -458,7 +458,7 @@ export default function RentalManager() {
   const handleAddRental = async (e) => {
     e.preventDefault();
     if (!user) return;
-    const entry = { ...newRental };
+    const { id: _id, ...entry } = newRental;
     if (entry.type === 'booking') {
       entry.income = Number(entry.income) || 0; entry.advancePayment = Number(entry.advancePayment) || 0;
       entry.commission = Number(entry.commission) || 0; entry.tax = Number(entry.tax) || 0; entry.vat = Number(entry.vat) || 0;
