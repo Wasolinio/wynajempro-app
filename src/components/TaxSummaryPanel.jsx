@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Copy, CheckCircle, Landmark, Percent, TrendingUp, AlertTriangle, ChevronDown, Receipt } from 'lucide-react';
+import { Copy, CheckCircle, Landmark, Percent, TrendingUp, AlertTriangle, ChevronDown, Receipt, Download } from 'lucide-react';
 import { calculateMonthlyTaxes } from '../utils/taxCalculator';
+import { generateAccountingReportCSV } from '../utils/accountingExport';
 import { monthNames } from '../utils/constants';
 import toast from 'react-hot-toast';
 
@@ -54,17 +55,28 @@ export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) 
           </div>
         </div>
 
-        <div className="relative">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="appearance-none pl-4 pr-10 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm cursor-pointer"
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="appearance-none pl-4 pr-10 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm cursor-pointer"
+            >
+              {monthNames.map((name, i) => (
+                <option key={i} value={i}>{name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+          
+          <button 
+            onClick={() => generateAccountingReportCSV(rentals, taxSettings, selectedMonth, year)}
+            className="flex items-center gap-2 px-4 py-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all shadow-sm"
+            title="Pobierz plik CSV dla biura rachunkowego"
           >
-            {monthNames.map((name, i) => (
-              <option key={i} value={i}>{name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Download className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Raport Księgowy</span>
+          </button>
         </div>
       </div>
 

@@ -118,7 +118,8 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, month, year) {
   const isVatPayer = taxProfile.isVatPayer;
 
   // --- Filtruj rezerwacje i koszty wg miesiąca ---
-  const monthBookings = bookings.filter(r => _isInMonth(r.date, month, year));
+  // Dla rezerwacji główną "datą sprzedaży" jest data wyjazdu (endDate)
+  const monthBookings = bookings.filter(r => _isInMonth(r.endDate || r.date, month, year));
   const monthExpenses = expenses.filter(r => _isInMonth(r.date, month, year));
 
   // --- Przychód brutto i prowizje w danym miesiącu ---
@@ -144,11 +145,11 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, month, year) {
   // ═══════════════════════════════════════════════════════════════════════
 
   // Dane narastające do KOŃCA bieżącego miesiąca włącznie
-  const ytdBookings = bookings.filter(r => _isBeforeOrInMonth(r.date, month, year));
+  const ytdBookings = bookings.filter(r => _isBeforeOrInMonth(r.endDate || r.date, month, year));
   const ytdExpenses = expenses.filter(r => _isBeforeOrInMonth(r.date, month, year));
 
   // Dane narastające do końca POPRZEDNIEGO miesiąca
-  const prevBookings = bookings.filter(r => _isBeforeMonth(r.date, month, year));
+  const prevBookings = bookings.filter(r => _isBeforeMonth(r.endDate || r.date, month, year));
   const prevExpenses = expenses.filter(r => _isBeforeMonth(r.date, month, year));
 
   let incomeTax = 0;
