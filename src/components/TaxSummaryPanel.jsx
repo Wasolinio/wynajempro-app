@@ -122,14 +122,21 @@ export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) 
 
             {/* Mikrorachunek */}
             {tax.microAccount ? (
-              <CopyableField
-                label="Nr Mikrorachunku Podatkowego"
-                value={formatAccountNumber(tax.microAccount)}
-                rawValue={tax.microAccount}
-                fieldName="microAccount"
-                copiedField={copiedField}
-                onCopy={copyToClipboard}
-              />
+              tax.microAccount.startsWith('BŁĄD') ? (
+                <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-xl border border-rose-100 dark:border-rose-500/20">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span className="font-bold">{tax.microAccount}</span>
+                </div>
+              ) : (
+                <CopyableField
+                  label="Nr Mikrorachunku Podatkowego"
+                  value={formatAccountNumber(tax.microAccount)}
+                  rawValue={tax.microAccount}
+                  fieldName="microAccount"
+                  copiedField={copiedField}
+                  onCopy={copyToClipboard}
+                />
+              )
             ) : (
               <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 p-3 rounded-xl border border-amber-100 dark:border-amber-500/20">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -170,14 +177,21 @@ export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) 
 
             {/* Mikrorachunek (ten sam co dla PIT) */}
             {tax.microAccount ? (
-              <CopyableField
-                label="Nr Mikrorachunku Podatkowego"
-                value={formatAccountNumber(tax.microAccount)}
-                rawValue={tax.microAccount}
-                fieldName="microAccountVat"
-                copiedField={copiedField}
-                onCopy={copyToClipboard}
-              />
+              tax.microAccount.startsWith('BŁĄD') ? (
+                <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-xl border border-rose-100 dark:border-rose-500/20">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span className="font-bold">{tax.microAccount}</span>
+                </div>
+              ) : (
+                <CopyableField
+                  label="Nr Mikrorachunku Podatkowego"
+                  value={formatAccountNumber(tax.microAccount)}
+                  rawValue={tax.microAccount}
+                  fieldName="microAccountVat"
+                  copiedField={copiedField}
+                  onCopy={copyToClipboard}
+                />
+              )
             ) : (
               <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 p-3 rounded-xl border border-amber-100 dark:border-amber-500/20">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
