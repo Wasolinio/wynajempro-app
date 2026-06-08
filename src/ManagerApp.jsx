@@ -510,16 +510,6 @@ export default function RentalManager() {
     await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
   };
 
-  const exportToCSV = () => {
-    const headers = ['Domek', 'Typ', 'Kategoria', 'Gosc_Opis', 'Telefon', 'Email', 'Notatka', 'Przyjazd_Data', 'Wyjazd', 'Przychod', 'Zaliczka', 'Zaliczka_Wplynela', 'Kwota_Kosztu', 'Zysk', 'Status_Calkowity'];
-    const allSorted = [...displayedRentals].filter(r => r.type !== 'reminder').sort((a, b) => {
-      const tA = new Date(a.date).getTime(); const tB = new Date(b.date).getTime(); return (isNaN(tB) ? 0 : tB) - (isNaN(tA) ? 0 : tA);
-    });
-    const csvContent = [headers.join(','), ...allSorted.map(r => [`"${r.property}"`, `"${r.type}"`, `"${r.category || ''}"`, `"${r.guest}"`, `"${r.phone || ''}"`, `"${r.email || ''}"`, `"${r.guestNote || ''}"`, r.date, r.endDate || '', r.income, r.advancePayment || 0, r.isAdvancePaid ? 'Tak' : 'Nie', r.utilities, (Number(r.income) - Number(r.commission) - Number(r.tax) - Number(r.vat || 0) - Number(r.utilities)), r.isPaid ? 'Tak' : 'Nie'].join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.setAttribute('download', `raport_wynajmow_${selectedYear}.csv`);
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-  };
 
   const openSettingsModal = () => {
     setEditingTemplates(JSON.parse(JSON.stringify(templates)));
@@ -700,9 +690,6 @@ export default function RentalManager() {
               {dailyReport.total > 0 && <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-extrabold w-5 h-5 flex items-center justify-center rounded-full shadow-md">{dailyReport.total}</span>}
             </button>
 
-            <button onClick={exportToCSV} className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-600 dark:text-slate-300 transition-all shadow-sm" title="Eksportuj do CSV">
-              <Download className="w-4 h-4" />
-            </button>
 
             <button onClick={openSettingsModal} className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-600 dark:text-slate-300 transition-all shadow-sm"><Settings className="w-4 h-4" /></button>
             
