@@ -574,6 +574,161 @@ exports.syncICalCalendars = onCall(
 );
 
 // =============================================================================
+// 6. AUTOMATYCZNA SYNCHRONIZACJA iCAL — RAZ NA DOBĘ (Scheduled Function)
+// Iteruje po wszystkich aktywnych użytkownikach, pobiera ich syncLinks
+// i wykonuje tę samą logikę synchronizacji co ręczny przycisk.
+// =============================================================================
+exports.dailyICalSync = onSchedule(
+  {
+    schedule: "every day 06:00",
+    timeZone: "Europe/Warsaw",
+    maxInstances: 1,
+  },
+  async (event) => {
+    const logger = require("firebase-functions/logger");
+    logger.info("🔄 Rozpoczęto automatyczną synchronizację iCal...");
+
+    let totalUsersProcessed = 0;
+    let totalNewBookings = 0;
+    let totalErrors = 0;
+
+    try {
+      // Pobierz wszystkich użytkowników z aktywną subskrypcją
+      const activeSnapshot = await db
+        .collection("users")
+        .where("status", "in", ["active", "trialing"])
+        .get();
+
+      if (activeSnapshot.empty) {
+        logger.info("🔄 Brak aktywnych użytkowników do synchronizacji.");
+        return;
+      }
+
+      logger.info(`🔄 Znaleziono ${activeSnapshot.size} aktywnych użytkowników.`);
+
+      for (const userDoc of activeSnapshot.docs) {
+        const uid = userDoc.id;
+
+        try {
+          // Pobierz syncLinks z ustawień użytkownika
+          const syncLinksDoc = await db
+            .collection("users")
+            .doc(uid)
+            .collection("settings")
+            .doc("syncLinks")
+            .get();
+
+          if (!syncLinksDoc.exists) continue;
+
+          const syncLinks = syncLinksDoc.data()?.links;
+          if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) {
+            continue;
+          }
+
+          // Wykonaj synchronizację — ta sama logika co w ręcznym syncICalCalendars
+          let userNewBookings = 0;
+
+          for (const [propertyName, links] of Object.entries(syncLinks)) {
+            for (const [sourceName, url] of Object.entries(links)) {
+              if (!url || typeof url !== "string") continue;
+
+              let icalText;
+              try {
+                const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+                if (!response.ok) {
+                  logger.warn(`⚠️ [${uid}] HTTP ${response.status} dla ${propertyName}/${sourceName}`);
+                  continue;
+                }
+                icalText = await response.text();
+              } catch (fetchErr) {
+                logger.warn(`⚠️ [${uid}] Błąd pobierania ${propertyName}/${sourceName}: ${fetchErr.message}`);
+                continue;
+              }
+
+              const events = parseICalEvents(icalText);
+
+              for (const evt of events) {
+                const startDate = formatICalDate(evt.dtstart);
+                const endDate = formatICalDate(evt.dtend);
+                if (!startDate || !endDate) continue;
+
+                const normalizedSource = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
+                const syncId = `sync_${sourceName}_${propertyName}_${startDate}_${endDate}`;
+
+                // Sprawdź duplikaty
+                const duplicateSnapshot = await db
+                  .collection("users")
+                  .doc(uid)
+                  .collection("rentals")
+                  .where("syncId", "==", syncId)
+                  .limit(1)
+                  .get();
+
+                if (!duplicateSnapshot.empty) continue;
+
+                // Ustal nazwę gościa
+                const summary = (evt.summary || "").trim();
+                const lowerSummary = summary.toLowerCase();
+                let guest;
+                if (lowerSummary.includes("blocked") || lowerSummary.includes("niedostępne")) {
+                  guest = `Blokada (${normalizedSource})`;
+                } else {
+                  guest = summary || `Gość ${normalizedSource}`;
+                }
+
+                // Dodaj rezerwację
+                await db
+                  .collection("users")
+                  .doc(uid)
+                  .collection("rentals")
+                  .add({
+                    type: "booking",
+                    property: propertyName,
+                    source: normalizedSource,
+                    guest: guest,
+                    date: startDate,
+                    endDate: endDate,
+                    income: 0,
+                    advancePayment: 0,
+                    isAdvancePaid: false,
+                    commission: 0,
+                    tax: 0,
+                    vat: 0,
+                    utilities: 0,
+                    isPaid: false,
+                    completedTasks: {},
+                    guestNote: "",
+                    syncId: syncId,
+                  });
+
+                userNewBookings++;
+              }
+            }
+          }
+
+          if (userNewBookings > 0) {
+            logger.info(`✅ [${uid}] Dodano ${userNewBookings} nowych rezerwacji.`);
+          }
+
+          totalNewBookings += userNewBookings;
+          totalUsersProcessed++;
+        } catch (userErr) {
+          totalErrors++;
+          logger.error(`❌ [${uid}] Błąd synchronizacji: ${userErr.message}`);
+        }
+      }
+
+      logger.info(
+        `🔄 Synchronizacja zakończona: ${totalUsersProcessed} użytkowników, ` +
+        `${totalNewBookings} nowych rezerwacji, ${totalErrors} błędów.`
+      );
+    } catch (error) {
+      logger.error("❌ Błąd krytyczny automatycznej synchronizacji iCal:", error);
+    }
+  }
+);
+
+// =============================================================================
 // HELPER: Parsowanie zdarzeń VEVENT z tekstu iCal
 // Wyodrębnia DTSTART, DTEND, SUMMARY i UID z każdego bloku VEVENT.
 // =============================================================================
