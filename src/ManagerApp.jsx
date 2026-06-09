@@ -30,6 +30,7 @@ import PaywallScreen from './components/PaywallScreen';
 import DeleteConfirmModal from './components/modals/DeleteConfirmModal';
 import StatCard from './components/StatCard';
 import TaxSummaryPanel from './components/TaxSummaryPanel';
+import CompleteProfileScreen from './components/CompleteProfileScreen';
 
 // --- WSPÓLNE HELPERY ---
 const getIconComponent = (name, className) => {
@@ -97,7 +98,7 @@ export default function RentalManager() {
   const syncLinks = settings.syncLinks;
   const [editingSyncLinks, setEditingSyncLinks] = useState({});
 
-  const taxSettings = settings.taxSettings;
+  const taxSettings = settings.taxSettings || defaultTaxSettings;
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
 
   const hostProfile = settings.hostProfile || defaultHostProfile;
@@ -643,6 +644,19 @@ export default function RentalManager() {
         onManageSubscription={handleManageSubscription}
         isBillingPortalLoading={isBillingPortalLoading}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  // --- EKRAN UZUPEŁNIANIA PROFILU (Gdy brakuje NIP lub nazwy) ---
+  const isHostProfileIncomplete = !hostProfile.entityName || !hostProfile.taxIdentifier;
+  if (isHostProfileIncomplete) {
+    return (
+      <CompleteProfileScreen 
+        user={user} 
+        onComplete={() => {
+          // Stan zostanie automatycznie zaktualizowany przez listenera z useFirebaseData
+        }} 
       />
     );
   }
