@@ -88,7 +88,12 @@ export default function GuestGuideView() {
       await setDoc(sigRef, {
         acceptedRegulations: true,
         acceptedPpo: true,
-        acceptedAt: Timestamp.now()
+        acceptedAt: Timestamp.now(),
+        // Zapisujemy kopię (snapshot) akceptowanych dokumentów dla bezpieczeństwa gospodarza
+        acceptedHouseRulesSnapshot: guide.houseRules || '',
+        acceptedHouseRulesFileName: guide.houseRulesFile?.name || '',
+        acceptedHouseRulesFileUrl: guide.houseRulesFile?.url || '',
+        acceptedPpoRulesSnapshot: guide.ppoRules || ''
       });
       setIsAccepted(true);
       toast.success('Dane dostępowe zostały odblokowane!', { position: 'top-center' });
