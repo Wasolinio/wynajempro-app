@@ -14,16 +14,14 @@ import toast from 'react-hot-toast';
  *   @param {Object} taxSettings  — profil podatkowy użytkownika
  *   @param {number} selectedYear — wybrany rok
  */
-export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) {
+export default function TaxSummaryPanel({ year, rentals, taxSettings, hostProfile }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [copiedField, setCopiedField] = useState(null);
 
-  const year = Number(selectedYear);
-
   // Obliczenia podatkowe
   const tax = useMemo(() => {
-    return calculateMonthlyTaxes(rentals, taxSettings, selectedMonth, year);
-  }, [rentals, taxSettings, selectedMonth, year]);
+    return calculateMonthlyTaxes(rentals, taxSettings, hostProfile, selectedMonth, year);
+  }, [rentals, taxSettings, hostProfile, selectedMonth, year]);
 
   // Helper kopiowania do schowka
   const copyToClipboard = async (text, fieldName) => {
@@ -39,6 +37,10 @@ export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) 
 
   const isRyczalt = taxSettings.taxForm === 'lump_sum';
   const formLabel = isRyczalt ? 'Ryczałt' : taxSettings.taxForm === 'general' ? 'Skala podatkowa' : 'Dział. nierejestrowana';
+
+  const handleDownloadCSV = () => {
+    generateAccountingReportCSV(year, selectedMonth, rentals, taxSettings, hostProfile);
+  };
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -70,7 +72,7 @@ export default function TaxSummaryPanel({ rentals, taxSettings, selectedYear }) 
           </div>
           
           <button 
-            onClick={() => generateAccountingReportCSV(rentals, taxSettings, selectedMonth, year)}
+            onClick={handleDownloadCSV}
             className="flex items-center gap-2 px-4 py-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all shadow-sm"
             title="Pobierz plik CSV dla biura rachunkowego"
           >

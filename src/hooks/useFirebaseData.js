@@ -4,7 +4,7 @@ import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { 
   DEFAULT_PROPERTIES, DEFAULT_SOURCES, DEFAULT_CATEGORIES, 
-  DEFAULT_TEMPLATES, defaultTaxSettings, availableColors 
+  DEFAULT_TEMPLATES, defaultTaxSettings, defaultHostProfile, availableColors 
 } from '../utils/constants';
 
 export const useFirebaseData = (user, selectedYear) => {
@@ -63,7 +63,7 @@ export const useFirebaseData = (user, selectedYear) => {
     // Subskrypcja Ustawień (Settings)
     const unsubSettings = onSnapshot(collection(db, 'users', user.uid, 'settings'), (snapshot) => {
       if (!snapshot.empty) {
-        let newSettings = { properties: DEFAULT_PROPERTIES, sources: DEFAULT_SOURCES, categories: DEFAULT_CATEGORIES, templates: DEFAULT_TEMPLATES, taxSettings: defaultTaxSettings, syncLinks: {} };
+        let newSettings = { properties: DEFAULT_PROPERTIES, sources: DEFAULT_SOURCES, categories: DEFAULT_CATEGORIES, templates: DEFAULT_TEMPLATES, taxSettings: defaultTaxSettings, syncLinks: {}, hostProfile: defaultHostProfile };
 
         snapshot.docs.forEach(docSnap => {
           const id = docSnap.id;
@@ -76,6 +76,7 @@ export const useFirebaseData = (user, selectedYear) => {
           if (id === 'categories' && data.items) newSettings.categories = data.items;
           if (id === 'tax') newSettings.taxSettings = { ...defaultTaxSettings, ...data };
           if (id === 'syncLinks') newSettings.syncLinks = data.links || {};
+          if (id === 'hostProfile') newSettings.hostProfile = { ...defaultHostProfile, ...data };
         });
         
         queryClient.setQueryData(['settings', user.uid], newSettings);

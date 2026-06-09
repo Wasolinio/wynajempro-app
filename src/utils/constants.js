@@ -41,8 +41,15 @@ export const defaultTaxSettings = {
   zusSocial: 0,
   taxFreeAmount: 30000,
   includeZusInCosts: true,
+};
+
+export const defaultHostProfile = {
+  entityName: '',
   identifierType: 'NIP',
-  taxIdentifier: ''
+  taxIdentifier: '',
+  address: '',
+  phone: '',
+  email: ''
 };
 
 export const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];

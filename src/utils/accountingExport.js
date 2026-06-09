@@ -31,11 +31,11 @@ function formatNumber(num) {
   return Number(num).toFixed(2).replace('.', ',');
 }
 
-export function generateAccountingReportCSV(allYearRentals, taxSettings, month, year) {
+export function generateAccountingReportCSV(allYearRentals, taxSettings, hostProfile, month, year) {
   const monthName = monthNames[month];
   
   // Pobieramy dane z kalkulatora (wyliczone podatki i VAT-UE dla miesiąca)
-  const taxSummary = calculateMonthlyTaxes(allYearRentals, taxSettings, month, year);
+  const taxSummary = calculateMonthlyTaxes(allYearRentals, taxSettings, hostProfile, month, year);
 
   // Filtrujemy dane podobnie jak w kalkulatorze
   const bookings = allYearRentals.filter(r => r.type === 'booking');
@@ -168,10 +168,13 @@ export function generateAccountingReportCSV(allYearRentals, taxSettings, month, 
   lines.push(`Podatek Dochodowy do zapłaty:,${formatNumber(taxSummary.incomeTax)} PLN`);
   lines.push(`VAT-UE (Import Usług) do zapłaty:,${formatNumber(taxSummary.vatUE)} PLN (23% od sumy prowizji)`);
   
-  if (taxSettings.taxIdentifier) {
-    lines.push(`Identyfikator podatnika (${taxSettings.identifierType}):,${taxSettings.taxIdentifier}`);
+  if (hostProfile && hostProfile.taxIdentifier) {
+    lines.push(`Dane Gospodarza:,${hostProfile.entityName || ''} (Tel: ${hostProfile.phone || ''}, Email: ${hostProfile.email || ''})`);
+    lines.push(`Adres:,${hostProfile.address || ''}`);
+    lines.push(`Identyfikator podatnika (${hostProfile.identifierType}):,${hostProfile.taxIdentifier}`);
     lines.push(`Indywidualny Mikrorachunek Podatkowy:,${taxSummary.microAccount || 'Brak danych'}`);
   } else {
+    lines.push(`Dane Gospodarza:,Brak danych w profilu`);
     lines.push(`Identyfikator podatnika:,Brak NIP/PESEL w profilu`);
   }
 

@@ -100,6 +100,9 @@ export default function RentalManager() {
   const taxSettings = settings.taxSettings;
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
 
+  const hostProfile = settings.hostProfile || defaultHostProfile;
+  const [editingHostProfile, setEditingHostProfile] = useState(defaultHostProfile);
+
   // --- NOWY SYSTEM NAWIGACJI ---
   const [mainTab, setMainTab] = useState('bookings'); 
   const [bookingFilter, setBookingFilter] = useState('upcoming'); 
@@ -517,6 +520,7 @@ export default function RentalManager() {
     setEditingSources([...sources]); 
     setEditingCategories([...categories]);
     setEditingTaxSettings(taxSettings); 
+    setEditingHostProfile(hostProfile);
     setEditingSyncLinks(JSON.parse(JSON.stringify(syncLinks)));
     setSettingsTab('sync'); 
     setShowSettingsModal(true);
@@ -530,6 +534,7 @@ export default function RentalManager() {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'sources'), { items: editingSources });
       await setDoc(doc(db, 'users', user.uid, 'settings', 'categories'), { items: editingCategories });
       await setDoc(doc(db, 'users', user.uid, 'settings', 'tax'), editingTaxSettings);
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'hostProfile'), editingHostProfile);
       await setDoc(doc(db, 'users', user.uid, 'settings', 'syncLinks'), { links: editingSyncLinks });
       toast.success('Ustawienia zostały zapisane');
       setShowSettingsModal(false);
@@ -1019,9 +1024,10 @@ export default function RentalManager() {
         ) : renderMainTab === 'taxes' ? (
           <div className="p-8">
             <TaxSummaryPanel 
+              year={selectedYear} 
               rentals={rentals} 
               taxSettings={taxSettings} 
-              selectedYear={selectedYear} 
+              hostProfile={hostProfile}
             />
           </div>
         ) : <CalendarView 
@@ -1209,13 +1215,20 @@ export default function RentalManager() {
                 <button onClick={() => setShowSettingsModal(false)} className="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-400"><XCircle className="w-6 h-6" /></button>
               </div>
 
-              <div className="flex flex-wrap bg-slate-100/80 dark:bg-slate-800 p-1.5 rounded-2xl mb-8 gap-1 shadow-inner">
-                {['sync', 'properties', 'sources', 'categories', 'tax', 'reminders', 'subscription'].map(tab => (
-                  <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-1 text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
-                    {tab === 'sync' ? 'Integracje' : tab === 'properties' ? 'Obiekty' : tab === 'sources' ? 'Źródła' : tab === 'categories' ? 'Kategorie' : tab === 'tax' ? 'Podatki' : tab === 'reminders' ? 'Zadania' : '💳 Plan'}
-                  </button>
-                ))}
-              </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                  {['hostProfile', 'properties', 'sources', 'categories', 'tax', 'sync', 'reminders', 'subscription'].map((tab) => (
+                    <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-none text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
+                      {tab === 'hostProfile' && 'Profil Gospodarza'}
+                      {tab === 'properties' && 'Nieruchomości'}
+                      {tab === 'sources' && 'Źródła'}
+                      {tab === 'categories' && 'Kategorie wydatków'}
+                      {tab === 'tax' && 'Podatki'}
+                      {tab === 'sync' && 'Integracje'}
+                      {tab === 'reminders' && 'Powiadomienia'}
+                      {tab === 'subscription' && 'Subskrypcja'}
+                    </button>
+                  ))}
+                </div>
               
               {settingsTab === 'sync' && (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
@@ -1250,6 +1263,44 @@ export default function RentalManager() {
                   ))}
                 </div>
               )}
+              {settingsTab === 'hostProfile' && (
+                 <div className="space-y-5 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 animate-in slide-in-from-right-4 duration-300">
+                    <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Pełna nazwa podmiotu / Imię i Nazwisko</label>
+                          <input type="text" value={editingHostProfile.entityName} onChange={e => setEditingHostProfile({...editingHostProfile, entityName: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Typ Identyfikatora</label>
+                            <select value={editingHostProfile.identifierType} onChange={e => setEditingHostProfile({...editingHostProfile, identifierType: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer">
+                              <option value="NIP">NIP</option>
+                              <option value="PESEL">PESEL</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Twój NIP / PESEL</label>
+                            <input type="text" placeholder="np. 1234567890" value={editingHostProfile.taxIdentifier} onChange={e => setEditingHostProfile({...editingHostProfile, taxIdentifier: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Adres</label>
+                          <input type="text" value={editingHostProfile.address} onChange={e => setEditingHostProfile({...editingHostProfile, address: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Numer Telefonu</label>
+                            <input type="text" value={editingHostProfile.phone} onChange={e => setEditingHostProfile({...editingHostProfile, phone: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Adres e-mail</label>
+                            <input type="email" value={editingHostProfile.email} onChange={e => setEditingHostProfile({...editingHostProfile, email: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
+                          </div>
+                        </div>
+                    </div>
+                 </div>
+              )}
+
               {settingsTab === 'properties' && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                   {editingProperties.map((prop, idx) => (
@@ -1315,22 +1366,6 @@ export default function RentalManager() {
                       </label>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <h4 className="font-bold text-slate-900 dark:text-white mb-4">Dane do Mikrorachunku Podatkowego</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Typ Identyfikatora</label>
-                          <select value={editingTaxSettings.identifierType || 'NIP'} onChange={e => setEditingTaxSettings({...editingTaxSettings, identifierType: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer">
-                            <option value="NIP">NIP</option>
-                            <option value="PESEL">PESEL</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Twój NIP / PESEL</label>
-                          <input type="text" placeholder="np. 1234567890" value={editingTaxSettings.taxIdentifier || ''} onChange={e => setEditingTaxSettings({...editingTaxSettings, taxIdentifier: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400" />
-                        </div>
-                      </div>
-                    </div>
 
                     {editingTaxSettings.taxForm === 'general' && (
                       <div className="bg-blue-50 dark:bg-blue-500/10 p-5 rounded-2xl border border-blue-200 dark:border-blue-500/30 space-y-4">

@@ -112,7 +112,7 @@ export function calculateTaxes(rentalObj, allRentals, settings, editingId) {
  * @param {number} year             — rok
  * @returns {Object}                — wynik obliczeń
  */
-export function calculateMonthlyTaxes(allYearRentals, taxProfile, month, year) {
+export function calculateMonthlyTaxes(allYearRentals, taxProfile, hostProfile, month, year) {
   const bookings   = allYearRentals.filter(r => r.type === 'booking');
   const expenses   = allYearRentals.filter(r => r.type === 'utility');
   const isVatPayer = taxProfile.isVatPayer;
@@ -213,8 +213,8 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, month, year) {
 
   // --- Mikrorachunek i tytuły przelewów ---
   const microAccount = generateMicroAccount(
-    taxProfile.taxIdentifier,
-    taxProfile.identifierType
+    hostProfile?.taxIdentifier,
+    hostProfile?.identifierType
   );
   const incomeTaxTitle = generateTransferTitle(taxProfile.taxForm, year, month);
   const vatUETitle     = `VAT-I ${year}M${String(month + 1).padStart(2, '0')}`;

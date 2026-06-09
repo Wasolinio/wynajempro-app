@@ -56,7 +56,7 @@ service cloud.firestore {
     }
 
     function isValidSettings(docId, data) {
-      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax'];
+      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile'];
       return docId in knownIds
           && (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'properties' ? (!('items' in data) || data.items is list) : true)
