@@ -31,8 +31,9 @@ function formatNumber(num) {
   return Number(num).toFixed(2).replace('.', ',');
 }
 
-export function generateAccountingReportCSV(allYearRentals, taxSettings, hostProfile, month, year) {
+export function generateAccountingReportCSV(allYearRentals, taxSettings, hostProfile, month, rawYear) {
   const monthName = monthNames[month];
+  const year = Number(rawYear);
   
   // Pobieramy dane z kalkulatora (wyliczone podatki i VAT-UE dla miesiąca)
   const taxSummary = calculateMonthlyTaxes(allYearRentals, taxSettings, hostProfile, month, year);

@@ -20,7 +20,7 @@ export default function TaxSummaryPanel({ year, rentals, taxSettings, hostProfil
 
   // Obliczenia podatkowe
   const tax = useMemo(() => {
-    return calculateMonthlyTaxes(rentals, taxSettings, hostProfile, selectedMonth, year);
+    return calculateMonthlyTaxes(rentals, taxSettings, hostProfile, selectedMonth, Number(year));
   }, [rentals, taxSettings, hostProfile, selectedMonth, year]);
 
   // Helper kopiowania do schowka
