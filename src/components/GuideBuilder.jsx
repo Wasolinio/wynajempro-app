@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db, storage } from '../firebase';
-import { collection, query, where, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Edit2, Trash2, Link as LinkIcon, Save, X, Image as ImageIcon, Copy, MapPin, Wifi, Key, BookOpen, Navigation, Loader2, FileText, Upload, File as FileIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Link as LinkIcon, Save, X, Image as ImageIcon, Copy, MapPin, Wifi, Key, BookOpen, Navigation, Loader2, FileText, Upload, File as FileIcon, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function GuideBuilder({ user, properties }) {
@@ -33,6 +33,11 @@ export default function GuideBuilder({ user, properties }) {
     }
   };
 
+  const defaultPpoRules = `- Zakaz używania otwartego ognia wewnątrz obiektu.
+- Korzystanie z kominka/grilla dozwolone wyłącznie zgodnie z przeznaczeniem; nie pozostawiaj rozpalonego ognia bez nadzoru.
+- Przed opuszczeniem obiektu upewnij się, że wszystkie urządzenia elektryczne i grzewcze są wyłączone.
+- Upewnij się, że znasz lokalizację gaśnicy znajdującej się w obiekcie.`;
+
   const handleCreateNew = () => {
     setEditingGuide({
       id: `guide_${Date.now()}`,
@@ -45,12 +50,13 @@ export default function GuideBuilder({ user, properties }) {
       checkInInfo: '',
       houseRules: '',
       houseRulesFile: null,
+      ppoRules: defaultPpoRules,
       attractions: []
     });
   };
 
   const handleEdit = (guide) => {
-    setEditingGuide({ ...guide });
+    setEditingGuide({ ppoRules: defaultPpoRules, ...guide });
   };
 
   const handleDelete = async (id) => {
@@ -312,6 +318,15 @@ export default function GuideBuilder({ user, properties }) {
                     </label>
                   )}
                 </div>
+            </div>
+
+            {/* Instrukcja PPOŻ */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-4">
+               <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-rose-500" /> Instrukcja Bezpieczeństwa PPOŻ
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Ten tekst jest automatycznie generowany. Możesz go dowolnie edytować i dostosować do swojego obiektu.</p>
+                <textarea rows="6" value={editingGuide.ppoRules || ''} onChange={e => setEditingGuide({...editingGuide, ppoRules: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="Wpisz zasady bezpieczeństwa przeciwpożarowego..." />
             </div>
 
             {/* Atrakcje */}

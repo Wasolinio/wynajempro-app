@@ -112,7 +112,10 @@ service cloud.firestore {
     match /guides/{guideId} {
       allow read: if true; // Publiczny dostęp dla gości
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      // Właściciel może edytować wszystko; gość (niezalogowany) może jedynie dopisać swoją sesję akceptacji
+      allow update: if (request.auth != null && resource.data.ownerId == request.auth.uid)
+                    || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acceptedSessions']));
     }
   }
 }
