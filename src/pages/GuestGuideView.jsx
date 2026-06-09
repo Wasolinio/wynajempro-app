@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, Download, FileText, Home, ShieldAlert, Lock, Unlock, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -45,10 +45,16 @@ export default function GuestGuideView() {
             }
           }
 
-          // Check if already accepted (stored in guide doc itself under acceptedSessions)
+          // Check if already accepted via signatures subcollection
           const sessionKey = getSessionKey();
-          if (data.acceptedSessions && data.acceptedSessions[sessionKey]) {
-            setIsAccepted(true);
+          try {
+            const sigRef = doc(db, 'guides', guideId, 'signatures', sessionKey);
+            const sigSnap = await getDoc(sigRef);
+            if (sigSnap.exists()) {
+              setIsAccepted(true);
+            }
+          } catch (e) {
+            console.error("Nie udało się pobrać statusu akceptacji:", e);
           }
         } else {
           setError("Ten przewodnik nie istnieje lub został usunięty.");
@@ -78,13 +84,11 @@ export default function GuestGuideView() {
     setIsSavingAcceptance(true);
     try {
       const sessionKey = getSessionKey();
-      const docRef = doc(db, 'guides', guideId);
-      await updateDoc(docRef, {
-        [`acceptedSessions.${sessionKey}`]: {
-          acceptedRegulations: true,
-          acceptedPpo: true,
-          acceptedAt: Timestamp.now()
-        }
+      const sigRef = doc(db, 'guides', guideId, 'signatures', sessionKey);
+      await setDoc(sigRef, {
+        acceptedRegulations: true,
+        acceptedPpo: true,
+        acceptedAt: Timestamp.now()
       });
       setIsAccepted(true);
       toast.success('Dane dostępowe zostały odblokowane!', { position: 'top-center' });

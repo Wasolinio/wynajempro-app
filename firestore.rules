@@ -114,10 +114,15 @@ service cloud.firestore {
     match /guides/{guideId} {
       allow read: if true; // Publiczny dostęp dla gości
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
-      // Właściciel może edytować wszystko; gość (niezalogowany) może jedynie dopisać swoją sesję akceptacji
-      allow update: if (request.auth != null && resource.data.ownerId == request.auth.uid)
-                    || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acceptedSessions']));
+      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+
+      // Logi akceptacji regulaminów przez gości
+      match /signatures/{signatureId} {
+        allow get: if true; // Gość może odczytać własną sesję
+        allow create: if true; // Publiczny zapis dla zgód
+        allow update, delete: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
+        allow list: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
+      }
     }
   }
 }
