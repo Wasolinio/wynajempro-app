@@ -287,8 +287,8 @@ export default function LoginPanel() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Nr NIP / PESEL</label>
-                      <input type="text" name="taxIdentifier" required value={formData.taxIdentifier} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="1234567890" />
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Nr NIP / PESEL <span className="text-slate-400 font-normal text-xs">(opcjonalnie)</span></label>
+                      <input type="text" name="taxIdentifier" value={formData.taxIdentifier} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="1234567890" />
                     </div>
                   </div>
 

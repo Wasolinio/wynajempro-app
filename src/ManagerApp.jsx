@@ -648,8 +648,8 @@ export default function RentalManager() {
     );
   }
 
-  // --- EKRAN UZUPEŁNIANIA PROFILU (Gdy brakuje NIP lub nazwy) ---
-  const isHostProfileIncomplete = !hostProfile.entityName || !hostProfile.taxIdentifier;
+  // --- EKRAN UZUPEŁNIANIA PROFILU (Gdy brakuje nazwy) ---
+  const isHostProfileIncomplete = !hostProfile.entityName;
   if (isHostProfileIncomplete) {
     return (
       <CompleteProfileScreen 

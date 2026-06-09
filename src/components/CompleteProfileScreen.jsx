@@ -71,8 +71,8 @@ export default function CompleteProfileScreen({ user, onComplete }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nr NIP / PESEL</label>
-                  <input type="text" name="taxIdentifier" required value={formData.taxIdentifier} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 dark:bg-slate-900/50" placeholder="1234567890" />
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nr NIP / PESEL <span className="text-slate-400 font-normal text-xs">(opcjonalnie)</span></label>
+                  <input type="text" name="taxIdentifier" value={formData.taxIdentifier} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 dark:bg-slate-900/50" placeholder="1234567890" />
                 </div>
               </div>
 
@@ -87,7 +87,7 @@ export default function CompleteProfileScreen({ user, onComplete }) {
                 </div>
               </div>
 
-              <button type="submit" disabled={isLoading || !formData.name || !formData.taxIdentifier} className="w-full mt-8 flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+              <button type="submit" disabled={isLoading || !formData.name} className="w-full mt-8 flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Zapisz i przejdź do aplikacji <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
