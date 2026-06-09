@@ -158,9 +158,9 @@ export default function GuestGuideView() {
         {/* WIFI & DOORS (QUICK ACCESS) — conditionally blurred */}
         {(guide.wifiNetwork || guide.doorPin) && (
           <div className="relative">
-            {/* Blur overlay when not accepted */}
+            {/* Blur overlay removed to avoid CSS-only protection */}
             {!isAccepted && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm rounded-3xl border border-slate-200">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 rounded-3xl border border-slate-200">
                 <div className="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mb-3 shadow-sm border border-amber-100">
                   <Lock className="w-7 h-7" />
                 </div>
@@ -169,7 +169,7 @@ export default function GuestGuideView() {
               </div>
             )}
 
-            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${!isAccepted ? 'blur-sm select-none pointer-events-none' : ''}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {guide.wifiNetwork && (
                 <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
                   <div>
@@ -179,12 +179,12 @@ export default function GuestGuideView() {
                       </div>
                       <h2 className="font-bold text-slate-800">Sieć Wi-Fi</h2>
                     </div>
-                    <div className="text-sm text-slate-500 mb-1">Sieć: <span className="font-bold text-slate-800">{guide.wifiNetwork}</span></div>
+                    <div className="text-sm text-slate-500 mb-1">Sieć: <span className="font-bold text-slate-800">{isAccepted ? guide.wifiNetwork : '••••••••'}</span></div>
                     {guide.wifiPassword && (
-                      <div className="text-sm text-slate-500">Hasło: <span className="font-mono font-bold text-slate-800">{guide.wifiPassword}</span></div>
+                      <div className="text-sm text-slate-500">Hasło: <span className="font-mono font-bold text-slate-800">{isAccepted ? guide.wifiPassword : '••••••••'}</span></div>
                     )}
                   </div>
-                  {guide.wifiPassword && (
+                  {guide.wifiPassword && isAccepted && (
                     <button onClick={() => copyToClipboard(guide.wifiPassword, setCopiedWifi)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedWifi ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
                       {copiedWifi ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Hasło</>}
                     </button>
@@ -202,11 +202,13 @@ export default function GuestGuideView() {
                       <h2 className="font-bold text-slate-800">Dostęp</h2>
                     </div>
                     <div className="text-sm text-slate-500 mb-1">Kod do drzwi:</div>
-                    <div className="text-2xl tracking-[0.2em] font-mono font-black text-slate-800">{guide.doorPin}</div>
+                    <div className="text-2xl tracking-[0.2em] font-mono font-black text-slate-800">{isAccepted ? guide.doorPin : '••••••••'}</div>
                   </div>
-                  <button onClick={() => copyToClipboard(guide.doorPin, setCopiedPin)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedPin ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
-                    {copiedPin ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Kod</>}
-                  </button>
+                  {isAccepted && (
+                    <button onClick={() => copyToClipboard(guide.doorPin, setCopiedPin)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedPin ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
+                      {copiedPin ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Kod</>}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
