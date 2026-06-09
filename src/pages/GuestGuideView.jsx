@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, Download, FileText, Home, ShieldAlert, Lock, Unlock } from 'lucide-react';
+import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, Download, FileText, Home, ShieldAlert, Lock, Unlock, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function GuestGuideView() {
@@ -19,6 +19,9 @@ export default function GuestGuideView() {
   const [checkPpo, setCheckPpo] = useState(false);
   const [isSavingAcceptance, setIsSavingAcceptance] = useState(false);
 
+  // Host contact info
+  const [hostContact, setHostContact] = useState(null);
+
   useEffect(() => {
     const fetchGuide = async () => {
       try {
@@ -28,6 +31,19 @@ export default function GuestGuideView() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setGuide(data);
+
+          // Fetch host contact info
+          if (data.ownerId) {
+            try {
+              const hostProfileRef = doc(db, 'users', data.ownerId, 'settings', 'hostProfile');
+              const hostSnap = await getDoc(hostProfileRef);
+              if (hostSnap.exists()) {
+                setHostContact(hostSnap.data());
+              }
+            } catch (e) {
+              // Non-critical — just skip contact section
+            }
+          }
 
           // Check if already accepted (stored in guide doc itself under acceptedSessions)
           const sessionKey = getSessionKey();
@@ -332,6 +348,62 @@ export default function GuestGuideView() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* CONTACT INFO */}
+        {hostContact && (hostContact.entityName || hostContact.phone || hostContact.email) && (
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <h2 className="font-black text-lg text-slate-800 mb-5 flex items-center gap-2">
+              <Phone className="w-5 h-5 text-blue-500" />
+              Kontakt z Gospodarzem
+            </h2>
+            <div className="space-y-4">
+              {guide.propertyId && (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+                    <Home className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Obiekt</p>
+                    <p className="text-sm font-bold text-slate-800">{guide.propertyId}</p>
+                  </div>
+                </div>
+              )}
+              {hostContact.entityName && (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Gospodarz</p>
+                    <p className="text-sm font-bold text-slate-800">{hostContact.entityName}</p>
+                  </div>
+                </div>
+              )}
+              {hostContact.phone && (
+                <a href={`tel:${hostContact.phone}`} className="flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Telefon</p>
+                    <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">{hostContact.phone}</p>
+                  </div>
+                </a>
+              )}
+              {hostContact.email && (
+                <a href={`mailto:${hostContact.email}`} className="flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">E-mail</p>
+                    <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">{hostContact.email}</p>
+                  </div>
+                </a>
+              )}
+            </div>
           </div>
         )}
 

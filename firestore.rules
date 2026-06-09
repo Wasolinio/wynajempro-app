@@ -95,7 +95,9 @@ service cloud.firestore {
 
       // Ustawienia użytkownika - wymagają subskrypcji
       match /settings/{docId} {
-        allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        // hostProfile jest odczytywany publicznie (kontakt w przewodniku dla gości)
+        allow read: if docId == 'hostProfile'
+                    || (isOwnerAndVerified(userId) && hasActiveSubscription(userId));
         allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidSettings(docId, request.resource.data);
         allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
       }
