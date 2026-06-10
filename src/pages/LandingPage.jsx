@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   CheckCircle, CalendarDays, Calculator, Bell, BarChart3, 
   ArrowRight, ShieldCheck, XCircle, Coffee, TrendingUp, 
@@ -231,16 +231,43 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
             
-            {/* Karta 1: Cyfrowe Przewodniki (Duża 2x2) */}
+            {/* Karta 1: Cyfrowy Przewodnik Gościa premium (Duża 2x2) */}
             <div className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[2rem] p-8 md:p-12 border border-indigo-100 relative overflow-hidden group">
               <div className="absolute right-0 bottom-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all duration-700"></div>
               <div className="relative z-10">
                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 mb-6 group-hover:scale-110 transition-transform">
                   <Smartphone className="w-7 h-7 text-indigo-600" />
                 </div>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">Cyfrowe Przewodniki dla Gości</h3>
-                <p className="text-slate-600 text-base md:text-lg font-medium max-w-md mb-8">Koniec z drukowanymi regulaminami. Generuj piękne, mobilne strony dla swoich obiektów z kodem Wi-Fi, regulaminem i instrukcjami, udostępniane jednym linkiem.</p>
+                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Cyfrowy Przewodnik Gościa premium</h3>
+                <p className="text-slate-600 text-base md:text-lg font-medium max-w-md mb-8">Zrezygnuj z drukowanych kartek. Daj gościom wszystko na telefon przed przyjazdem i podnieś standard swoich obiektów.</p>
                 
+                {/* Mini-mockup: ekran telefonu gościa */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 max-w-sm mb-8 space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <span className="text-lg">📋</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-500">Sieć Wi-Fi</p>
+                      <p className="text-sm font-bold text-slate-800 truncate">Domek_WiFi_5G</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md whitespace-nowrap">Kopiuj hasło</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                    <span className="text-lg">🔐</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-500">Kod do drzwi</p>
+                      <p className="text-sm font-mono font-extrabold text-slate-800 tracking-widest">••••</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-md whitespace-nowrap">Auto w dniu przyjazdu</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                    <span className="text-lg">🔥</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-500">Instrukcja PPOŻ</p>
+                      <p className="text-sm font-bold text-slate-800">Generuj PDF z kodem QR</p>
+                    </div>
+                  </div>
+                </div>
+
                 <button 
                   onClick={() => setIsGuestGuideModalOpen(true)}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition-transform hover:-translate-y-0.5 flex items-center gap-2 group w-fit"
@@ -251,50 +278,88 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Karta 2: Poranny Raport Dnia */}
+            {/* Karta 2: Poranny Raport Operacyjny */}
             <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:border-slate-200 transition-colors group">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-5 group-hover:scale-110 transition-transform">
                 <Coffee className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900 mb-3 tracking-tight">Poranny Raport Dnia</h3>
-              <p className="text-slate-600 font-medium text-sm">Otwierasz aplikację przy kawie i wiesz wszystko. System podaje listę dzisiejszych zadań. Zero zgadywania.</p>
-            </div>
-
-            {/* Karta 3: Powiadomienia */}
-            <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:border-slate-200 transition-colors group">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-6 group-hover:scale-110 transition-transform">
-                <Bell className="w-6 h-6 text-amber-500" />
+              <h3 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">Poranny raport operacyjny</h3>
+              <p className="text-slate-600 font-medium text-sm mb-4">Otwierasz aplikację rano przy kawie i w 5 sekund wiesz, co dzisiaj musisz zrobić. Pełna kontrola nad dniem.</p>
+              {/* Mini-harmonogram na dziś */}
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                  <div><span className="font-bold text-slate-700">Domek Ruś 1</span> <span className="text-slate-500">— Zameldowanie 15:00</span> <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded ml-1">Płatność OK</span></div>
+                </div>
+                <div className="flex items-start gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></span>
+                  <div><span className="font-bold text-slate-700">Apt. Elbląg</span> <span className="text-slate-500">— Wymeldowanie 11:00</span> <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded ml-1">🧹 Sprzątanie</span></div>
+                </div>
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900 mb-3 tracking-tight">System Przypomnień</h3>
-              <p className="text-slate-600 font-medium text-sm">Twórz własne reguły. Przypomnimy Ci np. o wysłaniu kodu PIN lub zleceniu sprzątania po wyjeździe gości.</p>
             </div>
 
-            {/* Karta 4: Synchronizacja z iCal */}
+            {/* Karta 3: iCal Sync — Koniec z podwójnymi rezerwacjami */}
             <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:border-slate-200 transition-colors group">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-5 group-hover:scale-110 transition-transform">
                 <CalendarDays className="w-6 h-6 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900 mb-3 tracking-tight">Synchronizacja z iCal</h3>
-              <p className="text-slate-600 font-medium text-sm">Rezerwacje z portali (Booking, Airbnb) zablokują daty automatycznie. Koniec z overbookingiem.</p>
+              <h3 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">Koniec z podwójnymi rezerwacjami</h3>
+              <p className="text-slate-600 font-medium text-sm mb-4">Dwukierunkowa synchronizacja w czasie rzeczywistym. Rezerwacja na Booking natychmiast blokuje kalendarz na Airbnb i w WynajemPRO.</p>
+              {/* Wizualizacja przepływu iCal */}
+              <div className="flex items-center justify-between gap-1 bg-white rounded-xl p-3 border border-slate-200">
+                <div className="text-center flex-1">
+                  <div className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Booking.com</div>
+                </div>
+                <span className="text-slate-400 font-bold text-xs shrink-0">⇄</span>
+                <div className="text-center flex-1">
+                  <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">WynajemPRO</div>
+                </div>
+                <span className="text-slate-400 font-bold text-xs shrink-0">⇄</span>
+                <div className="text-center flex-1">
+                  <div className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg">Airbnb</div>
+                </div>
+              </div>
             </div>
 
-            {/* Karta 5: Podatki */}
+            {/* Karta 5: Automatyzacja podatków najmu */}
             <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:border-slate-200 transition-colors group">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100 mb-5 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900 mb-3 tracking-tight">Finanse i Podatki</h3>
-              <p className="text-slate-600 font-medium text-sm">Zliczamy przychód, odliczamy prowizje i sami wyliczamy polski ryczałt 8,5% z uwzględnieniem progów.</p>
+              <h3 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">Automatyzacja podatków najmu</h3>
+              <p className="text-slate-600 font-medium text-sm mb-4">Koniec z ręcznym liczeniem i strachem przed kontrolą za prowizje z Booking/Airbnb. System sam pilnuje wszystkiego.</p>
+              {/* Mini-mockup: wskaźnik podatkowy */}
+              <div className="space-y-2">
+                <div className="bg-white rounded-xl p-2.5 border border-slate-200">
+                  <div className="flex justify-between items-center text-[10px] mb-1.5">
+                    <span className="font-bold text-slate-500">Przychód YTD</span>
+                    <span className="font-bold text-slate-700">98 500 zł / 100 000 zł</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-amber-500 rounded-full" style={{width: '98.5%'}}></div>
+                  </div>
+                  <p className="text-[10px] text-amber-600 font-bold mt-1">Stawka: 8,5% → Auto-switch na 12,5%</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">VAT-UE (23%): Auto</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Mikrorachunek: Wygenerowany</span>
+                </div>
+              </div>
             </div>
 
-            {/* Karta 6: Płatności (Szeroka) */}
+            {/* Karta 6: Strategia Cenowa — Jeden abonament */}
             <div className="md:col-span-1 bg-slate-900 rounded-[2rem] p-8 overflow-hidden relative group">
               <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Users className="w-32 h-32 text-white" />
               </div>
               <div className="relative z-10">
-                <h3 className="text-xl font-extrabold text-white mb-3 tracking-tight">Kontrola Płatności</h3>
-                <p className="text-slate-400 text-sm font-medium">Błyskawicznie sprawdzaj kto wpłacił zaliczkę, a kto wciąż zalega z opłatą za pobyt.</p>
+                <h3 className="text-xl font-extrabold text-white mb-2 tracking-tight">Jeden stały abonament. Bez limitu obiektów.</h3>
+                <p className="text-slate-400 text-sm font-medium mb-4">Inni każą Ci płacić za każdy pokój lub pobierają prowizję. W WynajemPRO rozwijasz biznes bez dodatkowych kosztów.</p>
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-extrabold text-white">29,99 zł</span>
+                  <span className="text-sm text-slate-500 font-bold mb-0.5">/ mc</span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium mt-1">Stała cena — 1 domek, czy 10 apartamentów.</p>
               </div>
             </div>
 
