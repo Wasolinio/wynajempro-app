@@ -20,10 +20,12 @@ service cloud.firestore {
     // =====================================================================
     function checkFallbackSubscription(userId) {
       let userData = get(/databases/$(database)/documents/users/$(userId)).data;
-      return userData.status == 'active'
-        || (userData.status == 'trialing' 
-            && userData.trialEndsAt is timestamp 
-            && userData.trialEndsAt > request.time);
+      
+      let isTrialing = userData.status == 'trialing';
+      let validTimestamp = isTrialing && userData.trialEndsAt is timestamp && userData.trialEndsAt > request.time;
+      let validString = isTrialing && userData.trialEndsAt is string && timestamp.value(userData.trialEndsAt) > request.time;
+      
+      return userData.status == 'active' || validTimestamp || validString;
     }
 
     function hasActiveSubscription(userId) {
@@ -67,6 +69,26 @@ service cloud.firestore {
     }
 
     // =====================================================================
+    // WALIDACJA GUIDE (Schema Validation dla dokumentów przewodników)
+    // Ogranicza listę dozwolonych pól oraz ich typy.
+    // =====================================================================
+    function isValidGuide(data) {
+      return data.keys().hasAll(['name', 'ownerId'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 200
+        && data.ownerId is string
+        && (!('propertyId' in data) || (data.propertyId is string && data.propertyId.size() <= 200))
+        && (!('checkInInfo' in data) || (data.checkInInfo is string && data.checkInInfo.size() <= 5000))
+        && (!('houseRules' in data) || (data.houseRules is string && data.houseRules.size() <= 10000))
+        && (!('ppoRules' in data) || (data.ppoRules is string && data.ppoRules.size() <= 10000))
+        && (!('mapLink' in data) || (data.mapLink is string && data.mapLink.size() <= 500))
+        && (!('wifiNetwork' in data) || (data.wifiNetwork is string && data.wifiNetwork.size() <= 100))
+        && (!('wifiPassword' in data) || (data.wifiPassword is string && data.wifiPassword.size() <= 100))
+        && (!('doorPin' in data) || (data.doorPin is string && data.doorPin.size() <= 50))
+        && (!('attractions' in data) || data.attractions is list)
+        && data.keys().size() <= 20;
+    }
+
+    // =====================================================================
     // PROFIL UŻYTKOWNIKA — users/{userId}
     // =====================================================================
     // Odczyt: tylko właściciel (niezależnie od weryfikacji i subskrypcji)
@@ -78,13 +100,17 @@ service cloud.firestore {
 
       allow read: if request.auth != null && request.auth.uid == userId;
 
+      // Zablokowano Privilege Escalation (Account Takeover) — atakujący nie może wstrzyknąć stripeCustomerId na starcie
       allow create: if request.auth != null
                     && request.auth.uid == userId
-                    && request.resource.data.status == 'trialing';
+                    && request.resource.data.status == 'trialing'
+                    && !('stripeCustomerId' in request.resource.data)
+                    && !('stripeSubscriptionId' in request.resource.data);
 
       allow update: if isOwnerAndVerified(userId)
                     && request.resource.data.status == resource.data.status
-                    && request.resource.data.trialEndsAt == resource.data.trialEndsAt;
+                    && request.resource.data.trialEndsAt == resource.data.trialEndsAt
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['stripeCustomerId', 'stripeSubscriptionId']);
 
       // Rezerwacje, wydatki, zadania (zasoby biznesowe) - wymagają subskrypcji
       match /rentals/{docId} {
@@ -104,23 +130,67 @@ service cloud.firestore {
 
       // Sesje checkout - NIE wymagają subskrypcji (aby móc opłacić)
       match /checkout_sessions/{docId} {
-        allow read, write: if isOwnerAndVerified(userId);
+        allow read, delete: if isOwnerAndVerified(userId);
+        allow create, update: if isOwnerAndVerified(userId)
+                              && request.resource.data.keys().size() <= 10
+                              && (!('sessionId' in request.resource.data) || request.resource.data.sessionId is string);
       }
     }
 
     // =====================================================================
     // PRZEWODNIKI (Guest Guides) — guides/{guideId}
     // =====================================================================
+    // BEZPIECZEŃSTWO: Główny dokument zawiera tylko dane publiczne (tytuł, cover, atrakcje).
+    // Pola wrażliwe (wifi, kody) ukryte są w subkolekcji secrets, odczyt warunkowy.
+    // =====================================================================
     match /guides/{guideId} {
-      allow read: if true; // Publiczny dostęp dla gości
-      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow read: if true; // Publiczny dostęp do bazowego dokumentu (bez sekretów)
 
-      // Logi akceptacji regulaminów przez gości
+      allow create: if isOwnerAndVerified(request.auth.uid)
+                    && hasActiveSubscription(request.auth.uid)
+                    && request.resource.data.ownerId == request.auth.uid
+                    && isValidGuide(request.resource.data);
+
+      allow update: if isOwnerAndVerified(request.auth.uid)
+                    && hasActiveSubscription(request.auth.uid)
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == request.auth.uid
+                    && isValidGuide(request.resource.data);
+
+      allow delete: if isOwnerAndVerified(request.auth.uid)
+                    && resource.data.ownerId == request.auth.uid;
+
+      // =====================================================================
+      // SEKRETY (Wrażliwe dane: WiFi, Pin dostępu)
+      // Odczyt: Właściciel przewodnika LUB anonimowy gość, który posiada
+      // autoryzowany rekord (podpis) w kolekcji signatures
+      // =====================================================================
+      match /secrets/data {
+        allow read: if (request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid)
+                    || (request.auth != null && exists(/databases/$(database)/documents/guides/$(guideId)/signatures/$(request.auth.uid)));
+        
+        allow write: if isOwnerAndVerified(request.auth.uid)
+                     && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
+      }
+
+      // =====================================================================
+      // PODPISY REGULAMINÓW (Zablokowanie DoS)
+      // Tworzone tylko przez autentykowanego użytkownika (signInAnonymously),
+      // gdzie ID dokumentu = UID sesji. Blokuje to botom farmowanie logów.
+      // =====================================================================
       match /signatures/{signatureId} {
-        allow get: if true; // Gość może odczytać własną sesję
-        allow create: if true; // Publiczny zapis dla zgód
-        allow update, delete: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
+        allow get: if request.auth != null && request.auth.uid == signatureId;
+        allow create: if request.auth != null 
+                      && request.auth.uid == signatureId
+                      && request.resource.data.keys().size() <= 10
+                      && request.resource.data.keys().hasAll(['acceptedAt'])
+                      && request.resource.data.acceptedAt is timestamp
+                      && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() <= 200))
+                      && (!('signature' in request.resource.data) || (request.resource.data.signature is string && request.resource.data.signature.size() <= 10000))
+                      && (!('acceptedHouseRulesSnapshot' in request.resource.data) || (request.resource.data.acceptedHouseRulesSnapshot is string && request.resource.data.acceptedHouseRulesSnapshot.size() <= 15000))
+                      && (!('acceptedPpoRulesSnapshot' in request.resource.data) || (request.resource.data.acceptedPpoRulesSnapshot is string && request.resource.data.acceptedPpoRulesSnapshot.size() <= 15000));
+        allow update: if false; 
+        allow delete: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
         allow list: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
       }
     }

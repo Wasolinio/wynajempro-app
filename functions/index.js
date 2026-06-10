@@ -423,7 +423,7 @@ exports.deleteExpiredAccountsData = onSchedule(
 
       console.log(`🧹 Znaleziono ${snapshot.size} kont do wyczyszczenia.`);
 
-      for (const docSnap of snapshot.docs) {
+      const promises = snapshot.docs.map(async (docSnap) => {
         const uid = docSnap.id;
         try {
           console.log(`🧹 Rozpoczynanie usuwania danych dla użytkownika: ${uid}`);
@@ -438,7 +438,8 @@ exports.deleteExpiredAccountsData = onSchedule(
         } catch (err) {
           console.error(`❌ Błąd czyszczenia danych dla użytkownika ${uid}:`, err);
         }
-      }
+      });
+      await Promise.allSettled(promises);
     } catch (error) {
       console.error("❌ Błąd krytyczny podczas cyklicznego czyszczenia baz danych:", error);
     }
@@ -481,15 +482,49 @@ exports.syncICalCalendars = onCall(
         for (const [sourceName, url] of Object.entries(links)) {
           if (!url || typeof url !== "string") continue;
 
+          if (!isSafeUrl(url)) {
+            console.warn(`⚠️ Odrzucono niebezpieczny URL: ${url}`);
+            continue;
+          }
+
           // Pobieranie pliku iCal za pomocą wbudowanego fetch (Node 20+)
-          let icalText;
+          // Zabezpieczenie przed atakiem OOM (Out Of Memory) DoS - limit 5MB
+          const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
+          let icalText = "";
           try {
             const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
             if (!response.ok) {
               console.warn(`⚠️ Nie udało się pobrać iCal dla ${propertyName}/${sourceName}: HTTP ${response.status}`);
               continue;
             }
-            icalText = await response.text();
+            
+            // Opcjonalne wczesne odrzucenie na podstawie nagłówka Content-Length
+            const contentLength = response.headers.get("content-length");
+            if (contentLength && parseInt(contentLength, 10) > MAX_ICAL_SIZE_BYTES) {
+              console.warn(`⚠️ Odrzucono iCal dla ${propertyName}/${sourceName}: Plik za duży (Content-Length > 5MB)`);
+              continue;
+            }
+
+            // Strumieniowe odczytywanie z limitem wielkości (aby zablokować złośliwy streaming bez Content-Length)
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let bytesRead = 0;
+            
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              bytesRead += value.length;
+              if (bytesRead > MAX_ICAL_SIZE_BYTES) {
+                // Przerywamy połączenie
+                reader.cancel("Osiągnięto limit wielkości pliku (5MB)");
+                throw new Error("Plik iCal przekracza dozwolony limit wielkości (5MB)");
+              }
+              icalText += decoder.decode(value, { stream: true });
+            }
+            // Zdekodowanie reszty
+            icalText += decoder.decode();
+
           } catch (fetchErr) {
             console.warn(`⚠️ Błąd pobierania iCal dla ${propertyName}/${sourceName}:`, fetchErr.message);
             continue;
@@ -606,7 +641,7 @@ exports.dailyICalSync = onSchedule(
 
       logger.info(`🔄 Znaleziono ${activeSnapshot.size} aktywnych użytkowników.`);
 
-      for (const userDoc of activeSnapshot.docs) {
+      const processPromises = activeSnapshot.docs.map(async (userDoc) => {
         const uid = userDoc.id;
 
         try {
@@ -618,11 +653,11 @@ exports.dailyICalSync = onSchedule(
             .doc("syncLinks")
             .get();
 
-          if (!syncLinksDoc.exists) continue;
+          if (!syncLinksDoc.exists) return null;
 
           const syncLinks = syncLinksDoc.data()?.links;
           if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) {
-            continue;
+            return null;
           }
 
           // Wykonaj synchronizację — ta sama logika co w ręcznym syncICalCalendars
@@ -632,14 +667,41 @@ exports.dailyICalSync = onSchedule(
             for (const [sourceName, url] of Object.entries(links)) {
               if (!url || typeof url !== "string") continue;
 
-              let icalText;
+              if (!isSafeUrl(url)) continue;
+
+              // Pobieranie pliku iCal za pomocą wbudowanego fetch (Node 20+) z limitem 5MB
+              const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
+              let icalText = "";
               try {
                 const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
                 if (!response.ok) {
                   logger.warn(`⚠️ [${uid}] HTTP ${response.status} dla ${propertyName}/${sourceName}`);
                   continue;
                 }
-                icalText = await response.text();
+                
+                const contentLength = response.headers.get("content-length");
+                if (contentLength && parseInt(contentLength, 10) > MAX_ICAL_SIZE_BYTES) {
+                  logger.warn(`⚠️ [${uid}] Odrzucono iCal dla ${propertyName}/${sourceName}: Plik za duży (Content-Length > 5MB)`);
+                  continue;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let bytesRead = 0;
+                
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  
+                  bytesRead += value.length;
+                  if (bytesRead > MAX_ICAL_SIZE_BYTES) {
+                    reader.cancel("Osiągnięto limit wielkości pliku (5MB)");
+                    throw new Error("Plik iCal przekracza dozwolony limit wielkości (5MB)");
+                  }
+                  icalText += decoder.decode(value, { stream: true });
+                }
+                icalText += decoder.decode();
+
               } catch (fetchErr) {
                 logger.warn(`⚠️ [${uid}] Błąd pobierania ${propertyName}/${sourceName}: ${fetchErr.message}`);
                 continue;
@@ -710,11 +772,24 @@ exports.dailyICalSync = onSchedule(
             logger.info(`✅ [${uid}] Dodano ${userNewBookings} nowych rezerwacji.`);
           }
 
-          totalNewBookings += userNewBookings;
-          totalUsersProcessed++;
+          return { userNewBookings };
         } catch (userErr) {
-          totalErrors++;
           logger.error(`❌ [${uid}] Błąd synchronizacji: ${userErr.message}`);
+          throw userErr;
+        }
+      });
+
+      const results = await Promise.allSettled(processPromises);
+      
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          if (result.value !== null) {
+            totalUsersProcessed++;
+            totalNewBookings += result.value.userNewBookings;
+          }
+        } else {
+          totalUsersProcessed++;
+          totalErrors++;
         }
       }
 
@@ -788,18 +863,68 @@ function formatICalDate(dateStr) {
 }
 
 // =============================================================================
+// HELPER: Walidacja URL pod kątem SSRF (Server-Side Request Forgery)
+// Blokuje prywatne IP, localhost, IPv6 loopback, Cloud Metadata endpoints
+// =============================================================================
+function isSafeUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+  
+  try {
+    const urlObj = new URL(url);
+    const hn = urlObj.hostname.toLowerCase();
+    
+    // Blokada prywatnych zakresów IPv4
+    if (hn.startsWith('10.') || hn.startsWith('192.168.') || hn.startsWith('127.')) return false;
+    // Blokada 172.16.0.0/12
+    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hn)) return false;
+    // Blokada link-local IPv4
+    if (hn.startsWith('169.254.')) return false;
+    // Blokada specjalnych adresów
+    if (hn === 'localhost' || hn === '0.0.0.0' || hn === '[::]') return false;
+    // Blokada IPv6 loopback i prywatnych zakresów
+    if (hn === '::1' || hn === '[::1]') return false;
+    if (hn.startsWith('fc') || hn.startsWith('fd')) return false;
+    if (hn.startsWith('fe80')) return false;
+    // Blokada Cloud Metadata (GCP, AWS, Azure)
+    if (hn === 'metadata.google.internal' || hn === 'metadata.internal') return false;
+    
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// =============================================================================
 // 7. EKSPORT KALENDARZA (iCal Channel Manager)
 // Umożliwia pobranie kalendarza w formacie .ics dla konkretnego obiektu
 // =============================================================================
 exports.exportIcal = onRequest(async (req, res) => {
-  const userId = req.query.u;
-  const propertyId = req.query.p;
+  const userId = (req.query.u || '').toString().slice(0, 128);
+  const propertyId = (req.query.p || '').toString().slice(0, 200);
+  const token = (req.query.token || '').toString().slice(0, 256);
 
-  if (!userId || !propertyId) {
-    return res.status(400).send("Brak parametrów u (userId) lub p (propertyId).");
+  if (!userId || !propertyId || !token) {
+    return res.status(400).send("Brak parametrów u (userId), p (propertyId) lub token.");
+  }
+
+  // Walidacja formatu userId (Firebase UID: alfanumeryczny, max 128 znaków)
+  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
+    return res.status(400).send("Nieprawidłowy format userId.");
   }
 
   try {
+    const propsDoc = await db.collection('users').doc(userId).collection('settings').doc('properties').get();
+    const propsData = propsDoc.data();
+    if (!propsData || !propsData.items) {
+      return res.status(403).send("Brak autoryzacji.");
+    }
+
+    const property = propsData.items.find(p => p.id === propertyId || p.name === propertyId);
+    if (!property || property.secretToken !== token) {
+      return res.status(403).send("Nieprawidłowy token.");
+    }
+
     const rentalsRef = db.collection('users').doc(userId).collection('rentals');
     const snapshot = await rentalsRef
       .where('type', '==', 'booking')

@@ -10,6 +10,7 @@ const LoginPanel = lazy(() => import('./pages/LoginPanel'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ManagerApp = lazy(() => import('./ManagerApp')); 
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
+import { WynajemProvider } from './context/WynajemContext';
 
 // Prosty loader podczas doczytywania paczek
 const Loader = () => (
@@ -85,7 +86,9 @@ export default function App() {
             element={
               <GlobalErrorBoundary>
                 <ProtectedRoute>
-                  <ManagerApp />
+                  <WynajemProvider>
+                    <ManagerApp />
+                  </WynajemProvider>
                 </ProtectedRoute>
               </GlobalErrorBoundary>
             } 

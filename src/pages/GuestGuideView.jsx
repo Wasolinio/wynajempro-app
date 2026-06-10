@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, Download, FileText, Home, ShieldAlert, Lock, Unlock, Phone, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -8,10 +9,12 @@ import toast from 'react-hot-toast';
 export default function GuestGuideView() {
   const { guideId } = useParams();
   const [guide, setGuide] = useState(null);
+  const [secrets, setSecrets] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copiedWifi, setCopiedWifi] = useState(false);
   const [copiedPin, setCopiedPin] = useState(false);
+  const [authUid, setAuthUid] = useState(null);
 
   // Acceptance state
   const [isAccepted, setIsAccepted] = useState(false);
@@ -23,68 +26,110 @@ export default function GuestGuideView() {
   const [hostContact, setHostContact] = useState(null);
 
   useEffect(() => {
-    const fetchGuide = async () => {
-      try {
-        const docRef = doc(db, 'guides', guideId);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setGuide(data);
-
-          // Fetch host contact info
-          if (data.ownerId) {
-            try {
-              const hostProfileRef = doc(db, 'users', data.ownerId, 'settings', 'hostProfile');
-              const hostSnap = await getDoc(hostProfileRef);
-              if (hostSnap.exists()) {
-                setHostContact(hostSnap.data());
-              }
-            } catch (e) {
-              // Non-critical — just skip contact section
-            }
-          }
-
-          // Check if already accepted via signatures subcollection
-          const sessionKey = getSessionKey();
-          try {
-            const sigRef = doc(db, 'guides', guideId, 'signatures', sessionKey);
-            const sigSnap = await getDoc(sigRef);
-            if (sigSnap.exists()) {
-              setIsAccepted(true);
-            }
-          } catch (e) {
-            console.error("Nie udało się pobrać statusu akceptacji:", e);
-          }
-        } else {
-          setError("Ten przewodnik nie istnieje lub został usunięty.");
+    const auth = getAuth();
+    
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setAuthUid(user.uid);
+        await fetchGuideData(user.uid);
+      } else {
+        try {
+          // Logowanie anonimowe dla każdego gościa
+          const userCredential = await signInAnonymously(auth);
+          setAuthUid(userCredential.user.uid);
+          await fetchGuideData(userCredential.user.uid);
+        } catch (error) {
+          console.error("Błąd autentykacji anonimowej:", error);
+          setError("Wystąpił błąd autoryzacji sesji. Odśwież stronę.");
+          setIsLoading(false);
         }
-      } catch (err) {
-        console.error("Błąd ładowania przewodnika:", err);
-        setError("Wystąpił błąd podczas ładowania przewodnika. Spróbuj ponownie później.");
-      } finally {
-        setIsLoading(false);
       }
-    };
+    });
 
-    fetchGuide();
+    return () => unsubscribe();
   }, [guideId]);
 
-  // Generates a persistent session key for this browser (to remember acceptance)
-  const getSessionKey = () => {
-    let key = localStorage.getItem(`wp_guest_${guideId}`);
-    if (!key) {
-      key = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      localStorage.setItem(`wp_guest_${guideId}`, key);
+  const fetchGuideData = async (uid) => {
+    try {
+      const docRef = doc(db, 'guides', guideId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setGuide(data);
+
+        // Fetch host contact info
+        if (data.ownerId) {
+          try {
+            const hostProfileRef = doc(db, 'users', data.ownerId, 'settings', 'hostProfile');
+            const hostSnap = await getDoc(hostProfileRef);
+            if (hostSnap.exists()) {
+              setHostContact(hostSnap.data());
+            }
+          } catch {
+            // Non-critical — just skip contact section
+          }
+        }
+
+        // Sprawdzanie podpisu po UID autentykacji anonimowej
+        try {
+          const sigRef = doc(db, 'guides', guideId, 'signatures', uid);
+          const sigSnap = await getDoc(sigRef);
+          if (sigSnap.exists()) {
+            setIsAccepted(true);
+            await fetchSecrets(); // Pobieramy sekrety, jeśli już zaakceptowano
+          } else {
+            // Kompatybilność wsteczna: Sprawdzanie starej metody localStorage
+            const oldSessionKey = localStorage.getItem(`wp_guest_${guideId}`);
+            if (oldSessionKey) {
+               const oldSigRef = doc(db, 'guides', guideId, 'signatures', oldSessionKey);
+               const oldSigSnap = await getDoc(oldSigRef);
+               if (oldSigSnap.exists()) {
+                 // Przenosimy stary podpis na nowy UID i czyścimy localStorage
+                 await setDoc(sigRef, oldSigSnap.data());
+                 setIsAccepted(true);
+                 await fetchSecrets();
+               }
+               localStorage.removeItem(`wp_guest_${guideId}`);
+            }
+          }
+        } catch (e) {
+          console.error("Nie udało się pobrać statusu akceptacji:", e);
+        }
+      } else {
+        setError("Ten przewodnik nie istnieje lub został usunięty.");
+      }
+    } catch (err) {
+      console.error("Błąd ładowania przewodnika:", err);
+      setError("Wystąpił błąd podczas ładowania przewodnika. Spróbuj ponownie później.");
+    } finally {
+      setIsLoading(false);
     }
-    return key;
+  };
+
+  const fetchSecrets = async () => {
+    try {
+      const secretsRef = doc(db, 'guides', guideId, 'secrets', 'data');
+      const secretsSnap = await getDoc(secretsRef);
+      if (secretsSnap.exists()) {
+        setSecrets(secretsSnap.data());
+      }
+    } catch (e) {
+      console.error("Nie udało się pobrać danych dostępowych z subkolekcji:", e);
+      // Fallback: jeśli sekrety nie są jeszcze w subkolekcji, odczytujemy z głównego dokumentu
+      setSecrets({
+        wifiNetwork: guide?.wifiNetwork,
+        wifiPassword: guide?.wifiPassword,
+        doorPin: guide?.doorPin
+      });
+    }
   };
 
   const handleAccept = async () => {
+    if (!authUid) return;
     setIsSavingAcceptance(true);
     try {
-      const sessionKey = getSessionKey();
-      const sigRef = doc(db, 'guides', guideId, 'signatures', sessionKey);
+      const sigRef = doc(db, 'guides', guideId, 'signatures', authUid);
       await setDoc(sigRef, {
         acceptedRegulations: true,
         acceptedPpo: true,
@@ -96,6 +141,7 @@ export default function GuestGuideView() {
         acceptedPpoRulesSnapshot: guide.ppoRules || ''
       });
       setIsAccepted(true);
+      await fetchSecrets(); // Pobranie sekretów po udanym zapisie
       toast.success('Dane dostępowe zostały odblokowane!', { position: 'top-center' });
     } catch (err) {
       console.error("Błąd zapisu akceptacji:", err);
@@ -112,7 +158,8 @@ export default function GuestGuideView() {
     setTimeout(() => setter(false), 2000);
   };
 
-  const hasSensitiveData = guide?.wifiNetwork || guide?.doorPin;
+  // Ustalanie czy są wrażliwe dane na podstawie subkolekcji lub (fallback) głównego dokumentu
+  const hasSensitiveData = !!(secrets?.wifiNetwork || secrets?.doorPin || guide?.hasSensitiveData || guide?.wifiNetwork || guide?.doorPin);
 
   if (isLoading) {
     return (
@@ -179,7 +226,7 @@ export default function GuestGuideView() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {guide.wifiNetwork && (
+              {(secrets?.wifiNetwork || guide.wifiNetwork) && (
                 <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-3">
@@ -188,20 +235,20 @@ export default function GuestGuideView() {
                       </div>
                       <h2 className="font-bold text-slate-800">Sieć Wi-Fi</h2>
                     </div>
-                    <div className="text-sm text-slate-500 mb-1">Sieć: <span className="font-bold text-slate-800">{isAccepted ? guide.wifiNetwork : '••••••••'}</span></div>
-                    {guide.wifiPassword && (
-                      <div className="text-sm text-slate-500">Hasło: <span className="font-mono font-bold text-slate-800">{isAccepted ? guide.wifiPassword : '••••••••'}</span></div>
+                    <div className="text-sm text-slate-500 mb-1">Sieć: <span className="font-bold text-slate-800">{isAccepted ? (secrets?.wifiNetwork || 'Brak danych') : '••••••••'}</span></div>
+                    {(secrets?.wifiPassword || guide.wifiPassword) && (
+                      <div className="text-sm text-slate-500">Hasło: <span className="font-mono font-bold text-slate-800">{isAccepted ? (secrets?.wifiPassword || 'Brak danych') : '••••••••'}</span></div>
                     )}
                   </div>
-                  {guide.wifiPassword && isAccepted && (
-                    <button onClick={() => copyToClipboard(guide.wifiPassword, setCopiedWifi)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedWifi ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
+                  {(secrets?.wifiPassword || guide.wifiPassword) && isAccepted && (
+                    <button onClick={() => copyToClipboard(secrets?.wifiPassword || guide.wifiPassword, setCopiedWifi)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedWifi ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
                       {copiedWifi ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Hasło</>}
                     </button>
                   )}
                 </div>
               )}
 
-              {guide.doorPin && (
+              {(secrets?.doorPin || guide.doorPin) && (
                 <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-3">
@@ -211,10 +258,10 @@ export default function GuestGuideView() {
                       <h2 className="font-bold text-slate-800">Dostęp</h2>
                     </div>
                     <div className="text-sm text-slate-500 mb-1">Kod do drzwi:</div>
-                    <div className="text-2xl tracking-[0.2em] font-mono font-black text-slate-800">{isAccepted ? guide.doorPin : '••••••••'}</div>
+                    <div className="text-2xl tracking-[0.2em] font-mono font-black text-slate-800">{isAccepted ? (secrets?.doorPin || 'Brak danych') : '••••••••'}</div>
                   </div>
                   {isAccepted && (
-                    <button onClick={() => copyToClipboard(guide.doorPin, setCopiedPin)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedPin ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
+                    <button onClick={() => copyToClipboard(secrets?.doorPin || guide.doorPin, setCopiedPin)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedPin ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
                       {copiedPin ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Kod</>}
                     </button>
                   )}
@@ -225,15 +272,23 @@ export default function GuestGuideView() {
         )}
 
         {/* CHECK-IN INSTRUCTIONS */}
-        {guide.checkInInfo && (
+        {(guide.checkInInfo || guide.mapLink) && (
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
             <h2 className="font-black text-lg text-slate-800 mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-indigo-500" />
               Wskazówki Dotarcia i Zameldowania
             </h2>
-            <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed">
-              {guide.checkInInfo}
-            </div>
+            {guide.checkInInfo && (
+              <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed mb-4">
+                {guide.checkInInfo}
+              </div>
+            )}
+            {guide.mapLink && (
+              <a href={guide.mapLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-5 py-3 rounded-xl transition-colors border border-indigo-100 w-full sm:w-auto justify-center">
+                <MapPin className="w-5 h-5" />
+                Nawiguj (Mapy Google)
+              </a>
+            )}
           </div>
         )}
 

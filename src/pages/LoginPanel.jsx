@@ -19,11 +19,7 @@ export default function LoginPanel() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
-    identifierType: 'NIP',
-    taxIdentifier: '',
-    address: '',
-    phone: ''
+    password: ''
   });
 
   const handleChange = (e) => {
@@ -31,8 +27,7 @@ export default function LoginPanel() {
     setError(''); 
   };
 
-  // DODANE: Funkcja tworząca profil użytkownika ze statusem triala w bazie
-  const initializeUserInDatabase = async (user, isGoogle = false) => {
+  const initializeUserInDatabase = async (user) => {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
     
@@ -49,16 +44,8 @@ export default function LoginPanel() {
         createdAt: Timestamp.fromDate(new Date())
       });
 
-      // Jeśli rejestrujemy się tradycyjnie, zapisujemy profil gospodarza
-      // Jeśli to Google, wpisujemy puste/domyślne pola (zostaną wymuszone w ManagerApp)
-      await setDoc(doc(db, 'users', user.uid, 'settings', 'hostProfile'), {
-        entityName: isGoogle ? '' : formData.name,
-        identifierType: isGoogle ? 'NIP' : formData.identifierType,
-        taxIdentifier: isGoogle ? '' : formData.taxIdentifier,
-        address: isGoogle ? '' : formData.address,
-        phone: isGoogle ? '' : formData.phone,
-        email: user.email
-      });
+      // Nie zapisujemy od razu hostProfile przy rejestracji. 
+      // Użytkownik zostanie o to poproszony w aplikacji (CompleteProfileScreen).
     }
   };
 
@@ -142,7 +129,7 @@ export default function LoginPanel() {
     
     try {
       const result = await signInWithPopup(auth, provider);
-      await initializeUserInDatabase(result.user, true); // Google login
+      await initializeUserInDatabase(result.user); // Google login
       navigate('/dashboard'); 
     } catch (err) {
       console.error("Błąd Google Auth:", err);
@@ -271,35 +258,10 @@ export default function LoginPanel() {
               {!isLogin && (
                 <div className="animate-in slide-in-from-top-2 fade-in duration-300 space-y-5">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Pełna nazwa podmiotu / Imię i Nazwisko</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Imię i Nazwisko</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><User className="h-5 w-5 text-slate-400" /></div>
-                      <input type="text" name="name" required value={formData.name} onChange={handleChange} className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="np. Domki Letniskowe Ruś" />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Identyfikator</label>
-                      <select name="identifierType" value={formData.identifierType} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white cursor-pointer">
-                        <option value="NIP">NIP</option>
-                        <option value="PESEL">PESEL</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Nr NIP / PESEL <span className="text-slate-400 font-normal text-xs">(opcjonalnie)</span></label>
-                      <input type="text" name="taxIdentifier" value={formData.taxIdentifier} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="1234567890" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Adres</label>
-                      <input type="text" name="address" required value={formData.address} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="Ulica, Miasto" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5">Telefon</label>
-                      <input type="text" name="phone" required value={formData.phone} onChange={handleChange} className="block w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="123 456 789" />
+                      <input type="text" name="name" required value={formData.name} onChange={handleChange} className="block w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-slate-50 focus:bg-white" placeholder="np. Jan Kowalski" />
                     </div>
                   </div>
                 </div>

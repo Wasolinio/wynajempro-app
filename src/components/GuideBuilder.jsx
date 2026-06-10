@@ -51,12 +51,37 @@ export default function GuideBuilder({ user, properties }) {
       houseRules: '',
       houseRulesFile: null,
       ppoRules: defaultPpoRules,
+      mapLink: '',
       attractions: []
     });
   };
 
-  const handleEdit = (guide) => {
-    setEditingGuide({ ppoRules: defaultPpoRules, ...guide });
+  const handleEdit = async (guide) => {
+    setIsLoading(true);
+    let secrets = { wifiNetwork: '', wifiPassword: '', doorPin: '' };
+    try {
+      const secretsSnap = await getDoc(doc(db, 'guides', guide.id, 'secrets', 'data'));
+      if (secretsSnap.exists()) {
+        secrets = secretsSnap.data();
+      } else {
+        // Fallback dla starszych dokumentów gdzie sekrety były jeszcze w guide
+        secrets = {
+          wifiNetwork: guide.wifiNetwork || '',
+          wifiPassword: guide.wifiPassword || '',
+          doorPin: guide.doorPin || ''
+        };
+      }
+    } catch (e) {
+      console.error("Błąd pobierania sekretów do edycji:", e);
+    } finally {
+      setIsLoading(false);
+    }
+
+    setEditingGuide({ 
+      ...guide, 
+      ...secrets,
+      ppoRules: guide.ppoRules || defaultPpoRules 
+    });
   };
 
   const handleDelete = async (id) => {
@@ -133,23 +158,36 @@ export default function GuideBuilder({ user, properties }) {
       const isNew = !guides.some(g => g.id === editingGuide.id);
       const docRef = doc(db, 'guides', editingGuide.id);
       
-      const guideData = {
-        ...editingGuide,
+      const { wifiNetwork, wifiPassword, doorPin, ...publicGuideData } = editingGuide;
+      const hasSensitiveData = !!(wifiNetwork || wifiPassword || doorPin);
+
+      const guideDataToSave = {
+        ...publicGuideData,
+        hasSensitiveData,
         ownerId: user.uid,
         updatedAt: serverTimestamp()
       };
       
       if (isNew) {
         await setDoc(docRef, {
-          ...guideData,
+          ...guideDataToSave,
           createdAt: serverTimestamp()
         });
-        toast.success('Przewodnik został zapisany');
       } else {
-        await updateDoc(docRef, guideData);
-        toast.success('Przewodnik został zaktualizowany');
+        await updateDoc(docRef, guideDataToSave);
       }
 
+      // Zapis sekretów do subkolekcji
+      if (hasSensitiveData) {
+        const secretsRef = doc(db, 'guides', editingGuide.id, 'secrets', 'data');
+        await setDoc(secretsRef, {
+          wifiNetwork: wifiNetwork || '',
+          wifiPassword: wifiPassword || '',
+          doorPin: doorPin || ''
+        });
+      }
+
+      toast.success(isNew ? 'Przewodnik został zapisany' : 'Przewodnik został zaktualizowany');
       setEditingGuide(null);
       fetchGuides();
     } catch (err) {
@@ -275,6 +313,10 @@ export default function GuideBuilder({ user, properties }) {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Dodatkowe instrukcje zameldowania</label>
                     <textarea rows="3" value={editingGuide.checkInInfo} onChange={e => setEditingGuide({...editingGuide, checkInInfo: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="Kluczyk znajduje się w skrytce obok drzwi..." />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Link do mapy z dokładną lokalizacją (Google Maps)</label>
+                    <input value={editingGuide.mapLink || ''} onChange={e => setEditingGuide({...editingGuide, mapLink: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="https://maps.app.goo.gl/..." />
                   </div>
                 </div>
               </div>

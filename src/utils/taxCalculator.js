@@ -122,7 +122,7 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, hostProfile, m
   const monthBookings = bookings.filter(r => _isInMonth(r.endDate || r.date, month, year));
   const monthExpenses = expenses.filter(r => _isInMonth(r.date, month, year));
 
-  // --- Przychód brutto i prowizje w danym miesiącu ---
+  // --- Przychód brutto i wydatki w danym miesiącu ---
   const monthlyGrossIncome   = _sum(monthBookings, 'income');
   const monthlyCommissions   = _sum(monthBookings, 'commission');
   const monthlyExpenseAmount = _sum(monthExpenses, 'utilities');
@@ -136,9 +136,23 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, hostProfile, m
     : monthlyGrossIncome;
 
   // ═══════════════════════════════════════════════════════════════════════
-  //  VAT-UE (Import Usług) = 23% od sumy prowizji zagranicznych portali
+  //  VAT-UE (Import Usług) = 23% od sumy prowizji ZAGRANICZNYCH portali
   // ═══════════════════════════════════════════════════════════════════════
-  const vatUE = monthlyCommissions * 0.23;
+  const foreignCommissions = monthBookings.reduce((acc, r) => {
+    const src = (r.source || '').toLowerCase();
+    const isForeign = r.isForeignSource === true || src.includes('booking') || src.includes('airbnb');
+    const comm = Number(r.commission) || 0;
+    return isForeign ? acc + comm : acc;
+  }, 0);
+  const vatUE = foreignCommissions * 0.23;
+
+  // Pomocnicza funkcja do kosztów (dzieli przez 1.23 dla Vatowców)
+  const _netExpenseSum = (arr, key) => {
+    return arr.reduce((acc, r) => {
+      const val = Number(r[key]) || 0;
+      return acc + (isVatPayer ? (val / 1.23) : val);
+    }, 0);
+  };
 
   // ═══════════════════════════════════════════════════════════════════════
   //  PODATEK DOCHODOWY — narastająco od początku roku (YTD)
@@ -178,13 +192,13 @@ export function calculateMonthlyTaxes(allYearRentals, taxProfile, hostProfile, m
       : 0;
 
     const ytdNetNow    = _netIncomeSum(ytdBookings, isVatPayer);
-    const ytdCommNow   = _sum(ytdBookings, 'commission');
-    const ytdExpNow    = _sum(ytdExpenses, 'utilities');
+    const ytdCommNow   = _netExpenseSum(ytdBookings, 'commission');
+    const ytdExpNow    = _netExpenseSum(ytdExpenses, 'utilities');
     const ytdZusNow    = zusMonthly * (month + 1);
 
     const ytdNetPrev   = _netIncomeSum(prevBookings, isVatPayer);
-    const ytdCommPrev  = _sum(prevBookings, 'commission');
-    const ytdExpPrev   = _sum(prevExpenses, 'utilities');
+    const ytdCommPrev  = _netExpenseSum(prevBookings, 'commission');
+    const ytdExpPrev   = _netExpenseSum(prevExpenses, 'utilities');
     const ytdZusPrev   = zusMonthly * month;
 
     ytdGrossIncome = _sum(ytdBookings, 'income');
@@ -269,10 +283,18 @@ export function generateMicroAccount(identifier, type) {
   // Stała część rachunku (NBP + identyfikator urzędu)
   const bankPart = '10100071222';
 
-  // Dopełnij identyfikator zerami z lewej do 13 cyfr
-  const paddedId = digits.padStart(13, '0');
+  // Zgodnie z algorytmem MF:
+  // Pierwsza cyfra bloku identyfikatora: 1 dla PESEL, 2 dla NIP.
+  // Następnie sam identyfikator, a reszta znaków (do 13) jest dopełniana zerami Z PRAWEJ strony.
+  let idBlock = '';
+  if (type === 'PESEL') {
+    idBlock = '1' + digits; // 1 + 11 = 12 znaków
+  } else {
+    idBlock = '2' + digits; // 2 + 10 = 11 znaków
+  }
+  const paddedId = idBlock.padEnd(13, '0');
 
-  // BBAN = bankPart + paddedId (24 cyfry)
+  // BBAN = bankPart + paddedId (łącznie 11 + 13 = 24 cyfry)
   const bban = bankPart + paddedId;
 
   // Oblicz sumę kontrolną IBAN (standard ISO 7064 mod 97-10)

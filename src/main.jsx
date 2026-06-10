@@ -5,7 +5,7 @@ import './index.css'
 import App from './App.jsx'
 
 // Rozwiązanie problemu "Failed to fetch dynamically imported module" (cache PWA/Vite)
-window.addEventListener('vite:preloadError', (event) => {
+window.addEventListener('vite:preloadError', () => {
   window.location.reload();
 });
 // Inicjalizacja klienta React Query

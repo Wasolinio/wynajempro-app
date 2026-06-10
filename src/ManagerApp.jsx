@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   Plus, Download, Trash2, Home, DollarSign, Wallet, TrendingUp, CheckCircle, 
   XCircle, Landmark, Bell, Mail, Key, Loader2, BarChart3, CalendarDays, List, 
@@ -7,24 +7,28 @@ import {
   Search, ClipboardList, LogIn, LogOut, Sun, RefreshCw, Moon, Lock, CreditCard, ExternalLink,
   AlertTriangle, Clock, BookOpen, Copy
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 // IMPORTUJEMY FIREBASE ORAZ STRIPE
-import { auth, db, functions } from './firebase'; 
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { useFirebaseData } from './hooks/useFirebaseData';
+import { db } from './firebase'; 
+import { doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { useWynajem } from './context/WynajemContext';
 
 // STAŁE I LOGIKA BIZNESOWA — wydzielone do osobnych modułów
 import GuideBuilder from './components/GuideBuilder';
 import { 
   propColors, availableColors, DEFAULT_PROPERTIES, DEFAULT_SOURCES, 
-  DEFAULT_CATEGORIES, DEFAULT_TEMPLATES, defaultTaxSettings, defaultHostProfile, monthNames, ITEMS_PER_PAGE 
+  DEFAULT_CATEGORIES, DEFAULT_TEMPLATES, defaultTaxSettings, defaultHostProfile, ITEMS_PER_PAGE 
 } from './utils/constants';
 import FloatingTaskWidget from './components/FloatingTaskWidget';
 import { calculateTaxes } from './utils/taxCalculator';
+import ProfitabilityReportModal from './components/modals/ProfitabilityReportModal';
+import DailyReportModal from './components/modals/DailyReportModal';
+import AddEditEntryModal from './components/modals/AddEditEntryModal';
+import UtilitiesTable from './components/views/UtilitiesTable';
+import RemindersTable from './components/views/RemindersTable';
+import MobileBookingsList from './components/views/MobileBookingsList';
+import DesktopBookingsTable from './components/views/DesktopBookingsTable';
 import CalendarView from './components/CalendarView';
 import PaywallScreen from './components/PaywallScreen';
 import DeleteConfirmModal from './components/modals/DeleteConfirmModal';
@@ -47,17 +51,16 @@ const getIconComponent = (name, className) => {
 
 // --- GŁÓWNA APLIKACJA ---
 export default function RentalManager() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const { rentals, settings, profile, loading } = useFirebaseData(user, selectedYear);
-  
-  // NOWE: STANY SUBSKRYPCJI
-  const accountStatus = profile?.accountStatus;
-  const trialEndsAt = profile?.trialEndsAt;
-  const scheduledDeletionAt = profile?.scheduledDeletionAt;
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
-  const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
+  const { 
+    user, loading, rentals, 
+    accountStatus, trialEndsAt, scheduledDeletionAt,
+    isCheckoutLoading, isBillingPortalLoading,
+    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
+    selectedYear, setSelectedYear,
+    handleLogout, toggleStatus, completeTask, toggleDynamicTask,
+    isAccessLocked, handleSubscribe, handleManageSubscription,
+    isSyncing, handleSyncCalendars
+  } = useWynajem();
 
   // Stany UI
   const [showAddModal, setShowAddModal] = useState(false);
@@ -66,8 +69,7 @@ export default function RentalManager() {
   const [showDailyReportModal, setShowDailyReportModal] = useState(false);
   const [settingsTab, setSettingsTab] = useState('sync'); 
   const [itemToDelete, setItemToDelete] = useState(null); 
-  const [searchQuery, setSearchQuery] = useState(''); 
-  const [isSyncing, setIsSyncing] = useState(false); 
+  const [searchQuery, setSearchQuery] = useState('');
 
   // DARK MODE STATE
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -79,29 +81,20 @@ export default function RentalManager() {
 
   // Stany Edycji i Ustawień z domyślnymi wartościami
   const [editingId, setEditingId] = useState(null);
-  const templates = settings.templates;
   const [editingTemplates, setEditingTemplates] = useState([]);
   
-  const properties = settings.properties;
   const [editingProperties, setEditingProperties] = useState([]);
   const [newPropertyName, setNewPropertyName] = useState('');
   const [newPropertyColor, setNewPropertyColor] = useState('blue');
   
-  const sources = settings.sources;
   const [editingSources, setEditingSources] = useState([]);
   const [newSourceName, setNewSourceName] = useState('');
   
-  const categories = settings.categories;
   const [editingCategories, setEditingCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   
-  const syncLinks = settings.syncLinks;
   const [editingSyncLinks, setEditingSyncLinks] = useState({});
-
-  const taxSettings = settings.taxSettings || defaultTaxSettings;
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
-
-  const hostProfile = settings.hostProfile || defaultHostProfile;
   const [editingHostProfile, setEditingHostProfile] = useState(defaultHostProfile);
 
   // --- NOWY SYSTEM NAWIGACJI ---
@@ -113,18 +106,18 @@ export default function RentalManager() {
   const [utilitySortOrder, setUtilitySortOrder] = useState('desc'); 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const changeTab = (tab) => { setMainTab(tab); setCurrentPage(1); };
-  const changeBookingFilter = (filter) => { setBookingFilter(filter); setCurrentPage(1); };
-  const changeBookingSortOrder = (updater) => { setBookingSortOrder(updater); setCurrentPage(1); };
-  const changeUtilitySortOrder = (updater) => { setUtilitySortOrder(updater); setCurrentPage(1); };
-  const changeSearchQuery = (val) => { setSearchQuery(val); setCurrentPage(1); };
+  const changeTab = useCallback((tab) => { setMainTab(tab); setCurrentPage(1); }, []);
+  const changeBookingFilter = useCallback((filter) => { setBookingFilter(filter); setCurrentPage(1); }, []);
+  const changeBookingSortOrder = useCallback((updater) => { setBookingSortOrder(updater); setCurrentPage(1); }, []);
+  const changeUtilitySortOrder = useCallback((updater) => { setUtilitySortOrder(updater); setCurrentPage(1); }, []);
+  const changeSearchQuery = useCallback((val) => { setSearchQuery(val); setCurrentPage(1); }, []);
 
-  const getDefaultRentalState = () => ({
+  const getDefaultRentalState = useCallback(() => ({
     type: 'booking', source: sources.length > 0 ? sources[0] : '', property: properties.length > 0 ? properties[0].name : '', 
     category: categories.length > 0 ? categories[0] : '', guest: '', email: '', phone: '', guestNote: '', text: '',
     date: new Date().toISOString().split('T')[0], endDate: '', income: '', advancePayment: '', isAdvancePaid: false, commission: '',
     utilities: '', tax: '', vat: '', isPaid: false, isCompleted: false, completedTasks: {}, syncId: ''
-  });
+  }), [sources, properties, categories]);
 
   const [newRental, setNewRental] = useState(getDefaultRentalState());
 
@@ -148,78 +141,12 @@ export default function RentalManager() {
     }
   }, [isDarkMode]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        // Dodatkowa bariera: jeśli mail nie jest zweryfikowany (konto email/hasło), wyloguj
-        if (!currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
-          signOut(auth);
-          navigate('/login');
-          return;
-        }
-        setUser(currentUser);
-      } else {
-        navigate('/login');
-      }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
-
-
-
-
-
-  // --- ZABEZPIECZENIE DOSTĘPU (PAYWALL STRIPE) ---
-  const isAccessLocked = () => {
-    if (accountStatus === 'active') return false; // Konto aktywne (opłacone), wpuszczamy
-    if (accountStatus === 'past_due') return true; // Zaległa płatność, blokujemy
-    if (accountStatus === 'canceled') return true; // Subskrypcja anulowana, blokujemy
-    
-    // Konto w okresie próbnym, sprawdzamy datę
-    if (trialEndsAt) {
-        const now = new Date();
-        if (now > trialEndsAt) return true; // Czas minął, blokujemy
-    }
-    return false; // Trial nadal trwa, wpuszczamy
-  };
-
-  const handleSubscribe = async () => {
-    setIsCheckoutLoading(true);
-    try {
-        // Odświeżamy token użytkownika, aby App Check i auth claims były aktualne
-        if (auth.currentUser) {
-          await auth.currentUser.getIdToken(true);
-        }
-
-        // Wywołujemy Cloud Function, która bezpiecznie tworzy sesję Stripe Checkout
-        const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
-        const result = await createCheckoutSession({
-            successUrl: window.location.origin + '/dashboard',
-            cancelUrl: window.location.origin + '/dashboard',
-        });
-
-        // Przekierowujemy do bramki płatności Stripe
-        if (result.data?.url) {
-            window.location.assign(result.data.url);
-        } else {
-            throw new Error('Nie otrzymano URL sesji płatności');
-        }
-    } catch (err) {
-        console.error("Błąd tworzenia sesji checkoutu:", err);
-        
-        let message = 'Wystąpił problem z wczytaniem płatności. Spróbuj ponownie.';
-        if (err.code === 'functions/unauthenticated') {
-          message = 'Sesja wygasła. Wyloguj się i zaloguj ponownie.';
-        } else if (err.code === 'functions/permission-denied') {
-          message = 'Brak uprawnień. Upewnij się, że Twój adres email jest zweryfikowany.';
-        } else if (err.message?.includes('app-check')) {
-          message = 'Weryfikacja bezpieczeństwa nie powiodła się. Wyłącz blokady reklam i spróbuj ponownie.';
-        }
-        
-        alert(message);
-        setIsCheckoutLoading(false);
-    }
-  };
+  // useEffect(() => {
+  //   if (!user && !loading) {
+  //     navigate('/login');
+  //   }
+  // }, [user, loading, navigate]);
+  // W protectedRoute to jest ogarniane, tu nawigacja nie jest super niezbędna
 
 
   // --- OBLICZANIE DANYCH ---
@@ -233,7 +160,7 @@ export default function RentalManager() {
     return Array.from(years).sort((a, b) => b - a);
   }, [selectedYear]);
 
-  const handleYearChange = (newYearStr) => {
+  const handleYearChange = useCallback((newYearStr) => {
     setSelectedYear(newYearStr);
     setCurrentPage(1);
     const newYear = parseInt(newYearStr, 10);
@@ -243,7 +170,7 @@ export default function RentalManager() {
     } else {
       setCalendarDate(new Date(newYear, 0, 1)); 
     }
-  };
+  }, [setSelectedYear]);
 
   const dailyReport = useMemo(() => {
     const today = new Date();
@@ -389,45 +316,12 @@ export default function RentalManager() {
     return yearlyStats[selectedYear] || { total: { income: 0, costs: 0, tax: 0, profit: 0 }, months: Array.from({length: 12}, () => ({ income: 0, costs: 0, tax: 0, profit: 0, active: false })) };
   }, [yearlyStats, selectedYear]);
 
-  // --- LOGIKA SYNCHRONIZACJI ICAL (przez bezpieczną Cloud Function) ---
-  const handleSyncCalendars = async () => {
-    if (!user) return;
-    
-    if (Object.keys(syncLinks).length === 0) {
-      alert('Najpierw dodaj linki iCal w Ustawieniach (zakładka Integracje), aby móc zsynchronizować kalendarze.');
-      return;
-    }
 
-    setIsSyncing(true);
-    try {
-      if (auth.currentUser) {
-        await auth.currentUser.getIdToken(true);
-      }
-
-      const syncICalCalendars = httpsCallable(functions, 'syncICalCalendars');
-      const result = await syncICalCalendars({ syncLinks });
-
-      const count = result.data?.newBookingsCount || 0;
-      if (count > 0) alert(`Synchronizacja zakończona! Dodano ${count} nowych rezerwacji.`);
-      else alert('Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.');
-    } catch (err) {
-      console.error('Błąd synchronizacji kalendarzy:', err);
-      let message = 'Wystąpił błąd podczas synchronizacji kalendarzy.';
-      if (err.code === 'functions/unauthenticated') {
-        message = 'Sesja wygasła. Wyloguj się i zaloguj ponownie.';
-      } else if (err.message?.includes('app-check')) {
-        message = 'Weryfikacja bezpieczeństwa nie powiodła się. Wyłącz blokady reklam i spróbuj ponownie.';
-      }
-      alert(message);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   // --- AKCJE FIREBASE I FUNKCJE ---
-  const handleCloseModal = () => { setShowAddModal(false); setEditingId(null); setNewRental(getDefaultRentalState()); };
+  const handleCloseModal = useCallback(() => { setShowAddModal(false); setEditingId(null); setNewRental(getDefaultRentalState()); }, [getDefaultRentalState]);
   
-  const openEditModal = (r) => { 
+  const openEditModal = useCallback((r) => { 
     setEditingId(r.id); 
     setNewRental({
       ...r,
@@ -442,9 +336,9 @@ export default function RentalManager() {
       utilities: r.utilities || '',
     }); 
     setShowAddModal(true); 
-  };
+  }, []);
   
-  const handleDeleteClick = (id) => { setItemToDelete(id); };
+  const handleDeleteClick = useCallback((id) => { setItemToDelete(id); }, []);
 
   const handleRentalChange = (field, value) => {
     const updated = { ...newRental, [field]: value };
@@ -480,7 +374,7 @@ export default function RentalManager() {
     }
   };
 
-  const confirmDelete = async () => { 
+  const confirmDelete = useCallback(async () => { 
     if (!user || !itemToDelete) return; 
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete)); 
@@ -491,31 +385,12 @@ export default function RentalManager() {
     } finally {
       setItemToDelete(null); 
     }
-  };
-
-  const toggleStatus = async (id, field) => {
-    const r = rentals.find(r => r.id === id);
-    if (r && user) await updateDoc(doc(db, 'users', user.uid, 'rentals', id), { [field]: !r[field] });
-  };
-
-  const completeTask = async (id, taskId, current) => {
-    if (!user) return;
-    const updates = taskId === 'manual' ? { isCompleted: true } : { [`completedTasks.${taskId}`]: current !== undefined ? !current : true };
-    if (taskId === 'directions') updates.directionsSent = true;
-    if (taskId === 'keycode') updates.keycodeSent = true;
-    await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
-  };
-
-  const toggleDynamicTask = async (id, taskId, currentValue) => {
-    if (!user) return;
-    const updates = { [`completedTasks.${taskId}`]: !currentValue };
-    if (taskId === 'directions') updates.directionsSent = !currentValue;
-    if (taskId === 'keycode') updates.keycodeSent = !currentValue;
-    await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
-  };
+  }, [user, itemToDelete]);
 
 
-  const openSettingsModal = () => {
+
+
+  const openSettingsModal = useCallback(() => {
     setEditingTemplates(JSON.parse(JSON.stringify(templates)));
     setEditingProperties([...properties]); 
     setEditingSources([...sources]); 
@@ -525,9 +400,9 @@ export default function RentalManager() {
     setEditingSyncLinks(JSON.parse(JSON.stringify(syncLinks)));
     setSettingsTab('sync'); 
     setShowSettingsModal(true);
-  };
+  }, [templates, properties, sources, categories, taxSettings, hostProfile, syncLinks]);
 
-  const saveSettings = async () => {
+  const saveSettings = useCallback(async () => {
     if (!user) return;
     try {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'reminders'), { items: editingTemplates });
@@ -543,49 +418,19 @@ export default function RentalManager() {
       console.error(err);
       toast.error('Błąd podczas zapisywania ustawień');
     }
-  };
+  }, [user, editingTemplates, editingProperties, editingSources, editingCategories, editingTaxSettings, editingHostProfile, editingSyncLinks]);
 
-  const changeMonth = (offset) => {
-    const newDate = new Date(calendarDate);
-    newDate.setMonth(newDate.getMonth() + offset);
-    setCalendarDate(newDate);
-  };
+  const changeMonth = useCallback((offset) => {
+    setCalendarDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() + offset);
+      return newDate;
+    });
+  }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Błąd podczas wylogowywania:", error);
-    }
-  };
 
-  // --- STRIPE CUSTOMER PORTAL (zarządzanie subskrypcją) ---
-  const handleManageSubscription = async () => {
-    setIsBillingPortalLoading(true);
-    try {
-      if (auth.currentUser) {
-        await auth.currentUser.getIdToken(true);
-      }
-      const createBillingPortalSession = httpsCallable(functions, 'createBillingPortalSession');
-      const result = await createBillingPortalSession({
-        returnUrl: window.location.origin + '/dashboard',
-      });
-      if (result.data?.url) {
-        window.location.assign(result.data.url);
-      } else {
-        throw new Error('Nie otrzymano URL panelu zarządzania');
-      }
-    } catch (err) {
-      console.error('Błąd otwierania panelu subskrypcji:', err);
-      let message = 'Nie udało się otworzyć panelu zarządzania subskrypcją.';
-      if (err.code === 'functions/failed-precondition') {
-        message = 'Nie masz jeszcze aktywnej subskrypcji do zarządzania.';
-      }
-      alert(message);
-    } finally {
-      setIsBillingPortalLoading(false);
-    }
-  };
+
+
 
   const updateProperty = (index, newValue) => { const updated = [...editingProperties]; updated[index] = newValue; setEditingProperties(updated); };
   const removeProperty = (index) => { const updated = [...editingProperties]; updated.splice(index, 1); setEditingProperties(updated); };
@@ -784,244 +629,50 @@ export default function RentalManager() {
 
             <div className="overflow-x-auto">
               {renderMainTab === 'utilities' ? (
-                <table className="w-full text-left min-w-[600px]">
-                  <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
-                    <tr>
-                      <th className="p-5 font-extrabold">Opis Kosztu</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => changeUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
-                         <div className="flex items-center gap-1">Data {utilitySortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
-                      </th>
-                      <th className="p-5 text-right font-extrabold">Kwota</th>
-                      <th className="p-5 text-center font-extrabold">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-                    {paginatedUtilities.map(r => (
-                      <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
-                        <td className="p-5"><span className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-[10px] px-2.5 py-1 rounded-lg mr-3 shadow-sm">{r.category}</span> <span className="font-bold text-slate-800 dark:text-slate-200">{r.guest}</span> <div className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1.5">{r.property}</div></td>
-                        <td className="p-5 text-sm font-medium text-slate-600 dark:text-slate-300">{r.date}</td>
-                        <td className="p-5 text-right font-extrabold text-red-500 dark:text-rose-400">{Number(r.utilities).toLocaleString('pl-PL')} zł</td>
-                        <td className="p-5 text-center">
-                          <button onClick={() => openEditModal(r)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteClick(r.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <UtilitiesTable 
+                  paginatedUtilities={paginatedUtilities}
+                  utilitySortOrder={utilitySortOrder}
+                  changeUtilitySortOrder={changeUtilitySortOrder}
+                  openEditModal={openEditModal}
+                  handleDeleteClick={handleDeleteClick}
+                />
               ) : renderMainTab === 'reminders' ? (
-                <table className="w-full text-left min-w-[600px]">
-                  <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
-                    <tr>
-                      <th className="p-5 font-extrabold">Zadanie</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-center" onClick={() => changeUtilitySortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
-                         <div className="flex items-center justify-center gap-1">Termin {utilitySortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
-                      </th>
-                      <th className="p-5 text-center font-extrabold">Status</th>
-                      <th className="p-5 text-center font-extrabold">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-                    {paginatedReminders.map(r => (
-                      <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
-                        <td className="p-5 font-extrabold text-slate-800 dark:text-slate-200"><Bell className="inline w-4 h-4 text-amber-500 mr-2"/> {r.text}</td>
-                        <td className="p-5 text-center text-sm font-medium text-slate-600 dark:text-slate-300">{r.date}</td>
-                        <td className="p-5 text-center"><button onClick={() => toggleStatus(r.id, 'isCompleted')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${r.isCompleted ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'}`}>{r.isCompleted ? '✔ Wykonane' : 'Oczekuje'}</button></td>
-                        <td className="p-5 text-center">
-                          <button onClick={() => openEditModal(r)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteClick(r.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <RemindersTable 
+                  paginatedReminders={paginatedReminders}
+                  utilitySortOrder={utilitySortOrder}
+                  changeUtilitySortOrder={changeUtilitySortOrder}
+                  toggleStatus={toggleStatus}
+                  openEditModal={openEditModal}
+                  handleDeleteClick={handleDeleteClick}
+                />
               ) : (
                 <>
-                {/* ===== WIDOK MOBILNY: KARTY (md:hidden) ===== */}
-                <div className="grid grid-cols-1 gap-4 p-4 md:hidden mb-2">
-                  {paginatedBookings.map(r => {
-                    const propColor = propColors[properties.find(p => p.name === r.property)?.color || 'slate'];
-                    const netProfit = Number(r.income) - Number(r.commission) - Number(r.tax) - Number(r.vat || 0);
-                    return (
-                      <div key={r.id} className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col gap-3 relative transition-colors">
-                        
-                        {/* Nagłówek: Gość + Badge Płatności */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ${propColor?.bg}`}></div>
-                              <span className="font-extrabold text-slate-800 dark:text-slate-200 text-sm truncate">{r.property}</span>
-                            </div>
-                            <p className="text-sm font-bold text-slate-600 dark:text-slate-300 ml-[18px]">{r.guest}</p>
-                            {(r.email || r.phone) && (
-                              <div className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1.5 ml-[18px] flex flex-col gap-0.5">
-                                {r.phone && <a href={`tel:${r.phone.replace(/\s+/g, '')}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit flex items-center gap-1"><Phone className="w-3 h-3"/> {r.phone}</a>}
-                                {r.email && <a href={`mailto:${r.email}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit flex items-center gap-1"><Mail className="w-3 h-3"/> {r.email}</a>}
-                              </div>
-                            )}
-                          </div>
-                          <button onClick={() => toggleStatus(r.id, 'isPaid')} className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shadow-sm ${r.isPaid ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600'}`}>
-                            {r.isPaid ? '✔ Opłacone' : 'Nieopłacone'}
-                          </button>
-                        </div>
+                  {/* ===== WIDOK MOBILNY: KARTY (md:hidden) ===== */}
+                  <MobileBookingsList 
+                    paginatedBookings={paginatedBookings}
+                    propColors={propColors}
+                    properties={properties}
+                    toggleStatus={toggleStatus}
+                    templates={templates}
+                    toggleDynamicTask={toggleDynamicTask}
+                    openEditModal={openEditModal}
+                    handleDeleteClick={handleDeleteClick}
+                  />
 
-                        {/* Notatka gościa */}
-                        {r.guestNote && (
-                          <div className="text-xs text-amber-700 dark:text-amber-400 p-2.5 bg-gradient-to-r from-amber-50 to-yellow-50/50 dark:from-amber-500/10 dark:to-yellow-500/10 rounded-xl border border-amber-100/60 dark:border-amber-500/20 font-medium flex items-start gap-1.5">
-                            <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-0.5" /> <span>{r.guestNote}</span>
-                          </div>
-                        )}
-
-                        {/* Siatka danych */}
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm bg-slate-50/80 dark:bg-slate-900/30 p-3.5 rounded-xl border border-slate-100/80 dark:border-slate-700/50">
-                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                            <CalendarDays className="w-3.5 h-3.5 shrink-0 text-blue-500" />
-                            <div>
-                              <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">{r.date}</span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">do {r.endDate}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                            <Globe className="w-3.5 h-3.5 shrink-0 text-indigo-500" />
-                            <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">{r.source}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                            <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs">{Number(r.income).toLocaleString('pl-PL')} zł</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <TrendingUp className="w-3.5 h-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                            <span className="font-black text-slate-900 dark:text-white text-xs">{netProfit.toLocaleString('pl-PL')} zł</span>
-                          </div>
-                          {Number(r.advancePayment) > 0 && (
-                            <div className="col-span-2 flex items-center justify-between">
-                              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-500/20">
-                                Zaliczka: {Number(r.advancePayment).toLocaleString('pl-PL')} zł
-                              </span>
-                              <button onClick={() => toggleStatus(r.id, 'isAdvancePaid')} className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition-all ${r.isAdvancePaid ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600'}`}>
-                                {r.isAdvancePaid ? '✔ Wpłacona' : 'Oczekuje'}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Zadania (checkboxy) */}
-                        {templates.length > 0 && (
-                          <div className="flex flex-wrap gap-x-4 gap-y-2 px-1">
-                            {templates.map(t => {
-                              const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
-                              return (
-                                <label key={t.id} className="flex items-center gap-2 cursor-pointer group/task">
-                                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 group-hover/task:border-blue-400 dark:group-hover/task:border-blue-500'}`}>
-                                    {isCompleted && <CheckCircle className="w-3.5 h-3.5" />}
-                                  </div>
-                                  <input type="checkbox" className="hidden" checked={isCompleted || false} onChange={() => toggleDynamicTask(r.id, t.id, isCompleted)} />
-                                  <span className={`text-xs font-bold transition-colors ${isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 group-hover/task:text-slate-800 dark:group-hover/task:text-slate-200'}`}>{t.shortName}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {/* Akcje (Stopka karty) */}
-                        <div className="border-t border-slate-100 dark:border-slate-700 pt-3 flex gap-2">
-                          <button onClick={() => openEditModal(r)} className="flex-1 flex items-center justify-center gap-2 min-h-[44px] bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-xl transition-all border border-blue-100 dark:border-blue-500/20">
-                            <Edit className="w-4 h-4" /> Edytuj
-                          </button>
-                          <button onClick={() => handleDeleteClick(r.id)} className="flex items-center justify-center gap-2 min-h-[44px] px-4 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-bold text-sm rounded-xl transition-all border border-rose-100 dark:border-rose-500/20">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* ===== WIDOK DESKTOP: TABELA (hidden md:block) ===== */}
-                <div className="hidden md:block">
-                <table className="w-full text-left min-w-[1100px]">
-                  <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
-                    <tr>
-                      <th className="p-5 font-extrabold">Domek / Gość</th>
-                      <th className="p-5 font-extrabold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={() => changeBookingSortOrder(prev => prev === 'upcoming' ? 'desc' : prev === 'desc' ? 'asc' : 'upcoming')}>
-                         <div className="flex items-center gap-1">Termin {bookingSortOrder === 'upcoming' ? <CalendarDays className="w-3.5 h-3.5 text-blue-500"/> : bookingSortOrder === 'desc' ? <ArrowDown className="w-3.5 h-3.5"/> : <ArrowUp className="w-3.5 h-3.5"/>}</div>
-                      </th>
-                      <th className="p-5 text-right font-extrabold">Przychód</th>
-                      <th className="p-5 text-right font-extrabold">Prowizja</th>
-                      {taxSettings.isVatPayer && <th className="p-5 text-right font-extrabold">VAT</th>}
-                      <th className="p-5 text-right font-extrabold">Podatek</th>
-                      <th className="p-5 text-right text-blue-600 dark:text-blue-400 font-extrabold">Zysk Netto</th>
-                      <th className="p-5 font-extrabold">Zadania</th>
-                      <th className="p-5 text-center font-extrabold">Status</th>
-                      <th className="p-5 text-center font-extrabold">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-                    {paginatedBookings.map(r => {
-                      const propColor = propColors[properties.find(p => p.name === r.property)?.color || 'slate'];
-                      return (
-                        <tr key={r.id} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-colors group">
-                          <td className="p-5">
-                            <div className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                               <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${propColor?.bg}`}></div> 
-                               {r.property}
-                            </div>
-                            <div className="text-sm font-medium text-slate-600 dark:text-slate-400 ml-4 mt-1.5 flex items-center gap-2">
-                               {r.guest} 
-                               <span className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm px-1.5 py-0.5 rounded-md text-[10px] text-slate-500 dark:text-slate-300 font-bold">{r.source}</span>
-                            </div>
-                            {(r.email || r.phone) && (
-                              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1.5 ml-4 flex flex-col gap-0.5">
-                                {r.phone && <a href={`tel:${r.phone.replace(/\s+/g, '')}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit flex items-center gap-1"><Phone className="w-3 h-3"/> {r.phone}</a>}
-                                {r.email && <a href={`mailto:${r.email}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit flex items-center gap-1"><Mail className="w-3 h-3"/> {r.email}</a>}
-                              </div>
-                            )}
-                            {r.guestNote && (
-                              <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-2 ml-4 p-2 bg-gradient-to-r from-amber-50 to-yellow-50/50 dark:from-amber-500/10 dark:to-yellow-500/10 rounded-lg border border-amber-100/60 dark:border-amber-500/20 w-max max-w-xs font-medium shadow-sm flex items-start gap-1.5">
-                                <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-0.5" /> <span>{r.guestNote}</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-5 text-sm font-bold text-slate-700 dark:text-slate-300">{r.date} <br/><span className="text-xs font-medium text-slate-400 dark:text-slate-500">do {r.endDate}</span></td>
-                          <td className="p-5 text-right font-extrabold text-emerald-600 dark:text-emerald-400">{Number(r.income).toLocaleString('pl-PL')} zł {Number(r.advancePayment)>0 && <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold mt-1 bg-indigo-50 dark:bg-indigo-500/10 inline-block px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-500/20">zal. {Number(r.advancePayment).toLocaleString('pl-PL')} zł</div>}</td>
-                          <td className="p-5 text-right font-bold text-rose-500 dark:text-rose-400">{Number(r.commission).toLocaleString('pl-PL')} zł</td>
-                          {taxSettings.isVatPayer && <td className="p-5 text-right font-bold text-pink-500 dark:text-pink-400">{Number(r.vat).toLocaleString('pl-PL')} zł</td>}
-                          <td className="p-5 text-right font-bold text-violet-600 dark:text-violet-400">{Number(r.tax).toLocaleString('pl-PL')} zł</td>
-                          <td className="p-5 text-right font-black text-slate-900 dark:text-white text-base">{(Number(r.income) - Number(r.commission) - Number(r.tax) - Number(r.vat || 0)).toLocaleString('pl-PL')} zł</td>
-                          <td className="p-5">
-                            <div className="flex flex-col gap-2.5 w-max">
-                              {templates.map(t => {
-                                const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
-                                return (
-                                  <label key={t.id} className="flex items-center gap-2 cursor-pointer group/task">
-                                    <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isCompleted ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 group-hover/task:border-blue-400 dark:group-hover/task:border-blue-500'}`}>
-                                      {isCompleted && <CheckCircle className="w-3 h-3" />}
-                                    </div>
-                                    <input type="checkbox" className="hidden" checked={isCompleted || false} onChange={() => toggleDynamicTask(r.id, t.id, isCompleted)} />
-                                    <span className={`text-[11px] font-bold transition-colors ${isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 group-hover/task:text-slate-800 dark:group-hover/task:text-slate-200'}`}>{t.shortName}</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </td>
-                          <td className="p-5 text-center flex flex-col gap-2 items-center justify-center">
-                            <button onClick={() => toggleStatus(r.id, 'isPaid')} className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shadow-sm w-full max-w-[100px] ${r.isPaid ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}>Opłacone {r.isPaid ? '✔' : ''}</button>
-                            {Number(r.advancePayment) > 0 && (
-                               <button onClick={() => toggleStatus(r.id, 'isAdvancePaid')} className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shadow-sm w-full max-w-[100px] ${r.isAdvancePaid ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}>Zaliczka {r.isAdvancePaid ? '✔' : ''}</button>
-                            )}
-                          </td>
-                          <td className="p-5 text-center">
-                             <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <button onClick={() => openEditModal(r)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/20 rounded-xl transition-all shadow-sm"><Edit className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteClick(r.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm"><Trash2 className="w-4 h-4" /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                </div>
+                  {/* ===== WIDOK DESKTOP: TABELA (hidden md:block) ===== */}
+                  <DesktopBookingsTable 
+                    paginatedBookings={paginatedBookings}
+                    propColors={propColors}
+                    properties={properties}
+                    bookingSortOrder={bookingSortOrder}
+                    changeBookingSortOrder={changeBookingSortOrder}
+                    taxSettings={taxSettings}
+                    toggleStatus={toggleStatus}
+                    templates={templates}
+                    toggleDynamicTask={toggleDynamicTask}
+                    openEditModal={openEditModal}
+                    handleDeleteClick={handleDeleteClick}
+                  />
                 </>
               )}
             </div>
@@ -1056,611 +707,83 @@ export default function RentalManager() {
         {/* --- MODALE --- */}
         
         {/* MODAL: RAPORT RENTOWNOŚCI (Z PRZYCHODÓW) */}
-        {showStatsModal && (
-          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] border border-white/50 dark:border-slate-700">
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 rounded-t-[2rem] shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/30"><BarChart3 className="w-6 h-6" /></div>
-                  <div><h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Raport Rentowności</h2><p className="text-sm font-medium text-slate-500 dark:text-slate-400">Zestawienie przychodów i kosztów</p></div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <select value={selectedYear} onChange={(e) => handleYearChange(e.target.value)} className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all">
-                    {availableYears.map(year => <option key={year} value={year}>Rok {year}</option>)}
-                  </select>
-                  <button onClick={() => setShowStatsModal(false)} className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-500 dark:text-slate-400"><XCircle className="w-6 h-6" /></button>
-                </div>
-              </div>
-              <div className="p-8 overflow-y-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                  <div className="bg-emerald-50/50 dark:bg-emerald-500/10 p-5 rounded-3xl border border-emerald-100 dark:border-emerald-500/20"><p className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Przychód</p><p className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{currentYearData.total.income.toLocaleString('pl-PL')} zł</p></div>
-                  <div className="bg-rose-50/50 dark:bg-rose-500/10 p-5 rounded-3xl border border-rose-100 dark:border-rose-500/20"><p className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Koszty</p><p className="text-2xl font-black text-rose-700 dark:text-rose-300">{currentYearData.total.costs.toLocaleString('pl-PL')} zł</p></div>
-                  <div className="bg-violet-50/50 dark:bg-violet-500/10 p-5 rounded-3xl border border-violet-100 dark:border-violet-500/20"><p className="text-[10px] font-extrabold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Podatek</p><p className="text-2xl font-black text-violet-700 dark:text-violet-300">{currentYearData.total.tax.toLocaleString('pl-PL')} zł</p></div>
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-5 rounded-3xl shadow-lg shadow-blue-500/30"><p className="text-[10px] font-extrabold text-blue-100 uppercase tracking-widest mb-1">Zysk Netto</p><p className="text-2xl font-black text-white">{currentYearData.total.profit.toLocaleString('pl-PL')} zł</p></div>
-                </div>
-                <h3 className="font-extrabold text-slate-900 dark:text-white mb-5 flex items-center gap-2"><CalendarDays className="w-5 h-5 text-blue-500" /> Miesiąc po miesiącu</h3>
-                <div className="border border-slate-100 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider"><tr><th className="p-4 font-extrabold">Miesiąc</th><th className="p-4 font-extrabold text-right">Przychód</th><th className="p-4 font-extrabold text-right">Koszty</th><th className="p-4 font-extrabold text-right">Podatek</th><th className="p-4 font-extrabold text-right text-blue-600 dark:text-blue-400">Zysk Netto</th></tr></thead>
-                    <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-                      {currentYearData.months.map((m, i) => (
-                        <tr key={i} className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${!m.active ? 'opacity-40 bg-slate-50/30 dark:bg-slate-900/30' : ''}`}>
-                          <td className="p-4 font-bold text-slate-800 dark:text-slate-200">{monthNames[i]}</td>
-                          <td className="p-4 text-right font-bold text-emerald-600 dark:text-emerald-400">{m.income > 0 ? `${m.income.toLocaleString('pl-PL')} zł` : '-'}</td>
-                          <td className="p-4 text-right font-bold text-rose-500 dark:text-rose-400">{m.costs > 0 ? `${m.costs.toLocaleString('pl-PL')} zł` : '-'}</td>
-                          <td className="p-4 text-right font-bold text-violet-600 dark:text-violet-400">{m.tax > 0 ? `${m.tax.toLocaleString('pl-PL')} zł` : '-'}</td>
-                          <td className="p-4 text-right font-black text-slate-900 dark:text-white text-base">{m.profit !== 0 ? `${m.profit.toLocaleString('pl-PL')} zł` : '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ProfitabilityReportModal 
+          showStatsModal={showStatsModal}
+          setShowStatsModal={setShowStatsModal}
+          selectedYear={selectedYear}
+          handleYearChange={handleYearChange}
+          availableYears={availableYears}
+          currentYearData={currentYearData}
+        />
 
         {/* MODAL: RAPORT DZIENNY */}
-        {showDailyReportModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[70] animate-in fade-in zoom-in-95 duration-300">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden border border-white/20 dark:border-slate-800 relative">
-              
-              {/* Header */}
-              <div className="px-8 pt-8 pb-6 bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <div className="relative z-10 flex gap-5 items-center">
-                  <div className="p-4 bg-white dark:bg-slate-800 shadow-xl shadow-indigo-500/20 dark:shadow-none rounded-2xl border border-slate-100 dark:border-slate-700">
-                    <Sun className="w-8 h-8 text-indigo-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-1">Raport Dnia</h2>
-                    <p className="text-sm font-semibold text-indigo-600/80 dark:text-indigo-400/80 uppercase tracking-widest">{dailyReport.dateStr}</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowDailyReportModal(false)} className="relative z-10 p-2.5 bg-white/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><XCircle className="w-6 h-6" /></button>
-              </div>
-
-              {/* Body */}
-              <div className="p-8 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/50 space-y-8 relative">
-                
-                {/* Przyjazdy */}
-                <section>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="bg-emerald-100 dark:bg-emerald-500/20 p-2 rounded-xl"><LogIn className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div>
-                    <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Przyjazdy ({dailyReport.arrivals.length})</h3>
-                  </div>
-                  {dailyReport.arrivals.length === 0 ? (
-                    <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-500 dark:text-slate-400 font-medium">Dzisiaj nikt nie przyjeżdża.</div>
-                  ) : (
-                    <div className="space-y-3">
-                      {dailyReport.arrivals.map(r => (
-                        <div key={r.id} className="group bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-2 h-12 bg-emerald-400 dark:bg-emerald-500 rounded-full"></div>
-                            <div>
-                              <p className="font-extrabold text-slate-800 dark:text-slate-200 text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{r.guest}</p>
-                              <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mt-1">
-                                <Building className="w-4 h-4" /> {r.propNameStr}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-2 pl-6 sm:pl-0">
-                            <span className={`text-[11px] font-bold px-3 py-1.5 rounded-full ${r.isPaid ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30'}`}>{r.isPaid ? 'Opłacone' : 'Do opłacenia'}</span>
-                            {Number(r.advancePayment) > 0 && !r.isPaid && <span className={`text-[11px] font-bold px-3 py-1.5 rounded-full ${r.isAdvancePaid ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>{r.isAdvancePaid ? 'Zaliczka' : 'Brak zaliczki'}</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {/* Wyjazdy */}
-                <section>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="bg-rose-100 dark:bg-rose-500/20 p-2 rounded-xl"><LogOut className="w-5 h-5 text-rose-600 dark:text-rose-400" /></div>
-                    <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Wyjazdy ({dailyReport.departures.length})</h3>
-                  </div>
-                  {dailyReport.departures.length === 0 ? (
-                    <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-center text-slate-500 dark:text-slate-400 font-medium">Brak wyjazdów na dzisiaj.</div>
-                  ) : (
-                    <div className="space-y-3">
-                      {dailyReport.departures.map(r => (
-                        <div key={r.id} className="group bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-rose-200 dark:hover:border-rose-500/30 transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-2 h-12 bg-rose-400 dark:bg-rose-500 rounded-full"></div>
-                            <div>
-                              <p className="font-extrabold text-slate-800 dark:text-slate-200 text-lg group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">{r.guest}</p>
-                              <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mt-1">
-                                <Building className="w-4 h-4" /> {r.propNameStr}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="ml-6 sm:ml-0 text-[11px] font-extrabold px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 tracking-wide">🧹 Sprzątanie</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {/* Zadania na dziś */}
-                <section>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="bg-blue-100 dark:bg-blue-500/20 p-2 rounded-xl"><CheckSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
-                    <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Zadania ({dailyReport.tasks.length})</h3>
-                  </div>
-                  {dailyReport.tasks.length === 0 ? (
-                    <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center bg-white/50 dark:bg-slate-800/50">
-                       <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Wszystko gotowe! Możesz odpocząć. ☕</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {dailyReport.tasks.map(t => (
-                        <div key={`${t.id}-${t.taskId}`} className="group bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500/30 transition-all flex justify-between items-center gap-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center flex-shrink-0">
-                              {t.icon}
-                            </div>
-                            <div>
-                              <p className="font-extrabold text-slate-800 dark:text-slate-200">{t.text}</p>
-                              <p className="text-[13px] font-medium text-slate-500 mt-1 truncate max-w-[200px] sm:max-w-xs">{t.property} {t.guest ? `• ${t.guest}` : ''}</p>
-                            </div>
-                          </div>
-                          <button onClick={() => completeTask(t.id, t.taskId)} className="flex-shrink-0 text-slate-300 dark:text-slate-600 hover:text-white dark:hover:text-white hover:bg-emerald-500 dark:hover:bg-emerald-500 p-3.5 rounded-2xl transition-all shadow-sm border border-transparent hover:shadow-emerald-500/30" title="Oznacz jako wykonane"><CheckCircle className="w-6 h-6" /></button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-              </div>
-            </div>
-          </div>
-        )}
+        <DailyReportModal 
+          showDailyReportModal={showDailyReportModal}
+          setShowDailyReportModal={setShowDailyReportModal}
+          dailyReport={dailyReport}
+          completeTask={completeTask}
+        />
 
         {/* MODAL: USTAWIENIA */}
-        {showSettingsModal && (
-          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-3xl p-8 overflow-y-auto max-h-[90vh] border border-white/50 dark:border-slate-700">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-extrabold text-slate-900 dark:white flex items-center gap-3">
-                  <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl"><Settings className="w-6 h-6" /></div>
-                  Ustawienia Systemu
-                </h2>
-                <button onClick={() => setShowSettingsModal(false)} className="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-400"><XCircle className="w-6 h-6" /></button>
-              </div>
-
-                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                  {['hostProfile', 'properties', 'sources', 'categories', 'tax', 'sync', 'reminders', 'subscription'].map((tab) => (
-                    <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-none text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
-                      {tab === 'hostProfile' && 'Profil Gospodarza'}
-                      {tab === 'properties' && 'Nieruchomości'}
-                      {tab === 'sources' && 'Źródła'}
-                      {tab === 'categories' && 'Kategorie wydatków'}
-                      {tab === 'tax' && 'Podatki'}
-                      {tab === 'sync' && 'Integracje'}
-                      {tab === 'reminders' && 'Powiadomienia'}
-                      {tab === 'subscription' && 'Subskrypcja'}
-                    </button>
-                  ))}
-                </div>
-              
-              {settingsTab === 'sync' && (
-                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 p-5 rounded-3xl text-sm font-medium text-blue-900 dark:text-blue-300 leading-relaxed shadow-sm">
-                    Wklej linki iCal z Bookingu i Airbnb dla swoich obiektów, aby móc je automatycznie synchronizować na głównym ekranie.
-                  </div>
-                  {properties.map(p => (
-                    <div key={p.name} className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                      <h4 className="font-extrabold text-slate-900 dark:text-white mb-4 text-lg flex items-center gap-2"><Building className="w-5 h-5 text-blue-500"/> {p.name}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                           <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Link iCal Booking.com</label>
-                           <input value={editingSyncLinks[p.name]?.booking || ''} onChange={e => setEditingSyncLinks(prev => ({...prev, [p.name]: {...(prev[p.name] || {}), booking: e.target.value}}))} className="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none placeholder-slate-400 dark:placeholder-slate-600" placeholder="https://admin.booking.com/..." />
-                        </div>
-                        <div>
-                           <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Link iCal Airbnb</label>
-                           <input value={editingSyncLinks[p.name]?.airbnb || ''} onChange={e => setEditingSyncLinks(prev => ({...prev, [p.name]: {...(prev[p.name] || {}), airbnb: e.target.value}}))} className="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none placeholder-slate-400 dark:placeholder-slate-600" placeholder="https://www.airbnb.pl/..." />
-                        </div>
-                      </div>
-                      
-                      {/* EKSPORT ICAL (CHANNEL MANAGER) */}
-                      <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
-                        <label className="block text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><CalendarIcon className="w-3 h-3"/> Eksportuj Kalendarz (iCal)</label>
-                        <div className="flex gap-3 items-center">
-                          <input readOnly value={`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user.uid}&p=${encodeURIComponent(p.name)}`} className="flex-1 p-3.5 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl text-xs font-mono text-indigo-800 dark:text-indigo-300 outline-none truncate" />
-                          <button type="button" onClick={() => { navigator.clipboard.writeText(`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user.uid}&p=${encodeURIComponent(p.name)}`); toast.success('Link iCal skopiowany!'); }} className="px-5 py-3.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-400 font-bold rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
-                            <Copy className="w-4 h-4" /> Kopiuj Link
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {settingsTab === 'hostProfile' && (
-                 <div className="space-y-5 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 animate-in slide-in-from-right-4 duration-300">
-                    <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Pełna nazwa podmiotu / Imię i Nazwisko</label>
-                          <input type="text" value={editingHostProfile.entityName} onChange={e => setEditingHostProfile({...editingHostProfile, entityName: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Typ Identyfikatora</label>
-                            <select value={editingHostProfile.identifierType} onChange={e => setEditingHostProfile({...editingHostProfile, identifierType: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer">
-                              <option value="NIP">NIP</option>
-                              <option value="PESEL">PESEL</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Twój NIP / PESEL</label>
-                            <input type="text" placeholder="np. 1234567890" value={editingHostProfile.taxIdentifier} onChange={e => setEditingHostProfile({...editingHostProfile, taxIdentifier: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Adres</label>
-                          <input type="text" value={editingHostProfile.address} onChange={e => setEditingHostProfile({...editingHostProfile, address: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Numer Telefonu</label>
-                            <input type="text" value={editingHostProfile.phone} onChange={e => setEditingHostProfile({...editingHostProfile, phone: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Adres e-mail</label>
-                            <input type="email" value={editingHostProfile.email} onChange={e => setEditingHostProfile({...editingHostProfile, email: e.target.value})} className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                          </div>
-                        </div>
-                    </div>
-                 </div>
-              )}
-
-              {settingsTab === 'properties' && (
-                <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingProperties.map((prop, idx) => (
-                    <div key={idx} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                      <div className={`w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-white ${propColors[prop.color || 'blue'].bg}`}><Building className="w-5 h-5"/></div>
-                      <input value={prop.name} onChange={(e) => updateProperty(idx, { ...prop, name: e.target.value })} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 outline-none transition-all" />
-                      <button type="button" onClick={() => removeProperty(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"><Trash2 className="w-5 h-5" /></button>
-                    </div>
-                  ))}
-                  <form onSubmit={handleAddProperty} className="flex flex-col gap-4 mt-6 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 border-dashed">
-                    <div className="flex items-center gap-3">
-                       <input value={newPropertyName} onChange={(e) => setNewPropertyName(e.target.value)} className="flex-1 p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm text-slate-800 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="Nazwa nowego obiektu..." />
-                       <button type="submit" disabled={!newPropertyName.trim()} className="px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"><Plus className="w-5 h-5" /></button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 items-center">
-                       <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mr-2">Kolor:</span>
-                       {availableColors.map(c => (
-                         <button type="button" key={c} onClick={() => setNewPropertyColor(c)} className={`w-8 h-8 rounded-full shadow-sm transition-all ${propColors[c].bg} ${newPropertyColor === c ? 'ring-4 ring-offset-2 ring-slate-800 dark:ring-slate-300 scale-110' : 'opacity-40 hover:opacity-100'}`} />
-                       ))}
-                    </div>
-                  </form>
-                </div>
-              )}
-              {settingsTab === 'sources' && (
-                <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingSources.map((src, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Globe className="w-5 h-5"/></div><input value={src} onChange={(e) => updateSource(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button type="button" onClick={() => removeSource(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
-                  <form onSubmit={handleAddSource} className="flex items-center gap-3 mt-6">
-                    <input value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowe źródło (np. Booking)..." />
-                    <button type="submit" disabled={!newSourceName.trim()} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40 disabled:opacity-50"><Plus className="w-5 h-5" /></button>
-                  </form>
-                </div>
-              )}
-              {settingsTab === 'categories' && (
-                <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingCategories.map((cat, idx) => (<div key={idx} className="flex gap-4 items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]"><div className="p-2.5 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl"><Tags className="w-5 h-5"/></div><input value={cat} onChange={(e) => updateCategory(idx, e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" /><button type="button" onClick={() => removeCategory(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl"><Trash2 className="w-5 h-5" /></button></div>))}
-                  <form onSubmit={handleAddCategory} className="flex items-center gap-3 mt-6">
-                    <input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} className="flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold text-sm focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Nowa kategoria kosztów..." />
-                    <button type="submit" disabled={!newCategoryName.trim()} className="px-6 py-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-200 dark:hover:bg-blue-500/40 disabled:opacity-50"><Plus className="w-5 h-5" /></button>
-                  </form>
-                </div>
-              )}
-              {settingsTab === 'tax' && (
-                 <div className="space-y-5 bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 animate-in slide-in-from-right-4 duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm">
-                        <input type="radio" checked={editingTaxSettings.taxForm === 'lump_sum'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'lump_sum'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Ryczałt</span>
-                      </label>
-                      <label className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm">
-                        <input type="radio" checked={editingTaxSettings.taxForm === 'general'} onChange={() => setEditingTaxSettings({...editingTaxSettings, taxForm: 'general'})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Zasady ogólne (Skala)</span>
-                      </label>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                      <label className="flex items-center gap-4 cursor-pointer">
-                        <input type="checkbox" checked={editingTaxSettings.isVatPayer} onChange={e => setEditingTaxSettings({...editingTaxSettings, isVatPayer: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Jestem czynnym płatnikiem VAT (Podatek liczony od kwoty Netto)</span>
-                      </label>
-                      <label className="flex items-center gap-4 cursor-pointer">
-                        <input type="checkbox" checked={editingTaxSettings.includeZusInCosts} onChange={e => setEditingTaxSettings({...editingTaxSettings, includeZusInCosts: e.target.checked})} className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600"/> 
-                        <span className="font-bold text-slate-800 dark:text-slate-200">Uwzględniaj składki ZUS w kosztach obniżających podatek</span>
-                      </label>
-                    </div>
-
-
-                    {editingTaxSettings.taxForm === 'general' && (
-                      <div className="bg-blue-50 dark:bg-blue-500/10 p-5 rounded-2xl border border-blue-200 dark:border-blue-500/30 space-y-4">
-                        <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">Ustawienia Skali Podatkowej</h4>
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-2">Kwota Wolna od Podatku (rocznie)</label>
-                          <input type="number" value={editingTaxSettings.taxFreeAmount} onChange={e => setEditingTaxSettings({...editingTaxSettings, taxFreeAmount: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-500/50 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/20 transition-all" />
-                        </div>
-                      </div>
-                    )}
-
-                    {editingTaxSettings.taxForm === 'lump_sum' && (
-                      <div className="bg-amber-50 dark:bg-amber-500/10 p-5 rounded-2xl border border-amber-200 dark:border-amber-500/30 space-y-4">
-                         <h4 className="font-bold text-amber-900 dark:text-amber-300 mb-2">Ustawienia Ryczałtu</h4>
-                         <label className="flex items-center gap-4 cursor-pointer">
-                          <input type="checkbox" checked={editingTaxSettings.autoThreshold} onChange={e => setEditingTaxSettings({...editingTaxSettings, autoThreshold: e.target.checked})} className="w-5 h-5 text-amber-600 focus:ring-amber-500 rounded bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-600"/> 
-                          <span className="font-bold text-amber-900 dark:text-amber-200 text-sm">Automatyczny próg (8.5% do 100k, 12.5% powyżej)</span>
-                        </label>
-                        {!editingTaxSettings.autoThreshold && (
-                          <div>
-                            <label className="block text-[10px] font-extrabold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-2 mt-4">Stała Stawka Ryczałtu (%)</label>
-                            <input type="number" step="0.1" value={editingTaxSettings.rate} onChange={e => setEditingTaxSettings({...editingTaxSettings, rate: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-500/50 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-amber-500/20 transition-all" />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Składka ZUS Zdrowotna (Miesięcznie)</label>
-                        <input type="number" value={editingTaxSettings.zusHealth} onChange={e => setEditingTaxSettings({...editingTaxSettings, zusHealth: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-slate-500/10 transition-all" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Składka ZUS Społeczna (Miesięcznie)</label>
-                        <input type="number" value={editingTaxSettings.zusSocial} onChange={e => setEditingTaxSettings({...editingTaxSettings, zusSocial: Number(e.target.value)})} className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-slate-500/10 transition-all" />
-                      </div>
-                    </div>
-                 </div>
-              )}
-              {settingsTab === 'reminders' && (
-                <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  {editingTemplates.map((t, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)] items-center">
-                      <div className="col-span-12 md:col-span-3">
-                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Krótka Nazwa</label>
-                         <input value={t.shortName} onChange={(e) => updateTemplate(idx, 'shortName', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="np. Kod" />
-                      </div>
-                      <div className="col-span-12 md:col-span-4">
-                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Pełna treść (np. na liście)</label>
-                         <input value={t.text} onChange={(e) => updateTemplate(idx, 'text', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-medium focus:bg-white dark:focus:bg-slate-800 outline-none" placeholder="Wyślij kod do drzwi" />
-                      </div>
-                      <div className="col-span-12 md:col-span-2">
-                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Dni przed</label>
-                         <input type="number" value={t.daysBefore} onChange={(e) => updateTemplate(idx, 'daysBefore', Number(e.target.value))} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none text-center" title="Liczba dni przed przyjazdem" />
-                      </div>
-                      <div className="col-span-12 md:col-span-2">
-                         <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 ml-1">Ikona</label>
-                         <select value={t.icon || 'Bell'} onChange={(e) => updateTemplate(idx, 'icon', e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-slate-800 outline-none cursor-pointer">
-                           <option value="Bell">Dzwonek</option>
-                           <option value="Mail">Mail</option>
-                           <option value="Key">Klucz</option>
-                           <option value="MessageSquare">Wiadomość</option>
-                           <option value="Phone">Telefon</option>
-                           <option value="CheckSquare">Zadanie</option>
-                         </select>
-                      </div>
-                      <div className="col-span-12 md:col-span-1 flex justify-end mt-4 md:mt-0">
-                        <button type="button" onClick={() => removeTemplate(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"><Trash2 className="w-5 h-5" /></button>
-                      </div>
-                    </div>
-                  ))}
-                  <button type="button" onClick={addTemplate} className="w-full py-5 mt-4 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-extrabold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-400 transition-colors flex justify-center items-center gap-2"><Plus className="w-5 h-5" /> Dodaj przypomnienie</button>
-                </div>
-              )}
-              {settingsTab === 'subscription' && (
-                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  {/* Status subskrypcji */}
-                  <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                    <div className="flex items-center gap-4 mb-5">
-                      <div className={`p-3 rounded-2xl ${accountStatus === 'active' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : accountStatus === 'trialing' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
-                        <CreditCard className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Status subskrypcji</h3>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                          {accountStatus === 'active' && 'Twoja subskrypcja jest aktywna'}
-                          {accountStatus === 'trialing' && `Okres próbny${trialEndsAt ? ` — do ${trialEndsAt.toLocaleDateString('pl-PL')}` : ''}`}
-                          {accountStatus === 'past_due' && 'Płatność zaległa — zaktualizuj metodę płatności'}
-                          {accountStatus === 'canceled' && 'Subskrypcja anulowana'}
-                        </p>
-                      </div>
-                      <div className="ml-auto">
-                        <span className={`px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
-                          accountStatus === 'active' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
-                          accountStatus === 'trialing' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' :
-                          'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400'
-                        }`}>
-                          {accountStatus === 'active' ? 'Aktywna' : accountStatus === 'trialing' ? 'Trial' : accountStatus === 'past_due' ? 'Zaległa' : 'Anulowana'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-3xl font-black text-slate-900 dark:text-white">29.99</span>
-                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">zł / miesiąc</span>
-                      </div>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Plan Gospodarza — pełen dostęp do systemu</p>
-                    </div>
-                  </div>
-
-                  {/* Akcje zarządzania */}
-                  <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                    <h3 className="font-extrabold text-slate-900 dark:text-white text-lg mb-2">Zarządzaj subskrypcją</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-5">
-                      W panelu Stripe możesz zmienić kartę płatniczą, anulować subskrypcję lub pobrać faktury VAT.
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={handleManageSubscription}
-                      disabled={isBillingPortalLoading}
-                      className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      {isBillingPortalLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ExternalLink className="w-5 h-5" /> Otwórz panel zarządzania</>}
-                    </button>
-                  </div>
-
-                  {/* Info o koncie */}
-                  <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 p-5 rounded-3xl text-sm font-medium text-blue-900 dark:text-blue-300 leading-relaxed shadow-sm">
-                    <p className="flex items-start gap-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Zmiana metody płatności</strong> — zaktualizuj kartę lub dodaj nową bez przerwy w dostępie.</p>
-                    <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Faktury VAT</strong> — pobierz faktury za dowolny miesiąc w formacie PDF.</p>
-                    <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Anulowanie</strong> — anuluj subskrypcję w dowolnym momencie. Dostęp pozostanie do końca opłaconego okresu.</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-4 pt-8 mt-8 border-t border-slate-100 dark:border-slate-700">
-                <button type="button" onClick={() => setShowSettingsModal(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Anuluj</button>
-                <button type="button" onClick={saveSettings} className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 transition-all">Zapisz Ustawienia</button>
-              </div>
-            </div>
-          </div>
-        )}
+        <SettingsModal 
+          showSettingsModal={showSettingsModal}
+          setShowSettingsModal={setShowSettingsModal}
+          settingsTab={settingsTab}
+          setSettingsTab={setSettingsTab}
+          properties={properties}
+          editingSyncLinks={editingSyncLinks}
+          setEditingSyncLinks={setEditingSyncLinks}
+          user={user}
+          editingHostProfile={editingHostProfile}
+          setEditingHostProfile={setEditingHostProfile}
+          editingProperties={editingProperties}
+          updateProperty={updateProperty}
+          removeProperty={removeProperty}
+          handleAddProperty={handleAddProperty}
+          newPropertyName={newPropertyName}
+          setNewPropertyName={setNewPropertyName}
+          availableColors={availableColors}
+          newPropertyColor={newPropertyColor}
+          setNewPropertyColor={setNewPropertyColor}
+          propColors={propColors}
+          editingSources={editingSources}
+          updateSource={updateSource}
+          removeSource={removeSource}
+          handleAddSource={handleAddSource}
+          newSourceName={newSourceName}
+          setNewSourceName={setNewSourceName}
+          editingCategories={editingCategories}
+          updateCategory={updateCategory}
+          removeCategory={removeCategory}
+          handleAddCategory={handleAddCategory}
+          newCategoryName={newCategoryName}
+          setNewCategoryName={setNewCategoryName}
+          editingTaxSettings={editingTaxSettings}
+          setEditingTaxSettings={setEditingTaxSettings}
+          editingTemplates={editingTemplates}
+          updateTemplate={updateTemplate}
+          removeTemplate={removeTemplate}
+          addTemplate={addTemplate}
+          accountStatus={accountStatus}
+          trialEndsAt={trialEndsAt}
+          handleManageSubscription={handleManageSubscription}
+          isBillingPortalLoading={isBillingPortalLoading}
+          saveSettings={saveSettings}
+        />
 
         {/* MODAL: DODAWANIA / EDYCJI */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-2xl p-8 overflow-y-auto max-h-[90vh] border border-white/50 dark:border-slate-700">
-              <div className="flex justify-between items-center mb-8">
-                 <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
-                   <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl"><Edit className="w-6 h-6" /></div>
-                   {editingId ? 'Edytuj wpis' : 'Nowy wpis'}
-                 </h2>
-                 <button onClick={handleCloseModal} className="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-400"><XCircle className="w-6 h-6" /></button>
-              </div>
-              <form onSubmit={handleAddRental} className="space-y-5">
-                
-                <div className="flex gap-1 bg-slate-100/80 dark:bg-slate-800 p-1.5 rounded-2xl mb-6 shadow-inner">
-                  <button type="button" onClick={() => setNewRental({...newRental, type:'booking'})} className={`flex-1 py-3 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all ${newRental.type === 'booking' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Rezerwacja</button>
-                  <button type="button" onClick={() => setNewRental({...newRental, type:'utility'})} className={`flex-1 py-3 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all ${newRental.type === 'utility' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Koszty</button>
-                  <button type="button" onClick={() => setNewRental({...newRental, type:'reminder'})} className={`flex-1 py-3 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all ${newRental.type === 'reminder' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>Zadanie</button>
-                </div>
-                
-                {newRental.type === 'booking' ? (
-                  <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Wybierz Obiekt</label>
-                      <select value={newRental.property} onChange={e => handleRentalChange('property', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer" required>
-                        {properties.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                      </select>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Imię i Nazwisko</label>
-                        <input required placeholder="np. Jan Kowalski" value={newRental.guest} onChange={e => handleRentalChange('guest', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400 dark:placeholder-slate-500" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Źródło Rezerwacji</label>
-                        <select value={newRental.source} onChange={e => handleRentalChange('source', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer" required>
-                          {sources.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Adres e-mail (Opcjonalnie)</label>
-                        <input type="email" placeholder="jan@example.com" value={newRental.email} onChange={e => handleRentalChange('email', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400 dark:placeholder-slate-500" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefon (Opcjonalnie)</label>
-                        <input type="tel" placeholder="+48 000 000 000" value={newRental.phone} onChange={e => handleRentalChange('phone', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400 dark:placeholder-slate-500" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Prywatna notatka o gościu</label>
-                      <textarea placeholder="np. Gość preferuje cichy pokój, ustalenia cenowe..." value={newRental.guestNote || ''} onChange={e => handleRentalChange('guestNote', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder-slate-400 dark:placeholder-slate-500" rows="2" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Data przyjazdu</label>
-                        <input required type="date" value={newRental.date} onChange={e => handleRentalChange('date', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Data wyjazdu</label>
-                        <input required type="date" value={newRental.endDate} onChange={e => handleRentalChange('endDate', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50/50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 mt-2">
-                      <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2"><DollarSign className="w-4 h-4 text-emerald-500"/> Rozliczenia</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2 ml-1">Przychód Brutto</label>
-                          <input required type="number" placeholder="0.00" value={newRental.income} onChange={e => handleRentalChange('income', e.target.value)} className="w-full p-3 bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-500/30 rounded-xl font-bold text-emerald-700 dark:text-emerald-400 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder-emerald-300 dark:placeholder-emerald-700" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Zaliczka (Opcja)</label>
-                          <input type="number" placeholder="0.00" value={newRental.advancePayment} onChange={e => handleRentalChange('advancePayment', e.target.value)} className="w-full p-3 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-500/30 rounded-xl font-bold text-indigo-700 dark:text-indigo-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder-indigo-300 dark:placeholder-indigo-700" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-2 ml-1">Prowizja Portalu</label>
-                          <input type="number" placeholder="0.00" value={newRental.commission} onChange={e => handleRentalChange('commission', e.target.value)} className="w-full p-3 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-500/30 rounded-xl font-bold text-rose-700 dark:text-rose-400 outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all placeholder-rose-300 dark:placeholder-rose-700" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : newRental.type === 'utility' ? (
-                  <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Wybierz Obiekt</label>
-                      <select value={newRental.property} onChange={e => handleRentalChange('property', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" required>
-                        {properties.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Kategoria Kosztu</label>
-                        <select value={newRental.category} onChange={e => handleRentalChange('category', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" required>
-                          {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Data</label>
-                        <input required type="date" value={newRental.date} onChange={e => handleRentalChange('date', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Szczegóły (np. nr faktury)</label>
-                      <input required placeholder="np. Faktura PGE 12/2023" value={newRental.guest} onChange={e => handleRentalChange('guest', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400 dark:placeholder-slate-500" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-2 ml-1">Kwota Kosztu</label>
-                      <input required type="number" placeholder="Wpisz kwotę w zł" value={newRental.utilities} onChange={e => handleRentalChange('utilities', e.target.value)} className="w-full p-4 bg-rose-50/50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-xl font-black text-rose-700 dark:text-rose-400 text-lg outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all placeholder-rose-300 dark:placeholder-rose-800" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Data przypomnienia</label>
-                      <input required type="date" value={newRental.date} onChange={e => handleRentalChange('date', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Treść zadania</label>
-                      <input required placeholder="np. Zawieźć klucze lub sprawdzić żarówki" value={newRental.text} onChange={e => handleRentalChange('text', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-slate-400 dark:placeholder-slate-500" />
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-4 pt-8 mt-8 border-t border-slate-100 dark:border-slate-700">
-                  <button type="button" onClick={handleCloseModal} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Anuluj</button>
-                  <button type="submit" className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 transition-all">Zapisz Wpis</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <AddEditEntryModal 
+          showAddModal={showAddModal}
+          handleCloseModal={handleCloseModal}
+          handleAddRental={handleAddRental}
+          editingId={editingId}
+          newRental={newRental}
+          setNewRental={setNewRental}
+          handleRentalChange={handleRentalChange}
+          properties={properties}
+          sources={sources}
+          categories={categories}
+        />
 
         {/* MODAL: POTWIERDZENIE USUNIĘCIA */}
         {itemToDelete && (

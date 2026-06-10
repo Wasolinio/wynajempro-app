@@ -2,10 +2,16 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /guides/{guideId}/{fileName} {
-      // Anyone can read guide images
+      // Publiczny odczyt zdjęć i dokumentów w przewodnikach (goście potrzebują dostępu)
       allow read: if true;
-      // Only authenticated users can upload, max 5MB, must be image or document
+
+      // Zapis: wyłącznie zalogowany użytkownik z zweryfikowanym emailem,
+      // który jest właścicielem danego guide.
+      // Ograniczenie: max 5MB, typy MIME: obrazy, PDF, DOC/DOCX
       allow write: if request.auth != null 
+                   && request.auth.token.email_verified == true
+                   && firestore.exists(/databases/(default)/documents/guides/$(guideId))
+                   && firestore.get(/databases/(default)/documents/guides/$(guideId)).data.ownerId == request.auth.uid
                    && request.resource.size < 5 * 1024 * 1024 
                    && (request.resource.contentType.matches('image/.*') ||
                        request.resource.contentType == 'application/pdf' ||

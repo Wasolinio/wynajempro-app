@@ -90,7 +90,10 @@ export const useFirebaseData = (user, selectedYear) => {
 
   useEffect(() => {
     if (!user || !selectedYear) return;
-    setLoading(true);
+    // Asynchronously set loading to avoid cascading renders warning
+    const timeoutId = setTimeout(() => {
+      setLoading(true);
+    }, 0);
 
     // Subskrypcja Rezerwacji (Rentals) z lazy loadingiem dla danego roku
     // Pobieramy też końcówkę poprzedniego i początek następnego, aby pokryć rezerwacje na przełomie lat
@@ -117,7 +120,10 @@ export const useFirebaseData = (user, selectedYear) => {
       setLoading(false);
     });
 
-    return () => { unsubRentals(); };
+    return () => { 
+      clearTimeout(timeoutId);
+      unsubRentals(); 
+    };
   }, [user, queryClient, selectedYear]);
 
   return { rentals, settings, profile, loading };
