@@ -9,6 +9,9 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPanel = lazy(() => import('./pages/LoginPanel'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ManagerApp = lazy(() => import('./ManagerApp')); 
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 import { WynajemProvider } from './context/WynajemContext';
 
@@ -80,6 +83,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPanel />} />
+          <Route path="/regulamin" element={<TermsPage />} />
+          <Route path="/prywatnosc" element={<PrivacyPage />} />
+          <Route path="/kontakt" element={<ContactPage />} />
           <Route path="/guide/:guideId" element={<GuestGuideView />} />
           <Route 
             path="/dashboard/*" 

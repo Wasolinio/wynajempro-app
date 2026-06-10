@@ -662,9 +662,9 @@ export default function LandingPage() {
             © {new Date().getFullYear()} WynajemPro. Wszelkie prawa zastrzeżone.
           </div>
           <div className="flex gap-4 md:gap-6 text-xs md:text-sm font-medium text-slate-500">
-            <a href="#" className="hover:text-blue-600 transition-colors">Regulamin</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">Prywatność</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">Kontakt</a>
+            <Link to="/regulamin" className="hover:text-blue-600 transition-colors">Regulamin</Link>
+            <Link to="/prywatnosc" className="hover:text-blue-600 transition-colors">Prywatność</Link>
+            <Link to="/kontakt" className="hover:text-blue-600 transition-colors">Kontakt</Link>
           </div>
         </div>
       </footer>
