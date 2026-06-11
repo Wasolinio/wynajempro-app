@@ -12,6 +12,8 @@ const ManagerApp = lazy(() => import('./ManagerApp'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 import { WynajemProvider } from './context/WynajemContext';
 
@@ -86,6 +88,8 @@ export default function App() {
           <Route path="/regulamin" element={<TermsPage />} />
           <Route path="/prywatnosc" element={<PrivacyPage />} />
           <Route path="/kontakt" element={<ContactPage />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/guide/:guideId" element={<GuestGuideView />} />
           <Route 
             path="/dashboard/*" 

@@ -194,5 +194,15 @@ service cloud.firestore {
         allow list: if request.auth != null && get(/databases/$(database)/documents/guides/$(guideId)).data.ownerId == request.auth.uid;
       }
     }
+
+    // =====================================================================
+    // NEWSLETTER SUBSCRIBERS
+    // =====================================================================
+    match /newsletter_subscribers/{docId} {
+      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt', 'source'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.matches('.*@.*\\..*');
+      allow read, update, delete: if false;
+    }
   }
 }
