@@ -1,8 +1,9 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import { auth } from './firebase';
+import { auth, analytics } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { logEvent } from 'firebase/analytics';
 
 // Importujemy nasze strony asynchronicznie, by zmniejszyć początkowy rozmiar paczki
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -23,6 +24,21 @@ const Loader = () => (
     <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
   </div>
 );
+
+// Komponent do śledzenia odsłon w Google Analytics
+const AnalyticsTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (analytics) {
+      logEvent(analytics, 'page_view', {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location]);
+
+  return null;
+};
 
 // Komponent zabezpieczający chronione trasy (Protected Routes)
 const ProtectedRoute = ({ children }) => {
@@ -81,8 +97,9 @@ export default function App() {
         }}
       />
       <BrowserRouter>
-      <Suspense fallback={<Loader />}>
-        <Routes>
+        <AnalyticsTracker />
+        <Suspense fallback={<Loader />}>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPanel />} />
           <Route path="/regulamin" element={<TermsPage />} />

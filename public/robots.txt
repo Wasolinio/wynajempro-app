@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
 
 Sitemap: https://moje-domki-6c77d.web.app/sitemap.xml

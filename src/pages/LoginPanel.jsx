@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
-import { auth, db } from '../firebase'; // DODANE: db
+import { auth, db, analytics } from '../firebase';
+import { logEvent } from 'firebase/analytics';
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore'; // DODANE: funkcje firestore + Timestamp
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2, MailCheck, RefreshCw } from 'lucide-react';
 
@@ -84,6 +85,7 @@ export default function LoginPanel() {
           return;
         }
         
+        if (analytics) logEvent(analytics, 'login', { method: 'email' });
         navigate('/dashboard'); 
       } else {
         // === REJESTRACJA ===
@@ -100,6 +102,8 @@ export default function LoginPanel() {
         
         // Wyloguj — konto nieaktywne do weryfikacji
         await signOut(auth);
+        
+        if (analytics) logEvent(analytics, 'sign_up', { method: 'email' });
         
         // Pokaż ekran weryfikacji
         setVerificationEmail(formData.email);
@@ -130,6 +134,7 @@ export default function LoginPanel() {
     try {
       const result = await signInWithPopup(auth, provider);
       await initializeUserInDatabase(result.user); // Google login
+      if (analytics) logEvent(analytics, 'login', { method: 'google' });
       navigate('/dashboard'); 
     } catch (err) {
       console.error("Błąd Google Auth:", err);
