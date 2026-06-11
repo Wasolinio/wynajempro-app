@@ -755,24 +755,65 @@ export default function LandingPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-white border-t border-slate-200 py-10 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2.5 opacity-80 hover:opacity-100 transition-opacity cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-              <HomeIcon className="w-4 h-4 text-white" />
+      <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {/* Kolumna 1: Marka */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2.5 cursor-pointer mb-4" onClick={() => window.scrollTo(0, 0)}>
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                  <HomeIcon className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-extrabold text-2xl tracking-tight text-slate-900">
+                  Wynajem<span className="text-blue-600">PRO</span>
+                </span>
+              </div>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium mb-6">
+                Nowoczesne narzędzie dla właścicieli i zarządców nieruchomości. Automatyzuj wynajem, unikaj overbookingu i oszczędzaj czas każdego dnia.
+              </p>
             </div>
-            <span className="font-bold text-xl tracking-tight text-slate-800">
-              Wynajem<span className="text-blue-600">Pro</span>
-            </span>
+
+            {/* Kolumna 2: Produkt */}
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-xs">Produkt</h4>
+              <ul className="space-y-3 text-sm font-medium text-slate-500">
+                <li><a href="#funkcje" className="hover:text-blue-600 transition-colors">Funkcje i Możliwości</a></li>
+                <li><a href="#cennik" className="hover:text-blue-600 transition-colors">Cennik</a></li>
+                <li><a href="#dla-kogo" className="hover:text-blue-600 transition-colors">Dla kogo jest ten system?</a></li>
+                <li><Link to="/login" className="hover:text-blue-600 transition-colors">Logowanie do panelu</Link></li>
+              </ul>
+            </div>
+
+            {/* Kolumna 3: Zasoby */}
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-xs">Zasoby</h4>
+              <ul className="space-y-3 text-sm font-medium text-slate-500">
+                <li><Link to="/blog" className="hover:text-blue-600 transition-colors">Baza Wiedzy i Poradniki</Link></li>
+                <li><a href="#faq" className="hover:text-blue-600 transition-colors">Często zadawane pytania (FAQ)</a></li>
+                <li><button onClick={() => setIsGuestGuideModalOpen(true)} className="hover:text-blue-600 transition-colors">Zobacz Demo Przewodnika</button></li>
+              </ul>
+            </div>
+
+            {/* Kolumna 4: Firma */}
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-xs">Firma</h4>
+              <ul className="space-y-3 text-sm font-medium text-slate-500">
+                <li><Link to="/kontakt" className="hover:text-blue-600 transition-colors">Kontakt z nami</Link></li>
+                <li><Link to="/regulamin" className="hover:text-blue-600 transition-colors">Regulamin Serwisu</Link></li>
+                <li><Link to="/prywatnosc" className="hover:text-blue-600 transition-colors">Polityka Prywatności</Link></li>
+              </ul>
+            </div>
           </div>
-          <div className="text-xs md:text-sm font-medium text-slate-500 text-center">
-            © {new Date().getFullYear()} WynajemPro. Wszelkie prawa zastrzeżone.
-          </div>
-          <div className="flex gap-4 md:gap-6 text-xs md:text-sm font-medium text-slate-500">
-            <Link to="/blog" className="hover:text-blue-600 transition-colors">Blog</Link>
-            <Link to="/regulamin" className="hover:text-blue-600 transition-colors">Regulamin</Link>
-            <Link to="/prywatnosc" className="hover:text-blue-600 transition-colors">Prywatność</Link>
-            <Link to="/kontakt" className="hover:text-blue-600 transition-colors">Kontakt</Link>
+
+          <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm font-medium text-slate-400">
+              © {new Date().getFullYear()} WynajemPRO. Wszelkie prawa zastrzeżone.
+            </div>
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
+              <span>Stworzone z</span>
+              <HeartHandshake className="w-4 h-4 text-red-500" />
+              <span>dla polskich gospodarzy</span>
+            </div>
           </div>
         </div>
       </footer>
