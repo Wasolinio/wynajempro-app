@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  CheckCircle, CalendarDays, Calculator, Bell, BarChart3, 
+  CheckCircle, CalendarDays, Bell, BarChart3, 
   ArrowRight, ShieldCheck, XCircle, Coffee, TrendingUp, 
-  Users, Sparkles, Menu, ChevronDown, Star, LogIn, 
-  HeartHandshake, Building, X, ChevronLeft, ChevronRight, Smartphone, CheckSquare,
+  Users, Sparkles, Menu, ChevronDown, LogIn, 
+  HeartHandshake, Building, X, Smartphone,
   MapPin, Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -49,12 +49,12 @@ export default function LandingPage() {
              <span className="font-extrabold text-2xl tracking-tighter">Wynajem<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Pro</span></span>
           </div>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8 font-bold text-sm text-slate-600">
             <a href="#funkcje" className="hover:text-indigo-600 transition-colors">Funkcje</a>
             <a href="#jak-to-dziala" className="hover:text-indigo-600 transition-colors">Jak to działa?</a>
-            <a href="#opinie" className="hover:text-indigo-600 transition-colors">Opinie</a>
+            <a href="#dla-kogo" className="hover:text-indigo-600 transition-colors">Dla kogo?</a>
             <a href="#cennik" className="hover:text-indigo-600 transition-colors">Cennik</a>
+            <a href="#faq" className="hover:text-indigo-600 transition-colors">FAQ</a>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
@@ -75,8 +75,9 @@ export default function LandingPage() {
           <div className="md:hidden absolute top-20 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-100 p-6 flex flex-col gap-6 shadow-2xl">
             <a href="#funkcje" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Funkcje</a>
             <a href="#jak-to-dziala" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Jak to działa?</a>
-            <a href="#opinie" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Opinie</a>
+            <a href="#dla-kogo" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Dla kogo?</a>
             <a href="#cennik" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Cennik</a>
+            <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">FAQ</a>
             <hr className="border-slate-100" />
             <Link to="/login" className="text-lg font-bold text-slate-700 text-center">Zaloguj się</Link>
             <Link to="/login" className="bg-indigo-600 text-white px-6 py-3 rounded-xl text-lg font-bold text-center shadow-lg">Rozpocznij za darmo</Link>
@@ -778,27 +779,6 @@ export default function LandingPage() {
   );
 }
 
-// Pomocniczy komponent nowoczesnej karty funkcji
-function ModernFeatureCard({ icon, color, title, desc }) {
-  const colorMap = {
-    blue: 'bg-blue-500/10 text-blue-600 ring-blue-500/20',
-    purple: 'bg-purple-500/10 text-purple-600 ring-purple-500/20',
-    emerald: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20',
-    amber: 'bg-amber-500/10 text-amber-600 ring-amber-500/20',
-    pink: 'bg-pink-500/10 text-pink-600 ring-pink-500/20',
-    indigo: 'bg-indigo-500/10 text-indigo-600 ring-indigo-500/20',
-  };
-
-  return (
-    <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group">
-      <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-5 md:mb-6 ring-1 ${colorMap[color]} group-hover:scale-110 transition-transform duration-300`}>
-        {icon}
-      </div>
-      <h3 className="text-lg md:text-xl font-extrabold text-slate-900 mb-2 md:mb-3">{title}</h3>
-      <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">{desc}</p>
-    </div>
-  );
-}
 
 // Komponent FAQ (Akordeon)
 function FaqItem({ question, answer }) {
