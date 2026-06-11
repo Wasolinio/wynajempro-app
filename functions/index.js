@@ -896,7 +896,59 @@ function isSafeUrl(url) {
 }
 
 // =============================================================================
-// 7. EKSPORT KALENDARZA (iCal Channel Manager)
+// 7. USUWANIE KONTA UŻYTKOWNIKA I DANYCH (Right to be forgotten)
+// =============================================================================
+exports.deleteUserAccount = onCall(
+  { secrets: [stripeSecretKey], enforceAppCheck: true, maxInstances: 3 },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Musisz być zalogowany, aby usunąć konto.");
+    }
+    const uid = request.auth.uid;
+    const stripe = require("stripe")(stripeSecretKey.value());
+
+    try {
+      // 1. Sprawdź, czy użytkownik ma Stripe Customer ID
+      const userDoc = await db.collection("users").doc(uid).get();
+      const userData = userDoc.data();
+
+      if (userData?.stripeCustomerId) {
+        // Anuluj wszystkie aktywne subskrypcje i usuń klienta
+        try {
+          await stripe.customers.del(userData.stripeCustomerId);
+          console.log(`✅ Stripe Customer usunięty: ${userData.stripeCustomerId}`);
+        } catch (stripeErr) {
+          console.warn(`⚠️ Błąd usuwania Stripe Customer: ${stripeErr.message}`);
+          // Nie rzucamy wyjątku, próbujemy kontynuować kasowanie
+        }
+      }
+
+      // 2. Wyczyść dane biznesowe użytkownika
+      await cleanupUserData(uid);
+      await userDoc.ref.delete();
+
+      // 3. Usuń przewodniki użytkownika
+      const guidesSnap = await db.collection("guides").where("ownerId", "==", uid).get();
+      for (const guide of guidesSnap.docs) {
+        await deleteSubcollection(guide.ref, "secrets");
+        await deleteSubcollection(guide.ref, "signatures");
+        await guide.ref.delete();
+      }
+
+      // 4. Usuń użytkownika z Firebase Auth
+      await getAuth().deleteUser(uid);
+      console.log(`✅ Użytkownik ${uid} został całkowicie usunięty z systemu.`);
+      
+      return { success: true };
+    } catch (error) {
+      console.error(`❌ Błąd usuwania konta ${uid}:`, error);
+      throw new HttpsError("internal", "Wystąpił błąd podczas usuwania konta.");
+    }
+  }
+);
+
+// =============================================================================
+// 8. EKSPORT KALENDARZA (iCal Channel Manager)
 // Umożliwia pobranie kalendarza w formacie .ics dla konkretnego obiektu
 // =============================================================================
 exports.exportIcal = onRequest(async (req, res) => {

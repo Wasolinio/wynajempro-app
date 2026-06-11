@@ -1,5 +1,8 @@
-import React from 'react';
-import { Settings, XCircle, Building, Calendar as CalendarIcon, Copy, Trash2, Plus, Globe, Tags, Bell, Mail, Key, MessageSquare, Phone, CheckSquare, CreditCard, ExternalLink, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, XCircle, Building, Calendar as CalendarIcon, Copy, Trash2, Plus, Globe, Tags, Bell, Mail, Key, MessageSquare, Phone, CheckSquare, CreditCard, ExternalLink, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { auth, functions } from '../../firebase';
+import { EmailAuthProvider, reauthenticateWithCredential, signOut } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
 import toast from 'react-hot-toast';
 
 const SettingsModal = ({
@@ -47,6 +50,38 @@ const SettingsModal = ({
   isBillingPortalLoading,
   saveSettings
 }) => {
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) return toast.error('Wprowadź hasło by potwierdzić.');
+    setIsDeletingAccount(true);
+    try {
+      if (auth.currentUser) {
+        // 1. Re-auth
+        const credential = EmailAuthProvider.credential(auth.currentUser.email, deletePassword);
+        await reauthenticateWithCredential(auth.currentUser, credential);
+        
+        // 2. Wywołanie funkcji usuwającej
+        const deleteAccountFn = httpsCallable(functions, 'deleteUserAccount');
+        await deleteAccountFn();
+        
+        // 3. Wylogowanie
+        await signOut(auth);
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        toast.error('Błędne hasło.');
+      } else {
+        toast.error('Wystąpił błąd podczas usuwania konta.');
+      }
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   if (!showSettingsModal) return null;
 
   return (
@@ -61,7 +96,7 @@ const SettingsModal = ({
         </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-            {['hostProfile', 'properties', 'sources', 'categories', 'tax', 'sync', 'reminders', 'subscription'].map((tab) => (
+            {['hostProfile', 'properties', 'sources', 'categories', 'tax', 'sync', 'reminders', 'subscription', 'account'].map((tab) => (
               <button type="button" key={tab} onClick={() => setSettingsTab(tab)} className={`px-4 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all flex-none text-center ${settingsTab === tab ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}>
                 {tab === 'hostProfile' && 'Profil Gospodarza'}
                 {tab === 'properties' && 'Nieruchomości'}
@@ -71,6 +106,7 @@ const SettingsModal = ({
                 {tab === 'sync' && 'Integracje'}
                 {tab === 'reminders' && 'Powiadomienia'}
                 {tab === 'subscription' && 'Subskrypcja'}
+                {tab === 'account' && 'Konto'}
               </button>
             ))}
           </div>
@@ -344,6 +380,43 @@ const SettingsModal = ({
               <p className="flex items-start gap-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Zmiana metody płatności</strong> — zaktualizuj kartę lub dodaj nową bez przerwy w dostępie.</p>
               <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Faktury VAT</strong> — pobierz faktury za dowolny miesiąc w formacie PDF.</p>
               <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Anulowanie</strong> — anuluj subskrypcję w dowolnym momencie. Dostęp pozostanie do końca opłaconego okresu.</p>
+            </div>
+            </div>
+          </div>
+        )}
+
+        {settingsTab === 'account' && (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+            <div className="bg-red-50/50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 p-5 rounded-3xl text-sm font-medium text-red-900 dark:text-red-300 leading-relaxed shadow-sm">
+              <h4 className="font-bold flex items-center gap-2 mb-2 text-red-600 dark:text-red-400"><AlertTriangle className="w-5 h-5"/> Danger Zone: Trwałe usuwanie konta</h4>
+              Usunięcie konta jest operacją całkowicie i bezpowrotnie kasującą Twoje konto, subskrypcje, nieruchomości oraz historię rezerwacji.
+            </div>
+            
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium mb-5">
+                Zgodnie z RODO (Prawo do bycia zapomnianym) oraz naszymi procedurami, możesz w każdym momencie zażądać usunięcia swoich danych z systemu WynajemPRO.
+                Wymagane jest potwierdzenie aktualnym hasłem.
+              </p>
+              
+              <div className="mb-5">
+                <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Twoje hasło do WynajemPRO</label>
+                <input 
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none placeholder-slate-400 dark:placeholder-slate-600" 
+                  placeholder="Wprowadź hasło by potwierdzić..."
+                />
+              </div>
+
+              <button 
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount || !deletePassword}
+                className="flex items-center justify-center gap-2 w-full p-4 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl font-bold shadow-lg shadow-red-600/30 transition-all"
+              >
+                {isDeletingAccount ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                {isDeletingAccount ? 'Trwa kasowanie danych...' : 'Usuń trwale moje konto'}
+              </button>
             </div>
           </div>
         )}
