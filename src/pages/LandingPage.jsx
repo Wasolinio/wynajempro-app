@@ -4,7 +4,7 @@ import {
   ArrowRight, ShieldCheck, XCircle, Coffee, TrendingUp, 
   Users, Sparkles, Menu, ChevronDown, LogIn, 
   HeartHandshake, Building, X, Smartphone,
-  MapPin, Clock
+  MapPin, Clock, BookOpen
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import RoiCalculator from '../components/RoiCalculator';
