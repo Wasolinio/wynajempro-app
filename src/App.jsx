@@ -1,9 +1,10 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import { auth, analytics } from './firebase';
+import { auth, analytics, initAnalytics } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { logEvent } from 'firebase/analytics';
+import CookieBanner from './components/CookieBanner';
 
 // Importujemy nasze strony asynchronicznie, by zmniejszyć początkowy rozmiar paczki
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -30,8 +31,9 @@ const AnalyticsTracker = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (analytics) {
-      logEvent(analytics, 'page_view', {
+    const currentAnalytics = analytics || initAnalytics();
+    if (currentAnalytics) {
+      logEvent(currentAnalytics, 'page_view', {
         page_path: location.pathname + location.search,
       });
     }
@@ -100,30 +102,31 @@ export default function App() {
         <AnalyticsTracker />
         <Suspense fallback={<Loader />}>
           <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPanel />} />
-          <Route path="/regulamin" element={<TermsPage />} />
-          <Route path="/prywatnosc" element={<PrivacyPage />} />
-          <Route path="/kontakt" element={<ContactPage />} />
-          <Route path="/blog" element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-          <Route path="/guide/:guideId" element={<GuestGuideView />} />
-          <Route 
-            path="/dashboard/*" 
-            element={
-              <GlobalErrorBoundary>
-                <ProtectedRoute>
-                  <WynajemProvider>
-                    <ManagerApp />
-                  </WynajemProvider>
-                </ProtectedRoute>
-              </GlobalErrorBoundary>
-            } 
-          />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPanel />} />
+            <Route path="/regulamin" element={<TermsPage />} />
+            <Route path="/prywatnosc" element={<PrivacyPage />} />
+            <Route path="/kontakt" element={<ContactPage />} />
+            <Route path="/blog" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/guide/:guideId" element={<GuestGuideView />} />
+            <Route 
+              path="/dashboard/*" 
+              element={
+                <GlobalErrorBoundary>
+                  <ProtectedRoute>
+                    <WynajemProvider>
+                      <ManagerApp />
+                    </WynajemProvider>
+                  </ProtectedRoute>
+                </GlobalErrorBoundary>
+              } 
+            />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
+        <CookieBanner onAccept={() => initAnalytics()} />
+      </BrowserRouter>
     </>
   );
 }

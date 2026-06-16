@@ -58,7 +58,7 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-5 space-y-2">
           <li><strong>Local Storage i IndexedDB</strong>: Przechowuje podręczną pamięć aplikacji webowej tak, aby przy braku zasięgu (PWA/Offline) menedżer miał wgląd w swoje rezerwacje. Aplikacja przechowuje również sesje gości (akceptacja zasad wczasowiczów).</li>
           <li><strong>Cookies niezbędne (Auth)</strong>: Cookies wykorzystywane do utrzymywania stabilnej sesji bezpiecznego logowania (Firebase).</li>
-          <li>Aplikacja na chwilę obecną nie wymusza zgód "Cookie Consent", gdyż przechowuje wyłącznie ciasteczka niezbędne do działania usługi ("strictly necessary"), zgodnie z przepisami dyrektywy ePrivacy.</li>
+          <li><strong>Cookies analityczne (Google Analytics)</strong>: Wykorzystywane za pośrednictwem Firebase Analytics do analizy ruchu (odsłony, rejestracje) w celach statystycznych i optymalizacyjnych. Ze względu na ich charakter, <strong>wymagają one Twojej aktywnej zgody</strong>, o którą prosimy w dedykowanym pasku (Cookie Banner) przy pierwszym wejściu na stronę.</li>
         </ul>
       </section>
     </LegalLayout>

@@ -42,6 +42,18 @@ const db = initializeFirestore(app, {
 
 const functions = getFunctions(app); // Instancja Cloud Functions do wywołań httpsCallable
 const storage = getStorage(app);
-const analytics = getAnalytics(app); // Inicjalizacja Google Analytics
+
+// Inicjalizacja Google Analytics TYLKO po akceptacji cookies
+let analytics = null;
+if (typeof window !== 'undefined' && localStorage.getItem('cookie_consent') === 'true') {
+  analytics = getAnalytics(app);
+}
+
+export const initAnalytics = () => {
+  if (!analytics && typeof window !== 'undefined') {
+    analytics = getAnalytics(app);
+  }
+  return analytics;
+};
 
 export { auth, db, functions, appCheck, storage, analytics };
