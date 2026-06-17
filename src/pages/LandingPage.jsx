@@ -85,6 +85,7 @@ export default function LandingPage() {
             <a href="#cennik" className="hover:text-indigo-600 transition-colors">Cennik</a>
             <a href="#faq" className="hover:text-indigo-600 transition-colors">FAQ</a>
             <Link to="/blog" className="text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"><BookOpen className="w-4 h-4" /> Baza Wiedzy</Link>
+            <Link to="/kontakt" className="hover:text-indigo-600 transition-colors">Kontakt</Link>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
@@ -109,6 +110,7 @@ export default function LandingPage() {
             <a href="#cennik" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Cennik</a>
             <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">FAQ</a>
             <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-blue-600 flex items-center gap-2"><BookOpen className="w-5 h-5" /> Baza Wiedzy</Link>
+            <Link to="/kontakt" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-bold text-slate-700">Kontakt</Link>
             <hr className="border-slate-100" />
             <Link to="/login" className="text-lg font-bold text-slate-700 text-center">Zaloguj się</Link>
             <Link to="/login" className="bg-indigo-600 text-white px-6 py-3 rounded-xl text-lg font-bold text-center shadow-lg">Rozpocznij za darmo</Link>
@@ -561,9 +563,9 @@ export default function LandingPage() {
               </h3>
               <ul className="space-y-5 text-blue-100 text-base font-medium flex-1 relative z-10">
                 <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Jasny i czytelny pulpit z gotową listą zadań na dany dzień.</span></li>
-                <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Automatycznie generowane przewidniki dla gości na każdy obiekt.</span></li>
+                <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Automatycznie generowane przewodniki dla gości na każdy obiekt.</span></li>
                 <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Zautomatyzowane podatki i jedno kliknięcie do podsumowania miesiąca.</span></li>
-                <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Stała, niska cena (29,99 zł) niezależnie od ilości rezerwacji.</span></li>
+                <li className="flex gap-4 items-start"><div className="bg-blue-400/30 p-1 rounded mt-0.5 shrink-0"><CheckCircle className="w-3.5 h-3.5 text-white" /></div> <span className="leading-relaxed">Stała, niska cena (29,99 zł) niezależnie od liczby rezerwacji.</span></li>
               </ul>
             </div>
           </div>
@@ -618,7 +620,7 @@ export default function LandingPage() {
               </div>
 
               <ul className="text-left space-y-4 md:space-y-5 mb-8 md:mb-10 text-slate-300 text-sm font-medium">
-                <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Nielimitowana ilość rezerwacji</li>
+                <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Nielimitowana liczba rezerwacji</li>
                 <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Automatyczne raporty i podatki</li>
                 <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Interaktywny kalendarz wynajmu</li>
                 <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Szyfrowana baza w chmurze</li>

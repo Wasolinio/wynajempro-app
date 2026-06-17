@@ -1,8 +1,8 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getAnalytics } from 'firebase/analytics';
 
@@ -20,28 +20,42 @@ const firebaseConfig = {
 // Zapobiega podwójnej inicjalizacji w środowisku deweloperskim
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
+const isEmulator = import.meta.env.VITE_USE_EMULATORS === 'true';
+
 // ===== APP CHECK — OCHRONA PRZED BOTAMI =====
 // W trybie deweloperskim włączamy debug token (ustawiony w konsoli Firebase)
-if (import.meta.env.DEV) {
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+let appCheck = null;
+if (!isEmulator) {
+  if (import.meta.env.DEV) {
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+  appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true,
+  });
 }
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
-  isTokenAutoRefreshEnabled: true,
-});
 
 const auth = getAuth(app);
 
-// Firestore z trwałym cache w IndexedDB
+// Firestore z trwałym cache w IndexedDB (wyłączonym w trybie emulatora)
 // Powracający użytkownicy czytają dane z cache, nie z serwera
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-});
+const db = isEmulator
+  ? initializeFirestore(app, {})
+  : initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
 
 const functions = getFunctions(app); // Instancja Cloud Functions do wywołań httpsCallable
 const storage = getStorage(app);
+
+if (isEmulator) {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+  connectStorageEmulator(storage, '127.0.0.1', 9199);
+}
 
 // Inicjalizacja Google Analytics TYLKO po akceptacji cookies
 let analytics = null;

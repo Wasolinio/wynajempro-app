@@ -45,11 +45,11 @@ export default function TermsPage() {
         <p className="mb-3">Użytkownik zobowiązuje się do:</p>
         <ul className="list-disc pl-5 space-y-2 mb-3">
           <li>Podawania prawdziwych danych podczas rejestracji oraz autoryzacji gości.</li>
-          <li>Nie wykorzystywania Aplikacji do celów niezgodnych z prawem, w tym przesyłania nielegalnych treści poprzez formularze Przewodników dla Gości.</li>
+          <li>Niewykorzystywania Aplikacji do celów niezgodnych z prawem, w tym przesyłania nielegalnych treści poprzez formularze Przewodników dla Gości.</li>
           <li>Zabezpieczenia swoich danych dostępowych do panelu administracyjnego przed osobami trzecimi.</li>
         </ul>
         <p>
-          Twórcy Aplikacji dokładają wszelkich starań, by usługa działała bezprzerwanie (SLA), jednak nie ponoszą 
+          Twórcy Aplikacji dokładają wszelkich starań, by usługa działała bez przerwy (SLA), jednak nie ponoszą 
           odpowiedzialności za przerwy wynikające z awarii zewnętrznych operatorów chmurowych (Google Cloud, Firebase, Stripe) 
           oraz za szkody wynikłe z błędnej konfiguracji synchronizacji (np. zduplikowane rezerwacje wskutek opóźnień zew. serwerów iCal).
         </p>

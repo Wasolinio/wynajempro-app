@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Cookie, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function CookieBanner({ onAccept }) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const hasConsented = localStorage.getItem('cookie_consent');
-    if (!hasConsented) {
-      setIsVisible(true);
-    }
-  }, []);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('cookie_consent');
+  });
 
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'true');

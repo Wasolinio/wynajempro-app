@@ -15,9 +15,14 @@ export default function LegalLayout({ title, subtitle, lastUpdated, children }) 
             <ArrowLeft className="w-4 h-4" />
             Wróć do strony głównej
           </Link>
-          <div className="flex items-center gap-2 font-black text-slate-800 text-lg tracking-tight">
-            <ShieldCheck className="w-5 h-5 text-blue-600" />
-            Wynajem<span className="text-blue-600">PRO</span>
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">
+              Zarejestruj się
+            </Link>
+            <div className="flex items-center gap-2 font-black text-slate-800 text-lg tracking-tight">
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              Wynajem<span className="text-blue-600">PRO</span>
+            </div>
           </div>
         </div>
       </header>

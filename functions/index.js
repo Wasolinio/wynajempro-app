@@ -5,6 +5,7 @@ const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");
+const { getStorage } = require("firebase-admin/storage");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
 // Inicjalizacja Firebase Admin
@@ -929,7 +930,15 @@ exports.deleteUserAccount = onCall(
 
       // 3. Usuń przewodniki użytkownika
       const guidesSnap = await db.collection("guides").where("ownerId", "==", uid).get();
+      const bucket = getStorage(app).bucket();
       for (const guide of guidesSnap.docs) {
+        const guideId = guide.id;
+        try {
+          await bucket.deleteFiles({ prefix: `guides/${guideId}/` });
+          console.log(`✅ Pliki w Storage dla przewodnika ${guideId} usunięte.`);
+        } catch (storageErr) {
+          console.warn(`⚠️ Błąd usuwania plików Storage dla przewodnika ${guideId}:`, storageErr);
+        }
         await deleteSubcollection(guide.ref, "secrets");
         await deleteSubcollection(guide.ref, "signatures");
         await guide.ref.delete();

@@ -26,10 +26,13 @@ export default function BlogPostPage() {
             <ArrowLeft className="w-4 h-4" />
             Wróć do Bazy Wiedzy
           </Link>
-          <Link to="/" className="flex items-center gap-2 font-black text-slate-800 text-lg tracking-tight">
-            <BookOpen className="w-5 h-5 text-blue-600" />
-            Wynajem<span className="text-blue-600">PRO</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/kontakt" className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">Kontakt</Link>
+            <Link to="/" className="flex items-center gap-2 font-black text-slate-800 text-lg tracking-tight">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              Wynajem<span className="text-blue-600">PRO</span>
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -23,6 +23,7 @@ import {
 import FloatingTaskWidget from './components/FloatingTaskWidget';
 import { calculateTaxes } from './utils/taxCalculator';
 import ProfitabilityReportModal from './components/modals/ProfitabilityReportModal';
+import SettingsModal from './components/modals/SettingsModal';
 import DailyReportModal from './components/modals/DailyReportModal';
 import AddEditEntryModal from './components/modals/AddEditEntryModal';
 import UtilitiesTable from './components/views/UtilitiesTable';
@@ -392,7 +393,23 @@ export default function RentalManager() {
 
   const openSettingsModal = useCallback(() => {
     setEditingTemplates(JSON.parse(JSON.stringify(templates)));
-    setEditingProperties([...properties]); 
+    
+    // Retrofit legacy properties lacking an id or secretToken
+    const retrofittedProperties = properties.map(p => {
+      const updated = { ...p };
+      if (!updated.id) {
+        updated.id = typeof window !== 'undefined' && window.crypto?.randomUUID 
+          ? window.crypto.randomUUID() 
+          : Math.random().toString(36).substring(2, 15);
+      }
+      if (!updated.secretToken) {
+        updated.secretToken = typeof window !== 'undefined' && window.crypto?.randomUUID 
+          ? window.crypto.randomUUID().replace(/-/g, '') 
+          : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      }
+      return updated;
+    });
+    setEditingProperties(retrofittedProperties); 
     setEditingSources([...sources]); 
     setEditingCategories([...categories]);
     setEditingTaxSettings(taxSettings); 
@@ -437,7 +454,20 @@ export default function RentalManager() {
   const handleAddProperty = (e) => { 
     e.preventDefault();
     if (newPropertyName.trim() !== '') { 
-      setEditingProperties([...editingProperties, { name: newPropertyName.trim(), color: newPropertyColor }]); 
+      const secretToken = typeof window !== 'undefined' && window.crypto?.randomUUID 
+        ? window.crypto.randomUUID().replace(/-/g, '') 
+        : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      
+      const id = typeof window !== 'undefined' && window.crypto?.randomUUID 
+        ? window.crypto.randomUUID() 
+        : Math.random().toString(36).substring(2, 15);
+
+      setEditingProperties([...editingProperties, { 
+        id, 
+        name: newPropertyName.trim(), 
+        color: newPropertyColor,
+        secretToken 
+      }]); 
       setNewPropertyName(''); 
       setNewPropertyColor('blue'); 
     } 

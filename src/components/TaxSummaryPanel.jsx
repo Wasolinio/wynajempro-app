@@ -39,7 +39,7 @@ export default function TaxSummaryPanel({ year, rentals, taxSettings, hostProfil
   const formLabel = isRyczalt ? 'Ryczałt' : taxSettings.taxForm === 'general' ? 'Skala podatkowa' : 'Dział. nierejestrowana';
 
   const handleDownloadCSV = () => {
-    generateAccountingReportCSV(year, selectedMonth, rentals, taxSettings, hostProfile);
+    generateAccountingReportCSV(rentals, taxSettings, hostProfile, selectedMonth, year);
   };
 
   return (

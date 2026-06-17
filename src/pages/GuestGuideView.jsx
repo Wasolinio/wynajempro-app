@@ -47,6 +47,7 @@ export default function GuestGuideView() {
     });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guideId]);
 
   const fetchGuideData = async (uid) => {

@@ -8,7 +8,11 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy": "npm run build && firebase deploy"
+    "deploy": "npm run build && firebase deploy",
+    "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",
+    "test:e2e:ui": "cross-env VITE_USE_EMULATORS=true playwright test --ui",
+    "test:e2e:debug": "cross-env VITE_USE_EMULATORS=true playwright test --debug",
+    "test:e2e:local": "cross-env VITE_USE_EMULATORS=true playwright test"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
@@ -24,14 +28,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4.2.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.5.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "firebase-tools": "^15.20.0",
     "globals": "^17.4.0",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.2.4",

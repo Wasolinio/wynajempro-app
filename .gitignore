@@ -29,3 +29,11 @@ firebase-debug.log*
 
 # ESLint
 .eslintcache
+
+# AI Agents workspace
+.agents/
+PROJECT.md
+
+# Playwright
+test-results/
+playwright-report/.npm_cache/

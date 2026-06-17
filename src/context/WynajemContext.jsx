@@ -6,6 +6,9 @@ import { httpsCallable } from 'firebase/functions';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { defaultTaxSettings, defaultHostProfile } from '../utils/constants';
 
+const EMPTY_ARRAY = [];
+const EMPTY_OBJECT = {};
+
 const WynajemContext = createContext();
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -26,11 +29,11 @@ export const WynajemProvider = ({ children }) => {
   const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
 
   // USTAWIENIA
-  const templates = settings?.templates || [];
-  const properties = settings?.properties || [];
-  const sources = settings?.sources || [];
-  const categories = settings?.categories || [];
-  const syncLinks = settings?.syncLinks || {};
+  const templates = settings?.templates || EMPTY_ARRAY;
+  const properties = settings?.properties || EMPTY_ARRAY;
+  const sources = settings?.sources || EMPTY_ARRAY;
+  const categories = settings?.categories || EMPTY_ARRAY;
+  const syncLinks = settings?.syncLinks || EMPTY_OBJECT;
   const taxSettings = settings?.taxSettings || defaultTaxSettings;
   const hostProfile = settings?.hostProfile || defaultHostProfile;
 

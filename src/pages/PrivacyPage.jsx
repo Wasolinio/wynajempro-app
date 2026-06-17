@@ -54,7 +54,7 @@ export default function PrivacyPage() {
 
       <section>
         <h2 className="text-xl font-bold text-slate-800 mb-3">6. Polityka Cookies i Local Storage</h2>
-        <p className="mb-3">WynajemPRO korzysta z "ciasteczek" i technologii pamięci lokalnej przeglądarki wyłacznie w minimalnym, funkcjonalnym zakresie:</p>
+        <p className="mb-3">WynajemPRO korzysta z "ciasteczek" i technologii pamięci lokalnej przeglądarki wyłącznie w minimalnym, funkcjonalnym zakresie:</p>
         <ul className="list-disc pl-5 space-y-2">
           <li><strong>Local Storage i IndexedDB</strong>: Przechowuje podręczną pamięć aplikacji webowej tak, aby przy braku zasięgu (PWA/Offline) menedżer miał wgląd w swoje rezerwacje. Aplikacja przechowuje również sesje gości (akceptacja zasad wczasowiczów).</li>
           <li><strong>Cookies niezbędne (Auth)</strong>: Cookies wykorzystywane do utrzymywania stabilnej sesji bezpiecznego logowania (Firebase).</li>

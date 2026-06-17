@@ -10,7 +10,6 @@ const SettingsModal = ({
   setShowSettingsModal,
   settingsTab,
   setSettingsTab,
-  properties,
   editingSyncLinks,
   setEditingSyncLinks,
   user,
@@ -116,7 +115,7 @@ const SettingsModal = ({
             <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 p-5 rounded-3xl text-sm font-medium text-blue-900 dark:text-blue-300 leading-relaxed shadow-sm">
               Wklej linki iCal z Bookingu i Airbnb dla swoich obiektów, aby móc je automatycznie synchronizować na głównym ekranie.
             </div>
-            {properties.map(p => (
+            {editingProperties.map(p => (
               <div key={p.name} className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
                 <h4 className="font-extrabold text-slate-900 dark:text-white mb-4 text-lg flex items-center gap-2"><Building className="w-5 h-5 text-blue-500"/> {p.name}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -134,8 +133,8 @@ const SettingsModal = ({
                 <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
                   <label className="block text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><CalendarIcon className="w-3 h-3"/> Eksportuj Kalendarz (iCal)</label>
                   <div className="flex gap-3 items-center">
-                    <input readOnly value={`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user?.uid}&p=${encodeURIComponent(p.name)}`} className="flex-1 p-3.5 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl text-xs font-mono text-indigo-800 dark:text-indigo-300 outline-none truncate" />
-                    <button type="button" onClick={() => { navigator.clipboard.writeText(`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user?.uid}&p=${encodeURIComponent(p.name)}`); toast.success('Link iCal skopiowany!'); }} className="px-5 py-3.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-400 font-bold rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
+                    <input readOnly value={`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user?.uid}&p=${encodeURIComponent(p.name)}&token=${p.secretToken || ''}`} className="flex-1 p-3.5 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl text-xs font-mono text-indigo-800 dark:text-indigo-300 outline-none truncate" />
+                    <button type="button" onClick={() => { navigator.clipboard.writeText(`https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${user?.uid}&p=${encodeURIComponent(p.name)}&token=${p.secretToken || ''}`); toast.success('Link iCal skopiowany!'); }} className="px-5 py-3.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-400 font-bold rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
                       <Copy className="w-4 h-4" /> Kopiuj Link
                     </button>
                   </div>
@@ -380,7 +379,6 @@ const SettingsModal = ({
               <p className="flex items-start gap-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Zmiana metody płatności</strong> — zaktualizuj kartę lub dodaj nową bez przerwy w dostępie.</p>
               <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Faktury VAT</strong> — pobierz faktury za dowolny miesiąc w formacie PDF.</p>
               <p className="flex items-start gap-2 mt-2"><CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> <strong>Anulowanie</strong> — anuluj subskrypcję w dowolnym momencie. Dostęp pozostanie do końca opłaconego okresu.</p>
-            </div>
             </div>
           </div>
         )}
