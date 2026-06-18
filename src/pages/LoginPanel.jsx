@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth, db, analytics, initAnalytics } from '../firebase';
 import { logEvent } from 'firebase/analytics';
-import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore'; // DODANE: funkcje firestore + Timestamp
+import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, CheckCircle, Quote, Loader2, MailCheck, RefreshCw } from 'lucide-react';
 
 export default function LoginPanel() {
   const navigate = useNavigate();
+
+  // Przechwytywanie wyniku Google Redirect (po powrocie z ekranu Google)
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          await initializeUserInDatabase(result.user);
+          const currentAnalytics = analytics || initAnalytics();
+          if (currentAnalytics) logEvent(currentAnalytics, 'login', { method: 'google' });
+          navigate('/dashboard');
+        }
+      })
+      .catch((err) => {
+        console.error('Google redirect error:', err);
+        if (err.code !== 'auth/popup-closed-by-user') {
+          setError('Błąd logowania przez Google. Spróbuj ponownie.');
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -134,16 +154,31 @@ export default function LoginPanel() {
     const provider = new GoogleAuthProvider();
     
     try {
+      // Próbujemy popup (szybsze UX na desktop)
       const result = await signInWithPopup(auth, provider);
-      await initializeUserInDatabase(result.user); // Google login
+      await initializeUserInDatabase(result.user);
       
       const currentAnalytics = analytics || initAnalytics();
       if (currentAnalytics) logEvent(currentAnalytics, 'login', { method: 'google' });
       
       navigate('/dashboard'); 
     } catch (err) {
-      console.error("Błąd Google Auth:", err);
-      setError('Błąd podczas logowania przez Google. Spróbuj ponownie.');
+      // Jeśli popup zablokowany lub cross-origin — fallback na redirect
+      if (err.code === 'auth/popup-blocked' || 
+          err.code === 'auth/popup-closed-by-user' ||
+          err.code === 'auth/cancelled-popup-request' ||
+          err.code === 'auth/unauthorized-domain') {
+        try {
+          await signInWithRedirect(auth, provider);
+          return; // Strona się przeładuje po powrocie z Google
+        } catch (redirectErr) {
+          console.error('Google redirect fallback error:', redirectErr);
+          setError('Nie udało się zalogować przez Google. Sprawdź połączenie.');
+        }
+      } else {
+        console.error('Google Auth error:', err);
+        setError('Błąd podczas logowania przez Google. Spróbuj ponownie.');
+      }
     } finally {
       setIsLoading(false);
     }
