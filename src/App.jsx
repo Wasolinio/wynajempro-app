@@ -16,6 +16,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'));
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 import { WynajemProvider } from './context/WynajemContext';
 
@@ -109,6 +110,7 @@ export default function App() {
             <Route path="/kontakt" element={<ContactPage />} />
             <Route path="/blog" element={<BlogListPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/auth/action" element={<AuthActionHandler />} />
             <Route path="/guide/:guideId" element={<GuestGuideView />} />
             <Route 
               path="/dashboard/*" 
