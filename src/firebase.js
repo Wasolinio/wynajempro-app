@@ -25,15 +25,15 @@ const isEmulator = import.meta.env.VITE_USE_EMULATORS === 'true';
 // ===== APP CHECK — OCHRONA PRZED BOTAMI =====
 // W trybie deweloperskim włączamy debug token (ustawiony w konsoli Firebase)
 let appCheck = null;
-if (!isEmulator) {
-  if (import.meta.env.DEV) {
-    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-  }
-  appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
-    isTokenAutoRefreshEnabled: true,
-  });
-}
+// if (!isEmulator) {
+//   if (import.meta.env.DEV) {
+//     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+//   }
+//   appCheck = initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+//     isTokenAutoRefreshEnabled: true,
+//   });
+// }
 
 const auth = getAuth(app);
 
