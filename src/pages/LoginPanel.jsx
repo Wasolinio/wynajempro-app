@@ -163,11 +163,17 @@ export default function LoginPanel() {
       
       navigate('/dashboard'); 
     } catch (err) {
-      // Jeśli popup zablokowany lub cross-origin — fallback na redirect
+      // Ignorujemy błędy, gdy użytkownik po prostu zamknie okienko logowania Google
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        setIsLoading(false);
+        return;
+      }
+
+      // Jeśli popup został zablokowany przez przeglądarkę (np. Safari) lub wystąpił błąd cross-origin — fallback na redirect
       if (err.code === 'auth/popup-blocked' || 
-          err.code === 'auth/popup-closed-by-user' ||
-          err.code === 'auth/cancelled-popup-request' ||
-          err.code === 'auth/unauthorized-domain') {
+          err.code === 'auth/unauthorized-domain' ||
+          err.code === 'auth/cross-origin-opener-policy-failed' ||
+          err.message?.includes('Cross-Origin')) {
         try {
           await signInWithRedirect(auth, provider);
           return; // Strona się przeładuje po powrocie z Google

@@ -146,10 +146,10 @@ export default function AuthActionHandler() {
             <h2 className="text-2xl font-bold text-slate-800 mb-2">E-mail zweryfikowany!</h2>
             <p className="text-slate-600 mb-8">Twój adres e-mail został pomyślnie potwierdzony. Możesz teraz w pełni korzystać z konta WynajemPRO.</p>
             <Link 
-              to="/dashboard"
+              to="/login"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors w-full"
             >
-              Przejdź do panelu
+              Przejdź do logowania
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
