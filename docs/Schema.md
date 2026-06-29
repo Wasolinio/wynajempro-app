@@ -2,169 +2,134 @@
 
 Complete Firestore data structure for WynajemPRO.
 
+> **CRITICAL ARCHITECTURE RULE**: The database uses a **Subcollection-first model**. Almost everything belongs to a specific user under `users/{uid}`. There are **NO** top-level `properties` or `bookings` collections.
+
 ## Collections Overview
 
 ```
 firestore-database/
 ├── users/
 │   └── {uid}
-├── properties/
-│   └── {propId}
+│       ├── settings/
+│       │   ├── properties         ← The property list (array)
+│       │   ├── tax                ← Tax settings
+│       │   └── hostProfile        ← Host information
+│       └── rentals/
+│           └── {entryId}          ← All calendar entries (bookings, utilities, reminders)
 ├── guides/
-│   └── {guideId}
-├── bookings/
-│   └── {bookingId}
-└── analytics/
-    └── {analyticsId}
+│   └── {guideId}                  ← Publicly readable guest guides
+│       ├── secrets/data           ← Hidden codes
+│       └── signatures/{guestUid}  ← Signatures unlocking the secrets
+└── newsletter_subscribers/
+    └── {id}
 ```
 
 ---
 
 ## users Collection
 
-Stores user profiles and preferences.
+Stores user profiles, their settings (including properties), and their calendar entries (rentals).
 
 ### Document: `users/{uid}`
 
 ```javascript
 {
-  // Authentication
-  uid: "firebase-uid",
-  email: "owner@example.com",
-  displayName: "Jan Kowalski",
-  photoURL: "https://...",
-  emailVerified: true,
-
-  // Metadata
-  createdAt: Timestamp(2026-01-15),
-  updatedAt: Timestamp(2026-06-29),
-  lastLogin: Timestamp(2026-06-29T10:30:00),
-
-  // Preferences
-  language: "pl",
-  timezone: "Europe/Warsaw",
-  notificationsEnabled: true,
-
-  // Account Status
-  accountDeleted: false,
-  subscriptionPlan: "free", // free, pro, premium
-  subscriptionExpiresAt: null,
-
-  // Metadata
-  authProvider: "google",
-  deviceCount: 2,
-  totalProperties: 3,
+  // Profile & Status
+  status: "trialing", // trialing, active, past_due, canceled
+  trialEndsAt: Timestamp(2026-06-30),
+  scheduledDeletionAt: null, // Set if account is scheduled for cleanup
+  
+  // Stripe Data (Set by Cloud Functions, Read-Only for Client)
+  stripeCustomerId: "cus_abc123",
+  stripeSubscriptionId: "sub_xyz789",
+  
+  // Notice: Basic profile like displayName and email lives in Firebase Auth, not here.
 }
 ```
 
-### Subcollection: `users/{uid}/properties`
+### Subcollection: `users/{uid}/settings`
 
-Array or subcollection of property references.
+Contains various configuration documents.
 
-```javascript
-[
-  {
-    propId: "prop_001",
-    name: "Apartament Centrum",
-    address: "ul. Główna 1, 00-001 Warszawa",
-  }
-]
-```
-
----
-
-## properties Collection
-
-Stores rental property information.
-
-### Document: `properties/{propId}`
+#### Document: `users/{uid}/settings/properties`
+Stores the list of properties for the user as an array.
 
 ```javascript
 {
-  // Basic Info
-  id: "prop_001",
-  ownerId: "firebase-uid",
-  name: "Apartament Centrum",
-  description: "Nowoczesny apartament w centrum miasta",
-
-  // Location
-  address: "ul. Główna 1, 00-001 Warszawa",
-  city: "Warszawa",
-  zipCode: "00-001",
-  country: "Poland",
-  coordinates: {
-    latitude: 52.2298,
-    longitude: 21.0122,
-  },
-
-  // Capacity & Details
-  bedrooms: 2,
-  bathrooms: 1,
-  maxGuests: 4,
-  squareMeters: 65,
-
-  // Access Codes
-  codes: {
-    entryPin: "1234",
-    wifiPassword: "SecurePass123",
-    gateCode: "9876",
-    parkingSpot: "A-12",
-  },
-
-  // iCal Export (CRITICAL - BUG: not always generated)
-  secretToken: "token_abc123xyz789", // ⚠️ MUST BE GENERATED ON CREATE
-  icalUrl: "https://app.com/exportIcal?u={uid}&p={propId}&token={token}",
-
-  // Photos & Media
-  photos: [
+  items: [
     {
-      url: "gs://bucket/prop_001/photo_1.jpg",
-      caption: "Living room",
-      order: 1,
-    },
-    // ...
-  ],
-
-  // Availability Calendar
-  availableFrom: Timestamp(2026-07-01),
-  availableTo: Timestamp(2026-12-31),
-  blockedDates: [
-    Timestamp(2026-09-01),
-    Timestamp(2026-09-02),
-  ],
-
-  // Pricing
-  pricePerNight: 150,
-  currency: "PLN",
-  minimumStay: 2,
-  cleaningFee: 50,
-
-  // Settings
-  requiresSignature: true,
-  autoAcceptBookings: false,
-  allowPets: true,
-  allowSmoking: false,
-
-  // Metadata
-  createdAt: Timestamp(2026-01-15),
-  updatedAt: Timestamp(2026-06-29),
-  guidesCount: 2,
-  bookingsCount: 12,
-
-  // Guides Array (or subcollection)
-  guides: ["guide_001", "guide_002"],
+      // Basic Info
+      id: "prop_001",
+      name: "Apartament Centrum",
+      description: "Nowoczesny apartament",
+      
+      // Location
+      address: "ul. Główna 1",
+      
+      // Capacity
+      maxGuests: 4,
+      
+      // Access Codes (Encrypted/Stored safely)
+      codes: {
+        entryPin: "1234",
+        wifiPassword: "SecurePass123"
+      },
+      
+      // iCal Export
+      secretToken: "generated-uuid-v4", // Generated via window.crypto.randomUUID()
+      
+      // Guides & Media metadata
+      guides: ["guide_001", "guide_002"]
+    }
+  ]
 }
 ```
 
-### Subcollection: `properties/{propId}/guides`
-
-Quick access to guides for this property.
+#### Document: `users/{uid}/settings/hostProfile`
+Contains the host's public information. This specific document has public read access via security rules so guest guides can display it.
 
 ```javascript
 {
-  id: "guide_001",
-  title: "Przewodnik po apartamencie",
-  status: "published", // draft, published, archived
+  name: "Jan Kowalski",
+  phone: "+48 123 456 789",
+  email: "jan@example.com"
+}
+```
+
+#### Other Settings Documents
+- `tax`: Contains `taxSettings` object
+- `reminders`: Contains `{ items: [...] }`
+- `sources`: Contains `{ items: [...] }`
+- `categories`: Contains `{ items: [...] }`
+- `syncLinks`: Contains `{ links: [...] }` (external iCal URLs for import)
+
+### Subcollection: `users/{uid}/rentals`
+
+Contains all calendar entries: bookings, utility costs, and reminders.
+
+#### Document: `users/{uid}/rentals/{entryId}`
+
+```javascript
+{
+  id: "timestamp_or_uuid",
+  
+  // Entry Type
+  type: "booking", // booking, utility, reminder
+  
+  // Dates
+  date: "2026-07-15", // YYYY-MM-DD
+  endDate: "2026-07-18", // YYYY-MM-DD (if applicable)
+  
+  // Booking specific fields (if type == 'booking')
+  property: "Apartament Centrum", // Name of the property
+  price: 450,
+  source: "Airbnb",
+  guestName: "Maria Nowak",
+  guestPhone: "+48 123 456 789",
+  isPaid: true,
+  
+  // Financial specifics
+  currency: "PLN"
 }
 ```
 
@@ -172,218 +137,51 @@ Quick access to guides for this property.
 
 ## guides Collection
 
-Public guest guides with instructions and codes.
+Public guest guides.
 
 ### Document: `guides/{guideId}`
 
+**Read Access**: Public (no auth required)
+
 ```javascript
 {
-  // Identification
   id: "guide_001",
+  ownerId: "firebase-uid", // Links back to the creator
   propertyId: "prop_001",
-  ownerId: "firebase-uid",
-
-  // Content
+  
   title: "Przewodnik - Apartament Centrum",
-  description: "Wszystko co musisz wiedzieć o apartamencie",
-  language: "pl",
-
-  // Guide Sections
-  sections: [
-    {
-      id: "sec_1",
-      title: "Check-in",
-      content: "Klucze odbieracie...",
-      order: 1,
-    },
-    {
-      id: "sec_2",
-      title: "WiFi i sieci",
-      content: "SSID: ApartamentCentrum, Hasło: ...",
-      order: 2,
-    },
-    // ...
-  ],
-
-  // Access Control
+  content: "Witaj w apartamencie...",
+  
+  // Gated features
   requiresSignature: true,
-  signatureRequired: "Terms & Conditions",
-  signedUsers: [
-    {
-      email: "guest@example.com",
-      signedAt: Timestamp(2026-06-28T14:20:00),
-      ipAddress: "192.168.1.100",
-    }
-  ],
-
-  // Files & Media
-  attachments: [
-    {
-      name: "House Rules.pdf",
-      url: "gs://bucket/guides/guide_001/rules.pdf",
-      type: "pdf",
-    }
-  ],
-
-  // Publishing
-  status: "published", // draft, published, archived
-  publishedAt: Timestamp(2026-01-20),
-  publicUrl: "https://app.com/guide/guide_001",
-  accessToken: "token_public_xyz", // For sharing
-
-  // Analytics
-  viewCount: 45,
-  lastViewed: Timestamp(2026-06-29T08:15:00),
-
-  // Metadata
-  createdAt: Timestamp(2026-01-15),
-  updatedAt: Timestamp(2026-06-29),
+  
+  createdAt: Timestamp(2026-01-15)
 }
 ```
 
----
+### Subcollection: `guides/{guideId}/secrets`
 
-## bookings Collection
+Contains hidden data unlocked only after signing.
 
-Track guest reservations.
-
-### Document: `bookings/{bookingId}`
-
+#### Document: `guides/{guideId}/secrets/data`
 ```javascript
 {
-  // Identification
-  id: "booking_001",
-  propertyId: "prop_001",
-  ownerId: "firebase-uid",
-  guideId: "guide_001",
-
-  // Guest Info
-  guestEmail: "guest@example.com",
-  guestName: "Maria Nowak",
-  guestPhone: "+48 123 456 789",
-
-  // Dates
-  checkInDate: Timestamp(2026-07-15),
-  checkOutDate: Timestamp(2026-07-18),
-  numberOfNights: 3,
-  numberOfGuests: 2,
-
-  // Pricing
-  pricePerNight: 150,
-  nights: 3,
-  subtotal: 450,
-  cleaningFee: 50,
-  taxPercentage: 8,
-  taxAmount: 40,
-  totalPrice: 540,
-  currency: "PLN",
-
-  // Payment
-  paymentStatus: "completed", // pending, completed, failed, refunded
-  paymentMethod: "stripe",
-  transactionId: "ch_stripe123...",
-  paidAt: Timestamp(2026-06-15T18:30:00),
-
-  // Status
-  bookingStatus: "confirmed", // pending, confirmed, cancelled, completed
-  cancellationType: null, // full_refund, partial_refund, none
-  cancellationReason: null,
-
-  // Special Requests
-  specialRequests: "High chair needed for baby",
-  housekeepingNotes: "Clean thoroughly, guest allergic to dust",
-
-  // Metadata
-  createdAt: Timestamp(2026-06-15),
-  confirmedAt: Timestamp(2026-06-16),
-  completedAt: null,
+  wifiPassword: "SecurePass123",
+  entryPin: "1234"
 }
 ```
 
----
+### Subcollection: `guides/{guideId}/signatures`
 
-## analytics Collection (Optional)
+Contains proof of signature allowing access to secrets.
 
-Track app usage and metrics.
-
-### Document: `analytics/{analyticsId}`
-
+#### Document: `guides/{guideId}/signatures/{guestUid}`
 ```javascript
 {
-  // Identification
-  id: "analytics_2026_06",
-  month: "2026-06",
-  userId: "firebase-uid",
-
-  // Usage Stats
-  propertiesCreated: 1,
-  propertiesViewed: 24,
-  guidesPublished: 2,
-  bookingsReceived: 5,
-  totalRevenue: 2150,
-
-  // Engagement
-  sessionCount: 18,
-  totalSessionDuration: 3600, // seconds
-  pageViews: 156,
-  lastActiveAt: Timestamp(2026-06-29T18:45:00),
-
-  // Performance
-  averageSessionDuration: 200, // seconds
-  bounceRate: 15, // percent
-
-  // Metadata
-  createdAt: Timestamp(2026-06-30),
-  updatedAt: Timestamp(2026-06-30),
+  signedAt: Timestamp(2026-06-28),
+  guestUid: "anonymous-auth-uid"
 }
 ```
-
----
-
-## Firestore Indexes
-
-Recommended composite indexes for queries:
-
-### Index 1: Properties by Owner
-```
-Collection: properties
-Fields:
-  - ownerId (Ascending)
-  - createdAt (Descending)
-```
-
-### Index 2: Bookings by Property & Date
-```
-Collection: bookings
-Fields:
-  - propertyId (Ascending)
-  - checkInDate (Ascending)
-```
-
-### Index 3: Guides by Owner Status
-```
-Collection: guides
-Fields:
-  - ownerId (Ascending)
-  - status (Ascending)
-  - publishedAt (Descending)
-```
-
----
-
-## Security Rules
-
-### Read Access
-- Users can read own documents
-- Guides public with signature check
-- No cross-user access
-
-### Write Access
-- Users can write own documents
-- Validate required fields
-- Prevent escalation of privileges
-
-See: `firestore.rules` file
 
 ---
 
@@ -391,53 +189,26 @@ See: `firestore.rules` file
 
 ```
 gs://wynajempro-app.appspot.com/
-├── properties/{propId}/
-│   ├── photos/
-│   │   ├── photo_1.jpg
-│   │   └── photo_2.jpg
-│   └── documents/
-│       └── rules.pdf
-├── guides/{guideId}/
-│   ├── guide_content.pdf
-│   └── attachments/
-│       ├── WiFi_setup.pdf
-│       └── House_Rules.pdf
-└── users/{uid}/
-    ├── avatar.jpg
-    └── documents/
+└── guides/
+    └── {guideId}/
+        ├── cover.jpg
+        └── attachments/
+            └── House_Rules.pdf
 ```
-
-See: `storage.rules` file
-
----
-
-## Data Validation Rules
-
-### Properties
-- `name`: required, max 200 chars
-- `address`: required, max 300 chars
-- `pricePerNight`: required, min 0
-- `codes.entryPin`: must be 4-6 digits
-- `secretToken`: auto-generated (BUG: not always!)
-
-### Guides
-- `title`: required, max 200 chars
-- `propertyId`: required, must exist
-- `status`: enum [draft, published, archived]
-
-### Bookings
-- `checkInDate` < `checkOutDate`: required
-- `numberOfGuests` ≤ `property.maxGuests`
-- `totalPrice` > 0
+*Note: These are deleted when the `deleteUserAccount` Cloud Function runs.*
 
 ---
 
-## Versioning Notes
+## Security Rules Summary
 
-- **Schema Version**: 1.0
-- **Last Updated**: 2026-06-29
-- **Compatibility**: Firebase Realtime Database not supported (use Firestore)
+- **`users/{userId}`**: Read/update by verified owner.
+- **`users/{userId}/rentals/{docId}`**: Owner + verified + **active subscription**.
+- **`users/{userId}/settings/{docId}`**: Owner + verified + **active subscription**. Exception: `hostProfile` can be read publicly.
+- **`guides/{guideId}`**: **Public read**. Create/Update/Delete requires verified owner + active subscription + `ownerId` match.
+- **`guides/{guideId}/secrets/data`**: Public read ONLY if there is a corresponding signature document in `signatures/{guestUid}`.
+
+See: `firestore.rules` and `storage.rules`
 
 ---
 
-**Related**: [[Architecture]], [[Features]], [[Development]]
+**Related**: [[Architecture]], [[Features]], [[Agent-Process-Map]]

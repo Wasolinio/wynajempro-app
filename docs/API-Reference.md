@@ -85,10 +85,9 @@ const icalUrl = `https://us-central1-wynajempro-app.cloudfunctions.net/exportIca
 window.location.href = icalUrl;
 ```
 
-#### ⚠️ Known Issue
+#### Note
 
-**BUG**: `secretToken` is not generated when property is created!  
-See: [[Known-Issues]] → iCal Token Not Generated
+The `secretToken` is generated securely in the frontend (`ManagerApp.jsx`) and verified here.
 
 ---
 
@@ -129,7 +128,7 @@ await firebase.functions().httpsCallable('deleteUserAccount')({
 - ✅ All properties owned by user
 - ✅ All guides created by user
 - ✅ All bookings for user's properties
-- ❌ **BUG**: Storage files NOT fully deleted (see [[Known-Issues]])
+- ✅ Storage files belonging to guides
 - ✅ User authentication account
 
 #### Authentication
@@ -145,10 +144,7 @@ if (user) {
 }
 ```
 
-#### ⚠️ Known Issue
 
-**BUG**: Guide files in Storage (`guides/{guideId}/**`) are not deleted.  
-See: [[Known-Issues]] → Storage Leak on Account Deletion
 
 ---
 

@@ -38,7 +38,7 @@ const AddEditEntryModal = ({
               <div>
                 <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Wybierz Obiekt</label>
                 <select value={newRental.property} onChange={e => handleRentalChange('property', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer" required>
-                  {properties.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                  {properties.map(p => <option key={typeof p === 'object' ? p.name : p} value={typeof p === 'object' ? p.name : p}>{typeof p === 'object' ? p.name : p}</option>)}
                 </select>
               </div>
               
@@ -105,7 +105,7 @@ const AddEditEntryModal = ({
               <div>
                 <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 ml-1">Wybierz Obiekt</label>
                 <select value={newRental.property} onChange={e => handleRentalChange('property', e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" required>
-                  {properties.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                  {properties.map(p => <option key={typeof p === 'object' ? p.name : p} value={typeof p === 'object' ? p.name : p}>{typeof p === 'object' ? p.name : p}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

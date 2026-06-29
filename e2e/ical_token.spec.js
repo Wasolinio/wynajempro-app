@@ -11,9 +11,16 @@ test('verify iCal token generation, retrofitting, and link display', async ({ pa
 
   const mockDbData = {
     'users/uid-test': {
-      status: 'active',
+      accountStatus: 'active',
       name: 'Test User',
       email: 'test@example.com'
+    },
+    'users/uid-test/settings/hostProfile': {
+      entityName: 'Test Host',
+      phone: '+48 999 888 777',
+      email: 'test@example.com',
+      identifierType: 'NIP',
+      taxIdentifier: '1234567890'
     },
     'users/uid-test/settings/properties': {
       items: [
@@ -60,8 +67,8 @@ test('verify iCal token generation, retrofitting, and link display', async ({ pa
   await page.fill('input[placeholder="Nazwa nowego obiektu..."]', 'Nowy Apartament');
   await page.click('button[type="submit"]:has(svg.lucide-plus)');
 
-  // 5. Navigate back to 'Synchronizacja iCal' tab
-  await page.locator('button:has-text("Synchronizacja iCal")').click();
+  // 5. Navigate back to 'Integracje' tab
+  await page.locator('button:has-text("Integracje")').click();
 
   // New property should be listed at index 2 (third input)
   const newPropInput = page.locator('input[readOnly]').nth(2);

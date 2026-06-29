@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500;1,6..72,600&family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#17150F;background:#F3EFE5}
+  ::selection{background:#D9492B;color:#fff}
+  .mono{font-family:'IBM Plex Mono',monospace}
+</style>
+</helmet>
+
+<div style="background:#F3EFE5;color:#17150F">
+
+  <!-- utility strip -->
+  <div style="background:#17150F;color:#CFC7B6;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 0">
+    <div style="max-width:1240px;margin:0 auto;padding:0 40px;display:flex;justify-content:space-between">
+      <span>System dla mikro-gospodarzy najmu krótkoterminowego</span>
+      <span style="color:#8C8576">PL · PLN · 2026</span>
+    </div>
+  </div>
+
+  <!-- nav -->
+  <div style="border-bottom:1px solid #DDD5C3">
+    <div style="max-width:1240px;margin:0 auto;padding:20px 40px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:baseline;gap:2px;font-weight:800;font-size:21px;letter-spacing:-.02em">Wynajem<span style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;background:#17150F;color:#F3EFE5;padding:3px 6px;margin-left:3px;letter-spacing:.05em">PRO</span></div>
+      <div style="display:flex;align-items:center;gap:32px;font-size:15px;font-weight:500;color:#3D382E">
+        <span>Funkcje</span><span>Jak działa</span><span>Cennik</span><span>Pomoc</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:22px;font-size:15px">
+        <span style="font-weight:500;color:#3D382E">Zaloguj się</span>
+        <a style="background:#17150F;color:#F3EFE5;padding:11px 18px;font-weight:600;border-radius:3px;text-decoration:none">Wypróbuj 14 dni</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div style="max-width:1240px;margin:0 auto;padding:72px 40px 60px;display:grid;grid-template-columns:1.06fr .94fr;gap:64px;align-items:start">
+    <div>
+      <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;margin-bottom:30px">01 — Zarządzanie najmem</div>
+      <h1 style="font-weight:800;font-size:76px;line-height:.96;letter-spacing:-.035em;margin:0 0 26px">Zapanuj nad <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic;letter-spacing:-.01em">chaosem</span> w wynajmie.</h1>
+      <p style="font-size:19px;line-height:1.6;color:#524C3F;max-width:470px;margin:0 0 34px">Kalendarz, synchronizacja, finanse i przewodnik dla gości — jeden precyzyjny panel dla gospodarza z kilkoma obiektami. Bez arkuszy. Bez overbookingu.</p>
+      <div style="display:flex;align-items:center;gap:24px;margin-bottom:40px">
+        <a style="background:#D9492B;color:#fff;padding:15px 26px;font-weight:600;font-size:16px;border-radius:3px;text-decoration:none">Wypróbuj za darmo</a>
+        <a style="font-weight:600;font-size:16px;color:#17150F;text-decoration:none;border-bottom:2px solid #17150F;padding-bottom:2px">Zobacz, jak działa →</a>
+      </div>
+      <div style="border-top:1px solid #DDD5C3;padding-top:20px">
+        <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:8px">Synchronizacja</div>
+        <div style="display:flex;gap:24px;font-size:15px;font-weight:600;color:#3D382E;flex-wrap:wrap">
+          <span>Airbnb</span><span style="color:#CDC4B0">/</span><span>Booking.com</span><span style="color:#CDC4B0">/</span><span>Nocowanie</span><span style="color:#CDC4B0">/</span><span>iCal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- figure: kalendarz -->
+    <div>
+      <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:10px;display:flex;justify-content:space-between"><span>Rys. 1 — Kalendarz wszystkich obiektów</span><span>Czerwiec '26</span></div>
+      <div style="background:#FBFAF6;border:1px solid #17150F;border-radius:4px;padding:18px">
+        <div style="display:grid;grid-template-columns:104px 1fr;gap:8px">
+          <div></div>
+          <div class="mono" style="display:grid;grid-template-columns:repeat(7,1fr);font-size:10px;color:#9A917D;text-align:center;border-bottom:1px solid #E6DFCE;padding-bottom:7px;letter-spacing:.04em">
+            <span>09</span><span>10</span><span>11</span><span style="color:#D9492B;font-weight:600">12</span><span>13</span><span>14</span><span>15</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:grid;grid-template-columns:104px 1fr;gap:8px;align-items:center;border-bottom:1px solid #EFE9DA;min-height:50px">
+            <div style="font-size:12px;font-weight:600;line-height:1.2">Apartament<br><span class="mono" style="font-size:10px;color:#9A917D;font-weight:400">KRAKÓW</span></div>
+            <div style="position:relative;height:30px">
+              <div style="position:absolute;left:0;width:40%;top:3px;bottom:3px;background:#234B7A;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">Kowalski</div>
+              <div style="position:absolute;left:44%;width:30%;top:3px;bottom:3px;background:#D9492B;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">Nowak</div>
+              <div style="position:absolute;left:78%;width:22%;top:3px;bottom:3px;background:#2F6B53;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">W.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:104px 1fr;gap:8px;align-items:center;border-bottom:1px solid #EFE9DA;min-height:50px">
+            <div style="font-size:12px;font-weight:600;line-height:1.2">Domek<br><span class="mono" style="font-size:10px;color:#9A917D;font-weight:400">MAZURY</span></div>
+            <div style="position:relative;height:30px">
+              <div style="position:absolute;left:14%;width:48%;top:3px;bottom:3px;background:#D9492B;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">Lewandowscy</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:104px 1fr;gap:8px;align-items:center;min-height:50px">
+            <div style="font-size:12px;font-weight:600;line-height:1.2">Studio<br><span class="mono" style="font-size:10px;color:#9A917D;font-weight:400">GDAŃSK</span></div>
+            <div style="position:relative;height:30px">
+              <div style="position:absolute;left:0;width:26%;top:3px;bottom:3px;background:#2F6B53;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">Mazur</div>
+              <div style="position:absolute;left:58%;width:42%;top:3px;bottom:3px;background:#234B7A;border-radius:3px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding-left:8px">Król</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #E6DFCE">
+          <div style="display:flex;gap:16px;font-size:11px" class="mono">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#D9492B;border-radius:2px"></span>Airbnb</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#234B7A;border-radius:2px"></span>Booking</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#2F6B53;border-radius:2px"></span>Direct</span>
+          </div>
+          <div class="mono" style="font-size:11px;color:#524C3F">OBŁOŻENIE <span style="color:#2F6B53;font-weight:600">81%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- value ticker -->
+  <div style="background:#17150F;color:#F3EFE5;overflow:hidden">
+    <div class="mono" style="max-width:1240px;margin:0 auto;padding:16px 40px;display:flex;gap:28px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;flex-wrap:wrap;align-items:center">
+      <span>Koniec z overbookingiem</span><span style="color:#D9492B">/</span>
+      <span>Banalne podatki</span><span style="color:#D9492B">/</span>
+      <span>Jasna rentowność każdego obiektu</span><span style="color:#D9492B">/</span>
+      <span>Mniej telefonów od gości</span>
+    </div>
+  </div>
+
+  <!-- FEATURES — index list -->
+  <div style="max-width:1240px;margin:0 auto;padding:84px 40px 30px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px">
+      <h2 style="font-weight:800;font-size:42px;letter-spacing:-.03em;margin:0;max-width:520px;line-height:1.04">Cztery rzeczy, które robisz codziennie — bez tarcia.</h2>
+      <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">02 — Co dostajesz</div>
+    </div>
+
+    <div style="border-top:1px solid #17150F">
+      <div style="display:grid;grid-template-columns:64px 1.1fr 1fr;gap:32px;padding:30px 0;border-bottom:1px solid #DDD5C3;align-items:start">
+        <div class="mono" style="font-size:14px;color:#D9492B;font-weight:600;padding-top:4px">01</div>
+        <h3 style="font-size:27px;font-weight:600;letter-spacing:-.02em;margin:0">Kalendarz i synchronizacja</h3>
+        <p style="font-size:16px;line-height:1.6;color:#524C3F;margin:0">Wszystkie obiekty i kanały na jednej osi czasu. Synchronizacja iCal blokuje terminy automatycznie — <span style="color:#17150F;font-weight:600">overbooking przestaje istnieć</span>.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:64px 1.1fr 1fr;gap:32px;padding:30px 0;border-bottom:1px solid #DDD5C3;align-items:start">
+        <div class="mono" style="font-size:14px;color:#D9492B;font-weight:600;padding-top:4px">02</div>
+        <h3 style="font-size:27px;font-weight:600;letter-spacing:-.02em;margin:0">Finanse i podatki</h3>
+        <p style="font-size:16px;line-height:1.6;color:#524C3F;margin:0">Przychód, koszty i zysk netto liczone <span style="color:#17150F;font-weight:600">per obiekt</span>. Gotowy eksport dla księgowej — rozliczenie przestaje boleć.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:64px 1.1fr 1fr;gap:32px;padding:30px 0;border-bottom:1px solid #DDD5C3;align-items:start">
+        <div class="mono" style="font-size:14px;color:#D9492B;font-weight:600;padding-top:4px">03</div>
+        <h3 style="font-size:27px;font-weight:600;letter-spacing:-.02em;margin:0">Przewodnik dla gości</h3>
+        <p style="font-size:16px;line-height:1.6;color:#524C3F;margin:0">Jeden link: dojazd, kod do skrytki z kluczami, hasło WiFi i polecane miejsca. <span style="color:#17150F;font-weight:600">Mniej telefonów</span>, więcej spokoju.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:64px 1.1fr 1fr;gap:32px;padding:30px 0;border-bottom:1px solid #17150F;align-items:start">
+        <div class="mono" style="font-size:14px;color:#D9492B;font-weight:600;padding-top:4px">04</div>
+        <h3 style="font-size:27px;font-weight:600;letter-spacing:-.02em;margin:0">Przypomnienia</h3>
+        <p style="font-size:16px;line-height:1.6;color:#524C3F;margin:0">Zameldowania, sprzątanie, płatności. System pilnuje terminów za Ciebie i wysyła ponaglenia automatycznie.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT FIGURE — rentowność -->
+  <div style="max-width:1240px;margin:0 auto;padding:64px 40px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px">
+      <div>
+        <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;margin-bottom:14px">03 — W środku</div>
+        <h2 style="font-weight:800;font-size:42px;letter-spacing:-.03em;margin:0;max-width:560px;line-height:1.04">Widzisz, ile <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">naprawdę</span> zarabiasz na każdym obiekcie.</h2>
+      </div>
+    </div>
+
+    <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:10px">Rys. 2 — Rentowność per obiekt · 2026</div>
+    <div style="background:#FBFAF6;border:1px solid #17150F;border-radius:4px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #E6DFCE">
+        <div style="font-size:17px;font-weight:700">Rentowność</div>
+        <div class="mono" style="font-size:12px;color:#524C3F;display:flex;gap:16px"><span>ROK 2026</span><span style="color:#D9492B">EKSPORT PDF</span></div>
+      </div>
+      <!-- table head -->
+      <div class="mono" style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .8fr;gap:16px;padding:12px 24px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;border-bottom:1px solid #EFE9DA">
+        <span>Obiekt</span><span style="text-align:right">Przychód</span><span style="text-align:right">Koszty</span><span style="text-align:right">Zysk netto</span><span style="text-align:right">Marża</span>
+      </div>
+      <!-- rows -->
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .8fr;gap:16px;padding:18px 24px;border-bottom:1px solid #EFE9DA;align-items:center">
+        <div><div style="font-size:15px;font-weight:600">Apartament Centrum</div><div class="mono" style="font-size:11px;color:#9A917D">KRAKÓW · 320 ZŁ/NOC</div></div>
+        <div class="mono" style="text-align:right;font-size:15px;font-variant-numeric:tabular-nums">38 400 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;color:#A2553F;font-variant-numeric:tabular-nums">− 5 120 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;font-weight:600;color:#2F6B53;font-variant-numeric:tabular-nums">33 280 zł</div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><div style="width:42px;height:6px;background:#E6DFCE;border-radius:3px;overflow:hidden"><div style="width:87%;height:100%;background:#2F6B53"></div></div><span class="mono" style="font-size:13px">87%</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .8fr;gap:16px;padding:18px 24px;border-bottom:1px solid #EFE9DA;align-items:center">
+        <div><div style="font-size:15px;font-weight:600">Domek nad jeziorem</div><div class="mono" style="font-size:11px;color:#9A917D">MAZURY · 540 ZŁ/NOC</div></div>
+        <div class="mono" style="text-align:right;font-size:15px;font-variant-numeric:tabular-nums">31 860 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;color:#A2553F;font-variant-numeric:tabular-nums">− 6 980 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;font-weight:600;color:#2F6B53;font-variant-numeric:tabular-nums">24 880 zł</div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><div style="width:42px;height:6px;background:#E6DFCE;border-radius:3px;overflow:hidden"><div style="width:78%;height:100%;background:#2F6B53"></div></div><span class="mono" style="font-size:13px">78%</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .8fr;gap:16px;padding:18px 24px;border-bottom:1px solid #E6DFCE;align-items:center">
+        <div><div style="font-size:15px;font-weight:600">Studio Stare Miasto</div><div class="mono" style="font-size:11px;color:#9A917D">GDAŃSK · 240 ZŁ/NOC</div></div>
+        <div class="mono" style="text-align:right;font-size:15px;font-variant-numeric:tabular-nums">14 340 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;color:#A2553F;font-variant-numeric:tabular-nums">− 2 980 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;font-weight:600;color:#2F6B53;font-variant-numeric:tabular-nums">11 360 zł</div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><div style="width:42px;height:6px;background:#E6DFCE;border-radius:3px;overflow:hidden"><div style="width:79%;height:100%;background:#2F6B53"></div></div><span class="mono" style="font-size:13px">79%</span></div>
+      </div>
+      <!-- total -->
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .8fr;gap:16px;padding:18px 24px;background:#17150F;color:#F3EFE5;align-items:center">
+        <div style="font-size:15px;font-weight:700">Razem</div>
+        <div class="mono" style="text-align:right;font-size:15px;font-variant-numeric:tabular-nums">84 600 zł</div>
+        <div class="mono" style="text-align:right;font-size:15px;color:#E89A86;font-variant-numeric:tabular-nums">− 15 080 zł</div>
+        <div class="mono" style="text-align:right;font-size:16px;font-weight:600;color:#7FD0AC;font-variant-numeric:tabular-nums">69 520 zł</div>
+        <div class="mono" style="text-align:right;font-size:13px">82%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING — ledger -->
+  <div style="max-width:1240px;margin:0 auto;padding:64px 40px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px">
+      <h2 style="font-weight:800;font-size:42px;letter-spacing:-.03em;margin:0;line-height:1.04">Płacisz za obiekt.<br>Nie za rezerwację.</h2>
+      <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">04 — Cennik</div>
+    </div>
+    <div style="border:1px solid #17150F;border-radius:4px;display:grid;grid-template-columns:repeat(3,1fr);background:#FBFAF6">
+      <div style="padding:32px;border-right:1px solid #DDD5C3">
+        <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Start</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin:14px 0 4px"><span style="font-size:46px;font-weight:800;letter-spacing:-.03em">39</span><span class="mono" style="font-size:14px;color:#524C3F">zł / mies.</span></div>
+        <div style="font-size:14px;color:#524C3F;margin-bottom:22px">1 obiekt</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#3D382E">
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Kalendarz i iCal</div>
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Przewodnik dla gości</div>
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Podstawowe finanse</div>
+        </div>
+      </div>
+      <div style="padding:32px;border-right:1px solid #DDD5C3;background:#17150F;color:#F3EFE5;position:relative">
+        <div class="mono" style="position:absolute;top:0;left:0;right:0;height:4px;background:#D9492B"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#E89A86">Gospodarz</span><span class="mono" style="font-size:11px;background:#D9492B;padding:3px 8px;letter-spacing:.06em">POLECANY</span></div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin:14px 0 4px"><span style="font-size:46px;font-weight:800;letter-spacing:-.03em">89</span><span class="mono" style="font-size:14px;color:#B8B0A0">zł / mies.</span></div>
+        <div style="font-size:14px;color:#B8B0A0;margin-bottom:22px">do 3 obiektów</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#E4DDCE">
+          <div style="display:flex;gap:10px"><span style="color:#E89A86">+</span>Wszystko ze Start</div>
+          <div style="display:flex;gap:10px"><span style="color:#E89A86">+</span>Rentowność i eksport PDF</div>
+          <div style="display:flex;gap:10px"><span style="color:#E89A86">+</span>Przypomnienia automatyczne</div>
+          <div style="display:flex;gap:10px"><span style="color:#E89A86">+</span>Zadania sprzątania</div>
+        </div>
+      </div>
+      <div style="padding:32px">
+        <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Pro</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin:14px 0 4px"><span style="font-size:46px;font-weight:800;letter-spacing:-.03em">149</span><span class="mono" style="font-size:14px;color:#524C3F">zł / mies.</span></div>
+        <div style="font-size:14px;color:#524C3F;margin-bottom:22px">do 8 obiektów</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#3D382E">
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Wszystko z Gospodarz</div>
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Wielu użytkowników</div>
+          <div style="display:flex;gap:10px"><span style="color:#D9492B">+</span>Priorytetowe wsparcie</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div style="border-top:1px solid #DDD5C3;margin-top:40px">
+    <div style="max-width:1240px;margin:0 auto;padding:90px 40px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center">
+      <h2 style="font-weight:800;font-size:60px;letter-spacing:-.035em;margin:0;line-height:.98">Spokojniejszy sezon<br>zaczyna się <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">tutaj</span>.</h2>
+      <div style="text-align:right">
+        <a style="display:inline-block;background:#D9492B;color:#fff;padding:17px 30px;font-weight:600;font-size:17px;border-radius:3px;text-decoration:none">Załóż konto za darmo</a>
+        <div class="mono" style="font-size:12px;color:#A0987F;margin-top:14px;letter-spacing:.06em">14 DNI · BEZ KARTY · SYNCHRONIZACJA W 5 MIN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#17150F;color:#CFC7B6">
+    <div style="max-width:1240px;margin:0 auto;padding:56px 40px 40px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="display:flex;align-items:baseline;font-weight:800;font-size:22px;color:#F3EFE5;letter-spacing:-.02em">Wynajem<span style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;background:#D9492B;color:#fff;padding:3px 6px;margin-left:4px">PRO</span></div>
+        <p style="font-size:14px;line-height:1.6;color:#8C8576;max-width:280px;margin:16px 0 0">System do zarządzania najmem krótkoterminowym dla mikro-gospodarzy.</p>
+      </div>
+      <div>
+        <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:14px">Produkt</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px"><span>Funkcje</span><span>Cennik</span><span>Integracje</span></div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:14px">Firma</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px"><span>O nas</span><span>Kontakt</span><span>Blog</span></div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:14px">Pomoc</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px"><span>Centrum pomocy</span><span>Status</span><span>Regulamin</span></div>
+      </div>
+    </div>
+    <div class="mono" style="border-top:1px solid #2C2920;max-width:1240px;margin:0 auto;padding:18px 40px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B6555">
+      <span>© 2026 WynajemPRO</span><span>Wykonane w Polsce</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}"></script>
+</body>
+</html>

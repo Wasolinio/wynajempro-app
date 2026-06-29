@@ -53,9 +53,22 @@ export const useFirebaseData = (user, selectedYear) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         queryClient.setQueryData(['profile', user.uid], {
-          accountStatus: data.status || 'trialing',
+          accountStatus: data.accountStatus || data.status || 'trialing',
           trialEndsAt: data.trialEndsAt ? (data.trialEndsAt.toDate ? data.trialEndsAt.toDate() : new Date(data.trialEndsAt)) : null,
           scheduledDeletionAt: data.scheduledDeletionAt ? (data.scheduledDeletionAt.toDate ? data.scheduledDeletionAt.toDate() : new Date(data.scheduledDeletionAt)) : null,
+        });
+      } else {
+        // SELF-HEAL: Brak dokumentu usera (stare konta zepsute błędem).
+        // Tworzymy na nowo z 14-dniowym trialem.
+        const trialEndDate = new Date();
+        trialEndDate.setDate(trialEndDate.getDate() + 14);
+        import('firebase/firestore').then(({ setDoc, serverTimestamp, Timestamp }) => {
+          setDoc(doc(db, 'users', user.uid), {
+            email: user.email || '',
+            createdAt: serverTimestamp(),
+            accountStatus: 'trialing',
+            trialEndsAt: Timestamp.fromDate(trialEndDate)
+          }).catch(console.error);
         });
       }
     });

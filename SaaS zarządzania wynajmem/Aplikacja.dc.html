@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#211C16;background:#EDE9E0}
+  ::selection{background:#E8C9A0}
+  input{font-family:inherit}
+</style>
+</helmet>
+
+<div style="height:100vh;overflow:hidden">
+
+  <!-- ================= LOGIN ================= -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:1.05fr 1fr;height:100vh;background:#fff">
+    <!-- brand panel -->
+    <div style="background:#1E3A33;color:#EAF1ED;padding:56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+      <div style="position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(194,90,56,.18);top:-120px;right:-120px"></div>
+      <div style="position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(232,201,160,.12);bottom:-80px;left:-60px"></div>
+      <div style="display:flex;align-items:center;gap:11px;font-size:23px;font-weight:700;position:relative">
+        <span style="display:inline-flex;width:34px;height:34px;border-radius:9px;background:#C25A38;color:#fff;align-items:center;justify-content:center;font-weight:700">K</span>Kluczyk
+      </div>
+      <div style="position:relative">
+        <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:46px;line-height:1.1;margin:0 0 18px">Cały Twój wynajem<br>w jednym spokojnym miejscu.</h1>
+        <p style="font-size:17px;color:#A9C0B7;line-height:1.6;margin:0;max-width:420px">Kalendarz, synchronizacja iCal, finanse i przewodnik dla gości — dla gospodarzy z 1–3 obiektami.</p>
+        <div style="margin-top:34px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:22px;max-width:430px">
+          <div style="display:flex;gap:14px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:50%;background:#E8C9A0;color:#1E3A33;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">MW</div>
+            <div>
+              <div style="font-size:14px;line-height:1.5;color:#D6E2DC">„Wreszcie nie boję się podwójnej rezerwacji. Wszystko widzę w jednym miejscu."</div>
+              <div style="font-size:13px;color:#8FA89E;margin-top:6px">Marta W. · 3 apartamenty, Kraków</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;font-size:13px;color:#7E988D">© 2026 Kluczyk · Wykonane w Polsce</div>
+    </div>
+    <!-- form -->
+    <div style="display:flex;align-items:center;justify-content:center;padding:40px">
+      <div style="width:100%;max-width:380px">
+        <h2 style="font-size:30px;font-weight:700;margin:0 0 6px">Zaloguj się</h2>
+        <p style="font-size:15px;color:#6A6153;margin:0 0 30px">Witaj ponownie. Zarządzaj swoim wynajmem.</p>
+        <label style="display:block;font-size:13px;font-weight:600;color:#4A4339;margin-bottom:7px">Adres e-mail</label>
+        <input value="anna@kluczyk.pl" style="width:100%;padding:13px 15px;border:1px solid #E0D9CB;border-radius:11px;font-size:15px;margin-bottom:18px;background:#FBFAF6;color:#211C16">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><label style="font-size:13px;font-weight:600;color:#4A4339">Hasło</label><span style="font-size:13px;color:#C25A38;font-weight:600">Nie pamiętasz?</span></div>
+        <input type="password" value="haslo12345" style="width:100%;padding:13px 15px;border:1px solid #E0D9CB;border-radius:11px;font-size:15px;margin-bottom:18px;background:#FBFAF6">
+        <label style="display:flex;align-items:center;gap:9px;font-size:14px;color:#4A4339;margin-bottom:24px;cursor:pointer"><span style="width:18px;height:18px;border-radius:5px;background:#C25A38;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:12px">✓</span>Zapamiętaj mnie na tym urządzeniu</label>
+        <button onClick="{{ doLogin }}" style="width:100%;padding:14px;background:#C25A38;color:#fff;border:none;border-radius:11px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit">Zaloguj się</button>
+        <div style="display:flex;align-items:center;gap:14px;margin:24px 0;color:#A89E8E;font-size:13px"><span style="flex:1;height:1px;background:#E6DFD3"></span>lub<span style="flex:1;height:1px;background:#E6DFD3"></span></div>
+        <button onClick="{{ doLogin }}" style="width:100%;padding:13px;background:#fff;border:1px solid #E0D9CB;border-radius:11px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px">
+          <span style="width:18px;height:18px;border-radius:50%;background:conic-gradient(#EA4335,#FBBC05,#34A853,#4285F4);display:inline-block"></span>Kontynuuj z Google
+        </button>
+        <p style="text-align:center;font-size:14px;color:#6A6153;margin:28px 0 0">Nie masz konta? <span style="color:#C25A38;font-weight:600">Załóż za darmo</span></p>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= APP SHELL ================= -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:248px 1fr;height:100vh">
+    <!-- sidebar -->
+    <div style="background:#1E3A33;color:#AEC3BA;padding:22px 16px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;color:#fff;padding:6px 10px 22px">
+        <span style="display:inline-flex;width:30px;height:30px;border-radius:8px;background:#C25A38;color:#fff;align-items:center;justify-content:center;font-weight:700;font-size:15px">K</span>Kluczyk
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div onClick="{{ goDash }}" style="{{ sDash }}">{{ icoDash }}<span>Pulpit</span></div>
+        <div onClick="{{ goCal }}" style="{{ sCal }}">{{ icoCal }}<span>Kalendarz</span></div>
+        <div onClick="{{ goProp }}" style="{{ sProp }}">{{ icoHome }}<span>Obiekty</span></div>
+        <div onClick="{{ goRes }}" style="{{ sRes }}">{{ icoDoc }}<span>Rezerwacje</span></div>
+        <div onClick="{{ goFin }}" style="{{ sFin }}">{{ icoMoney }}<span>Finanse</span></div>
+      </div>
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:700;letter-spacing:.06em;color:#6F8C81;padding-left:12px;margin-bottom:10px">SYNCHRONIZACJA</div>
+      <div style="padding:0 12px;display:flex;flex-direction:column;gap:11px;font-size:13px">
+        <div style="display:flex;align-items:center;gap:9px"><span style="width:8px;height:8px;border-radius:50%;background:#7BD8A4"></span>Airbnb<span style="margin-left:auto;color:#6F8C81;font-size:12px">2 min temu</span></div>
+        <div style="display:flex;align-items:center;gap:9px"><span style="width:8px;height:8px;border-radius:50%;background:#7BD8A4"></span>Booking.com<span style="margin-left:auto;color:#6F8C81;font-size:12px">5 min temu</span></div>
+        <div style="display:flex;align-items:center;gap:9px"><span style="width:8px;height:8px;border-radius:50%;background:#E8C24B"></span>Nocowanie<span style="margin-left:auto;color:#6F8C81;font-size:12px">synchr…</span></div>
+      </div>
+      <div style="margin-top:auto;display:flex;align-items:center;gap:11px;padding:10px;border-radius:12px;background:rgba(255,255,255,.05)">
+        <div style="width:36px;height:36px;border-radius:50%;background:#E8C9A0;color:#1E3A33;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">AN</div>
+        <div style="line-height:1.3"><div style="font-size:14px;font-weight:600;color:#fff">Anna Nowak</div><div style="font-size:12px;color:#7E988D">Plan Gospodarz</div></div>
+        <div onClick="{{ goLogin }}" style="margin-left:auto;cursor:pointer;color:#7E988D" title="Wyloguj">{{ icoOut }}</div>
+      </div>
+    </div>
+
+    <!-- main -->
+    <div data-app-main style="background:#F4F1EA;overflow-y:auto;height:100vh">
+      <!-- topbar -->
+      <div style="position:sticky;top:0;z-index:10;background:rgba(244,241,234,.85);backdrop-filter:blur(8px);border-bottom:1px solid #E6DFD3;padding:16px 32px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:21px;font-weight:700">{{ pageTitle }}</div>
+          <div style="font-size:13px;color:#8A7F6C">{{ pageSub }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E6DFD3;border-radius:10px;padding:9px 14px;width:240px;color:#9A9082;font-size:14px">{{ icoSearch }}<span>Szukaj rezerwacji…</span></div>
+          <div style="position:relative;width:40px;height:40px;border-radius:10px;background:#fff;border:1px solid #E6DFD3;display:flex;align-items:center;justify-content:center;color:#4A4339">{{ icoBell }}<span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:#C25A38"></span></div>
+          <button onClick="{{ goCal }}" style="padding:10px 16px;background:#C25A38;color:#fff;border:none;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px">+ Rezerwacja</button>
+        </div>
+      </div>
+
+      <div style="padding:28px 32px 60px">
+
+        <!-- ===== DASHBOARD ===== -->
+        <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px">
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px">
+            <div style="font-size:13px;color:#8A7F6C;margin-bottom:8px">Przychód · czerwiec</div>
+            <div style="font-size:28px;font-weight:700">14 280 zł</div>
+            <div style="font-size:12px;color:#2E7D55;margin-top:6px;font-weight:600">▲ 12% vs maj</div>
+          </div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px">
+            <div style="font-size:13px;color:#8A7F6C;margin-bottom:8px">Obłożenie</div>
+            <div style="font-size:28px;font-weight:700">81%</div>
+            <div style="height:6px;background:#F0EADD;border-radius:3px;margin-top:10px;overflow:hidden"><div style="width:81%;height:100%;background:#C25A38"></div></div>
+          </div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px">
+            <div style="font-size:13px;color:#8A7F6C;margin-bottom:8px">Przyjazdy dziś</div>
+            <div style="font-size:28px;font-weight:700">2</div>
+            <div style="font-size:12px;color:#8A7F6C;margin-top:6px">+ 1 wyjazd</div>
+          </div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px">
+            <div style="font-size:13px;color:#8A7F6C;margin-bottom:8px">Do posprzątania</div>
+            <div style="font-size:28px;font-weight:700">1</div>
+            <div style="font-size:12px;color:#C25A38;margin-top:6px;font-weight:600">Studio · dziś 14:00</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px">
+          <!-- arrivals -->
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><div style="font-size:16px;font-weight:700">Najbliższe przyjazdy i wyjazdy</div><span onClick="{{ goCal }}" style="font-size:13px;color:#C25A38;font-weight:600;cursor:pointer">Kalendarz →</span></div>
+            <sc-for list="{{ arrivals }}" as="a" hint-placeholder-count="4">
+              <div onClick="{{ goRes }}" style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #F2ECDF;cursor:pointer">
+                <div style="width:42px;height:42px;border-radius:10px;background:{{ a.tagBg }};color:{{ a.tagFg }};display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;line-height:1;flex-shrink:0"><span style="font-size:11px">{{ a.kindShort }}</span></div>
+                <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{{ a.guest }}</div><div style="font-size:13px;color:#8A7F6C">{{ a.property }}</div></div>
+                <div style="text-align:right"><div style="font-size:13px;font-weight:600;color:{{ a.kindColor }}">{{ a.kind }}</div><div style="font-size:13px;color:#8A7F6C">{{ a.when }}</div></div>
+                <span style="font-size:12px;font-weight:600;color:#8A7F6C;background:#F4F1EA;padding:4px 9px;border-radius:6px">{{ a.channel }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <!-- right column -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:#1E3A33;border-radius:16px;padding:22px;color:#EAF1ED">
+              <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:#fff">Przychód · ostatnie 7 dni</div>
+              <div style="display:flex;align-items:flex-end;gap:9px;height:90px">
+                <div style="flex:1;height:48%;background:rgba(232,201,160,.35);border-radius:5px"></div>
+                <div style="flex:1;height:66%;background:rgba(232,201,160,.35);border-radius:5px"></div>
+                <div style="flex:1;height:40%;background:rgba(232,201,160,.35);border-radius:5px"></div>
+                <div style="flex:1;height:82%;background:#E8C9A0;border-radius:5px"></div>
+                <div style="flex:1;height:70%;background:rgba(232,201,160,.35);border-radius:5px"></div>
+                <div style="flex:1;height:95%;background:#E8C9A0;border-radius:5px"></div>
+                <div style="flex:1;height:60%;background:rgba(232,201,160,.35);border-radius:5px"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#8FA89E;margin-top:8px"><span>Pn</span><span>Wt</span><span>Śr</span><span>Cz</span><span>Pt</span><span>Sb</span><span>Nd</span></div>
+            </div>
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+              <div style="font-size:15px;font-weight:700;margin-bottom:14px">Zadania na dziś</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px 0"><span style="width:18px;height:18px;border-radius:5px;border:2px solid #C25A38;flex-shrink:0"></span><span style="font-size:14px">Sprzątanie · Studio Stare Miasto</span><span style="margin-left:auto;font-size:12px;color:#8A7F6C">14:00</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px 0"><span style="width:18px;height:18px;border-radius:5px;border:2px solid #D9D1C2;flex-shrink:0"></span><span style="font-size:14px">Wyślij przewodnik · A. Nowak</span><span style="margin-left:auto;font-size:12px;color:#8A7F6C">jutro</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:9px 0"><span style="width:18px;height:18px;border-radius:5px;background:#E7EDE7;display:inline-flex;align-items:center;justify-content:center;color:#2E7D55;flex-shrink:0">✓</span><span style="font-size:14px;color:#A89E8E;text-decoration:line-through">Potwierdź rezerwację · Booking</span></div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===== KALENDARZ ===== -->
+        <sc-if value="{{ isCal }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="display:flex;align-items:center;gap:4px"><span style="width:32px;height:32px;border-radius:8px;border:1px solid #E6DFD3;display:flex;align-items:center;justify-content:center;cursor:pointer">‹</span><span style="width:32px;height:32px;border-radius:8px;border:1px solid #E6DFD3;display:flex;align-items:center;justify-content:center;cursor:pointer">›</span></div>
+              <div style="font-size:18px;font-weight:700">Czerwiec 2026</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:18px;font-size:13px">
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:11px;height:11px;border-radius:3px;background:#C25A38"></span>Airbnb</span>
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:11px;height:11px;border-radius:3px;background:#234B7A"></span>Booking</span>
+              <span style="display:flex;align-items:center;gap:7px"><span style="width:11px;height:11px;border-radius:3px;background:#2E7D55"></span>Bezpośrednia</span>
+            </div>
+          </div>
+          <!-- day header -->
+          <div style="display:grid;grid-template-columns:160px 1fr;gap:0">
+            <div></div>
+            <div style="display:grid;grid-template-columns:repeat(14,1fr);font-size:12px;color:#8A7F6C;text-align:center;border-bottom:1px solid #EFE9DC;padding-bottom:8px">
+              <span>9<br><span style="font-size:10px">pn</span></span><span>10<br><span style="font-size:10px">wt</span></span><span>11<br><span style="font-size:10px">śr</span></span><span style="color:#C25A38;font-weight:700">12<br><span style="font-size:10px">cz</span></span><span>13<br><span style="font-size:10px">pt</span></span><span>14<br><span style="font-size:10px">sb</span></span><span>15<br><span style="font-size:10px">nd</span></span><span>16<br><span style="font-size:10px">pn</span></span><span>17<br><span style="font-size:10px">wt</span></span><span>18<br><span style="font-size:10px">śr</span></span><span>19<br><span style="font-size:10px">cz</span></span><span>20<br><span style="font-size:10px">pt</span></span><span>21<br><span style="font-size:10px">sb</span></span><span>22<br><span style="font-size:10px">nd</span></span>
+            </div>
+          </div>
+          <!-- rows -->
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:160px 1fr;align-items:center;border-bottom:1px solid #F4EEE1;min-height:60px">
+              <div style="font-size:14px;font-weight:600;padding-right:12px">Apartament Centrum<div style="font-size:12px;color:#9A9082;font-weight:400">Kraków · 320 zł</div></div>
+              <div style="position:relative;height:40px;background:repeating-linear-gradient(90deg,#FBFAF6,#FBFAF6 calc(100%/14 - 1px),#F1EBDD calc(100%/14 - 1px),#F1EBDD calc(100%/14));border-radius:8px">
+                <div onClick="{{ goRes }}" style="position:absolute;left:1.5%;width:25%;top:5px;bottom:5px;background:#234B7A;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px;cursor:pointer">Kowalski</div>
+                <div onClick="{{ goRes }}" style="position:absolute;left:30%;width:19%;top:5px;bottom:5px;background:#C25A38;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px;cursor:pointer">A. Nowak</div>
+                <div style="position:absolute;left:64%;width:33%;top:5px;bottom:5px;background:#2E7D55;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Wiśniewscy</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:160px 1fr;align-items:center;border-bottom:1px solid #F4EEE1;min-height:60px">
+              <div style="font-size:14px;font-weight:600;padding-right:12px">Domek nad jeziorem<div style="font-size:12px;color:#9A9082;font-weight:400">Mazury · 540 zł</div></div>
+              <div style="position:relative;height:40px;background:repeating-linear-gradient(90deg,#FBFAF6,#FBFAF6 calc(100%/14 - 1px),#F1EBDD calc(100%/14 - 1px),#F1EBDD calc(100%/14));border-radius:8px">
+                <div style="position:absolute;left:10%;width:40%;top:5px;bottom:5px;background:#C25A38;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Lewandowscy</div>
+                <div style="position:absolute;left:72%;width:26%;top:5px;bottom:5px;background:#234B7A;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Zając</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:160px 1fr;align-items:center;min-height:60px">
+              <div style="font-size:14px;font-weight:600;padding-right:12px">Studio Stare Miasto<div style="font-size:12px;color:#9A9082;font-weight:400">Gdańsk · 240 zł</div></div>
+              <div style="position:relative;height:40px;background:repeating-linear-gradient(90deg,#FBFAF6,#FBFAF6 calc(100%/14 - 1px),#F1EBDD calc(100%/14 - 1px),#F1EBDD calc(100%/14));border-radius:8px">
+                <div style="position:absolute;left:1.5%;width:18%;top:5px;bottom:5px;background:#2E7D55;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Mazur</div>
+                <div style="position:absolute;left:42%;width:14%;top:5px;bottom:5px;background:#234B7A;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Król</div>
+                <div style="position:absolute;left:78%;width:20%;top:5px;bottom:5px;background:#C25A38;border-radius:7px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;padding-left:10px">Duda</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px">
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:14px;padding:18px"><div style="font-size:13px;color:#8A7F6C">Rezerwacje w tym miesiącu</div><div style="font-size:24px;font-weight:700;margin-top:4px">23</div></div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:14px;padding:18px"><div style="font-size:13px;color:#8A7F6C">Wolnych nocy</div><div style="font-size:24px;font-weight:700;margin-top:4px">17</div></div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:14px;padding:18px"><div style="font-size:13px;color:#8A7F6C">Średnia długość pobytu</div><div style="font-size:24px;font-weight:700;margin-top:4px">3,2 nocy</div></div>
+        </div>
+        </sc-if>
+
+        <!-- ===== OBIEKTY ===== -->
+        <sc-if value="{{ isProp }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="font-size:14px;color:#8A7F6C">3 obiekty · wszystkie aktywne</div>
+          <button style="padding:10px 16px;background:#fff;border:1px solid #E0D9CB;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">+ Dodaj obiekt</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <sc-for list="{{ properties }}" as="p" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;overflow:hidden">
+              <div style="height:140px;background:{{ p.photo }};position:relative">
+                <div style="position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="background:rgba(255,255,255,.92);color:#2E7D55;font-size:12px;font-weight:700;padding:5px 10px;border-radius:7px;white-space:nowrap">● Aktywny</span>
+                  <span style="background:rgba(33,28,22,.6);color:#fff;font-size:12px;font-weight:600;padding:5px 10px;border-radius:7px;white-space:nowrap">{{ p.kind }}</span>
+                </div>
+              </div>
+              <div style="padding:18px">
+                <div style="font-size:17px;font-weight:700">{{ p.name }}</div>
+                <div style="font-size:13px;color:#8A7F6C;margin-bottom:14px">{{ p.address }}</div>
+                <div style="display:flex;gap:18px;margin-bottom:14px">
+                  <div><div style="font-size:12px;color:#8A7F6C">Cena/noc</div><div style="font-size:16px;font-weight:700">{{ p.price }}</div></div>
+                  <div><div style="font-size:12px;color:#8A7F6C">Obłożenie</div><div style="font-size:16px;font-weight:700">{{ p.occ }}</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding-top:13px;border-top:1px solid #F2ECDF;font-size:12px;color:#8A7F6C">
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#7BD8A4"></span>iCal zsynchr.</span>
+                  <span style="margin-left:auto">Najbliższy przyjazd: {{ p.next }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <!-- ===== REZERWACJA (szczegóły) ===== -->
+        <sc-if value="{{ isRes }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#8A7F6C;margin-bottom:16px"><span onClick="{{ goCal }}" style="cursor:pointer">Kalendarz</span><span>›</span><span style="color:#211C16;font-weight:600">Rezerwacja #A-2048</span></div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:18px">
+          <!-- left -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:24px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px">
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="width:52px;height:52px;border-radius:50%;background:#C25A38;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px">AN</div>
+                  <div><div style="font-size:20px;font-weight:700">Anna Nowak</div><div style="font-size:13px;color:#8A7F6C">2 osoby dorosłe · Apartament Centrum</div></div>
+                </div>
+                <span style="background:#E7EDE7;color:#2E7D55;font-size:13px;font-weight:700;padding:7px 13px;border-radius:8px">● Potwierdzona</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+                <div style="background:#F8F5EE;border-radius:12px;padding:14px"><div style="font-size:12px;color:#8A7F6C">Przyjazd</div><div style="font-size:16px;font-weight:700;margin-top:3px">12 cze · 15:00</div></div>
+                <div style="background:#F8F5EE;border-radius:12px;padding:14px"><div style="font-size:12px;color:#8A7F6C">Wyjazd</div><div style="font-size:16px;font-weight:700;margin-top:3px">15 cze · 11:00</div></div>
+                <div style="background:#F8F5EE;border-radius:12px;padding:14px"><div style="font-size:12px;color:#8A7F6C">Kanał</div><div style="font-size:16px;font-weight:700;margin-top:3px;color:#C25A38">Airbnb</div></div>
+              </div>
+            </div>
+            <!-- payment -->
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:24px">
+              <div style="font-size:16px;font-weight:700;margin-bottom:16px">Rozliczenie</div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;padding:8px 0;color:#4A4339">320 zł × 3 noce<span>960 zł</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;padding:8px 0;color:#4A4339">Opłata za sprzątanie<span>80 zł</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;padding:8px 0;color:#4A4339;border-bottom:1px solid #F2ECDF">Prowizja Airbnb<span style="color:#B5503A">− 45 zł</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;padding:14px 0 4px">Do wypłaty<span>995 zł</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2E7D55;font-weight:600">✓ Opłacone · wypłata 17 cze</div>
+            </div>
+            <!-- messages -->
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:24px">
+              <div style="font-size:16px;font-weight:700;margin-bottom:16px">Wiadomości</div>
+              <div style="display:flex;gap:10px;margin-bottom:14px"><div style="width:32px;height:32px;border-radius:50%;background:#E8C9A0;color:#1E3A33;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">AN</div><div style="background:#F4F1EA;border-radius:12px;border-top-left-radius:3px;padding:11px 14px;font-size:14px;max-width:80%">Dzień dobry! Czy jest możliwość wcześniejszego zameldowania o 13:00?</div></div>
+              <div style="display:flex;gap:10px;flex-direction:row-reverse;margin-bottom:16px"><div style="width:32px;height:32px;border-radius:50%;background:#C25A38;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">JA</div><div style="background:#1E3A33;color:#EAF1ED;border-radius:12px;border-top-right-radius:3px;padding:11px 14px;font-size:14px;max-width:80%">Oczywiście! Mieszkanie będzie gotowe od 13:00. Kod do skrytki wyślę w przewodniku.</div></div>
+              <div style="display:flex;gap:10px;border:1px solid #E6DFD3;border-radius:11px;padding:6px 6px 6px 14px;align-items:center"><span style="flex:1;font-size:14px;color:#9A9082">Napisz wiadomość…</span><button style="padding:8px 16px;background:#C25A38;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit">Wyślij</button></div>
+            </div>
+          </div>
+          <!-- right: przewodnik dla gości -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:#1E3A33;border-radius:16px;padding:22px;color:#EAF1ED">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-size:16px;font-weight:700;color:#fff">Przewodnik dla gości</div><span style="font-size:11px;background:rgba(123,216,164,.2);color:#7BD8A4;padding:4px 9px;border-radius:6px;font-weight:700">WYSŁANY</span></div>
+              <div style="font-size:13px;color:#9DBDB2;margin-bottom:18px">kluczyk.pl/g/centrum-an48</div>
+              <div style="background:rgba(232,201,160,.14);border:1px solid rgba(232,201,160,.25);border-radius:12px;padding:15px;margin-bottom:12px">
+                <div style="font-size:12px;color:#C9B79A;margin-bottom:4px">Kod do skrytki z kluczami</div>
+                <div style="font-size:26px;font-weight:700;letter-spacing:.16em;color:#E8C9A0">4 7 2 9</div>
+                <div style="font-size:11px;color:#8FA89E;margin-top:4px">Widoczny dla gościa od 12 cze, 13:00</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+                <div style="background:rgba(255,255,255,.06);border-radius:11px;padding:12px"><div style="font-size:11px;color:#8FA89E">WiFi</div><div style="font-size:14px;font-weight:600;color:#fff">Centrum_5G</div></div>
+                <div style="background:rgba(255,255,255,.06);border-radius:11px;padding:12px"><div style="font-size:11px;color:#8FA89E">Hasło WiFi</div><div style="font-size:14px;font-weight:600;color:#fff">goscie2026</div></div>
+              </div>
+              <div style="background:rgba(255,255,255,.06);border-radius:11px;padding:13px">
+                <div style="font-size:11px;color:#8FA89E;margin-bottom:7px">Dojazd</div>
+                <div style="font-size:13px;line-height:1.5;color:#D6E2DC">ul. Floriańska 12/4, Kraków. Parking podziemny od ul. św. Jana — pilot w skrytce.</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:12px">Polecane w okolicy</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:8px 0;font-size:14px"><span style="width:30px;height:30px;border-radius:8px;background:#FBEEE6;display:flex;align-items:center;justify-content:center">☕</span>Kawiarnia Mela · 120 m</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:8px 0;font-size:14px"><span style="width:30px;height:30px;border-radius:8px;background:#E7EDE7;display:flex;align-items:center;justify-content:center">🍝</span>Trattoria Sole · 300 m</div>
+              <div style="display:flex;align-items:center;gap:11px;padding:8px 0;font-size:14px"><span style="width:30px;height:30px;border-radius:8px;background:#FBF3E2;display:flex;align-items:center;justify-content:center">🏰</span>Wawel · 850 m</div>
+            </div>
+            <button style="padding:13px;background:#fff;border:1px solid #E0D9CB;border-radius:11px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">Edytuj przewodnik</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===== FINANSE ===== -->
+        <sc-if value="{{ isFin }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="display:flex;gap:8px;background:#fff;border:1px solid #E6DFD3;border-radius:10px;padding:4px">
+            <span style="padding:7px 14px;font-size:13px;font-weight:600;color:#8A7F6C">Miesiąc</span>
+            <span style="padding:7px 14px;font-size:13px;font-weight:700;background:#1E3A33;color:#fff;border-radius:7px">Rok 2026</span>
+            <span style="padding:7px 14px;font-size:13px;font-weight:600;color:#8A7F6C">Wszystko</span>
+          </div>
+          <button style="padding:10px 16px;background:#fff;border:1px solid #E0D9CB;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">⬇ Eksport PDF</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px">
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px"><div style="font-size:13px;color:#8A7F6C">Przychód brutto</div><div style="font-size:26px;font-weight:700">84 600 zł</div></div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px"><div style="font-size:13px;color:#8A7F6C">Prowizje i koszty</div><div style="font-size:26px;font-weight:700;color:#B5503A">− 11 240 zł</div></div>
+          <div style="background:#1E3A33;border-radius:16px;padding:20px;color:#fff"><div style="font-size:13px;color:#9DBDB2">Zysk netto</div><div style="font-size:26px;font-weight:700">73 360 zł</div></div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:20px"><div style="font-size:13px;color:#8A7F6C">Śr. cena / noc (ADR)</div><div style="font-size:26px;font-weight:700">348 zł</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:18px">
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+            <div style="font-size:16px;font-weight:700;margin-bottom:20px">Przychód miesięczny 2026</div>
+            <div style="display:flex;align-items:flex-end;gap:10px;height:160px">
+              <div style="flex:1;height:32%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:40%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:55%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:62%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:78%;background:#C25A38;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:92%;background:#C25A38;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:60%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:50%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:44%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:38%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:30%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+              <div style="flex:1;height:25%;background:#E3D9C6;border-radius:5px 5px 0 0"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#9A9082;margin-top:8px"><span>Sty</span><span>Lut</span><span>Mar</span><span>Kwi</span><span>Maj</span><span>Cze</span><span>Lip</span><span>Sie</span><span>Wrz</span><span>Paź</span><span>Lis</span><span>Gru</span></div>
+          </div>
+          <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+            <div style="font-size:16px;font-weight:700;margin-bottom:18px">Przychód wg kanału</div>
+            <div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Airbnb</span><span style="font-weight:700">48%</span></div><div style="height:8px;background:#F0EADD;border-radius:4px;overflow:hidden"><div style="width:48%;height:100%;background:#C25A38"></div></div></div>
+            <div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Booking.com</span><span style="font-weight:700">34%</span></div><div style="height:8px;background:#F0EADD;border-radius:4px;overflow:hidden"><div style="width:34%;height:100%;background:#234B7A"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Bezpośrednie</span><span style="font-weight:700">18%</span></div><div style="height:8px;background:#F0EADD;border-radius:4px;overflow:hidden"><div style="width:18%;height:100%;background:#2E7D55"></div></div></div>
+          </div>
+        </div>
+        <!-- transactions -->
+        <div style="background:#fff;border:1px solid #EAE3D6;border-radius:16px;padding:22px">
+          <div style="font-size:16px;font-weight:700;margin-bottom:16px">Ostatnie wypłaty</div>
+          <div style="display:grid;grid-template-columns:1.2fr 1.4fr 1fr .8fr .8fr;font-size:12px;color:#8A7F6C;font-weight:600;padding-bottom:10px;border-bottom:1px solid #EFE9DC"><span>Data</span><span>Gość / obiekt</span><span>Kanał</span><span>Kwota</span><span>Status</span></div>
+          <sc-for list="{{ transactions }}" as="t" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:1.2fr 1.4fr 1fr .8fr .8fr;font-size:14px;padding:13px 0;border-bottom:1px solid #F4EEE1;align-items:center">
+              <span style="color:#6A6153">{{ t.date }}</span>
+              <span><span style="font-weight:600">{{ t.guest }}</span><br><span style="font-size:12px;color:#9A9082">{{ t.property }}</span></span>
+              <span style="color:{{ t.chColor }};font-weight:600">{{ t.channel }}</span>
+              <span style="font-weight:700">{{ t.amount }}</span>
+              <span><span style="font-size:12px;font-weight:700;color:{{ t.stFg }};background:{{ t.stBg }};padding:4px 9px;border-radius:6px">{{ t.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:860}}">
+class Component extends DCLogic {
+  state = { screen: 'login' };
+
+  go(s) { return () => { this.setState({ screen: s }); const m = document.querySelector('[data-app-main]'); if (m) m.scrollTop = 0; }; }
+
+  sideItem(s) {
+    const active = this.state.screen === s;
+    return `display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;font-size:14px;font-weight:${active ? 600 : 500};cursor:pointer;color:${active ? '#fff' : '#AEC3BA'};background-color:${active ? '#C25A38' : 'transparent'}`;
+  }
+
+  ico(paths, fill) {
+    return React.createElement('svg', { width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', style: { flexShrink: 0 } },
+      ...paths.map((d, i) => React.createElement('path', { key: i, d })));
+  }
+
+  titles() {
+    return {
+      dashboard: ['Pulpit', 'Czwartek, 11 czerwca 2026'],
+      calendar: ['Kalendarz', 'Przegląd rezerwacji wszystkich obiektów'],
+      properties: ['Obiekty', 'Twoje miejsca na wynajem'],
+      reservation: ['Szczegóły rezerwacji', 'Anna Nowak · 12–15 czerwca'],
+      finances: ['Finanse', 'Przychody, koszty i wypłaty'],
+    }[this.state.screen] || ['Pulpit', ''];
+  }
+
+  renderVals() {
+    const s = this.state.screen;
+    const [pageTitle, pageSub] = this.titles();
+    return {
+      isLogin: s === 'login',
+      isApp: s !== 'login',
+      isDash: s === 'dashboard', isCal: s === 'calendar', isProp: s === 'properties', isRes: s === 'reservation', isFin: s === 'finances',
+      pageTitle, pageSub,
+      doLogin: this.go('dashboard'),
+      goLogin: this.go('login'),
+      goDash: this.go('dashboard'), goCal: this.go('calendar'), goProp: this.go('properties'), goRes: this.go('reservation'), goFin: this.go('finances'),
+      sDash: this.sideItem('dashboard'), sCal: this.sideItem('calendar'), sProp: this.sideItem('properties'), sRes: this.sideItem('reservation'), sFin: this.sideItem('finances'),
+      icoDash: this.ico(['M3 13h8V3H3z', 'M13 21h8V11h-8z', 'M13 3h8v6h-8z', 'M3 17h8v4H3z']),
+      icoCal: this.ico(['M3 9h18', 'M7 3v4', 'M17 3v4', 'M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z']),
+      icoHome: this.ico(['M3 11l9-8 9 8', 'M5 10v10h14V10']),
+      icoDoc: this.ico(['M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z', 'M14 3v5h5', 'M9 13h6', 'M9 17h6']),
+      icoMoney: this.ico(['M3 6h18v12H3z', 'M12 9a3 3 0 0 1 0 6 3 3 0 0 1 0-6z']),
+      icoBell: this.ico(['M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9', 'M13.7 21a2 2 0 0 1-3.4 0']),
+      icoSearch: this.ico(['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'M21 21l-4.3-4.3']),
+      icoOut: this.ico(['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5', 'M21 12H9']),
+      properties: [
+        { name: 'Apartament Centrum', address: 'ul. Floriańska 12, Kraków', kind: 'Mieszkanie 2-pok.', price: '320 zł', occ: '84%', next: 'jutro', photo: 'linear-gradient(135deg,#C9A77E,#A87E54)' },
+        { name: 'Domek nad jeziorem', address: 'Ruciane-Nida, Mazury', kind: 'Dom · 3 sypialnie', price: '540 zł', occ: '76%', next: 'pt, 13 cze', photo: 'linear-gradient(135deg,#7FA08C,#4E6B5A)' },
+        { name: 'Studio Stare Miasto', address: 'ul. Piwna 4, Gdańsk', kind: 'Kawalerka', price: '240 zł', occ: '81%', next: 'dziś', photo: 'linear-gradient(135deg,#B98C8C,#8A5E5E)' },
+      ],
+      arrivals: [
+        { guest: 'Anna Nowak', property: 'Apartament Centrum', kind: 'Przyjazd', kindShort: 'PRZY', kindColor: '#2E7D55', when: 'dziś · 15:00', channel: 'Airbnb', tagBg: '#E7EDE7', tagFg: '#2E7D55' },
+        { guest: 'Rodzina Lewandowskich', property: 'Domek nad jeziorem', kind: 'Przyjazd', kindShort: 'PRZY', kindColor: '#2E7D55', when: 'dziś · 16:00', channel: 'Direct', tagBg: '#E7EDE7', tagFg: '#2E7D55' },
+        { guest: 'Piotr Mazur', property: 'Studio Stare Miasto', kind: 'Wyjazd', kindShort: 'WYJ', kindColor: '#B5503A', when: 'dziś · 11:00', channel: 'Booking', tagBg: '#FBEAE3', tagFg: '#B5503A' },
+        { guest: 'Tomasz Zając', property: 'Domek nad jeziorem', kind: 'Przyjazd', kindShort: 'PRZY', kindColor: '#2E7D55', when: 'jutro · 14:00', channel: 'Booking', tagBg: '#E7EDE7', tagFg: '#2E7D55' },
+      ],
+      transactions: [
+        { date: '17 cze 2026', guest: 'Anna Nowak', property: 'Apartament Centrum', channel: 'Airbnb', chColor: '#C25A38', amount: '995 zł', status: 'Wypłacone', stFg: '#2E7D55', stBg: '#E7EDE7' },
+        { date: '13 cze 2026', guest: 'Rodzina Lewandowskich', property: 'Domek nad jeziorem', channel: 'Direct', chColor: '#2E7D55', amount: '2 160 zł', status: 'Wypłacone', stFg: '#2E7D55', stBg: '#E7EDE7' },
+        { date: '11 cze 2026', guest: 'Piotr Mazur', property: 'Studio Stare Miasto', channel: 'Booking', chColor: '#234B7A', amount: '720 zł', status: 'W toku', stFg: '#9A7B12', stBg: '#FBF3E2' },
+        { date: '08 cze 2026', guest: 'Maria Król', property: 'Studio Stare Miasto', channel: 'Booking', chColor: '#234B7A', amount: '480 zł', status: 'Wypłacone', stFg: '#2E7D55', stBg: '#E7EDE7' },
+        { date: '04 cze 2026', guest: 'Jan Wiśniewski', property: 'Apartament Centrum', channel: 'Direct', chColor: '#2E7D55', amount: '1 280 zł', status: 'Wypłacone', stFg: '#2E7D55', stBg: '#E7EDE7' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

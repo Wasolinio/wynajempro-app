@@ -30,13 +30,12 @@ React Router v6
 
 ### State Management
 ```
-Options:
-- Redux (if configured)
-- Context API (native React)
-- React Query (data fetching)
-- Zustand (lightweight)
+Actual (verified):
+- React Context API — src/context/WynajemContext.jsx (UI/app state)
+- TanStack React Query (@tanstack/react-query) — server cache,
+  fed by Firestore onSnapshot in src/hooks/useFirebaseData.js
 
-Current: Check src/context/ and hooks/
+No Redux, no Zustand.
 ```
 
 ### Styling
@@ -74,7 +73,10 @@ Firebase Authentication
 ```
 Cloud Firestore
 - NoSQL real-time database
-- Collections: users, properties, guides
+- Top-level: users/{uid}, guides/{guideId}, newsletter_subscribers/{id}
+- Under users/{uid}: rentals/*, settings/* (properties live in
+  settings/properties.items), checkout_sessions/*
+- Under guides/{guideId}: secrets/data, signatures/{guestUid}
 - Real-time snapshots
 - Offline persistence
 - Security rules (firestore.rules)

@@ -627,9 +627,9 @@ export default function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-blue-500 shrink-0" /> Brak ukrytych prowizji</li>
               </ul>
 
-              <button onClick={handleAction} className="w-full bg-white hover:bg-slate-50 text-slate-900 px-6 py-4 rounded-xl text-sm md:text-base font-extrabold shadow-xl transition-transform hover:-translate-y-1">
+              <Link to="/login" className="block text-center w-full bg-white hover:bg-slate-50 text-slate-900 px-6 py-4 rounded-xl text-sm md:text-base font-extrabold shadow-xl transition-transform hover:-translate-y-1">
                 Zacznij 14-dniowy test
-              </button>
+              </Link>
               <div className="mt-5 space-y-2">
                 <p className="text-xs text-slate-400 font-medium flex items-center justify-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" /> Nie wymagamy podawania danych karty kredytowej.

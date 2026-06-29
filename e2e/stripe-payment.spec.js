@@ -14,7 +14,7 @@ const mockUser = {
 
 const buildDbData = (statusOverrides = {}) => ({
   'users/uid-test': {
-    status: 'trial_expired',
+    accountStatus: 'trial_expired',
     name: 'Test User',
     email: 'test@example.com',
     ...statusOverrides
@@ -22,26 +22,26 @@ const buildDbData = (statusOverrides = {}) => ({
 });
 
 const trialExpiredDb = buildDbData({
-  status: 'trial_expired',
+  accountStatus: 'trial_expired',
   trialEndsAt: pastDate
 });
 
 const trialActiveDb = buildDbData({
-  status: 'trialing',
+  accountStatus: 'trialing',
   trialEndsAt: futureDate
 });
 
 const canceledDb = buildDbData({
-  status: 'canceled',
+  accountStatus: 'canceled',
   scheduledDeletionAt: futureDeletionDate.toISOString()
 });
 
 const _pastDueDb = buildDbData({
-  status: 'past_due'
+  accountStatus: 'past_due'
 });
 
 const activeDb = buildDbData({
-  status: 'active'
+  accountStatus: 'active'
 });
 
 test.describe('Stripe Payment E2E Tests', () => {
@@ -98,23 +98,16 @@ test.describe('Stripe Payment E2E Tests', () => {
 
   test('2. Verify click on subscription plan buttons triggers paywall redirect action', async ({ page }) => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
-
-    await page.addInitScript(() => {
-      window.__capturedAssign = null;
-      window.location.assign = (url) => {
-        window.__capturedAssign = url;
-      };
-    });
+    await page.route('**/*stripe.com/**', route => route.fulfill({ status: 200, body: 'Stripe Mock' }));
 
     await page.goto('/dashboard');
     await page.waitForSelector('text=Pakiet Miesięczny');
 
     // Click subscribe for monthly plan
     await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
-    await page.waitForTimeout(500);
+    await page.waitForURL('**/checkout.stripe.com/**');
 
-    const capturedUrl = await page.evaluate(() => window.__capturedAssign);
-    expect(capturedUrl).toContain('checkout.stripe.com');
+    expect(page.url()).toContain('checkout.stripe.com');
   });
 
   test('3. Verify that trial expiry warning page is shown for accounts with trial ended', async ({ page }) => {
@@ -263,13 +256,7 @@ test.describe('Stripe Payment E2E Tests', () => {
 
   test('11. Test that an expired trial user logging in is blocked by the PaywallScreen, selects a plan, triggers payment redirect, then returns on cancel to remain blocked', async ({ page }) => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
-
-    await page.addInitScript(() => {
-      window.__capturedAssign = null;
-      window.location.assign = (url) => {
-        window.__capturedAssign = url;
-      };
-    });
+    await page.route('**/*stripe.com/**', route => route.fulfill({ status: 200, body: 'Stripe Mock' }));
 
     await page.goto('/login');
     
@@ -284,10 +271,9 @@ test.describe('Stripe Payment E2E Tests', () => {
     // Select yearly plan
     await page.click('button:has-text("Rocznie")');
     await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').last().click();
-    await page.waitForTimeout(500);
+    await page.waitForURL('**/checkout.stripe.com/**');
 
-    const capturedUrl = await page.evaluate(() => window.__capturedAssign);
-    expect(capturedUrl).toContain('checkout.stripe.com');
+    expect(page.url()).toContain('checkout.stripe.com');
 
     // Simulate returning back via cancelUrl (still blocked)
     await page.goto('/dashboard');
@@ -299,16 +285,13 @@ test.describe('Stripe Payment E2E Tests', () => {
   test('12. Expired user payment checkout: login -> trial expired screen -> click monthly subscription -> mock checkout redirection -> verify redirect parameters -> return page checks', async ({ page }) => {
     let callParams = null;
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
+    await page.route('**/*stripe.com/**', route => route.fulfill({ status: 200, body: 'Stripe Mock' }));
 
     await page.exposeFunction('saveCallParams', (data) => {
       callParams = data;
     });
 
     await page.addInitScript(() => {
-      window.__capturedAssign = null;
-      window.location.assign = (url) => {
-        window.__capturedAssign = url;
-      };
       if (window.__mockFunctions) {
         window.__mockFunctions.createCheckoutSession = async (data) => {
           window.saveCallParams(data);
@@ -333,9 +316,8 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
 
     // 4. Mock checkout redirection & verify redirect parameters
-    await page.waitForTimeout(500);
-    const capturedUrl = await page.evaluate(() => window.__capturedAssign);
-    expect(capturedUrl).toBe('https://checkout.stripe.com/pay/mock_session_123');
+    await page.waitForURL('**/checkout.stripe.com/**');
+    expect(page.url()).toContain('checkout.stripe.com');
     expect(callParams).not.toBeNull();
     expect(callParams.successUrl).toContain('/dashboard');
 

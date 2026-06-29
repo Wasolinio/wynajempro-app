@@ -43,7 +43,7 @@ const mockGuideData = {
 const buildTaxesDbData = (taxForm, autoThreshold, taxIdentifier = '1234567890', bookings = []) => {
   return {
     'users/uid-test': {
-      status: 'active',
+      accountStatus: 'active',
       name: 'Test Host',
       email: 'test@example.com'
     },
@@ -84,7 +84,7 @@ test.describe('Guest Guide and Taxes E2E Tests', () => {
     await expect(page.locator('h1')).toContainText('Przewodnik Luksusowy');
     await expect(page.locator('text=Apartament Widokowy').first()).toBeVisible();
     // Falls back to placeholder icon cover container since coverImage is empty
-    await expect(page.locator('svg.lucide-home')).toBeVisible();
+    await expect(page.locator('svg.w-16.h-16')).toBeVisible();
   });
 
   test('2. Verify that wifi and access PIN card are locked (blurred/hidden) before accepting rules', async ({ page }) => {
@@ -175,7 +175,7 @@ test.describe('Guest Guide and Taxes E2E Tests', () => {
     await page.goto('/dashboard');
     await page.click('button:has-text("Podatki")');
 
-    await expect(page.locator('text=Uzupełnij NIP lub PESEL w ustawieniach')).toBeVisible();
+    await expect(page.locator('text=Uzupełnij NIP lub PESEL w ustawieniach').first()).toBeVisible();
   });
 
   test('9. Verify VAT-UE import of services calculation (23% of foreign portal commission) displays correctly', async ({ page }) => {
@@ -192,7 +192,7 @@ test.describe('Guest Guide and Taxes E2E Tests', () => {
 
     // VAT-UE should render 46.00
     await expect(page.locator('text=VAT-UE (Import Usług)')).toBeVisible();
-    await expect(page.locator('text=46.00')).toBeVisible();
+    await expect(page.locator('text=46,00').first()).toBeVisible();
   });
 
   test('10. Verify that for Lump Sum (Ryczałt) with autoThreshold active, YTD progress bar and status card render progress, showing remaining amount to 100k or threshold exceeded text', async ({ page }) => {
@@ -208,8 +208,8 @@ test.describe('Guest Guide and Taxes E2E Tests', () => {
     await page.click('button:has-text("Podatki")');
 
     await expect(page.locator('text=Próg Ryczałtu 100 000 zł')).toBeVisible();
-    await expect(page.locator('text=60 000')).toBeVisible();
-    await expect(page.locator('text=Brakuje 40 000 zł')).toBeVisible();
+    await expect(page.locator('text=60 000').first()).toBeVisible();
+    await expect(page.locator('text=Brakuje 40 000 zł').first()).toBeVisible();
 
     // Case 2: Over threshold (120k gross)
     const bookingsOver = [
@@ -220,7 +220,7 @@ test.describe('Guest Guide and Taxes E2E Tests', () => {
     await page.goto('/dashboard');
     await page.click('button:has-text("Podatki")');
 
-    await expect(page.locator('text=120 000')).toBeVisible();
+    await expect(page.locator('text=120 000').first()).toBeVisible();
     await expect(page.locator('text=Próg przekroczony!')).toBeVisible();
     await expect(page.locator('text=Przychód w 2026 roku przekroczył próg 100 000 zł')).toBeVisible();
   });

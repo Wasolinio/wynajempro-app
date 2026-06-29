@@ -2,62 +2,21 @@
 
 ## Critical Issues
 
-### 1. iCal Token Not Generated
-**Severity**: 🔴 HIGH  
-**Status**: ⏳ PLANNED  
-**Component**: Property Creation  
-**Issue**: When new property is created, `secretToken` field is not initialized.
+> **None outstanding.** The two "critical bugs" previously listed here were investigated on 2026-06-29 and found to be **false** — both behaviours are already implemented in the code. Kept below as RESOLVED/NOT-A-BUG so nobody re-opens them.
 
-**Impact**:
-- iCal export endpoint requires token
-- Without token, export returns 403 Forbidden
-- Guests cannot add calendar to their devices
+### 1. iCal Token Not Generated — ❌ NOT A BUG (verified 2026-06-29)
+**Status**: ✅ RESOLVED (was never broken)  
+**Claim**: `secretToken` not initialized on property create → iCal export 403.
 
-**Fix Location**: `src/components/modals/AddEditEntryModal.jsx`
-
-**Solution**:
-```javascript
-// On property create, generate token
-const secretToken = generateRandomToken();
-// Save with property data
-properties[propId].secretToken = secretToken;
-```
-
-**Related**: [[Features]] → iCal Export
+**Reality**: `secretToken` **is** generated with `window.crypto.randomUUID()` in `src/ManagerApp.jsx` — on create (`ManagerApp.jsx:463-475`) and as a retrofit for legacy properties lacking one (`ManagerApp.jsx:403-412`). Properties live in `users/{uid}/settings/properties.items`, not a top-level `properties` collection. `functions/index.js` `exportIcal` validates the token (`:985`). Export works.
 
 ---
 
-### 2. Storage Leak on Account Deletion
-**Severity**: 🔴 HIGH  
-**Status**: ⏳ PLANNED  
-**Component**: Cloud Function `deleteUserAccount`  
-**Issue**: When user deletes account, guide files in Storage are not deleted.
+### 2. Storage Leak on Account Deletion — ❌ NOT A BUG (verified 2026-06-29)
+**Status**: ✅ RESOLVED (was never broken)  
+**Claim**: `deleteUserAccount` leaves guide files in Storage.
 
-**Impact**:
-- Orphaned files accumulate
-- Increased storage costs
-- Guides still accessible (security risk)
-
-**Fix Location**: Cloud Function `functions/deleteUserAccount.js`
-
-**Current Code** ❌:
-```javascript
-// Only deletes Firestore, not Storage
-deleteDoc(userRef);
-```
-
-**Needed Fix** ✅:
-```javascript
-// 1. List all guides in guides/{guideId}/*
-const guideBucket = admin.storage().bucket();
-const files = await guideBucket.getFiles({ prefix: `guides/` });
-
-// 2. Delete all guide files
-await Promise.all(files[0].map(f => f.delete()));
-
-// 3. Delete Firestore doc
-await deleteDoc(userRef);
-```
+**Reality**: `functions/index.js` `exports.deleteUserAccount` (`:902`) deletes, per owned guide, the Storage files via `bucket.deleteFiles({ prefix: 'guides/${guideId}/' })` (`:933-937`), then the guide doc (`:944`), then the Auth user. No leak. (`exports.deleteExpiredAccountsData` handles scheduled cleanup of expired accounts.)
 
 ---
 
@@ -106,8 +65,8 @@ await deleteDoc(userRef);
 
 | Issue | E2E Test | Manual Test | Fix Status |
 |-------|----------|-------------|-----------|
-| iCal Token | ❌ MISSING | ⚠️ FAILING | NEEDS FIX |
-| Storage Leak | ⚠️ PARTIAL | ⚠️ FAILING | NEEDS FIX |
+| iCal Token | n/a | ✅ OK | NOT A BUG (generated in ManagerApp.jsx) |
+| Storage Leak | n/a | ✅ OK | NOT A BUG (deleteUserAccount clears Storage) |
 | App Check | ✅ PASS | ✅ OK | FIXED |
 | Auth iFrame | ✅ PASS | ✅ OK | FIXED |
 | Google Loop | ✅ PASS | ✅ OK | FIXED |

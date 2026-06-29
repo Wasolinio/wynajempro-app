@@ -35,6 +35,7 @@ export async function setupFirebaseMocks(page, options = {}) {
             };
             if (window.__mockAuth.currentUser) {
               window.__mockAuth.currentUser.reload = async () => {};
+              window.__mockAuth.currentUser.getIdToken = async () => 'mock-token';
               window.__mockAuth.currentUser.providerData = [{ providerId: 'password' }];
             }
           }
@@ -110,6 +111,14 @@ export async function setupFirebaseMocks(page, options = {}) {
           mockAuth.listeners.forEach(callback => callback(mockAuth.currentUser));
           return { user: mockAuth.currentUser };
         };
+        export const signInWithRedirect = async (auth, provider) => {
+          // Mock redirects don't actually navigate, just return
+          return Promise.resolve();
+        };
+        export const getRedirectResult = async (auth) => {
+          // Return null by default in tests (meaning no redirect result)
+          return Promise.resolve(null);
+        };
         export const updateProfile = async (user, { displayName }) => {
           if (user) {
             user.displayName = displayName;
@@ -149,6 +158,7 @@ export async function setupFirebaseMocks(page, options = {}) {
         export const initializeFirestore = () => ({});
         export const connectFirestoreEmulator = () => {};
         export const serverTimestamp = () => Timestamp.now();
+        export const deleteField = () => ({ _deleteField: true });
         
         export const doc = (db, ...paths) => {
           return { type: 'doc', path: paths.join('/') };

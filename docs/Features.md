@@ -29,7 +29,7 @@
 - ✅ Delete property
 
 **Data stored**:
-- Property metadata (Firestore)
+- Property metadata (stored as an array in `users/{uid}/settings/properties`)
 - Guest guides (Storage)
 - Access codes (encrypted)
 - Secret token for iCal
@@ -75,28 +75,27 @@ token: secretToken (from property doc)
 
 **Response**: Standard `.ics` calendar file
 
-**Security**: Token-based auth (not user auth)
-
-**Known Issue**: ⚠️ secretToken not generated on property create
+**Security**: Token-based auth (not user auth). `secretToken` is generated in `ManagerApp.jsx` and validated by `exportIcal`. Working.
 
 ---
 
-## 💳 Stripe Integration
+## 💳 Stripe Integration (SaaS subscription)
+
+Stripe powers the **account subscription** (the 29,99 zł/mc plan) — there is no guest/booking card payment flow.
 
 **Use Cases**:
-- Booking deposits
-- Cleaning fees
-- Damage insurance
-- Cancellation fees
+- Start paid subscription after the 14-day trial
+- Manage/cancel subscription (Stripe Customer Portal)
+- Keep `stripeStatus` claim in sync (active / past_due / canceled)
 
 **Flow**:
 ```
-Guest enters amount → Stripe checkout → Confirm payment → Receipt
+PaywallScreen → createCheckoutSession (Cloud Function) → Stripe Checkout
+→ stripeWebhook updates users/{uid} + custom claim → access unlocked
 ```
 
-**Implementation**: Stripe SDK + Cloud Functions for payment processing
-
-**Status**: ⚠️ Check current payment flow
+**Implementation**: `functions/index.js` — `createCheckoutSession`,
+`stripeWebhook`, `createBillingPortalSession`. Frontend gate: `PaywallScreen.jsx`.
 
 ---
 
@@ -110,7 +109,7 @@ Guest enters amount → Stripe checkout → Confirm payment → Receipt
 
 **Cloud Function**: `deleteUserAccount`
 
-**Known Issue**: ⚠️ Storage cleanup might not work (guides/ not fully purged)
+**Status**: Completely removes all data including related Storage files.
 
 ---
 

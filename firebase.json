@@ -1,4 +1,12 @@
 {
+  "auth": {
+    "authorizedDomains": [
+      "localhost",
+      "moje-domki-6c77d.firebaseapp.com",
+      "moje-domki-6c77d.web.app",
+      "wynajempro.com"
+    ]
+  },
   "hosting": {
     "public": "dist",
     "ignore": [

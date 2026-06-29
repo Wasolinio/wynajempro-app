@@ -1,231 +1,190 @@
 # ⚡ Agent Process Map
 
-**CRITICAL**: High-density reference for fast agent navigation. Lists every core process with exact file paths and data flow.
+**CRITICAL**: High-density reference for fast agent navigation. Lists every core process with exact file paths and data flow. Read this BEFORE grepping or exploring code.
 
-Use this BEFORE grepping or exploring code. Saves ~500 tokens per query.
+**Verified against source on 2026-06-29.** Firebase project id: `moje-domki-6c77d`. Frontend: React + Vite + React Router + TanStack Query. Backend: Firebase Auth, Firestore, Storage, Cloud Functions v2 (`functions/index.js`), Stripe.
+
+---
+
+## 🗄️ Data Model (read this first)
+
+Almost everything is a **subcollection under `users/{uid}`** — there is no top-level `properties` or `bookings` collection.
+
+```
+users/{uid}                         ← profile: status, trialEndsAt, stripeCustomerId, stripeSubscriptionId
+  ├── rentals/{entryId}             ← ALL calendar entries. field `type`: 'booking' | 'utility' | 'reminder'.
+  │                                    booking entries carry: date, property (name), price, etc.
+  ├── settings/{docId}              ← config docs, each shaped `{ items: [...] }` (or object):
+  │     ├── properties  → { items: [{ id, name, secretToken, ... }] }   ← THE property list
+  │     ├── reminders   → { items: [...] }
+  │     ├── sources     → { items: [...] }
+  │     ├── categories  → { items: [...] }
+  │     ├── tax         → { ...taxSettings }
+  │     ├── hostProfile → { ...host info shown on guest guides }
+  │     └── syncLinks   → { links: [...] }   ← external iCal URLs to import
+  └── checkout_sessions/{docId}     ← Stripe checkout session bookkeeping
+
+guides/{guideId}                    ← TOP-LEVEL, public read. field `ownerId` = creator uid.
+  ├── secrets/data                  ← hidden codes (PIN, WiFi); revealed only after guest signs
+  └── signatures/{guestUid}         ← guest signature records
+Storage: guides/{guideId}/**        ← guide media files
+
+newsletter_subscribers/{id}        ← landing-page newsletter opt-ins (source field)
+```
+
+"Properties" = objects in the `users/{uid}/settings/properties` `items` array. "Rentals" = entries in the `users/{uid}/rentals` subcollection. They are different things.
 
 ---
 
 ## User Authentication Flow
 
-**File Path**: `src/pages/LandingPage.jsx` + `src/firebase.js`
+**Files**: `src/pages/LoginPanel.jsx` (real auth UI) · `src/firebase.js` (init) · `src/App.jsx` (route guard). The landing pages only link to `/login`.
 
 **Process**:
-1. User clicks "Sign in with Google"
-2. `src/firebase.js` → `signInWithPopup(auth, GoogleAuthProvider)`
-3. Firebase Auth redirects to Google OAuth
-4. On success → User object created in Firebase Auth
-5. `src/App.jsx` checks `auth.currentUser` → routes to Dashboard
-6. User doc auto-created in `users/{uid}` collection (via Firestore trigger or first-write)
+1. User signs up / logs in via `LoginPanel.jsx` — email+password or Google (`signInWithPopup`, redirect fallback).
+2. On **register**: `createUserWithEmailAndPassword` → `updateProfile` → write `users/{uid}` doc (`status: 'trialing'`, `trialEndsAt` = +14 days) → `sendEmailVerification` → `signOut` → show verification screen.
+3. `onUserDocumentCreated` Cloud Function (trigger on `users/{userId}`) backstops trial setup / custom claims.
+4. On **login**: password users must have `emailVerified` (blocked + signed out otherwise). Google users skip that.
+5. `src/App.jsx` `ProtectedRoute` uses `onAuthStateChanged`; unverified password users are rejected. Authed → `/dashboard/*` → `ManagerApp.jsx`.
 
-**Key Files**:
-- `src/firebase.js` - Firebase initialization
-- `src/App.jsx` - Route protection based on currentUser
-- `src/pages/LandingPage.jsx` - Sign-in buttons
-- `src/context/` - User state management (Redux/Context)
+**Data**: Firebase Auth ↔ `users/{uid}`. Trial/subscription state also lives in custom claims (`stripeStatus`) set by Stripe webhook.
 
-**Data**: Firebase Auth ↔ Firestore users collection
+**Note**: A new brand-identity login prototype exists at `src/pages/landing_v4/LoginPanelV4.jsx` (route `/prototyp4-login`) — same auth logic, restyled.
 
 ---
 
-## Property Creation
+## Property Management (the property list)
 
-**File Path**: `src/components/modals/AddEditEntryModal.jsx`
+**Files**: `src/components/modals/SettingsModal.jsx` (UI) · `src/ManagerApp.jsx` (persistence + token gen).
 
 **Process**:
-1. Manager clicks "Add Property"
-2. Modal opens with form fields
-3. User enters: name, address, capacity, codes
-4. Submit → calls Firebase function to create property
-5. Property doc created in `properties/{propId}`
-6. **⚠️ BUG**: `secretToken` NOT generated here (causes iCal export to fail)
+1. Manager edits properties in Settings.
+2. `ManagerApp.jsx` saves the whole array to `users/{uid}/settings/properties` as `{ items: [...] }` (see `ManagerApp.jsx:432`).
+3. Each property gets a `secretToken` generated via `window.crypto.randomUUID()` (`ManagerApp.jsx:463`); legacy items are retrofitted with one (`ManagerApp.jsx:403-412`). The token authorizes iCal export.
 
-**Key Files**:
-- `src/components/modals/AddEditEntryModal.jsx` - Form component
-- `src/hooks/useFirebaseData.js` - Firestore write operation
-- `firebase.json` - Firestore collection schema reference
+**Data**: `users/{uid}/settings/properties.items[]`.
 
-**Data Location**: `properties/{propId}` document
-
-**Required Fix**: Generate `secretToken = generateRandomToken()` on create
+> Earlier map claimed `secretToken` was never generated — **false**. It is generated in `ManagerApp.jsx`.
 
 ---
 
-## Real-time Property Sync
+## Rental / Calendar Entry Creation
 
-**File Path**: `src/hooks/useFirebaseData.js`
+**Files**: `src/components/AddRentalModal.jsx` and `src/components/modals/AddEditEntryModal.jsx` (forms) · `src/ManagerApp.jsx` (write).
 
 **Process**:
-1. Component mounts and calls `useFirebaseData(userId)`
-2. Hook sets up Firestore real-time listener on `properties` where `ownerId == userId`
-3. `onSnapshot(query(...), snapshot => ...)` fires on data changes
-4. Returns current state + setter
-5. Component re-renders when data changes
+1. Manager adds an entry; tab picks `type`: Rezerwacja (`booking`) / Koszty (`utility`) / Zadanie (`reminder`).
+2. `ManagerApp.jsx` writes to `users/{uid}/rentals/{entryId}` (`entryId` = existing id or `Date.now()`), via `setDoc`/`updateDoc` (`ManagerApp.jsx:372-375`); delete via `deleteDoc` (`:387`).
 
-**Key Files**:
-- `src/hooks/useFirebaseData.js` - THE KEY FILE for data syncing
-- `src/ManagerApp.jsx` - Main component using this hook
-- `firestore.rules` - Security rules preventing unauthorized reads
+**Data**: `users/{uid}/rentals/{entryId}` — booking entries have `date`, `property`, financials.
 
-**Performance Note**: Clean up listeners on unmount! Check for `unsubscribe()` in useEffect cleanup.
+---
+
+## Real-time Data Sync ⭐
+
+**File**: `src/hooks/useFirebaseData.js` (TanStack Query cache fed by Firestore `onSnapshot`).
+
+**Process**:
+1. `useFirebaseData(user, selectedYear)` sets up listeners:
+   - `onSnapshot(doc(db,'users',uid))` → profile (`status`, `trialEndsAt`, `scheduledDeletionAt`); self-heals missing doc.
+   - `onSnapshot(collection(db,'users',uid,'settings'))` → all settings docs.
+   - `onSnapshot(query(collection(db,'users',uid,'rentals'), where('date','>=',yearStart), where('date','<=',yearEnd)))` → year-scoped entries.
+2. Results pushed into React Query cache (`queryClient.setQueryData`). Returns `{ rentals, settings, profile, loading }`.
+3. Listeners cleaned up on unmount (returned `unsub*` functions).
+
+**Consumers**: `src/ManagerApp.jsx` (main), child views in `src/components/views/`.
 
 ---
 
 ## Guest Guide Publishing
 
-**File Path**: `src/components/modals/AddEditEntryModal.jsx` (or dedicated guide editor)
+**Files**: `src/components/GuideBuilder.jsx` (editor) · `src/ManagerApp.jsx` / Firestore writes.
 
 **Process**:
-1. Manager creates guide content
-2. Publishes to `guides/{guideId}`
-3. Guide includes: title, sections, property reference
-4. Public URL generated: `/guide/{guideId}`
-5. Manager shares link with guests
+1. Manager builds guide content; publishes to `guides/{guideId}` with `ownerId == uid`.
+2. Hidden codes (PIN/WiFi) stored separately in `guides/{guideId}/secrets/data`. Media in Storage `guides/{guideId}/`.
+3. Public URL: `/guide/{guideId}`.
 
-**Key Files**:
-- `src/components/` - Guide editor component
-- `src/pages/GuestGuide.jsx` or similar - Public guide view
-- `firestore.rules` - Allows anonymous read with signature
-
-**Data**: `guides/{guideId}` collection
+**Rules**: base guide doc is publicly readable; secrets are not. Create/update require owner + active subscription + `ownerId` match.
 
 ---
 
 ## Guest Guide Access (Public)
 
-**File Path**: `src/pages/GuestGuide.jsx` (or similar)
+**File**: `src/pages/GuestGuideView.jsx`.
 
 **Process**:
-1. Guest opens `/guide/{guideId}` from link
-2. App fetches guide doc from Firestore (no auth required)
-3. Displays: property info, guide content (codes hidden)
-4. Guest clicks "Show Codes" → Signature form appears
-5. Guest reads terms, signs (stores signature in Firestore)
-6. `signedUsers` array updated: `{ email, signedAt, ipAddress }`
-7. Codes revealed: PIN, WiFi, etc.
+1. Guest opens `/guide/{guideId}`; `getDoc(guides/{guideId})` (no auth needed).
+2. Host info pulled from `users/{ownerId}/settings/hostProfile`.
+3. Existing signature checked at `guides/{guideId}/signatures/{guestUid}` (anonymous auth uid; legacy localStorage session migration handled).
+4. To reveal codes, guest signs → record written to `guides/{guideId}/signatures/{authUid}`.
+5. Codes read from `guides/{guideId}/secrets/data` after signing.
 
-**Key Files**:
-- `src/pages/GuestGuide.jsx` - Public guide view
-- `src/components/` - Signature form
-- `firestore.rules` - Allows anonymous read + write to signedUsers
-
-**Security**: 
-- Guide readable by anyone
-- Codes only shown after signature
-- Signature proof stored
+**Security**: guide public; secrets gated behind signature; signature proof persisted.
 
 ---
 
-## iCal Export
+## iCal Export (outbound — share your calendar)
 
-**File Path**: Cloud Function (likely `functions/exportIcal.js`)
+**File**: `functions/index.js` → `exports.exportIcal` (onRequest, `:963`).
 
 **Process**:
-1. User clicks "Export to Calendar"
-2. Frontend generates URL: `/exportIcal?u={uid}&p={propId}&token={secretToken}`
-3. POST request to Cloud Function
-4. Function validates token against `properties/{propId}.secretToken`
-5. Fetches property availability + bookings
-6. Generates iCal format (.ics file)
-7. Returns file for download
+1. Frontend builds URL in `SettingsModal.jsx`: `https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u={uid}&p={propertyName}&token={secretToken}`.
+2. Function loads `users/{uid}/settings/properties.items`, finds property by `id` or `name`, validates `secretToken` (403 on mismatch).
+3. Queries `users/{uid}/rentals` where `type=='booking'` and `property==p`; emits a `.ics` (`BEGIN:VCALENDAR ...`).
 
-**Key Files**:
-- Cloud Function file (location TBD in `functions/`)
-- `src/components/` - Export button component
-- `firestore.rules` - No direct access; function handles auth
+**Status**: working (validates token). No known bug here.
 
-**Data**: Reads `properties/{propId}` + `bookings/{bookingId}`
+---
 
-**⚠️ CRITICAL BUG**: `secretToken` not generated in AddEditEntryModal.jsx
-- **Where to fix**: Generate token on property create
-- **Fix**: `const secretToken = generateRandomToken();`
-- **Impact**: High (iCal export completely broken without token)
+## iCal Import / Sync (inbound — pull Booking/Airbnb)
+
+**Files**: `functions/index.js` → `exports.syncICalCalendars` (onCall, manual, `:455`) and `exports.dailyICalSync` (onSchedule, `:617`).
+
+**Process**: reads external iCal URLs from `users/{uid}/settings/syncLinks.links`, fetches via Node `fetch`, parses `VEVENT`s, writes/updates booking entries in `users/{uid}/rentals` to block dates and prevent overbooking.
+
+---
+
+## Subscription & Payments (Stripe — SaaS, not guest payments)
+
+**Files**: `src/components/PaywallScreen.jsx` (+ Settings billing) · `functions/index.js`.
+
+This is the **29,99 zł/mc account subscription**, not per-booking guest card payments (there is no guest checkout flow).
+
+**Functions**:
+- `createCheckoutSession` (onCall, `:69`) — creates Stripe Checkout for the plan (`price_1TZULu8D7fwsePNBa7aXaP92`); stores `stripeCustomerId` on `users/{uid}`.
+- `stripeWebhook` (onRequest, `:151`) — verifies signature; on `checkout.session.completed` / invoice events / `customer.subscription.deleted` updates `users/{uid}` Stripe fields and sets Auth custom claim `stripeStatus` (`active`/`past_due`/`canceled`).
+- `createBillingPortalSession` (onCall, `:344`) — Stripe Customer Portal link.
+
+**Gate**: Firestore rules require `hasActiveSubscription(uid)` (claims/profile) to read/write `rentals` and `settings`.
 
 ---
 
 ## Account Deletion
 
-**File Path**: Cloud Function (likely `functions/deleteUserAccount.js`)
+**Files**: `functions/index.js` → `exports.deleteUserAccount` (onCall, `:902`) and `exports.deleteExpiredAccountsData` (onSchedule, `:403`).
 
-**Process**:
-1. User requests account deletion
-2. Calls Cloud Function `deleteUserAccount(uid)`
-3. Function:
-   - Deletes `users/{uid}` doc
-   - Deletes all `properties` where `ownerId == uid`
-   - Deletes all `guides` where `ownerId == uid`
-   - Deletes all `bookings` where `ownerId == uid`
-   - ❌ **BUG**: Does NOT delete `guides/{guideId}/**` files in Storage
-   - Deletes Firebase Auth user
+**`deleteUserAccount` process**:
+1. Delete `users/{uid}` doc (`:929`).
+2. For each owned guide: delete Storage files `bucket.deleteFiles({ prefix: 'guides/${guideId}/' })` (`:933-937`), then delete the guide doc (`:944`).
+3. Delete the Firebase Auth user.
 
-**Key Files**:
-- Cloud Function file (location TBD)
-- `src/components/` - Delete account button
-- `storage.rules` - Security rules for guides
+**`deleteExpiredAccountsData`** purges data for accounts past `scheduledDeletionAt` (trial/cancellation grace period).
 
-**⚠️ CRITICAL BUG**: Storage leak
-- Orphaned guide files not deleted
-- **Where to fix**: Cloud Function needs to:
-  1. List files in `guides/` prefix
-  2. Delete all matched files
-  3. Then delete Firestore docs
-- **Impact**: High (storage costs + privacy risk)
+> Earlier map claimed guide Storage files leak on deletion — **false**. They are listed and deleted.
 
 ---
 
-## Stripe Payment Flow
+## Firestore Rules (actual model)
 
-**File Path**: `src/components/` (payment form) + Cloud Function webhook
+See `firestore.rules`. Helpers: `isOwnerAndVerified(userId)`, `hasActiveSubscription(userId)`, `isValidRental/Settings/Guide(...)`.
 
-**Process**:
-1. Guest enters booking dates + payment info
-2. Component calls Stripe API → creates payment intent
-3. User sees Stripe checkout modal
-4. User confirms payment
-5. Stripe charges card
-6. Webhook fires: `/stripeWebhook`
-7. Cloud Function updates `bookings/{bookingId}.paymentStatus = 'completed'`
-8. Guest sees confirmation
+- `users/{userId}` — read/update by verified owner; `create` must set `status:'trialing'` and must NOT include Stripe fields (those are server-only via claims).
+- `users/{userId}/rentals/{docId}` — owner + verified + **active subscription** + schema validation.
+- `users/{userId}/settings/{docId}` — same; `hostProfile` has a public-read exception (for guest guides).
+- `guides/{guideId}` — **public read**; create/update/delete require verified owner + active subscription + `ownerId` match. Secrets/signatures gated in subcollections.
 
-**Key Files**:
-- `src/components/` - Payment form
-- Cloud Function `stripeWebhook` - Webhook handler
-- `bookings/{bookingId}` - Payment status stored here
-
-**Webhook Events Handled**:
-- `charge.succeeded` - Mark as paid
-- `charge.failed` - Notify guest
-- `charge.refunded` - Update status
-
----
-
-## Admin Operations (if any)
-
-**Location**: Check `src/context/` for role-based access
-
-**If exists, typical flow**:
-1. Check user role in `users/{uid}.role`
-2. Cloud Functions check auth token claims
-3. Only admins can perform destructive operations
-
----
-
-## Key Firestore Rules Pattern
-
-See `firestore.rules`:
-
-```
-match /properties/{propId} {
-  allow read, write: if request.auth.uid == resource.data.ownerId;
-}
-
-match /guides/{guideId} {
-  allow read: if true; // Public
-  allow write: if request.auth.uid == resource.data.ownerId;
-}
-```
-
-**Pattern**: Users can only access own data. Exceptions for public guides.
+`storage.rules` governs `guides/` media.
 
 ---
 
@@ -233,57 +192,67 @@ match /guides/{guideId} {
 
 ```
 src/
-├── App.jsx ..................... Root router
-├── ManagerApp.jsx .............. Manager dashboard (protected)
-├── firebase.js ................. Firebase init + config
-├── hooks/
-│   └── useFirebaseData.js ....... ⭐ CRITICAL: Real-time data syncing
+├── App.jsx ......................... Router + ProtectedRoute (/dashboard → ManagerApp)
+├── ManagerApp.jsx .................. ⭐ Main dashboard + central Firestore writes (rentals, settings, secretToken)
+├── firebase.js ..................... Firebase init (auth, db, storage, analytics, App Check)
+├── hooks/useFirebaseData.js ........ ⭐ Real-time sync (onSnapshot → TanStack Query)
+├── context/WynajemContext.jsx ...... React Context (UI/app state) — NOT Redux
 ├── pages/
-│   ├── LandingPage.jsx ......... Public landing + auth
-│   ├── GuestGuide.jsx .......... Public guide view (⭐ fix this)
-│   └── ResetPassword.jsx ....... Password reset
+│   ├── LandingPage.jsx ............. Production landing (links to /login)
+│   ├── LoginPanel.jsx .............. ⭐ Auth (email/Google/verify/trial)
+│   ├── GuestGuideView.jsx .......... Public guide view + signature gate
+│   ├── ResetPassword.jsx ........... Password reset
+│   ├── AuthActionHandler.jsx ....... Firebase email-action handler
+│   └── landing_v4/ ................. New brand-identity prototype (LandingPageV4, LoginPanelV4)
 ├── components/
+│   ├── AddRentalModal.jsx .......... Add calendar entry (booking/utility/reminder)
+│   ├── GuideBuilder.jsx ............ Guest-guide editor
+│   ├── PaywallScreen.jsx ........... Subscription gate / Stripe checkout entry
 │   ├── modals/
-│   │   └── AddEditEntryModal.jsx ... ⚠️ MUST FIX: Generate secretToken
-│   └── ... other UI components
-└── context/ .................... State management (Redux/Context)
+│   │   ├── AddEditEntryModal.jsx ... Add/edit entry (takes `properties` prop)
+│   │   └── SettingsModal.jsx ....... Manage properties, tax, host profile, sync links, iCal export URL
+│   └── views/ ...................... Desktop/Mobile bookings, reminders, utilities tables
+└── utils/ .......................... taxCalculator, accountingExport, constants
 
-firebase.json ................... Firestore/Storage schemas + emulator config
-firestore.rules ................. Security rules
-storage.rules ................... Storage security rules
+functions/index.js ................. ALL Cloud Functions (Stripe, iCal export+import, account deletion, user trigger)
+firestore.rules / storage.rules .... Security rules
+firebase.json ...................... Emulator + hosting config
 ```
 
 ---
 
-## 🔴 Critical Bugs to Fix
+## ✅ Corrections vs prior map (2026-06-29 rewrite)
 
-1. **iCal Token Not Generated** → `AddEditEntryModal.jsx`
-   - Add: `secretToken = generateRandomToken()`
-   - On: Property create
-   - Impact: iCal export 403 Forbidden
+The previous version was largely speculative. Fixed:
+- **No top-level `properties`/`bookings` collections** — data is subcollections under `users/{uid}` (`rentals`, `settings/*`). Properties live in `settings/properties.items`.
+- **Auth UI is `LoginPanel.jsx`**, not `LandingPage.jsx`. State is React Context + TanStack Query, not Redux.
+- **Guest guide file is `GuestGuideView.jsx`** (not `GuestGuide.jsx`); codes in `guides/{id}/secrets/data`, signatures in `guides/{id}/signatures/{uid}`.
+- **Stripe = SaaS subscription** (createCheckoutSession / webhook / billing portal), not guest booking payments.
+- **iCal**: both export (`exportIcal`) and import (`syncICalCalendars`, `dailyICalSync`) exist.
+- **Both prior "critical bugs" were false**: `secretToken` IS generated (`ManagerApp.jsx`); `deleteUserAccount` DOES delete guide Storage files.
 
-2. **Storage Leak on Deletion** → Cloud Function `deleteUserAccount`
-   - Add: List + delete `guides/` files before doc deletion
-   - Impact: Orphaned files cost money + security risk
+No verified critical bugs at this time. Log real ones in [[Known-Issues]].
 
 ---
 
 ## Process Lookup Quick Index
 
-- **Auth** → `src/firebase.js` + `src/pages/LandingPage.jsx`
-- **Real-time Data** → `src/hooks/useFirebaseData.js` ⭐
-- **Properties** → `src/components/modals/AddEditEntryModal.jsx` + `properties/{propId}`
-- **Guest Guide** → `src/pages/GuestGuide.jsx` + `guides/{guideId}`
-- **iCal Export** → Cloud Function + `secretToken` bug ⚠️
-- **Payments** → Stripe webhook + `bookings/{bookingId}`
-- **Deletion** → Cloud Function + storage leak bug ⚠️
+- **Auth** → `src/pages/LoginPanel.jsx` + `src/firebase.js` + `src/App.jsx`
+- **Real-time data** → `src/hooks/useFirebaseData.js` ⭐
+- **Writes (rentals/settings)** → `src/ManagerApp.jsx` ⭐
+- **Property list** → `src/components/modals/SettingsModal.jsx` → `users/{uid}/settings/properties`
+- **Calendar entries** → `AddRentalModal.jsx` / `AddEditEntryModal.jsx` → `users/{uid}/rentals`
+- **Guest guide (build)** → `src/components/GuideBuilder.jsx` → `guides/{guideId}`
+- **Guest guide (view)** → `src/pages/GuestGuideView.jsx`
+- **iCal export** → `functions/index.js` `exportIcal`
+- **iCal import** → `functions/index.js` `syncICalCalendars` / `dailyICalSync`
+- **Payments/subscription** → `functions/index.js` `createCheckoutSession` / `stripeWebhook` / `createBillingPortalSession`
+- **Account deletion** → `functions/index.js` `deleteUserAccount` / `deleteExpiredAccountsData`
 - **Security** → `firestore.rules` + `storage.rules`
 
 ---
 
-**Last Updated**: 2026-06-29  
-**Maintained By**: Agent-AI (Auto-update when architecture changes)
+**Last Updated**: 2026-06-29 (full verification rewrite)
+**Maintained By**: keep in sync with `functions/index.js`, `src/ManagerApp.jsx`, `src/hooks/useFirebaseData.js`, `firestore.rules` when they change.
 
----
-
-**Related**: [[Architecture]], [[Development]], [[Debugging]]
+**Related**: [[Architecture]], [[Schema]], [[Tech-Stack]], [[Debugging]], [[Known-Issues]]

@@ -3,7 +3,7 @@ import { setupFirebaseMocks } from './firebase-mock';
 
 const mockDbData = {
   'users/uid-test': {
-    status: 'active',
+    accountStatus: 'active',
     name: 'Test User',
     email: 'test@example.com'
   }

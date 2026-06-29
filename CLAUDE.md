@@ -7,6 +7,9 @@
 - E2E testing (Playwright)
 - Optymalizacja tokenów i systemu pamięci
 
+## Agent Navigation
+⚠️ **CRITICAL DIRECTIVE:** Before modifying any business logic, READ `docs/Agent-Process-Map.md`. This file contains the exact file paths and logic flow for every core process. Do not waste tokens grepping or exploring the codebase.
+
 ## Kluczowe pliki
 - `src/App.jsx` - główny komponent
 - `src/ManagerApp.jsx` - widok managera

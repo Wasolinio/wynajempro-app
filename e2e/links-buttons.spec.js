@@ -10,7 +10,7 @@ const mockUser = {
 
 const mockDbData = {
   'users/uid-test': {
-    status: 'active',
+    accountStatus: 'active',
     name: 'Test User',
     email: 'test@example.com'
   },

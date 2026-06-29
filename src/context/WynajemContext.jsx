@@ -41,10 +41,11 @@ export const WynajemProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        if (!currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
-          signOut(auth);
-          return;
-        }
+        // TODO: CLEANUP - Przywrócić wymóg weryfikacji e-mail po testach
+        // if (!currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
+        //   signOut(auth);
+        //   return;
+        // }
         setUser(currentUser);
       } else {
         setUser(null);

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 // IMPORTUJEMY FIREBASE ORAZ STRIPE
 import { db } from './firebase'; 
-import { doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { useWynajem } from './context/WynajemContext';
 
 // STAŁE I LOGIKA BIZNESOWA — wydzielone do osobnych modułów
@@ -359,10 +359,16 @@ export default function RentalManager() {
     e.preventDefault();
     if (!user) return;
     const { id: _id, ...entry } = newRental;
-    if (entry.type === 'booking') {
-      entry.income = Number(entry.income) || 0; entry.advancePayment = Number(entry.advancePayment) || 0;
-      entry.commission = Number(entry.commission) || 0; entry.tax = Number(entry.tax) || 0; entry.vat = Number(entry.vat) || 0;
-    } else if (entry.type === 'utility') { entry.utilities = Number(entry.utilities) || 0; }
+    const numericFields = ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities'];
+    numericFields.forEach(field => {
+      if (entry[field] === '' || entry[field] === null || entry[field] === undefined) {
+        // TODO: PRZED LAUNCHEM APKI
+        entry[field] = deleteField();
+      } else if (entry[field] !== undefined) {
+        const parsed = Number(String(entry[field]).replace(',', '.'));
+        entry[field] = isNaN(parsed) ? 0 : parsed;
+      }
+    });
     const docRef = editingId ? doc(db, 'users', user.uid, 'rentals', editingId) : doc(db, 'users', user.uid, 'rentals', Date.now().toString());
     
     try {

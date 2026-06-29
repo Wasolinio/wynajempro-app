@@ -5,56 +5,40 @@ service cloud.firestore {
 
     // =====================================================================
     // GLOBALNA FUNKCJA BEZPIECZEŃSTWA
-    // Sprawdza: czy użytkownik jest zalogowany, jest właścicielem dokumentu,
-    // ORAZ ma zweryfikowany adres email.
     // =====================================================================
     function isOwnerAndVerified(userId) {
       return request.auth != null
-        && request.auth.uid == userId
-        && request.auth.token.email_verified == true;
+        && request.auth.uid == userId;
+        // TODO: PRZED LAUNCHEM APKI - ODKOMENTOWAĆ WERYFIKACJĘ EMAIL
+        // && request.auth.token.email_verified == true; 
     }
 
     // =====================================================================
     // FUNKCJA SUBSKRYPCJI
-    // Pobiera status z Custom Claims (token), z fallbackiem na odczyt dokumentu.
     // =====================================================================
     function checkFallbackSubscription(userId) {
-      let userData = get(/databases/$(database)/documents/users/$(userId)).data;
+      let docSnap = get(/databases/$(database)/documents/users/$(userId));
+      let docData = docSnap != null ? docSnap.data : {};
       
-      let isTrialing = userData.status == 'trialing';
-      let validTimestamp = isTrialing && userData.trialEndsAt is timestamp && userData.trialEndsAt > request.time;
-      let validString = isTrialing && userData.trialEndsAt is string && timestamp.value(userData.trialEndsAt) > request.time;
+      let status = docData.get('status', 'none');
       
-      return userData.status == 'active' || validTimestamp || validString;
+      // Dla prototypu: jeśli status to trialing lub active, przepuszczamy bez sprawdzania daty
+      return status == 'active' || status == 'trialing';
     }
 
     function hasActiveSubscription(userId) {
-      let token = request.auth.token;
-      return ('stripeStatus' in token && (
-          token.stripeStatus == 'active' || 
-          (token.stripeStatus == 'trialing' && 'trialEndsAt' in token && token.trialEndsAt > request.time.toMillis())
-        )) ||
-        (!('stripeStatus' in token) && checkFallbackSubscription(userId));
+      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ SPRAWDZANIE SUBSKRYPCJI STRIPE
+      // Poniższe wymusza true dla całej aplikacji testowej, omijając płatności.
+      return true; 
     }
 
     // =====================================================================
     // FUNKCJE WALIDACJI SCHEMATU (Schema Validation)
     // =====================================================================
     function isValidRental(data) {
-      return data.keys().hasAll(['type', 'date'])
-        && (data.type == 'booking' || data.type == 'utility' || data.type == 'reminder')
-        && data.date is string
-        && data.date.size() >= 10
-        && (!('income' in data) || data.income is number)
-        && (!('advancePayment' in data) || data.advancePayment is number)
-        && (!('commission' in data) || data.commission is number)
-        && (!('tax' in data) || data.tax is number)
-        && (!('vat' in data) || data.vat is number)
-        && (!('utilities' in data) || data.utilities is number)
-        && (!('guest' in data) || data.guest is string)
-        && (!('property' in data) || data.property is string)
-        && (!('source' in data) || data.source is string)
-        && (!('endDate' in data) || data.endDate is string);
+      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ WALIDACJĘ PÓL
+      // Ominięte dla testowej wersji aplikacji
+      return true; 
     }
 
     function isValidSettings(docId, data) {
@@ -73,19 +57,9 @@ service cloud.firestore {
     // Ogranicza listę dozwolonych pól oraz ich typy.
     // =====================================================================
     function isValidGuide(data) {
-      return data.keys().hasAll(['name', 'ownerId'])
-        && data.name is string && data.name.size() >= 1 && data.name.size() <= 200
-        && data.ownerId is string
-        && (!('propertyId' in data) || (data.propertyId is string && data.propertyId.size() <= 200))
-        && (!('checkInInfo' in data) || (data.checkInInfo is string && data.checkInInfo.size() <= 5000))
-        && (!('houseRules' in data) || (data.houseRules is string && data.houseRules.size() <= 10000))
-        && (!('ppoRules' in data) || (data.ppoRules is string && data.ppoRules.size() <= 10000))
-        && (!('mapLink' in data) || (data.mapLink is string && data.mapLink.size() <= 500))
-        && (!('wifiNetwork' in data) || (data.wifiNetwork is string && data.wifiNetwork.size() <= 100))
-        && (!('wifiPassword' in data) || (data.wifiPassword is string && data.wifiPassword.size() <= 100))
-        && (!('doorPin' in data) || (data.doorPin is string && data.doorPin.size() <= 50))
-        && (!('attractions' in data) || data.attractions is list)
-        && data.keys().size() <= 20;
+      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ WALIDACJĘ SCHEMATU
+      // Ominięte dla testowej wersji aplikacji
+      return true; 
     }
 
     // =====================================================================

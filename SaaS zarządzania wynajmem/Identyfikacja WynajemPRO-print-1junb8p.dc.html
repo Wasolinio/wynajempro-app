@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#17150F;background:#F3EFE5}
+  ::selection{background:#D9492B;color:#fff}
+  .mono{font-family:'IBM Plex Mono',monospace}
+</style>
+</helmet>
+
+<div style="max-width:1080px;margin:0 auto;padding:0 48px 80px;background:#F3EFE5">
+
+  <!-- header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:24px 0;border-bottom:1px solid #DDD5C3">
+    <div style="display:flex;align-items:center;gap:11px">
+      <svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <div style="display:flex;align-items:baseline;font-weight:800;font-size:19px;letter-spacing:-.02em">Wynajem<span class="mono" style="font-weight:500;font-size:12px;background:#17150F;color:#F3EFE5;padding:2px 5px;margin-left:3px;letter-spacing:.05em">PRO</span></div>
+    </div>
+    <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">System identyfikacji wizualnej · v1.0</div>
+  </div>
+
+  <!-- COVER -->
+  <div style="padding:90px 0 70px;border-bottom:1px solid #DDD5C3">
+    <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;margin-bottom:36px">Brand book — dla zespołu i agenta kodującego</div>
+    <div style="display:flex;align-items:center;gap:22px;margin-bottom:34px">
+      <svg viewBox="0 0 40 40" width="76" height="76"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <div style="display:flex;align-items:baseline;font-weight:800;font-size:52px;letter-spacing:-.03em">Wynajem<span class="mono" style="font-weight:500;font-size:24px;background:#17150F;color:#F3EFE5;padding:5px 11px;margin-left:8px;letter-spacing:.04em">PRO</span></div>
+    </div>
+    <h1 style="font-weight:800;font-size:64px;line-height:.98;letter-spacing:-.035em;margin:0 0 18px;max-width:760px">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</h1>
+    <p style="font-size:19px;line-height:1.6;color:#524C3F;max-width:520px;margin:0">System do zarządzania najmem krótkoterminowym dla mikro-gospodarzy. Spokojny, precyzyjny, bez chaosu — jak dobre narzędzie pracy.</p>
+  </div>
+
+  <!-- 01 LOGO -->
+  <div style="padding:64px 0 20px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:36px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Logo</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">01</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:620px;margin:0 0 28px">Znak to miniaturowa oś czasu rezerwacji — trzy paski na atramentowym kaflu, jeden w kolorze cynobrowym (zajęty termin). Nawiązuje wprost do produktu: kalendarz pod kontrolą. Logotyp łączy „Wynajem" (Schibsted Grotesk 800) z tagiem „PRO" w monospace.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <!-- lockup horizontal on paper -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Lockup poziomy — podstawowy</span>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#17150F;color:#F3EFE5;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+      <!-- lockup on ink -->
+      <div style="background:#17150F;border-radius:4px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555">Na tle atramentowym</span>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#D9492B;color:#fff;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
+      <!-- mark only -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;display:flex;flex-direction:column;gap:24px;justify-content:space-between;min-height:170px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Sam znak</span>
+        <svg viewBox="0 0 40 40" width="56" height="56"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      </div>
+      <!-- clear space -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;min-height:170px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;display:block;margin-bottom:20px">Pole ochronne = ½ wysokości znaku</span>
+        <div style="display:inline-block;border:1px dashed #D9492B;padding:18px">
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        </div>
+      </div>
+      <!-- min size -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;min-height:170px;display:flex;flex-direction:column;justify-content:space-between">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Rozmiar minimalny</span>
+        <div style="display:flex;align-items:flex-end;gap:16px">
+          <div style="text-align:center"><svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg><div class="mono" style="font-size:10px;color:#9A917D;margin-top:8px">24 PX znak</div></div>
+          <div style="text-align:center"><div style="display:flex;align-items:baseline;font-weight:800;font-size:14px;letter-spacing:-.02em">Wynajem<span class="mono" style="font-weight:500;font-size:8px;background:#17150F;color:#F3EFE5;padding:1px 3px;margin-left:2px">PRO</span></div><div class="mono" style="font-size:10px;color:#9A917D;margin-top:10px">120 PX lockup</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 MISUSE -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Czego nie robić</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">02</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="58" preserveAspectRatio="none" style="margin-bottom:16px"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie rozciągać</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px"><rect width="40" height="40" rx="8" fill="#7A52C9"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#39C56B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie zmieniać barw</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px;transform:rotate(18deg)"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie obracać</div>
+      </div>
+      <div style="background:#D9C9C2;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Bez cieni i teł</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 KOLORY -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Kolory</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">03</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;margin-bottom:14px">
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#F3EFE5;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Paper</div><div class="mono" style="font-size:12px;color:#9A917D">#F3EFE5</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Tło główne</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#FBFAF6;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Surface</div><div class="mono" style="font-size:12px;color:#9A917D">#FBFAF6</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Panele / karty</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#17150F;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Ink</div><div class="mono" style="font-size:12px;color:#9A917D">#17150F</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Atrament / tekst</div></div>
+      </div>
+      <div>
+        <div style="height:96px;background:#D9492B;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Cynober</div><div class="mono" style="font-size:12px;color:#9A917D">#D9492B</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Akcent / CTA</div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden">
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#2F6B53;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Zieleń</div><div class="mono" style="font-size:12px;color:#9A917D">#2F6B53</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Pieniądze / zysk</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#234B7A;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Granat</div><div class="mono" style="font-size:12px;color:#9A917D">#234B7A</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Kanał Booking</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#C99A2E;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Amber</div><div class="mono" style="font-size:12px;color:#9A917D">#C99A2E</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">W toku / uwaga</div></div>
+      </div>
+      <div>
+        <div style="height:72px;background:#DDD5C3;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Hairline</div><div class="mono" style="font-size:12px;color:#9A917D">#DDD5C3</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Linie / obramowania</div></div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:14px;letter-spacing:.03em;line-height:1.6">POMOCNICZE — tinty: cynober #F6E5DF · zieleń #E7EDE7 · amber #FBF1D9 / linie wewn. #EFE9DA / tekst: muted #524C3F, faint #9A917D, label #A0987F / na atramencie: #E4DDCE, faint #8C8576, label #6B6555, linia #2C2920</p>
+  </div>
+
+  <!-- 04 TYPOGRAFIA -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Typografia</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">04</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div style="font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">Schibsted Grotesk</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Nagłówki + UI · 400–800</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div style="font-family:'Newsreader',serif;font-style:italic;font-weight:500;font-size:46px;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">Newsreader <span style="font-family:'Newsreader';font-style:italic;font-weight:500">italic</span></div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Akcent w nagłówkach · cytaty</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div class="mono" style="font-size:42px;font-weight:500;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">IBM Plex Mono</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Etykiety · liczby · dane</div>
+      </div>
+    </div>
+    <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-weight:800;font-size:42px;letter-spacing:-.03em;line-height:1">Display / H1</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">800 · −0.03em · 1.04</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-weight:600;font-size:27px;letter-spacing:-.02em">Nagłówek sekcji / H2</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">600 · −0.02em · 1.1</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-size:19px;line-height:1.6">Lead — wprowadzający akapit, większy</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">400 · 19/1.6</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-size:16px;line-height:1.6">Tekst podstawowy — opisy, treść interfejsu</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">400 · 16/1.6</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px"><span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Etykieta mono · liczby tabularne</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">500 · +0.10em · UPPER</span></div>
+    </div>
+  </div>
+
+  <!-- 05 GŁOS + SLOGAN -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Głos i slogany</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">05</span>
+    </div>
+    <div style="background:#17150F;border-radius:4px;padding:40px;color:#E4DDCE;margin-bottom:18px">
+      <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:18px">Slogan główny</div>
+      <div style="font-weight:800;font-size:46px;letter-spacing:-.03em;color:#F3EFE5;line-height:1.02">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">Obietnica marki</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.25">Cały Twój wynajem w jednym precyzyjnym panelu.</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">Wariant emocjonalny</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.25">Mniej chaosu. Więcej wynajmu.</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Rzeczowy</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Konkrety i liczby zamiast obietnic. „Zysk 33 280 zł", nie „rosnące przychody".</div></div>
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Spokojny</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Krótkie zdania, bez wykrzykników i żargonu. Ton narzędzia, nie sprzedawcy.</div></div>
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Po imieniu</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Mówimy do gospodarza „Ty". Jeden człowiek, kilka obiektów — nie korporacja.</div></div>
+    </div>
+  </div>
+
+  <!-- 06 KOMPONENTY -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Komponenty</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">06</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <!-- buttons -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Przyciski</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <span style="background:#D9492B;color:#fff;padding:13px 22px;font-weight:600;font-size:15px;border-radius:3px">Wypróbuj za darmo</span>
+          <span style="background:#FBFAF6;border:1px solid #DDD5C3;color:#17150F;padding:12px 20px;font-weight:600;font-size:15px;border-radius:3px">Drugorzędny</span>
+          <span style="font-weight:600;font-size:15px;border-bottom:2px solid #17150F;padding-bottom:2px">Link →</span>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">radius 3px · padding 13/22 · waga 600<br>primary hover #C23E22</div>
+      </div>
+      <!-- tags -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Tagi i statusy</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="mono" style="display:flex;align-items:center;gap:5px;background:#E7EDE7;color:#2F6B53;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em"><span style="width:6px;height:6px;background:#2F6B53;border-radius:50%"></span>POTWIERDZONA</span>
+          <span class="mono" style="background:#D9492B;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">POLECANY</span>
+          <span class="mono" style="background:#FBF1D9;color:#9A7B12;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">W TOKU</span>
+          <span class="mono" style="background:#F0EADC;color:#524C3F;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">AIRBNB</span>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">mono 11px · UPPER +0.05em<br>padding 5/10 · radius 3px</div>
+      </div>
+      <!-- input -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:8px">Adres e-mail</div>
+        <div style="width:100%;padding:13px 14px;border:1px solid #DDD5C3;border-radius:3px;font-size:15px;background:#fff;color:#9A917D">anna@wynajempro.com</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">label mono nad polem · border hairline<br>radius 3px · focus border cynober</div>
+      </div>
+      <!-- panel/kpi -->
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Panel KPI</div>
+        <div style="border:1px solid #DDD5C3;border-radius:4px;padding:18px;background:#fff">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:8px">Zysk netto · 2026</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.02em">69 520 zł</div>
+          <div class="mono" style="font-size:11px;color:#2F6B53;margin-top:6px">▲ 12% VS 2025</div>
+        </div>
+      </div>
+    </div>
+    <!-- table style -->
+    <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;margin-top:18px">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;padding:16px 22px;border-bottom:1px solid #EFE9DA">Tabela danych — liczby tabularne, wyrównane do prawej</div>
+      <div class="mono" style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:11px 22px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;border-bottom:1px solid #EFE9DA"><span>Obiekt</span><span style="text-align:right">Przychód</span><span style="text-align:right">Zysk netto</span></div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:14px 22px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-weight:600;font-size:14px">Apartament Centrum</span><span class="mono" style="text-align:right;font-size:14px">38 400 zł</span><span class="mono" style="text-align:right;font-size:14px;font-weight:600;color:#2F6B53">33 280 zł</span></div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:14px 22px;background:#17150F;color:#F3EFE5;align-items:center"><span style="font-weight:700;font-size:14px">Razem</span><span class="mono" style="text-align:right;font-size:14px">84 600 zł</span><span class="mono" style="text-align:right;font-size:14px;font-weight:600;color:#7FD0AC">69 520 zł</span></div>
+    </div>
+  </div>
+
+  <!-- 07 ZASADY -->
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Zasady układu</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">07</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid #17150F;border-radius:4px;overflow:hidden">
+      <div style="padding:24px;border-right:1px solid #DDD5C3;border-bottom:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">01</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Struktura liniami, nie cieniami</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Sekcje i karty oddzielamy włoskową linią 1px (#DDD5C3). Cienie minimalne lub żadne.</div></div>
+      <div style="padding:24px;border-bottom:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">02</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Etykiety i liczby w monospace</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Nagłówki sekcji, metki i wszystkie liczby w IBM Plex Mono z liczbami tabularnymi.</div></div>
+      <div style="padding:24px;border-right:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">03</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Podpisy „RYS." przy figurach</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Zrzuty i wykresy opisujemy edytorialnie: „RYS. 1 — Kalendarz". Daje wrażenie precyzji.</div></div>
+      <div style="padding:24px;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">04</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Zero emoji, zero gradientów</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Placeholdery zdjęć = „papier milimetrowy" z etykietą. Promień: 3px kontrolki, 4px panele.</div></div>
+    </div>
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;letter-spacing:.03em;line-height:1.7">SKALA ODSTĘPÓW — 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 64 · 84 PX &nbsp;|&nbsp; PROMIENIE — 3PX (przyciski / pola / tagi) · 4PX (panele) &nbsp;|&nbsp; SIATKA — max 1240PX, padding 40PX, gap 16–20PX</p>
+  </div>
+
+  <!-- footer -->
+  <div style="margin-top:40px;border-top:1px solid #17150F;padding-top:22px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <span style="font-weight:800;font-size:15px;letter-spacing:-.02em">WynajemPRO</span>
+    </div>
+    <span class="mono" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A0987F">Identyfikacja v1.0 · 2026</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:900}}"></script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Identyfikacja WynajemPRO";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

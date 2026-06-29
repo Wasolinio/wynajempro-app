@@ -12,6 +12,7 @@
 ## Data Flow & State
 | Context | Mechanism | Implementation |
 |---------|-----------|----------------|
+| **Data Model** | Subcollection-first | Almost all data (properties, bookings, settings) is scoped under `users/{uid}`. There are no top-level collections for these. |
 | **Global State** | Firestore Snapshots | `src/hooks/useFirebaseData.js` handles real-time caching |
 | **Auth** | Firebase Auth | Google OAuth + Email Verif -> updates local Context |
 | **Public Flow** | Anonymous Read | `/guide/:guideId` fetches without Auth, requires terms signature |
