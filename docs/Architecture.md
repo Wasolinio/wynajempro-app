@@ -1,117 +1,34 @@
 # 🏗️ Architecture
 
+**Agent Map**: ➡️ See [[Agent-Process-Map]] for step-by-step file & flow mapping.
+
 ## System Overview
+| Layer | Tech Stack | Responsibility |
+|-------|------------|----------------|
+| **Frontend** | React + Vite | SPA, routing, UI rendering (`src/`) |
+| **BaaS** | Firebase Suite | Auth, Firestore (Real-time), Storage (`firebase.json`) |
+| **Backend** | Cloud Functions | iCal sync, Stripe webhooks, account cleanup (`functions/index.js`) |
 
-```
-┌─────────────┐
-│   Frontend  │ React + Vite
-├─────────────┤
-│  Firebase   │ Auth + Firestore + Storage
-├─────────────┤
-│   Cloud Fn  │ iCal Export, Account Deletion
-└─────────────┘
-```
+## Data Flow & State
+| Context | Mechanism | Implementation |
+|---------|-----------|----------------|
+| **Global State** | Firestore Snapshots | `src/hooks/useFirebaseData.js` handles real-time caching |
+| **Auth** | Firebase Auth | Google OAuth + Email Verif -> updates local Context |
+| **Public Flow** | Anonymous Read | `/guide/:guideId` fetches without Auth, requires terms signature |
 
-## Data Flow
-
-### User (Authenticated)
-```
-Google Login
-    ↓
-Firebase Auth
-    ↓
-Firestore Real-time Snapshot
-    ↓
-useFirebaseData Hook (cache)
-    ↓
-React Components
-```
-
-### Guest (Public Guide)
-```
-/guide/:guideId
-    ↓
-Anonymous Read (Firestore Rules)
-    ↓
-Show Guide Content
-    ↓
-Require Signature
-    ↓
-Unlock Codes (PIN, WiFi)
-```
-
-## Component Hierarchy
-
-```
-App.jsx
-├── LandingPage
-│   └── Hero, Features, CTA
-├── Auth Pages
-│   ├── Login (Google)
-│   ├── Signup
-│   └── ResetPassword
-├── ManagerApp (Protected)
-│   ├── PropertyList
-│   ├── PropertyDetail
-│   ├── GuestGuideEditor
-│   └── Settings
-└── GuestGuide (Public)
-    ├── GuideDisplay
-    ├── SignatureForm
-    └── CodesReveal
-```
-
-## State Management
-
-Key Hook:
-- **`useFirebaseData.js`** - Real-time Firestore syncing
-  - Manages listeners
-  - Handles cache
-  - Updates on real-time events
-
-Frameworks:
-- Redux? (check implementation)
-- Context API?
-- React Query?
+## Component Hierarchy Map
+- **App.jsx** (Router)
+  - **LandingPage** (Public Marketing)
+  - **Auth Pages** (Login, Signup, ResetPassword)
+  - **ManagerApp.jsx** (Protected Dashboard -> `PropertyList`, `GuestGuideEditor`, `Settings`)
+  - **GuestGuideView** (Public -> `SignatureForm`, `CodesReveal`)
 
 ## Security Model
-
-### Firestore Rules (`firestore.rules`)
-- **Authenticated users**: Can read/write own properties
-- **Public guides**: Anonymous users can read with signature
-- **Storage**: Guides accessible only after email verification
-
-### Cloud Functions
-- **exportIcal**: POST with token validation
-- **deleteUserAccount**: Cleanup storage + firestore
-
-### App Check
-- Prevents abuse from non-app clients
-- Enabled for web/mobile
-
-## Data Schema (Firestore)
-
-```
-users/{uid}
-├── email
-├── name
-└── properties[]
-
-properties/{propId}
-├── name
-├── address
-├── codes (PIN, WiFi)
-├── secretToken (iCal auth)
-├── guides[]
-└── created_at
-
-guides/{guideId}
-├── title
-├── content
-├── createdBy
-└── storage_url
-```
+| Component | Rules/Implementation |
+|-----------|----------------------|
+| **Firestore** | `firestore.rules`: Auth reads own data, Public guides readable anonymously |
+| **Storage** | `storage.rules`: Images accessible public/auth based on path |
+| **Functions** | Require Auth token / AppCheck enforcement |
 
 ---
-
-**Related**: [[Features]], [[Development]], [[Known-Issues]]
+**Related**: [[Schema]], [[Agent-Process-Map]]
