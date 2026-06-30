@@ -19,7 +19,7 @@ const exportUrl = (uid, name, token) =>
   `https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${uid}&p=${encodeURIComponent(name)}&token=${token || ''}`;
 
 /* Ustawienia systemu — styl V4. Kontrakt propsów 1:1 z oryginałem. */
-function SettingsModalV4(props) {
+function SettingsModal(props) {
   const {
     showSettingsModal, setShowSettingsModal, settingsTab, setSettingsTab,
     editingSyncLinks, setEditingSyncLinks, user, editingHostProfile, setEditingHostProfile,
@@ -28,7 +28,7 @@ function SettingsModalV4(props) {
     editingSources, updateSource, removeSource, handleAddSource, newSourceName, setNewSourceName,
     editingCategories, updateCategory, removeCategory, handleAddCategory, newCategoryName, setNewCategoryName,
     editingTaxSettings, setEditingTaxSettings, editingTemplates, updateTemplate, removeTemplate, addTemplate,
-    accountStatus, trialEndsAt, handleManageSubscription, isBillingPortalLoading, saveSettings,
+    accountStatus, handleManageSubscription, isBillingPortalLoading, saveSettings,
   } = props;
 
   const [deletePassword, setDeletePassword] = useState('');
@@ -363,4 +363,4 @@ function SettingsModalV4(props) {
   );
 }
 
-export default React.memo(SettingsModalV4);
+export default React.memo(SettingsModal);

@@ -4,7 +4,7 @@ import { Edit, X, Wallet } from 'lucide-react';
 const propName = (p) => (typeof p === 'object' ? p.name : p);
 
 /* Dodaj/edytuj wpis (rezerwacja / koszt / zadanie) — styl V4. Kontrakt propsów 1:1 z oryginałem. */
-function AddEditEntryModalV4({
+function AddEditEntryModal({
   showAddModal, handleCloseModal, handleAddRental, editingId,
   newRental, setNewRental, handleRentalChange, properties, sources, categories,
 }) {
@@ -149,4 +149,4 @@ function AddEditEntryModalV4({
   );
 }
 
-export default React.memo(AddEditEntryModalV4);
+export default React.memo(AddEditEntryModal);

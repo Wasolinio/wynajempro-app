@@ -20,20 +20,18 @@ const channelLabel = (src = '') => {
 */
 export default function FinanceView({ rentals, selectedYear, currentYearData, onExport }) {
   const [scope, setScope] = useState('year'); // 'month' | 'year' | 'all'
-  const now = new Date();
-  const curMonth = now.getMonth();
-
-  const inScope = (r) => {
-    if (!r.date) return scope === 'all';
-    const d = new Date(r.date);
-    if (isNaN(d.getTime())) return false;
-    if (scope === 'all') return true;
-    if (d.getFullYear().toString() !== selectedYear) return false;
-    if (scope === 'month') return d.getMonth() === curMonth;
-    return true;
-  };
 
   const kpi = useMemo(() => {
+    const curMonth = new Date().getMonth();
+    const inScope = (r) => {
+      if (!r.date) return scope === 'all';
+      const d = new Date(r.date);
+      if (isNaN(d.getTime())) return false;
+      if (scope === 'all') return true;
+      if (d.getFullYear().toString() !== selectedYear) return false;
+      if (scope === 'month') return d.getMonth() === curMonth;
+      return true;
+    };
     let income = 0, costs = 0, tax = 0, nights = 0;
     const byChannel = {};
     rentals.forEach((r) => {
@@ -65,7 +63,7 @@ export default function FinanceView({ rentals, selectedYear, currentYearData, on
       avgRate: nights > 0 ? Math.round(income / nights) : 0,
       channels,
     };
-  }, [rentals, selectedYear, scope]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rentals, selectedYear, scope]);
 
   const monthly = useMemo(() => {
     const arr = currentYearData.months.map((m) => m.income || 0);

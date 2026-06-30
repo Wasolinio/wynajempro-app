@@ -16,7 +16,7 @@ const MAX_UPLOAD = 10 * 1024 * 1024; // 10 MB
   LOGIKA przeniesiona 1:1 z src/components/GuideBuilder.jsx (fetch/edit/delete/upload/save/
   atrakcje/sekrety/QR). Zmieniona wyłącznie warstwa wizualna (namespace .wpd) + limit 5→10 MB.
 */
-export default function GuideBuilderV4({ user, properties }) {
+export default function GuideBuilder({ user, properties }) {
   const [guides, setGuides] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingGuide, setEditingGuide] = useState(null);

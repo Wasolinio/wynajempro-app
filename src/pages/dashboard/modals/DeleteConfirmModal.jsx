@@ -2,7 +2,7 @@ import React from 'react';
 import { Trash2 } from 'lucide-react';
 
 /* Potwierdzenie usunięcia — styl V4. */
-export default function DeleteConfirmModalV4({ onCancel, onConfirm }) {
+export default function DeleteConfirmModal({ onCancel, onConfirm }) {
   return (
     <div className="wpd-overlay" style={{ zIndex: 90 }} onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="wpd-dialog wpd-dialog--sm">

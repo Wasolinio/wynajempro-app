@@ -26,11 +26,12 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
   const todayNum = today.getDate();
   const monthLabel = calendarDate.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
 
-  const monthStart = new Date(year, month, 1).setHours(0, 0, 0, 0);
-  const monthEnd = new Date(year, month, daysInMonth).setHours(0, 0, 0, 0);
-
   // Rezerwacje obiektu w obrębie miesiąca → pozycje pasków
   const barsByProp = useMemo(() => {
+    const y = calendarDate.getFullYear(); const m = calendarDate.getMonth();
+    const dim = new Date(y, m + 1, 0).getDate();
+    const mStart = new Date(y, m, 1).setHours(0, 0, 0, 0);
+    const mEnd = new Date(y, m, dim).setHours(0, 0, 0, 0);
     const map = {};
     properties.forEach((p) => { map[p.name] = []; });
     rentals.forEach((r) => {
@@ -39,16 +40,17 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
       if (!(propName in map)) return;
       const s = new Date(r.date); s.setHours(0, 0, 0, 0);
       const e = new Date(r.endDate || r.date); e.setHours(0, 0, 0, 0);
-      if (isNaN(s.getTime()) || e < new Date(monthStart) || s > new Date(monthEnd)) return;
-      const startNum = s.getTime() < monthStart ? 1 : s.getDate();
-      const endNum = e.getTime() > monthEnd ? daysInMonth : e.getDate();
+      if (isNaN(s.getTime()) || e.getTime() < mStart || s.getTime() > mEnd) return;
+      const startNum = s.getTime() < mStart ? 1 : s.getDate();
+      const endNum = e.getTime() > mEnd ? dim : e.getDate();
       map[propName].push({ r, startNum, endNum, propName });
     });
     return map;
-  }, [rentals, properties, monthStart, monthEnd, daysInMonth]);
+  }, [rentals, properties, calendarDate]);
 
   // Metryki miesiąca
   const metrics = useMemo(() => {
+    const dim = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 0).getDate();
     let count = 0, bookedNights = 0, totalNights = 0;
     Object.values(barsByProp).forEach((arr) => {
       arr.forEach(({ r, startNum, endNum }) => {
@@ -58,13 +60,13 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
         totalNights += Math.max(1, Math.round((e - s) / 86400000) || 1);
       });
     });
-    const capacity = properties.length * daysInMonth;
+    const capacity = properties.length * dim;
     return {
       count,
       free: Math.max(0, capacity - bookedNights),
       avg: count ? (totalNights / count).toFixed(1).replace('.', ',') : '0',
     };
-  }, [barsByProp, properties.length, daysInMonth]);
+  }, [barsByProp, properties.length, calendarDate]);
 
   return (
     <>

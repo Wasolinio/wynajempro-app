@@ -25,12 +25,13 @@ export default function ObjectsView({ properties, rentals, selectedYear, onAddPr
 
   const statsByProp = useMemo(() => {
     const map = {};
+    const ref = new Date();
     const todayTime = new Date().setHours(0, 0, 0, 0);
     // okno obłożenia: bieżący miesiąc
-    const mIdx = now.getMonth();
-    const daysInMonth = new Date(now.getFullYear(), mIdx + 1, 0).getDate();
-    const mStart = new Date(now.getFullYear(), mIdx, 1).setHours(0, 0, 0, 0);
-    const mEnd = new Date(now.getFullYear(), mIdx, daysInMonth).setHours(0, 0, 0, 0);
+    const mIdx = ref.getMonth();
+    const daysInMonth = new Date(ref.getFullYear(), mIdx + 1, 0).getDate();
+    const mStart = new Date(ref.getFullYear(), mIdx, 1).setHours(0, 0, 0, 0);
+    const mEnd = new Date(ref.getFullYear(), mIdx, daysInMonth).setHours(0, 0, 0, 0);
 
     properties.forEach((p) => { map[p.name] = { income: 0, nights: 0, count: 0, monthNights: 0, nextArrival: null }; });
     rentals.forEach((r) => {

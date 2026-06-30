@@ -11,7 +11,7 @@ import { logEvent } from 'firebase/analytics';
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 
 /**
- * LoginPanelV4 — panel logowania/rejestracji w systemie identyfikacji "Wynajem PRO" v1.0.
+ * LoginPanel — panel logowania/rejestracji w systemie identyfikacji "Wynajem PRO" v1.0.
  *
  * Logika autoryzacji (Firebase: e-mail, Google, weryfikacja e-mail, błędy, 14-dniowy trial)
  * jest identyczna jak w src/pages/LoginPanel.jsx — przebudowana jest wyłącznie warstwa
@@ -37,7 +37,7 @@ const GoogleIcon = (props) => (
   </svg>
 );
 
-export default function LoginPanelV4() {
+export default function LoginPanel() {
   const navigate = useNavigate();
 
   // Przechwytywanie wyniku Google Redirect (po powrocie z ekranu Google)

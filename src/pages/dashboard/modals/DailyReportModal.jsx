@@ -2,7 +2,7 @@ import React from 'react';
 import { ClipboardList, X, LogIn, LogOut, CheckSquare, CheckCircle } from 'lucide-react';
 
 /* Raport dzienny — styl V4. Kontrakt propsów 1:1 z oryginałem. */
-function DailyReportModalV4({ showDailyReportModal, setShowDailyReportModal, dailyReport, completeTask }) {
+function DailyReportModal({ showDailyReportModal, setShowDailyReportModal, dailyReport, completeTask }) {
   if (!showDailyReportModal || !dailyReport) return null;
   const close = () => setShowDailyReportModal(false);
 
@@ -84,4 +84,4 @@ function DailyReportModalV4({ showDailyReportModal, setShowDailyReportModal, dai
   );
 }
 
-export default React.memo(DailyReportModalV4);
+export default React.memo(DailyReportModal);

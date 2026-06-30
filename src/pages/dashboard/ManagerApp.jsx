@@ -16,11 +16,11 @@ import {
 import { calculateTaxes } from '../../utils/taxCalculator';
 
 // Modale w stylu V4 (własne)
-import ProfitabilityReportModal from './modals/ProfitabilityReportModalV4';
-import DailyReportModal from './modals/DailyReportModalV4';
-import AddEditEntryModal from './modals/AddEditEntryModalV4';
-import DeleteConfirmModal from './modals/DeleteConfirmModalV4';
-import SettingsModal from './modals/SettingsModalV4';
+import ProfitabilityReportModal from './modals/ProfitabilityReportModal';
+import DailyReportModal from './modals/DailyReportModal';
+import AddEditEntryModal from './modals/AddEditEntryModal';
+import DeleteConfirmModal from './modals/DeleteConfirmModal';
+import SettingsModal from './modals/SettingsModal';
 import PaywallScreen from '../../components/PaywallScreen';
 import CompleteProfileScreen from '../../components/CompleteProfileScreen';
 import FloatingTaskWidget from '../../components/FloatingTaskWidget';
@@ -32,7 +32,7 @@ import CalendarView from './views/CalendarView';
 import ObjectsView from './views/ObjectsView';
 import FinanceView from './views/FinanceView';
 import BookingDetailView from './views/BookingDetailView';
-import GuideBuilderV4 from './GuideBuilderV4';
+import GuideBuilder from './GuideBuilder';
 
 const getIconComponent = (name) => {
   switch (name) {
@@ -68,7 +68,7 @@ const VIEW_META = {
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
 };
 
-export default function ManagerAppClaude() {
+export default function ManagerApp() {
   const {
     user, loading, rentals,
     accountStatus, trialEndsAt, scheduledDeletionAt,
@@ -201,7 +201,7 @@ export default function ManagerAppClaude() {
     return d.getFullYear().toString() === selectedYear;
   }), [rentals, selectedYear, searchQuery]);
 
-  const { allBookings, upcomingBookings, archivedBookings, utilitiesList, remindersList } = useMemo(() => {
+  const { allBookings, upcomingBookings, archivedBookings, remindersList } = useMemo(() => {
     const todayTime = new Date().setHours(0, 0, 0, 0);
     const sortFn = (list, isBooking = true) => [...list].sort((a, b) => {
       const tA = new Date(a.date).getTime() || 0; const tB = new Date(b.date).getTime() || 0;
@@ -229,16 +229,6 @@ export default function ManagerAppClaude() {
   const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
-
-  const stats = useMemo(() => {
-    let inc = 0, cst = 0, tax = 0;
-    displayedRentals.forEach((r) => {
-      inc += Number(r.income) || 0;
-      cst += (Number(r.commission) || 0) + (Number(r.utilities) || 0);
-      tax += (Number(r.tax) || 0) + (Number(r.vat) || 0);
-    });
-    return { income: inc, costs: cst, tax, profit: inc - cst - tax };
-  }, [displayedRentals]);
 
   const yearlyStats = useMemo(() => {
     const data = {};
@@ -558,7 +548,7 @@ export default function ManagerAppClaude() {
               />
             )}
             {renderView === 'guides' && (
-              <GuideBuilderV4 user={user} properties={properties} />
+              <GuideBuilder user={user} properties={properties} />
             )}
             </>
             )}

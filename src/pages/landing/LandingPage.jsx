@@ -12,7 +12,7 @@ const CATEGORY_TAG = {
 };
 
 /**
- * LandingPageV4 — landing wierny systemowi identyfikacji wizualnej "Wynajem PRO" v1.0.
+ * LandingPage — landing wierny systemowi identyfikacji wizualnej "Wynajem PRO" v1.0.
  *
  * Założenia brand booka:
  *  - Kolory: Paper #F3EFE5 / Surface #FBFAF6 / Ink #17150F / Cynober #D9492B /
@@ -65,7 +65,7 @@ const FaqItem = ({ q, a }) => (
   </details>
 );
 
-export default function LandingPageV4() {
+export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState('');

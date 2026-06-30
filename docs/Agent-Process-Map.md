@@ -4,6 +4,19 @@
 
 **Verified against source on 2026-06-29.** Firebase project id: `moje-domki-6c77d`. Frontend: React + Vite + React Router + TanStack Query. Backend: Firebase Auth, Firestore, Storage, Cloud Functions v2 (`functions/index.js`), Stripe.
 
+> ⚠️ **AKTUALIZACJA STRUKTURY (2026-06-30):** UI przebudowane do identyfikacji WynajemPRO v2, a kod
+> uporządkowany. **Logika biznesowa i model danych poniżej są nadal aktualne** (przeniesione 1:1),
+> ale ŚCIEŻKI PLIKÓW UI się zmieniły. Mapowanie stare → nowe:
+> - `src/ManagerApp.jsx` → **`src/pages/dashboard/ManagerApp.jsx`** (powłoka panelu)
+> - `src/pages/LoginPanel.jsx` → **`src/pages/landing/LoginPanel.jsx`** (auth) ; landing → `src/pages/landing/LandingPage.jsx`
+> - `src/components/GuideBuilder.jsx` → **`src/pages/dashboard/GuideBuilder.jsx`** (limit uploadu teraz 10 MB)
+> - modale/widoki panelu → **`src/pages/dashboard/modals/` i `…/views/`** (styl .wpd)
+> - Stare wersje (oryginał, prototypy, wersja Gemini) → przeniesione do **`/_legacy`** (poza buildem).
+>
+> Niezmienione i nadal kluczowe: `src/context/WynajemContext.jsx`, `src/hooks/useFirebaseData.js`,
+> `src/firebase.js`, `src/utils/*`, `functions/index.js`, `firestore.rules`, `storage.rules`.
+> Pełna mapa żywej struktury: `src/README.md`.
+
 ---
 
 ## 🗄️ Data Model (read this first)

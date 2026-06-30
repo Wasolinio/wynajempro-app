@@ -5,7 +5,7 @@ import { monthNames } from '../../../utils/constants';
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 
 /* Raport rentowności — styl V4. Kontrakt propsów 1:1 z oryginałem. */
-function ProfitabilityReportModalV4({ showStatsModal, setShowStatsModal, selectedYear, handleYearChange, availableYears, currentYearData }) {
+function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedYear, handleYearChange, availableYears, currentYearData }) {
   if (!showStatsModal) return null;
   const t = currentYearData.total;
 
@@ -75,4 +75,4 @@ function ProfitabilityReportModalV4({ showStatsModal, setShowStatsModal, selecte
   );
 }
 
-export default React.memo(ProfitabilityReportModalV4);
+export default React.memo(ProfitabilityReportModal);

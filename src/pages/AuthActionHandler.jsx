@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { applyActionCode, verifyPasswordResetCode, confirmPasswordReset } from 'firebase/auth';
 import { auth } from '../firebase';
 import { CheckCircle, XCircle, Loader2, Key, MailCheck, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthActionHandler() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  
+
   const mode = searchParams.get('mode');
   const actionCode = searchParams.get('oobCode');
   

@@ -1,9 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Edit, Trash2, ExternalLink, BookOpen } from 'lucide-react';
-import { channelTone } from '../styles';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
-const up = (s) => (s || '').toUpperCase();
 const initials = (name) => (name || 'Gość').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 const fmtDate = (d) => {
   if (!d) return '—';
