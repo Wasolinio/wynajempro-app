@@ -20,6 +20,7 @@ const LoginPanel = lazy(() => import('./pages/LoginPanel'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ManagerApp = lazy(() => import('./ManagerApp')); 
 const ManagerAppV4 = lazy(() => import('./pages/dashboard_v4/ManagerAppV4'));
+const ManagerAppClaude = lazy(() => import('./pages/dashboard_claude/ManagerAppClaude'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
@@ -131,25 +132,37 @@ export default function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/auth/action" element={<AuthActionHandler />} />
               <Route path="/guide/:guideId" element={<GuestGuideView />} />
-              <Route 
-                path="/dashboard/*" 
+              {/* GŁÓWNA wersja produkcyjna dashboardu (przebudowa V4 / Claude) */}
+              <Route
+                path="/dashboard/*"
                 element={
                   <ProtectedRoute>
                     <WynajemProvider>
-                      <ManagerAppV4 />
+                      <ManagerAppClaude />
                     </WynajemProvider>
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/prototyp4-app/*" 
+              <Route
+                path="/prototyp4-app/*"
                 element={
                   <ProtectedRoute>
                     <WynajemProvider>
                       <ManagerAppV4 />
                     </WynajemProvider>
                   </ProtectedRoute>
-                } 
+                }
+              />
+              {/* Moja (Claude) wersja przebudowy dashboardu — równolegle do wersji Gemini */}
+              <Route
+                path="/app-claude/*"
+                element={
+                  <ProtectedRoute>
+                    <WynajemProvider>
+                      <ManagerAppClaude />
+                    </WynajemProvider>
+                  </ProtectedRoute>
+                }
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "a9b2c87f9a9f2677",
+        "id": "fa46398521293881",
         "type": "tabs",
         "children": [
           {
-            "id": "1ca6238a9ee88db3",
+            "id": "9912920efc1740fc",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -176,8 +176,11 @@
       "bases:Stwórz nową bazę danych": false
     }
   },
-  "active": "1ca6238a9ee88db3",
+  "active": "9912920efc1740fc",
   "lastOpenFiles": [
+    "Agent-Process-Map.md",
+    "API-Reference.md",
+    "Development.md",
     "archive/old_memory/architecture.md",
     "Bez nazwy.base",
     "2026-06-29.md",
@@ -186,7 +189,6 @@
     "Schema.md",
     "Tech Stack.md",
     "Known-Issues.md",
-    "Agent-Process-Map.md",
     "Activity-Log.md",
     "Patterns.md",
     "Glossary.md",
@@ -210,7 +212,6 @@
     "Performance.md",
     "Features.md",
     "Debugging.md",
-    "Home.md",
     "Projects"
   ]
 }
