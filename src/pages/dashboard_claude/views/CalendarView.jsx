@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarCheck, Moon, Clock } from 'lucide-react';
 import { channelColor } from '../styles';
 
 const WD = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'sb'];
@@ -138,15 +138,15 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
       {/* metryki pod kalendarzem */}
       <div className="wpd-section wpd-stats" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
-          <p className="wpd-stat__label">Rezerwacje w tym mies.</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Rezerwacje w tym mies.</p><span className="wpd-stat__ic"><CalendarCheck /></span></div>
           <div className="wpd-stat__value">{metrics.count}</div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
-          <p className="wpd-stat__label">Wolnych nocy</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Wolnych nocy</p><span className="wpd-stat__ic"><Moon /></span></div>
           <div className="wpd-stat__value">{fmt(metrics.free)}</div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
-          <p className="wpd-stat__label">Śr. długość pobytu</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Śr. długość pobytu</p><span className="wpd-stat__ic"><Clock /></span></div>
           <div className="wpd-stat__value">{metrics.avg} <small>nocy</small></div>
         </div>
       </div>

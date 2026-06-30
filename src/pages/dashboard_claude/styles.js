@@ -26,6 +26,8 @@ export const DASHBOARD_CSS = `
 }
 .wpd *{ box-sizing:border-box; }
 .wpd ::selection{ background:var(--tint-cynober); }
+/* delikatniejszy stroke ikon — spójny z estetyką cienkich linii brand booka */
+.wpd svg{ stroke-width:1.75; }
 .wpd-mono{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; }
 .wpd-serif{ font-family:'Newsreader', serif; font-style:italic; font-weight:400; }
 
@@ -102,7 +104,7 @@ export const DASHBOARD_CSS = `
 .wpd-top__spacer{ flex:1 1 auto; }
 .wpd-search{
   display:flex; align-items:center; gap:9px; background:var(--surface);
-  border:1px solid var(--hairline); border-radius:3px; padding:9px 13px; width:230px;
+  border:1px solid var(--hairline); border-radius:3px; height:40px; padding:0 13px; width:230px;
   transition:border-color .14s;
 }
 .wpd-search:focus-within{ border-color:var(--ink); }
@@ -113,22 +115,24 @@ export const DASHBOARD_CSS = `
 
 /* ── Przyciski ── */
 .wpd-btn{
-  display:inline-flex; align-items:center; gap:7px; justify-content:center;
-  font-family:inherit; font-weight:600; font-size:14px; padding:10px 16px;
+  display:inline-flex; align-items:center; gap:8px; justify-content:center;
+  font-family:inherit; font-weight:600; font-size:14px; height:40px; padding:0 16px;
   border-radius:3px; border:1px solid var(--hairline); background:var(--surface);
   color:var(--ink); cursor:pointer; text-decoration:none; white-space:nowrap;
   transition:background .14s, border-color .14s, color .14s;
 }
-.wpd-btn svg{ width:15px; height:15px; }
+.wpd-btn svg{ width:16px; height:16px; flex:0 0 16px; }
 .wpd-btn:hover{ border-color:var(--ink); }
 .wpd-btn--primary{ background:var(--cynober); border-color:var(--cynober); color:#fff; }
 .wpd-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
-.wpd-btn--sm{ padding:7px 12px; font-size:13px; }
+.wpd-btn--sm{ height:34px; padding:0 12px; font-size:13px; gap:6px; }
+.wpd-btn--sm svg{ width:14px; height:14px; flex:0 0 14px; }
+.wpd-btn--block{ width:100%; }
 .wpd-btn:disabled{ opacity:.5; cursor:default; }
 .wpd-btn--danger:hover{ border-color:var(--cynober); color:var(--cynober); }
 .wpd-iconbtn{
-  display:inline-flex; align-items:center; justify-content:center; padding:9px;
-  border:1px solid var(--hairline); background:var(--surface); border-radius:3px;
+  display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0;
+  border:1px solid var(--hairline); background:var(--surface); border-radius:3px; flex:0 0 40px;
   color:var(--muted); cursor:pointer; position:relative; transition:border-color .14s, color .14s;
 }
 .wpd-iconbtn svg{ width:17px; height:17px; }
@@ -157,6 +161,11 @@ export const DASHBOARD_CSS = `
   padding:18px 20px 20px; min-height:128px; display:flex; flex-direction:column; cursor:pointer;
   transition:border-color .14s; }
 .wpd-stat:hover{ border-color:var(--ink); }
+.wpd-stat__head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.wpd-stat__head .wpd-stat__label{ margin:0; }
+.wpd-stat__ic{ color:var(--faint); flex:0 0 auto; line-height:0; }
+.wpd-stat__ic svg{ width:18px; height:18px; }
+.wpd-stat--dark .wpd-stat__ic{ color:var(--on-side-faint); }
 .wpd-stat__label{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.08em;
   text-transform:uppercase; color:var(--label); margin:0 0 14px; line-height:1.4; }
 .wpd-stat__value{ font-weight:800; font-size:30px; letter-spacing:-.02em; color:var(--ink); line-height:1.05; }
@@ -373,7 +382,7 @@ export const DASHBOARD_CSS = `
 .wpd-dialog__body{ padding:24px; overflow-y:auto; }
 .wpd-dialog__foot{ display:flex; gap:12px; padding:18px 24px; border-top:1px solid var(--hairline);
   background:var(--surface); }
-.wpd-dialog__foot .wpd-btn{ flex:1; padding:12px; }
+.wpd-dialog__foot .wpd-btn{ flex:1; height:44px; }
 
 /* ── Kontrolki formularza ── */
 .wpd-field{ margin-bottom:16px; }
@@ -499,6 +508,30 @@ export const DASHBOARD_CSS = `
 .wpd-kv__k{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--label); margin-bottom:4px; }
 .wpd-kv__v{ font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500; color:var(--ink); }
+
+/* ── Kreator przewodnika ── */
+.wpd-up{ border:1px dashed var(--hairline); border-radius:4px; padding:22px; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+  background:var(--surface); color:var(--faint); text-align:center; transition:border-color .14s, background .14s; }
+.wpd-up:hover{ border-color:var(--ink); background:var(--inner); }
+.wpd-up svg{ width:22px; height:22px; }
+.wpd-up__txt{ font-size:13px; color:var(--muted); }
+.wpd-cover{ width:88px; height:88px; border-radius:4px; object-fit:cover; border:1px solid var(--hairline); flex:0 0 88px; }
+.wpd-qr{ display:flex; justify-content:center; padding:16px; background:#fff; border:1px solid var(--hairline); border-radius:4px; }
+.wpd-attr{ display:flex; gap:12px; align-items:flex-start; background:var(--inner); border:1px solid var(--hairline);
+  border-radius:4px; padding:12px; margin-bottom:10px; }
+.wpd-filechip{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px;
+  background:var(--tint-granat); border:1px solid #C9D3E0; border-radius:4px; }
+.wpd-filechip__name{ display:flex; align-items:center; gap:9px; min-width:0; }
+.wpd-filechip__name b{ font-size:13px; font-weight:600; color:var(--granat); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wpd-gcard__cover{ height:140px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
+  background-color:var(--inner);
+  background-image:linear-gradient(var(--inner-2) 1px, transparent 1px), linear-gradient(90deg, var(--inner-2) 1px, transparent 1px);
+  background-size:16px 16px; display:flex; align-items:center; justify-content:center; }
+.wpd-gcard__cover img{ width:100%; height:100%; object-fit:cover; }
+.wpd-gcard__prop{ position:absolute; left:12px; bottom:10px; font-family:'IBM Plex Mono', monospace;
+  font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink); background:var(--surface);
+  border:1px solid var(--hairline); border-radius:3px; padding:4px 8px; }
 
 /* ── Responsywność ── */
 @media (max-width:980px){

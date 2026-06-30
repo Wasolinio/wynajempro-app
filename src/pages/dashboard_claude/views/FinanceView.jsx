@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, TrendingUp, Receipt, Wallet, Tag } from 'lucide-react';
 import { channelColor } from '../styles';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
@@ -86,19 +86,19 @@ export default function FinanceView({ rentals, selectedYear, currentYearData, on
 
       <div className="wpd-stats">
         <div className="wpd-stat" style={{ cursor: 'default' }}>
-          <p className="wpd-stat__label">Przychód brutto</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Przychód brutto</p><span className="wpd-stat__ic"><TrendingUp /></span></div>
           <div className="wpd-stat__value">{fmt(kpi.income)} <small>zł</small></div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default' }}>
-          <p className="wpd-stat__label">Prowizje i koszty</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Prowizje i koszty</p><span className="wpd-stat__ic"><Receipt /></span></div>
           <div className="wpd-stat__value" style={{ color: 'var(--cynober)' }}>− {fmt(kpi.costs)} <small>zł</small></div>
         </div>
         <div className="wpd-stat wpd-stat--dark" style={{ cursor: 'default' }}>
-          <p className="wpd-stat__label">Zysk netto</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Zysk netto</p><span className="wpd-stat__ic"><Wallet /></span></div>
           <div className="wpd-stat__value">{fmt(kpi.profit)} <small>zł</small></div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default' }}>
-          <p className="wpd-stat__label">Śr. cena / noc</p>
+          <div className="wpd-stat__head"><p className="wpd-stat__label">Śr. cena / noc</p><span className="wpd-stat__ic"><Tag /></span></div>
           <div className="wpd-stat__value">{fmt(kpi.avgRate)} <small>zł</small></div>
         </div>
       </div>

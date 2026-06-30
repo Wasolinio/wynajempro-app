@@ -18,7 +18,7 @@ const fmtDate = (d) => {
   (kody/WiFi żyją w kolekcji guides/{id}/secrets per-przewodnik), więc kod/WiFi to pola
   do uzupełnienia, a dojazd bierzemy z profilu gospodarza. Pełne wpięcie kreatora — w dopracowaniu.
 */
-export default function BookingDetailView({ booking: r, hostProfile, onBack, onEdit, onDelete }) {
+export default function BookingDetailView({ booking: r, hostProfile, onBack, onEdit, onDelete, onOpenGuides }) {
   if (!r) return null;
   const propName = typeof r.property === 'object' ? r.property?.name : r.property;
   const income = Number(r.income) || 0;
@@ -121,7 +121,7 @@ export default function BookingDetailView({ booking: r, hostProfile, onBack, onE
                 {hostProfile?.address || 'Uzupełnij adres w profilu gospodarza'}
               </div>
             </div>
-            <button className="wpd-btn" style={{ width: '100%' }} disabled title="Wpięcie kreatora przewodników — w dopracowaniu">
+            <button className="wpd-btn" style={{ width: '100%' }} onClick={onOpenGuides}>
               <ExternalLink /> Otwórz kreator przewodnika
             </button>
           </div>

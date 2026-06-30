@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, CheckCircle, ClipboardList } from 'lucide-react';
+import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles } from 'lucide-react';
 import { channelTone } from '../styles';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
@@ -32,7 +32,10 @@ export default function PulpitView({
       {/* ── Karty metryk ── */}
       <div className="wpd-stats">
         <div className="wpd-stat" onClick={onOpenStats} role="button" tabIndex={0}>
-          <p className="wpd-stat__label">Przychód · {up(pulpit.monthName)}</p>
+          <div className="wpd-stat__head">
+            <p className="wpd-stat__label">Przychód · {up(pulpit.monthName)}</p>
+            <span className="wpd-stat__ic"><Banknote /></span>
+          </div>
           <div className="wpd-stat__value">{fmt(pulpit.monthRevenue)} <small>zł</small></div>
           <div className="wpd-stat__foot">
             {pulpit.delta === null
@@ -44,7 +47,10 @@ export default function PulpitView({
         </div>
 
         <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
-          <p className="wpd-stat__label">Obłożenie</p>
+          <div className="wpd-stat__head">
+            <p className="wpd-stat__label">Obłożenie</p>
+            <span className="wpd-stat__ic"><PieChart /></span>
+          </div>
           <div className="wpd-stat__value">{pulpit.occupancy}%</div>
           <div className="wpd-stat__foot">
             <div className="wpd-bar"><div className="wpd-bar__fill" style={{ width: `${pulpit.occupancy}%` }} /></div>
@@ -52,7 +58,10 @@ export default function PulpitView({
         </div>
 
         <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
-          <p className="wpd-stat__label">Przyjazdy dziś</p>
+          <div className="wpd-stat__head">
+            <p className="wpd-stat__label">Przyjazdy dziś</p>
+            <span className="wpd-stat__ic"><LogIn /></span>
+          </div>
           <div className="wpd-stat__value">{pulpit.arrivals}</div>
           <div className="wpd-stat__foot">
             <span className="wpd-stat__sub">{pulpit.departures > 0 ? `+ ${pulpit.departures} wyjazd` : 'brak wyjazdów'}</span>
@@ -60,7 +69,10 @@ export default function PulpitView({
         </div>
 
         <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
-          <p className="wpd-stat__label">Do posprzątania</p>
+          <div className="wpd-stat__head">
+            <p className="wpd-stat__label">Do posprzątania</p>
+            <span className="wpd-stat__ic"><Sparkles /></span>
+          </div>
           <div className="wpd-stat__value">{pulpit.cleaning}</div>
           <div className="wpd-stat__foot">
             <span className="wpd-stat__sub wpd-stat__sub--accent">{pulpit.cleaningInfo ? `${up(pulpit.cleaningInfo)} · dziś` : '—'}</span>

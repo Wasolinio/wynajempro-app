@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays, Building2, List, BarChart3,
+  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
 } from 'lucide-react';
@@ -32,6 +32,7 @@ import CalendarView from './views/CalendarView';
 import ObjectsView from './views/ObjectsView';
 import FinanceView from './views/FinanceView';
 import BookingDetailView from './views/BookingDetailView';
+import GuideBuilderV4 from './GuideBuilderV4';
 
 const getIconComponent = (name) => {
   switch (name) {
@@ -51,6 +52,7 @@ const NAV = [
   { key: 'objects', num: '03', label: 'Obiekty', icon: Building2 },
   { key: 'bookings', num: '04', label: 'Rezerwacje', icon: List },
   { key: 'finance', num: '05', label: 'Finanse', icon: BarChart3 },
+  { key: 'guides', num: '06', label: 'Przewodniki', icon: BookOpen },
 ];
 
 const todaySubtitle = () => {
@@ -63,6 +65,7 @@ const VIEW_META = {
   objects: { title: 'Obiekty', sub: 'Twoje miejsca na wynajem' },
   bookings: { title: 'Rezerwacje', sub: 'Wszystkie rezerwacje' },
   finance: { title: 'Finanse', sub: 'Przychody, koszty i wypłaty' },
+  guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
 };
 
 export default function ManagerAppClaude() {
@@ -223,7 +226,7 @@ export default function ManagerAppClaude() {
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
-  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit'].includes(activeView) ? 'bookings' : activeView;
+  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
 
@@ -504,6 +507,7 @@ export default function ManagerAppClaude() {
                 booking={detailBooking} hostProfile={hostProfile}
                 onBack={() => setDetailId(null)} onEdit={openEditModal}
                 onDelete={(id) => { setDetailId(null); handleDeleteClick(id); }}
+                onOpenGuides={() => { setDetailId(null); changeView('guides'); }}
               />
             ) : (
             <>
@@ -552,6 +556,9 @@ export default function ManagerAppClaude() {
                 rentals={rentals} selectedYear={selectedYear} currentYearData={currentYearData}
                 onExport={() => setShowStatsModal(true)}
               />
+            )}
+            {renderView === 'guides' && (
+              <GuideBuilderV4 user={user} properties={properties} />
             )}
             </>
             )}
