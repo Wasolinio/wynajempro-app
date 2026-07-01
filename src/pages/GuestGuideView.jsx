@@ -3,8 +3,12 @@ import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle, Download, FileText, Home, ShieldAlert, Lock, Unlock, Phone, Mail } from 'lucide-react';
+import {
+  MapPin, Wifi, Key, BookOpen, Navigation, ExternalLink, Copy, CheckCircle2, AlertCircle,
+  Download, FileText, Home, ShieldAlert, Lock, Unlock, Phone, Mail,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import { BrandStyles } from '../styles/brand';
 
 export default function GuestGuideView() {
   const { guideId } = useParams();
@@ -16,93 +20,76 @@ export default function GuestGuideView() {
   const [copiedPin, setCopiedPin] = useState(false);
   const [authUid, setAuthUid] = useState(null);
 
-  // Acceptance state
   const [isAccepted, setIsAccepted] = useState(false);
   const [checkRegulations, setCheckRegulations] = useState(false);
   const [checkPpo, setCheckPpo] = useState(false);
   const [isSavingAcceptance, setIsSavingAcceptance] = useState(false);
 
-  // Host contact info
   const [hostContact, setHostContact] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
-    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setAuthUid(user.uid);
         await fetchGuideData(user.uid);
       } else {
         try {
-          // Logowanie anonimowe dla każdego gościa
           const userCredential = await signInAnonymously(auth);
           setAuthUid(userCredential.user.uid);
           await fetchGuideData(userCredential.user.uid);
-        } catch (error) {
-          console.error("Błąd autentykacji anonimowej:", error);
-          setError("Wystąpił błąd autoryzacji sesji. Odśwież stronę.");
+        } catch (e) {
+          console.error('Błąd autentykacji anonimowej:', e);
+          setError('Wystąpił błąd autoryzacji sesji. Odśwież stronę.');
           setIsLoading(false);
         }
       }
     });
-
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guideId]);
 
   const fetchGuideData = async (uid) => {
     try {
-      const docRef = doc(db, 'guides', guideId);
-      const docSnap = await getDoc(docRef);
-      
+      const docSnap = await getDoc(doc(db, 'guides', guideId));
       if (docSnap.exists()) {
         const data = docSnap.data();
         setGuide(data);
 
-        // Fetch host contact info
         if (data.ownerId) {
           try {
-            const hostProfileRef = doc(db, 'users', data.ownerId, 'settings', 'hostProfile');
-            const hostSnap = await getDoc(hostProfileRef);
-            if (hostSnap.exists()) {
-              setHostContact(hostSnap.data());
-            }
-          } catch {
-            // Non-critical — just skip contact section
-          }
+            const hostSnap = await getDoc(doc(db, 'users', data.ownerId, 'settings', 'hostProfile'));
+            if (hostSnap.exists()) setHostContact(hostSnap.data());
+          } catch { /* pomijamy sekcję kontaktu */ }
         }
 
-        // Sprawdzanie podpisu po UID autentykacji anonimowej
         try {
           const sigRef = doc(db, 'guides', guideId, 'signatures', uid);
           const sigSnap = await getDoc(sigRef);
           if (sigSnap.exists()) {
             setIsAccepted(true);
-            await fetchSecrets(); // Pobieramy sekrety, jeśli już zaakceptowano
+            await fetchSecrets();
           } else {
-            // Kompatybilność wsteczna: Sprawdzanie starej metody localStorage
             const oldSessionKey = localStorage.getItem(`wp_guest_${guideId}`);
             if (oldSessionKey) {
-               const oldSigRef = doc(db, 'guides', guideId, 'signatures', oldSessionKey);
-               const oldSigSnap = await getDoc(oldSigRef);
-               if (oldSigSnap.exists()) {
-                 // Przenosimy stary podpis na nowy UID i czyścimy localStorage
-                 await setDoc(sigRef, oldSigSnap.data());
-                 setIsAccepted(true);
-                 await fetchSecrets();
-               }
-               localStorage.removeItem(`wp_guest_${guideId}`);
+              const oldSigSnap = await getDoc(doc(db, 'guides', guideId, 'signatures', oldSessionKey));
+              if (oldSigSnap.exists()) {
+                await setDoc(sigRef, oldSigSnap.data());
+                setIsAccepted(true);
+                await fetchSecrets();
+              }
+              localStorage.removeItem(`wp_guest_${guideId}`);
             }
           }
         } catch (e) {
-          console.error("Nie udało się pobrać statusu akceptacji:", e);
+          console.error('Nie udało się pobrać statusu akceptacji:', e);
         }
       } else {
-        setError("Ten przewodnik nie istnieje lub został usunięty.");
+        setError('Ten przewodnik nie istnieje lub został usunięty.');
       }
     } catch (err) {
-      console.error("Błąd ładowania przewodnika:", err);
-      setError("Wystąpił błąd podczas ładowania przewodnika. Spróbuj ponownie później.");
+      console.error('Błąd ładowania przewodnika:', err);
+      setError('Wystąpił błąd podczas ładowania przewodnika. Spróbuj ponownie później.');
     } finally {
       setIsLoading(false);
     }
@@ -110,19 +97,12 @@ export default function GuestGuideView() {
 
   const fetchSecrets = async () => {
     try {
-      const secretsRef = doc(db, 'guides', guideId, 'secrets', 'data');
-      const secretsSnap = await getDoc(secretsRef);
-      if (secretsSnap.exists()) {
-        setSecrets(secretsSnap.data());
-      }
+      const secretsSnap = await getDoc(doc(db, 'guides', guideId, 'secrets', 'data'));
+      if (secretsSnap.exists()) setSecrets(secretsSnap.data());
     } catch (e) {
-      console.error("Nie udało się pobrać danych dostępowych z subkolekcji:", e);
-      // Fallback: jeśli sekrety nie są jeszcze w subkolekcji, odczytujemy z głównego dokumentu
-      setSecrets({
-        wifiNetwork: guide?.wifiNetwork,
-        wifiPassword: guide?.wifiPassword,
-        doorPin: guide?.doorPin
-      });
+      console.error('Nie udało się pobrać danych dostępowych z subkolekcji:', e);
+      // Fallback dla starszych przewodników, gdzie sekrety były w głównym dokumencie
+      setSecrets({ wifiNetwork: guide?.wifiNetwork, wifiPassword: guide?.wifiPassword, doorPin: guide?.doorPin });
     }
   };
 
@@ -135,17 +115,16 @@ export default function GuestGuideView() {
         acceptedRegulations: true,
         acceptedPpo: true,
         acceptedAt: Timestamp.now(),
-        // Zapisujemy kopię (snapshot) akceptowanych dokumentów dla bezpieczeństwa gospodarza
         acceptedHouseRulesSnapshot: guide.houseRules || '',
         acceptedHouseRulesFileName: guide.houseRulesFile?.name || '',
         acceptedHouseRulesFileUrl: guide.houseRulesFile?.url || '',
-        acceptedPpoRulesSnapshot: guide.ppoRules || ''
+        acceptedPpoRulesSnapshot: guide.ppoRules || '',
       });
+      await fetchSecrets();
       setIsAccepted(true);
-      await fetchSecrets(); // Pobranie sekretów po udanym zapisie
       toast.success('Dane dostępowe zostały odblokowane!', { position: 'top-center' });
     } catch (err) {
-      console.error("Błąd zapisu akceptacji:", err);
+      console.error('Błąd zapisu akceptacji:', err);
       toast.error('Wystąpił błąd. Spróbuj ponownie.');
     } finally {
       setIsSavingAcceptance(false);
@@ -159,325 +138,254 @@ export default function GuestGuideView() {
     setTimeout(() => setter(false), 2000);
   };
 
-  // Ustalanie czy są wrażliwe dane na podstawie subkolekcji lub (fallback) głównego dokumentu
+  // Czy przewodnik ma dane wrażliwe (nowe: flaga hasSensitiveData; stare: pola na dokumencie; po odblokowaniu: secrets)
   const hasSensitiveData = !!(secrets?.wifiNetwork || secrets?.doorPin || guide?.hasSensitiveData || guide?.wifiNetwork || guide?.doorPin);
+  const needsAcceptance = hasSensitiveData && (guide?.houseRules || guide?.houseRulesFile || guide?.ppoRules);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p className="text-slate-500 font-medium">Ładowanie przewodnika...</p>
+      <div className="wpb">
+        <BrandStyles />
+        <div className="wpb-center" style={{ flexDirection: 'column', gap: 14 }}>
+          <span className="wpb-spin" />
+          <p className="wpb-body" style={{ color: 'var(--muted)' }}>Ładowanie przewodnika…</p>
+        </div>
       </div>
     );
   }
 
   if (error || !guide) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white p-8 rounded-3xl shadow-sm text-center max-w-sm w-full">
-          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-8 h-8" />
+      <div className="wpb">
+        <BrandStyles />
+        <div className="wpb-center">
+          <div className="wpb-panel" style={{ textAlign: 'center' }}>
+            <span className="wpb-ic" style={{ margin: '0 auto 16px' }}><AlertCircle /></span>
+            <h1 className="wpb-h2" style={{ marginBottom: 8 }}>Brak dostępu</h1>
+            <p className="wpb-body" style={{ color: 'var(--muted)', margin: 0 }}>{error || 'Przewodnik nie został odnaleziony.'}</p>
           </div>
-          <h1 className="text-xl font-black text-slate-800 mb-2">Brak Dostępu</h1>
-          <p className="text-slate-500 text-sm">{error || "Przewodnik nie został odnaleziony."}</p>
         </div>
       </div>
     );
   }
 
+  const RevealCard = ({ icon, title, children }) => (
+    <div className="wpb-card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+        <span className="wpb-ic" style={{ width: 38, height: 38 }}>{icon}</span>
+        <h2 className="wpb-h2" style={{ fontSize: 16 }}>{title}</h2>
+      </div>
+      {children}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-12">
-      {/* HEADER / COVER */}
-      <div className="w-full relative flex flex-col items-center justify-center pt-8 pb-12 px-4 bg-gradient-to-br from-slate-100 to-slate-200 border-b border-slate-200 shadow-sm">
-        {guide.coverImage ? (
-          <img src={guide.coverImage} alt={guide.name} className="w-11/12 max-w-md aspect-video object-cover rounded-2xl shadow-lg border border-white/50 mb-6" />
-        ) : (
-          <div className="w-11/12 max-w-md aspect-video bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl shadow-lg border border-white/50 flex items-center justify-center mb-6">
-            <Home className="w-16 h-16 text-slate-400 opacity-50" />
-          </div>
-        )}
-        
-        <div className="text-center w-11/12 max-w-md">
-           {guide.propertyId && (
-             <span className="inline-block bg-white shadow-sm border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full mb-3">
-               {guide.propertyId}
-             </span>
-           )}
-           <h1 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight">
-             {guide.name}
-           </h1>
+    <div className="wpb">
+      <BrandStyles />
+
+      {/* COVER */}
+      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--hairline)', padding: '28px 18px 34px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 460, margin: '0 auto' }}>
+          {guide.coverImage ? (
+            <img src={guide.coverImage} alt={guide.name}
+              style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 4, border: '1px solid var(--hairline)', marginBottom: 20 }} />
+          ) : (
+            <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 4, border: '1px solid var(--hairline)', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: 'var(--inner)', backgroundImage: 'linear-gradient(var(--inner-2) 1px, transparent 1px), linear-gradient(90deg, var(--inner-2) 1px, transparent 1px)', backgroundSize: '18px 18px' }}>
+              <Home style={{ width: 40, height: 40, color: 'var(--faint)' }} />
+            </div>
+          )}
+          {guide.propertyId && <span className="wpb-tag" style={{ marginBottom: 10 }}>{guide.propertyId}</span>}
+          <h1 className="wpb-h1" style={{ fontSize: 30, margin: '6px 0 0' }}>{guide.name}</h1>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-4 relative z-10 space-y-4">
-        
-        {/* WIFI & DOORS (QUICK ACCESS) — conditionally blurred */}
-        {(guide.wifiNetwork || guide.doorPin) && (
-          <div className="relative">
-            {/* Blur overlay removed to avoid CSS-only protection */}
-            {!isAccepted && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 rounded-3xl border border-slate-200">
-                <div className="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mb-3 shadow-sm border border-amber-100">
-                  <Lock className="w-7 h-7" />
-                </div>
-                <p className="text-sm font-bold text-slate-700">Zaakceptuj regulamin, aby odkryć</p>
-                <p className="text-xs text-slate-500 mt-1">Przewiń w dół do sekcji akceptacji</p>
-              </div>
-            )}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 18px 48px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {(secrets?.wifiNetwork || guide.wifiNetwork) && (
-                <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
+        {/* DANE DOSTĘPOWE (reveal) — bramkowane flagą hasSensitiveData, nie wyciętymi polami */}
+        {hasSensitiveData && (
+          !isAccepted ? (
+            <div className="wpb-card" style={{ textAlign: 'center', padding: 28 }}>
+              <span className="wpb-ic" style={{ margin: '0 auto 14px', color: 'var(--amber)' }}><Lock /></span>
+              <h2 className="wpb-h2" style={{ fontSize: 17, marginBottom: 6 }}>Dane dostępowe zablokowane</h2>
+              <p className="wpb-body" style={{ color: 'var(--muted)', margin: 0 }}>
+                {needsAcceptance
+                  ? 'Zaakceptuj regulamin poniżej, aby odsłonić hasło Wi-Fi i kod do drzwi.'
+                  : 'Kliknij „Odkryj dane dostępowe” poniżej, aby zobaczyć hasło Wi-Fi i kod do drzwi.'}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: (secrets?.wifiNetwork && secrets?.doorPin) ? '1fr 1fr' : '1fr', gap: 14 }} className="wpb-reveal">
+              {secrets?.wifiNetwork && (
+                <RevealCard icon={<Wifi />} title="Sieć Wi-Fi">
                   <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
-                        <Wifi className="w-5 h-5" />
-                      </div>
-                      <h2 className="font-bold text-slate-800">Sieć Wi-Fi</h2>
-                    </div>
-                    <div className="text-sm text-slate-500 mb-1">Sieć: <span className="font-bold text-slate-800">{isAccepted ? (secrets?.wifiNetwork || 'Brak danych') : '••••••••'}</span></div>
-                    {(secrets?.wifiPassword || guide.wifiPassword) && (
-                      <div className="text-sm text-slate-500">Hasło: <span className="font-mono font-bold text-slate-800">{isAccepted ? (secrets?.wifiPassword || 'Brak danych') : '••••••••'}</span></div>
-                    )}
+                    <p className="wpb-flabel" style={{ margin: '0 0 3px' }}>Sieć</p>
+                    <p className="wpb-mono" style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, fontSize: 16, margin: 0 }}>{secrets.wifiNetwork}</p>
                   </div>
-                  {(secrets?.wifiPassword || guide.wifiPassword) && isAccepted && (
-                    <button onClick={() => copyToClipboard(secrets?.wifiPassword || guide.wifiPassword, setCopiedWifi)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedWifi ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
-                      {copiedWifi ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Hasło</>}
-                    </button>
+                  {secrets.wifiPassword && (
+                    <>
+                      <div>
+                        <p className="wpb-flabel" style={{ margin: '0 0 3px' }}>Hasło</p>
+                        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, fontSize: 18, margin: 0, letterSpacing: '.04em' }}>{secrets.wifiPassword}</p>
+                      </div>
+                      <button onClick={() => copyToClipboard(secrets.wifiPassword, setCopiedWifi)}
+                        className={`wpb-btn wpb-btn--block${copiedWifi ? '' : ''}`} style={{ height: 40, fontSize: 13, color: copiedWifi ? 'var(--green)' : 'var(--ink)', borderColor: copiedWifi ? '#D7E2DA' : 'var(--hairline)', background: copiedWifi ? 'var(--tint-green)' : 'var(--surface)' }}>
+                        {copiedWifi ? <><CheckCircle2 style={{ width: 15, height: 15 }} /> Skopiowano</> : <><Copy style={{ width: 15, height: 15 }} /> Kopiuj hasło</>}
+                      </button>
+                    </>
                   )}
-                </div>
+                </RevealCard>
               )}
 
-              {(secrets?.doorPin || guide.doorPin) && (
-                <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
+              {secrets?.doorPin && (
+                <RevealCard icon={<Key />} title="Dostęp">
                   <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center">
-                        <Key className="w-5 h-5" />
-                      </div>
-                      <h2 className="font-bold text-slate-800">Dostęp</h2>
-                    </div>
-                    <div className="text-sm text-slate-500 mb-1">Kod do drzwi:</div>
-                    <div className="text-2xl tracking-[0.2em] font-mono font-black text-slate-800">{isAccepted ? (secrets?.doorPin || 'Brak danych') : '••••••••'}</div>
+                    <p className="wpb-flabel" style={{ margin: '0 0 4px' }}>Kod do drzwi</p>
+                    <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, fontSize: 26, margin: 0, letterSpacing: '.18em' }}>{secrets.doorPin}</p>
                   </div>
-                  {isAccepted && (
-                    <button onClick={() => copyToClipboard(secrets?.doorPin || guide.doorPin, setCopiedPin)} className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${copiedPin ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
-                      {copiedPin ? <><CheckCircle2 className="w-4 h-4" /> Skopiowano</> : <><Copy className="w-4 h-4" /> Kopiuj Kod</>}
-                    </button>
-                  )}
-                </div>
+                  <button onClick={() => copyToClipboard(secrets.doorPin, setCopiedPin)}
+                    className="wpb-btn wpb-btn--block" style={{ height: 40, fontSize: 13, color: copiedPin ? 'var(--green)' : 'var(--ink)', borderColor: copiedPin ? '#D7E2DA' : 'var(--hairline)', background: copiedPin ? 'var(--tint-green)' : 'var(--surface)' }}>
+                    {copiedPin ? <><CheckCircle2 style={{ width: 15, height: 15 }} /> Skopiowano</> : <><Copy style={{ width: 15, height: 15 }} /> Kopiuj kod</>}
+                  </button>
+                </RevealCard>
+              )}
+
+              {!secrets?.wifiNetwork && !secrets?.doorPin && (
+                <div className="wpb-note wpb-note--info">Gospodarz nie zapisał jeszcze danych dostępowych dla tego przewodnika.</div>
               )}
             </div>
-          </div>
+          )
         )}
 
-        {/* CHECK-IN INSTRUCTIONS */}
+        {/* WSKAZÓWKI DOTARCIA */}
         {(guide.checkInInfo || guide.mapLink) && (
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-            <h2 className="font-black text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-indigo-500" />
-              Wskazówki Dotarcia i Zameldowania
+          <div className="wpb-card">
+            <h2 className="wpb-h2" style={{ fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <MapPin style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Dotarcie i zameldowanie
             </h2>
-            {guide.checkInInfo && (
-              <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed mb-4">
-                {guide.checkInInfo}
-              </div>
-            )}
+            {guide.checkInInfo && <p className="wpb-body" style={{ color: 'var(--muted)', whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>{guide.checkInInfo}</p>}
             {guide.mapLink && (
-              <a href={guide.mapLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-5 py-3 rounded-xl transition-colors border border-indigo-100 w-full sm:w-auto justify-center">
-                <MapPin className="w-5 h-5" />
-                Nawiguj (Mapy Google)
-              </a>
+              <a href={guide.mapLink} target="_blank" rel="noreferrer" className="wpb-btn"><MapPin /> Nawiguj (Mapy Google)</a>
             )}
           </div>
         )}
 
-        {/* ATTRACTIONS */}
-        {guide.attractions && guide.attractions.length > 0 && (
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-            <h2 className="font-black text-lg text-slate-800 mb-6 flex items-center gap-2">
-              <Navigation className="w-5 h-5 text-emerald-500" />
-              Polecane Miejsca
+        {/* ATRAKCJE */}
+        {guide.attractions?.length > 0 && (
+          <div className="wpb-card">
+            <h2 className="wpb-h2" style={{ fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <Navigation style={{ width: 18, height: 18, color: 'var(--green)' }} /> Polecane miejsca
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="wpb-reveal">
               {guide.attractions.map((attr, idx) => (
-                <div key={idx} className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                  <h3 className="font-bold text-slate-800 text-base mb-1">{attr.name}</h3>
-                  {attr.description && <p className="text-sm text-slate-500 mb-4 line-clamp-3">{attr.description}</p>}
-                  {attr.link && (
-                    <a href={attr.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
-                      Sprawdź <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
+                <div key={idx} style={{ background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 4, padding: 16 }}>
+                  <h3 style={{ fontWeight: 700, fontSize: 15, margin: '0 0 4px' }}>{attr.name}</h3>
+                  {attr.description && <p className="wpb-body" style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}>{attr.description}</p>}
+                  {attr.link && <a href={attr.link} target="_blank" rel="noreferrer" className="wpb-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>Sprawdź <ExternalLink style={{ width: 13, height: 13 }} /></a>}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ============================================= */}
-        {/* REGULAMIN + PPOŻ + AKCEPTACJA                */}
-        {/* ============================================= */}
-        {(guide.houseRules || guide.houseRulesFile || guide.ppoRules) && (
-          <div className="space-y-4">
-            {/* HOUSE RULES */}
-            {(guide.houseRules || guide.houseRulesFile) && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-                <h2 className="font-black text-lg text-slate-800 mb-4 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-rose-500" />
-                  Regulamin Obiektu
-                </h2>
-                {guide.houseRules && (
-                  <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed mb-4">
-                    {guide.houseRules}
-                  </div>
-                )}
-                
-                {guide.houseRulesFile && (
-                  <a href={guide.houseRulesFile.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 transition-colors group">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100 text-rose-500 group-hover:scale-110 transition-transform">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <h3 className="text-sm font-bold text-slate-800 truncate">Pobierz Regulamin Obiektu</h3>
-                      <p className="text-xs text-slate-500 truncate">{guide.houseRulesFile.name}</p>
-                    </div>
-                    <Download className="w-5 h-5 text-slate-400 group-hover:text-rose-500 transition-colors" />
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* PPOŻ RULES */}
-            {guide.ppoRules && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-                <h2 className="font-black text-lg text-slate-800 mb-4 flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-red-500" />
-                  Instrukcja Bezpieczeństwa PPOŻ
-                </h2>
-                <div className="prose prose-slate prose-sm sm:prose-base whitespace-pre-wrap text-slate-600 leading-relaxed">
-                  {guide.ppoRules}
+        {/* REGULAMIN */}
+        {(guide.houseRules || guide.houseRulesFile) && (
+          <div className="wpb-card">
+            <h2 className="wpb-h2" style={{ fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <BookOpen style={{ width: 18, height: 18, color: 'var(--granat)' }} /> Regulamin obiektu
+            </h2>
+            {guide.houseRules && <p className="wpb-body" style={{ color: 'var(--muted)', whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>{guide.houseRules}</p>}
+            {guide.houseRulesFile && (
+              <a href={guide.houseRulesFile.url} target="_blank" rel="noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 4, textDecoration: 'none', color: 'inherit' }}>
+                <span className="wpb-ic" style={{ width: 38, height: 38, color: 'var(--granat)' }}><FileText /></span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>Pobierz regulamin obiektu</div>
+                  <div className="wpb-meta" style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{guide.houseRulesFile.name}</div>
                 </div>
-              </div>
-            )}
-
-            {/* ACCEPTANCE PANEL */}
-            {hasSensitiveData && !isAccepted && (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-100">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
-                    <Lock className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h2 className="font-black text-lg text-slate-800">Akceptacja dokumentów</h2>
-                    <p className="text-sm text-slate-500">Potwierdź zapoznanie się z dokumentami, aby odblokować dane dostępowe</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  {(guide.houseRules || guide.houseRulesFile) && (
-                    <label className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors group">
-                      <input type="checkbox" checked={checkRegulations} onChange={(e) => setCheckRegulations(e.target.checked)} className="w-5 h-5 mt-0.5 text-blue-600 focus:ring-blue-500 rounded border-slate-300 cursor-pointer shrink-0" />
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">
-                        Potwierdzam zapoznanie się i akceptację Regulaminu Obiektu
-                      </span>
-                    </label>
-                  )}
-
-                  {guide.ppoRules && (
-                    <label className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors group">
-                      <input type="checkbox" checked={checkPpo} onChange={(e) => setCheckPpo(e.target.checked)} className="w-5 h-5 mt-0.5 text-blue-600 focus:ring-blue-500 rounded border-slate-300 cursor-pointer shrink-0" />
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">
-                        Potwierdzam zapoznanie się i akceptację Instrukcji Bezpieczeństwa PPOŻ
-                      </span>
-                    </label>
-                  )}
-                </div>
-
-                <button
-                  onClick={handleAccept}
-                  disabled={
-                    isSavingAcceptance ||
-                    ((guide.houseRules || guide.houseRulesFile) && !checkRegulations) ||
-                    (guide.ppoRules && !checkPpo)
-                  }
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-300 disabled:to-slate-400 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-500/30 disabled:shadow-none transition-all"
-                >
-                  {isSavingAcceptance ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <Unlock className="w-5 h-5" />
-                      Odkryj dane dostępowe
-                    </>
-                  )}
-                </button>
-              </div>
+                <Download style={{ width: 18, height: 18, color: 'var(--faint)' }} />
+              </a>
             )}
           </div>
         )}
 
-        {/* CONTACT INFO */}
-        {hostContact && (hostContact.entityName || hostContact.phone || hostContact.email) && (
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-            <h2 className="font-black text-lg text-slate-800 mb-5 flex items-center gap-2">
-              <Phone className="w-5 h-5 text-blue-500" />
-              Kontakt z Gospodarzem
+        {/* PPOŻ */}
+        {guide.ppoRules && (
+          <div className="wpb-card">
+            <h2 className="wpb-h2" style={{ fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <ShieldAlert style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Instrukcja bezpieczeństwa PPOŻ
             </h2>
-            <div className="space-y-4">
-              {guide.propertyId && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-                    <Home className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Obiekt</p>
-                    <p className="text-sm font-bold text-slate-800">{guide.propertyId}</p>
-                  </div>
-                </div>
-              )}
+            <p className="wpb-body" style={{ color: 'var(--muted)', whiteSpace: 'pre-wrap', margin: 0 }}>{guide.ppoRules}</p>
+          </div>
+        )}
+
+        {/* AKCEPTACJA */}
+        {hasSensitiveData && !isAccepted && (
+          <div className="wpb-card" style={{ background: 'var(--tint-granat)', borderColor: '#C9D3E0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: needsAcceptance ? 18 : 0 }}>
+              <span className="wpb-ic wpb-ic--granat"><Lock /></span>
+              <div>
+                <h2 className="wpb-h2" style={{ fontSize: 17 }}>Odblokuj dane dostępowe</h2>
+                <p className="wpb-body" style={{ color: 'var(--muted)', fontSize: 13, margin: '2px 0 0' }}>
+                  {needsAcceptance ? 'Potwierdź zapoznanie się z dokumentami.' : 'Kliknij, aby odsłonić hasło Wi-Fi i kod.'}
+                </p>
+              </div>
+            </div>
+
+            {needsAcceptance && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+                {(guide.houseRules || guide.houseRulesFile) && (
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 11, padding: 14, background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 4, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={checkRegulations} onChange={(e) => setCheckRegulations(e.target.checked)} style={{ width: 17, height: 17, marginTop: 1, accentColor: 'var(--cynober)', flex: '0 0 17px' }} />
+                    <span style={{ fontSize: 13.5, fontWeight: 500 }}>Potwierdzam zapoznanie się i akceptację Regulaminu obiektu.</span>
+                  </label>
+                )}
+                {guide.ppoRules && (
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 11, padding: 14, background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 4, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={checkPpo} onChange={(e) => setCheckPpo(e.target.checked)} style={{ width: 17, height: 17, marginTop: 1, accentColor: 'var(--cynober)', flex: '0 0 17px' }} />
+                    <span style={{ fontSize: 13.5, fontWeight: 500 }}>Potwierdzam zapoznanie się i akceptację Instrukcji bezpieczeństwa PPOŻ.</span>
+                  </label>
+                )}
+              </div>
+            )}
+
+            <button onClick={handleAccept}
+              disabled={isSavingAcceptance || ((guide.houseRules || guide.houseRulesFile) && !checkRegulations) || (guide.ppoRules && !checkPpo)}
+              className="wpb-btn wpb-btn--primary wpb-btn--block">
+              {isSavingAcceptance ? <span className="wpb-spin" style={{ width: 18, height: 18 }} /> : <><Unlock /> Odkryj dane dostępowe</>}
+            </button>
+          </div>
+        )}
+
+        {/* KONTAKT */}
+        {hostContact && (hostContact.entityName || hostContact.phone || hostContact.email) && (
+          <div className="wpb-card">
+            <h2 className="wpb-h2" style={{ fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <Phone style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Kontakt z gospodarzem
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {hostContact.entityName && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Gospodarz</p>
-                    <p className="text-sm font-bold text-slate-800">{hostContact.entityName}</p>
-                  </div>
-                </div>
+                <div><p className="wpb-flabel" style={{ margin: '0 0 2px' }}>Gospodarz</p><p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>{hostContact.entityName}</p></div>
               )}
               {hostContact.phone && (
-                <a href={`tel:${hostContact.phone}`} className="flex items-center gap-3 group">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Phone className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Telefon</p>
-                    <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">{hostContact.phone}</p>
-                  </div>
+                <a href={`tel:${hostContact.phone}`} style={{ textDecoration: 'none' }}>
+                  <p className="wpb-flabel" style={{ margin: '0 0 2px' }}>Telefon</p>
+                  <p className="wpb-link" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Phone style={{ width: 14, height: 14 }} /> {hostContact.phone}</p>
                 </a>
               )}
               {hostContact.email && (
-                <a href={`mailto:${hostContact.email}`} className="flex items-center gap-3 group">
-                  <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">E-mail</p>
-                    <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">{hostContact.email}</p>
-                  </div>
+                <a href={`mailto:${hostContact.email}`} style={{ textDecoration: 'none' }}>
+                  <p className="wpb-flabel" style={{ margin: '0 0 2px' }}>E-mail</p>
+                  <p className="wpb-link" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Mail style={{ width: 14, height: 14 }} /> {hostContact.email}</p>
                 </a>
               )}
             </div>
           </div>
         )}
 
-        <div className="text-center pt-8 pb-4">
-          <p className="text-xs text-slate-400 font-medium">Stworzono za pomocą WynajemPRO</p>
-        </div>
+        <p className="wpb-meta" style={{ textAlign: 'center', marginTop: 8 }}>Stworzono za pomocą WynajemPRO</p>
 
+        <style>{`@media (max-width:560px){ .wpb-reveal{ grid-template-columns:1fr !important; } }`}</style>
       </div>
     </div>
   );
