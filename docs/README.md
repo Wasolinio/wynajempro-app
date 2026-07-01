@@ -25,10 +25,9 @@ Dokumentacja projektu zorganizowana dla Obsidiana. Każda strona zawiera klucze 
 - Common tasks
 
 ### 🐛 [Known Issues](Known-Issues.md)
-- iCal Token Bug
-- Storage Leak
-- App Check
-- Priority fixes
+- iCal Token — NOT a bug (verified)
+- Storage Leak — NOT a bug (verified)
+- App Check / Auth iFrame / Google Loop — fixed
 
 ### 🎨 [Design Notes](Design-Notes.md)
 - Apple Animation Architecture

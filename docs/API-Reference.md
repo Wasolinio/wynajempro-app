@@ -256,20 +256,32 @@ import {
 
 const db = getFirestore();
 
-// Read
-const querySnapshot = await getDocs(collection(db, 'properties'));
-querySnapshot.forEach(doc => console.log(doc.data()));
+// Calendar entries live in a subcollection under the user (no top-level
+// `properties`/`bookings` collections). Properties are an array inside
+// users/{uid}/settings/properties.items.
 
-// Write
-await addDoc(collection(db, 'properties'), {
-  name: 'New Property',
-  address: '...'
+// Read this year's entries
+const q = query(
+  collection(db, 'users', uid, 'rentals'),
+  where('date', '>=', `${year}-01-01`),
+  where('date', '<=', `${year}-12-31`)
+);
+const snap = await getDocs(q);
+snap.forEach(doc => console.log(doc.data()));
+
+// Write an entry (id = existing id or Date.now())
+await setDoc(doc(db, 'users', uid, 'rentals', entryId), {
+  type: 'booking', date: '2026-08-12', property: 'Apartament Centrum', price: 1200
 });
 
-// Real-time listener
-const q = query(collection(db, 'properties'), where('ownerId', '==', uid));
+// Real-time listener (see src/hooks/useFirebaseData.js)
 const unsubscribe = onSnapshot(q, (snapshot) => {
   snapshot.forEach(doc => console.log(doc.data()));
+});
+
+// The property list (single doc holding an array)
+await setDoc(doc(db, 'users', uid, 'settings', 'properties'), {
+  items: [{ id, name: 'Apartament Centrum', color: 'blue', secretToken }]
 });
 ```
 
@@ -286,8 +298,8 @@ import {
 
 const storage = getStorage();
 
-// Upload
-const fileRef = ref(storage, `properties/${propId}/photo.jpg`);
+// Upload (guide media; 10 MB limit enforced by storage.rules)
+const fileRef = ref(storage, `guides/${guideId}/photo.jpg`);
 await uploadBytes(fileRef, file);
 
 // Download
@@ -299,25 +311,26 @@ await deleteObject(fileRef);
 
 ---
 
-## Stripe API
+## Stripe API (SaaS subscription — backend)
 
-For payment processing (backend).
+Stripe powers the **account subscription** (the 29,99 zł/mc plan), not guest/booking payments. There is no guest card checkout. All logic is in `functions/index.js`.
 
-### Create Payment
+### Create Checkout Session (subscription)
 
 ```javascript
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// exports.createCheckoutSession (onCall) — see functions/index.js
+const stripe = require('stripe')(stripeSecretKey.value());
 
-const paymentIntent = await stripe.paymentIntents.create({
-  amount: 54000, // 540 PLN in cents
-  currency: 'pln',
-  description: 'Booking for property_001',
-  metadata: {
-    bookingId: 'booking_001',
-    propertyId: 'prop_001'
-  }
+const session = await stripe.checkout.sessions.create({
+  mode: 'subscription',
+  customer: customerId,              // stored on users/{uid}.stripeCustomerId
+  line_items: [{ price: 'price_1TZULu8D7fwsePNBa7aXaP92', quantity: 1 }],
+  success_url, cancel_url
 });
+// Frontend redirects to session.url; stripeWebhook later flips access on.
 ```
+
+Related functions: `createBillingPortalSession` (manage/cancel), `stripeWebhook` (syncs `users/{uid}` + the `stripeStatus` custom claim on subscription events).
 
 ### Webhook Signature Verification
 

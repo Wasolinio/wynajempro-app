@@ -133,12 +133,16 @@ firebase functions:log
 
 **Debugging**:
 ```javascript
-// Check if data exists
-const allDocs = await getDocs(collection(db, 'properties'));
-console.log('Total properties:', allDocs.size);
+// Check if data exists (entries are under the user, not a top-level collection)
+const allDocs = await getDocs(collection(db, 'users', uid, 'rentals'));
+console.log('Total entries:', allDocs.size);
 
-// Check query conditions
-const q = query(collection(db, 'properties'), where('ownerId', '==', uid));
+// Check query conditions (rentals are filtered by `date`, not `ownerId`)
+const q = query(
+  collection(db, 'users', uid, 'rentals'),
+  where('date', '>=', `${year}-01-01`),
+  where('date', '<=', `${year}-12-31`)
+);
 const results = await getDocs(q);
 console.log('Filtered results:', results.size);
 
@@ -171,13 +175,17 @@ useEffect(() => {
 
 **Error**: `FirebaseError: Missing or insufficient permissions`
 
-**Solution**: Check `firestore.rules`:
+**Solution**: Check `firestore.rules`. Rentals/settings also require an **active subscription** — a common cause of "permission denied" is a lapsed trial, not an ownership problem:
 ```
-// Should allow user to read own data
-match /properties/{propId} {
-  allow read: if request.auth.uid == resource.data.ownerId;
-  allow write: if request.auth.uid == resource.data.ownerId;
+// users/{uid}/rentals — owner + verified + active subscription
+match /users/{userId}/rentals/{docId} {
+  allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+  allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId)
+                        && isValidRental(request.resource.data);
+  allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
 }
+// guides/{guideId} — public read; owner-only write
+match /guides/{guideId} { allow read: if true; /* write: owner + subscription */ }
 ```
 
 ---

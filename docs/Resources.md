@@ -59,7 +59,7 @@ Links to documentation, libraries, and tools.
 
 ### Browser Tools
 - **React DevTools** - Inspect React components
-- **Redux DevTools** - Debug Redux state
+- **TanStack Query DevTools** - Inspect React Query cache (app uses React Query + Context, not Redux)
 - **Chrome DevTools** - Network, performance, console
 - **Stripe Dashboard** - Test payments
 

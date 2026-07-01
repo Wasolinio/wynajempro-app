@@ -142,7 +142,7 @@ Record of important decisions and their rationale.
 - ✅ Standard iCal format works with any calendar
 - ✅ Token auth without user login
 
-**Known Bug**: secretToken not generated on property create ⚠️
+**Status**: working — `secretToken` is generated on property create/retrofit in `ManagerApp.jsx` and validated by the `exportIcal` function. (An earlier "not generated" bug note was false; verified 2026-06-29.)
 
 ---
 
@@ -153,13 +153,12 @@ Record of important decisions and their rationale.
 
 **Decision**: Organize Firebase Storage by resource type and ID
 
-**Pattern**:
+**Pattern** (actual usage):
 ```
 gs://bucket/
-├── properties/{propId}/photos/
-├── guides/{guideId}/attachments/
-└── users/{uid}/avatar/
+└── guides/{guideId}/          ← guest-guide media (only Storage path in active use)
 ```
+Deleted together with the guide by `deleteUserAccount` (`bucket.deleteFiles({ prefix: 'guides/${guideId}/' })`).
 
 **Rationale**:
 - ✅ Clear structure

@@ -58,31 +58,15 @@ Stores the list of properties for the user as an array.
 {
   items: [
     {
-      // Basic Info
-      id: "prop_001",
-      name: "Apartament Centrum",
-      description: "Nowoczesny apartament",
-      
-      // Location
-      address: "ul. Główna 1",
-      
-      // Capacity
-      maxGuests: 4,
-      
-      // Access Codes (Encrypted/Stored safely)
-      codes: {
-        entryPin: "1234",
-        wifiPassword: "SecurePass123"
-      },
-      
-      // iCal Export
-      secretToken: "generated-uuid-v4", // Generated via window.crypto.randomUUID()
-      
-      // Guides & Media metadata
-      guides: ["guide_001", "guide_002"]
+      id: "prop_001",             // generated id
+      name: "Apartament Centrum", // display name (also used to link rentals via `property`)
+      color: "blue",              // calendar color key (see availableColors)
+      secretToken: "uuid-no-dashes" // iCal export auth; generated via crypto.randomUUID() in ManagerApp.jsx
     }
   ]
 }
+// NOTE: that's the whole object. There is no address / capacity / codes / description
+// on a property. Guest-facing codes (PIN, WiFi) live in guides/{guideId}/secrets/data.
 ```
 
 #### Document: `users/{uid}/settings/hostProfile`

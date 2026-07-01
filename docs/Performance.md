@@ -16,15 +16,15 @@ Optimization tips and patterns for WynajemPRO.
 // src/App.jsx
 import { lazy, Suspense } from 'react';
 
-const ManagerApp = lazy(() => import('./ManagerApp'));
-const GuestGuide = lazy(() => import('./pages/GuestGuide'));
+const ManagerApp = lazy(() => import('./pages/dashboard/ManagerApp'));
+const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 
 export default function App() {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
-        <Route path="/dashboard" element={<ManagerApp />} />
-        <Route path="/guide/:id" element={<GuestGuide />} />
+        <Route path="/dashboard/*" element={<ManagerApp />} />
+        <Route path="/guide/:guideId" element={<GuestGuideView />} />
       </Routes>
     </Suspense>
   );
@@ -44,10 +44,12 @@ export default function App() {
 ```javascript
 const PAGE_SIZE = 20;
 
+// Entries are already scoped under the user; filter by the indexed `date`
 let q = query(
-  collection(db, 'properties'),
-  where('ownerId', '==', uid),
-  orderBy('createdAt', 'desc'),
+  collection(db, 'users', uid, 'rentals'),
+  where('date', '>=', yearStart),
+  where('date', '<=', yearEnd),
+  orderBy('date', 'desc'),
   limit(PAGE_SIZE)
 );
 ```

@@ -60,20 +60,18 @@ Project timeline and key milestones.
 
 ## 2026-06-10
 
-### iCal Export Bug Discovered
-- 🔴 **Critical**: `secretToken` not generated on property create
-- Impact: iCal export returns 403 Forbidden
-- Priority: P0 (high impact, easy fix)
+### iCal Export Bug Discovered — later found FALSE
+- 🔴 Reported: `secretToken` not generated on property create
+- ✅ **2026-06-29 correction**: false alarm — `secretToken` IS generated in `ManagerApp.jsx` (create + legacy retrofit) and validated by `exportIcal`. No fix needed.
 - Tracking: [[Known-Issues]], [[Agent-Process-Map]]
 
 ---
 
 ## 2026-06-05
 
-### Storage Leak Bug Identified
-- 🔴 **Critical**: Guide files not deleted on account deletion
-- Impact: Orphaned files, cost, privacy risk
-- Priority: P0
+### Storage Leak Bug Identified — later found FALSE
+- 🔴 Reported: Guide files not deleted on account deletion
+- ✅ **2026-06-29 correction**: false alarm — `deleteUserAccount` deletes Storage via `bucket.deleteFiles({ prefix: 'guides/${guideId}/' })` before removing docs. No leak.
 - Tracking: [[Known-Issues]], [[Agent-Process-Map]]
 
 ---
@@ -156,9 +154,9 @@ See: `git log` for full history
 ## Next Steps (By Priority)
 
 ### This Week
-- [ ] Fix iCal token generation bug
-- [ ] Write E2E test for iCal
-- [ ] Fix storage leak bug
+- [x] iCal token generation — verified working (not a bug)
+- [ ] Write E2E test for iCal export
+- [x] Storage cleanup on account deletion — verified working (not a bug)
 
 ### Next Week
 - [ ] Complete E2E test suite

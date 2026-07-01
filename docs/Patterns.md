@@ -11,26 +11,32 @@ Recommended patterns and solutions for common problems in WynajemPRO.
 **Pattern**: useFirebaseData hook (key pattern!)
 
 ```javascript
-// src/hooks/useFirebaseData.js
-export function useFirebaseData(uid) {
-  const [data, setData] = useState(null);
-  
+// Simplified illustration. The real src/hooks/useFirebaseData.js feeds a
+// TanStack Query cache and listens to the user's subcollections (no top-level
+// `properties` collection; entries are scoped under users/{uid}).
+export function useFirebaseData(uid, year) {
+  const [rentals, setRentals] = useState([]);
+
   useEffect(() => {
-    const q = query(collection(db, 'properties'), where('ownerId', '==', uid));
-    const unsubscribe = onSnapshot(q, snapshot => {
-      setData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    
-    return () => unsubscribe(); // Cleanup!
-  }, [uid]);
-  
-  return data;
+    if (!uid) return;
+    const q = query(
+      collection(db, 'users', uid, 'rentals'),
+      where('date', '>=', `${year}-01-01`),
+      where('date', '<=', `${year}-12-31`)
+    );
+    const unsub = onSnapshot(q, snap =>
+      setRentals(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
+    return () => unsub(); // Cleanup!
+  }, [uid, year]);
+
+  return rentals;
 }
 ```
 
 **Usage**:
 ```javascript
-const properties = useFirebaseData(userId);
+const rentals = useFirebaseData(userId, 2026);
 ```
 
 **Why**: Centralizes real-time logic, prevents listener leaks
@@ -117,10 +123,10 @@ useEffect(() => {
 
 ```javascript
 const q = query(
-  collection(db, 'properties'),
-  where('ownerId', '==', userId),
-  where('status', '==', 'active'),
-  orderBy('createdAt', 'desc'),
+  collection(db, 'users', userId, 'rentals'),
+  where('date', '>=', yearStart),
+  where('date', '<=', yearEnd),
+  orderBy('date', 'desc'),
   limit(20)
 );
 
@@ -147,9 +153,9 @@ onSnapshot(q, snapshot => {
 const batch = writeBatch(db);
 
 // Add multiple documents
-batch.set(doc(db, 'properties', propId), propertyData);
+batch.set(doc(db, 'users', userId, 'rentals', entryId), entryData);
 batch.set(doc(db, 'guides', guideId), guideData);
-batch.update(doc(db, 'users', userId), { propertyCount: 2 });
+batch.set(doc(db, 'users', userId, 'settings', 'properties'), { items });
 
 await batch.commit(); // All or nothing
 ```
@@ -164,20 +170,17 @@ await batch.commit(); // All or nothing
 
 ```javascript
 // Client-side validation (UX)
-function validateProperty(data) {
-  if (!data.name || data.name.length === 0) {
-    throw new Error('Name required');
-  }
-  if (data.pricePerNight < 0) {
-    throw new Error('Price must be positive');
-  }
+function validateEntry(data) {
+  if (!data.date) throw new Error('Date required');
+  if (!data.property) throw new Error('Property required');
 }
 
-// Server-side validation (Firestore rules)
-match /properties/{propId} {
-  allow create: if request.resource.data.ownerId == request.auth.uid
-                && request.resource.data.name.size() > 0
-                && request.resource.data.pricePerNight > 0;
+// Server-side validation (Firestore rules) — real model
+match /users/{userId}/rentals/{docId} {
+  allow read:          if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+  allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId)
+                        && isValidRental(request.resource.data);
+  allow delete:        if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
 }
 ```
 
@@ -213,14 +216,18 @@ exports.deleteUserAccount = functions.https.onCall(async (data, context) => {
 ### Try-Catch Pattern
 
 ```javascript
-async function fetchProperties(userId) {
+async function fetchRentals(userId, year) {
   try {
-    const q = query(collection(db, 'properties'), where('ownerId', '==', userId));
+    const q = query(
+      collection(db, 'users', userId, 'rentals'),
+      where('date', '>=', `${year}-01-01`),
+      where('date', '<=', `${year}-12-31`)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error('Failed to fetch properties:', error);
-    throw new Error('Could not load properties. Please try again.');
+    console.error('Failed to fetch rentals:', error);
+    throw new Error('Could not load data. Please try again.');
   }
 }
 ```
@@ -266,9 +273,8 @@ const PAGE_SIZE = 20;
 
 async function loadMore() {
   let q = query(
-    collection(db, 'properties'),
-    where('ownerId', '==', uid),
-    orderBy('createdAt', 'desc'),
+    collection(db, 'users', uid, 'rentals'),
+    orderBy('date', 'desc'),
     limit(PAGE_SIZE)
   );
   
@@ -293,15 +299,15 @@ async function loadMore() {
 ```javascript
 import { useCallback, useState } from 'react';
 
-function SearchProperties() {
+function SearchEntries() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   
   const debouncedSearch = useCallback(
     debounce(async (searchTerm) => {
       const q = query(
-        collection(db, 'properties'),
-        where('name', '>=', searchTerm),
+        collection(db, 'users', uid, 'rentals'),
+        where('property', '>=', searchTerm),
         where('name', '<', searchTerm + ''),
         limit(10)
       );

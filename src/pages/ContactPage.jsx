@@ -18,88 +18,64 @@ export default function ContactPage() {
   };
 
   return (
-    <LegalLayout 
-      title="Kontakt"
-      subtitle="Chętnie pomożemy rozwiać Twoje wątpliwości"
-    >
-      <div className="flex flex-col md:flex-row gap-10 items-start">
-        
-        {/* Lewa kolumna: Informacje kontaktowe */}
-        <div className="flex-1 space-y-6">
-          <p className="text-lg text-slate-600 mb-4">
-            Masz pytania dotyczące subskrypcji, zgłoszenie techniczne lub chcesz usunąć swoje konto wraz z danymi? Napisz do nas bezpośrednio na poniższy adres e-mail lub skorzystaj z formularza.
+    <LegalLayout title="Kontakt" subtitle="Chętnie pomożemy rozwiać Twoje wątpliwości" bare wide>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }} className="wpb-contact">
+        {/* Lewa: informacje */}
+        <div>
+          <p className="wpb-lead" style={{ margin: '0 0 22px' }}>
+            Masz pytania dotyczące subskrypcji, zgłoszenie techniczne lub chcesz usunąć konto wraz z danymi?
+            Napisz do nas bezpośrednio lub skorzystaj z formularza.
           </p>
-          
-          <div className="flex items-center gap-4 p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
-            <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-              <Mail className="w-6 h-6" />
-            </div>
+
+          <div className="wpb-card" style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+            <span className="wpb-ic"><Mail /></span>
             <div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">E-mail Kontaktowy</p>
-              <a href="mailto:kontakt@wynajempro.pl" className="text-xl font-black text-slate-800 hover:text-blue-600 transition-colors">
+              <p className="wpb-label" style={{ marginBottom: 4 }}>E-mail kontaktowy</p>
+              <a href="mailto:kontakt@wynajempro.pl" className="wpb-link" style={{ fontSize: 18, fontWeight: 700 }}>
                 kontakt@wynajempro.pl
               </a>
             </div>
           </div>
 
-          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-500" /> Czas odpowiedzi
+          <div className="wpb-card" style={{ padding: 20 }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 15, margin: '0 0 6px' }}>
+              <ShieldCheck style={{ width: 17, height: 17, color: 'var(--green)' }} /> Czas odpowiedzi
             </h3>
-            <p className="text-slate-500 text-sm">
-              Staramy się odpowiadać na wszystkie zgłoszenia w ciągu 24 do 48 godzin roboczych.
+            <p className="wpb-note" style={{ border: 'none', padding: 0 }}>
+              Staramy się odpowiadać na wszystkie zgłoszenia w ciągu 24–48 godzin roboczych.
             </p>
           </div>
         </div>
 
-        {/* Prawa kolumna: Formularz kontaktowy */}
-        <div className="flex-1 w-full bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
-            <Mail className="w-6 h-6 text-blue-600" /> Formularz kontaktowy
+        {/* Prawa: formularz */}
+        <div className="wpb-card">
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 17, margin: '0 0 20px' }}>
+            <Mail style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Formularz kontaktowy
           </h3>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Adres e-mail
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="twoj@email.com"
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
+          <form onSubmit={handleSubmit}>
+            <div className="wpb-field">
+              <label className="wpb-flabel">Adres e-mail</label>
+              <input className="wpb-input" type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="twoj@email.com" />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Treść wiadomości
-              </label>
-              <textarea
-                required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="W czym możemy pomóc?"
-                rows="4"
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
+            <div className="wpb-field">
+              <label className="wpb-flabel">Treść wiadomości</label>
+              <textarea className="wpb-textarea" required value={message} rows="4"
+                onChange={(e) => setMessage(e.target.value)} placeholder="W czym możemy pomóc?" />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
-            >
-              <Send className="w-4 h-4" /> Wyślij wiadomość
+            <button type="submit" className="wpb-btn wpb-btn--primary wpb-btn--block">
+              <Send /> Wyślij wiadomość
             </button>
           </form>
           {isSubmitted && (
-            <p className="mt-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 text-center animate-pulse">
+            <p className="wpb-note wpb-note--ok" style={{ marginTop: 14, textAlign: 'center' }}>
               Wiadomość została wysłana!
             </p>
           )}
         </div>
-
       </div>
+
+      <style>{`@media (max-width:820px){ .wpb-contact{ grid-template-columns:1fr !important; } }`}</style>
     </LegalLayout>
   );
 }

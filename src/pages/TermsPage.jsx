@@ -9,7 +9,7 @@ export default function TermsPage() {
       lastUpdated={new Date().toLocaleDateString('pl-PL')}
     >
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">1. Postanowienia ogólne</h2>
+        <h2>1. Postanowienia ogólne</h2>
         <p>
           Niniejszy regulamin określa zasady świadczenia usług drogą elektroniczną w ramach aplikacji <strong>WynajemPRO</strong> 
           ("Aplikacja"), zasady korzystania z konta użytkownika oraz politykę płatności subskrypcyjnych realizowanych 
@@ -18,8 +18,8 @@ export default function TermsPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">2. Zakładanie Konta i Okres Próbny</h2>
-        <ul className="list-disc pl-5 space-y-2">
+        <h2>2. Zakładanie Konta i Okres Próbny</h2>
+        <ul>
           <li>Rejestracja w Aplikacji jest równoznaczna z akceptacją niniejszego Regulaminu.</li>
           <li>Konto użytkownika może założyć wyłącznie osoba pełnoletnia lub podmiot gospodarczy posiadający pełną zdolność do czynności prawnych.</li>
           <li>Użytkownik po rejestracji otrzymuje dostęp do darmowego okresu próbnego (o ile takowy obowiązuje w ofercie), w ramach którego ma pełny dostęp do funkcjonalności Aplikacji.</li>
@@ -28,11 +28,11 @@ export default function TermsPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">3. Płatności i Subskrypcje (Stripe)</h2>
-        <p className="mb-3">
+        <h2>3. Płatności i Subskrypcje (Stripe)</h2>
+        <p>
           Usługi płatne w WynajemPRO realizowane są w modelu subskrypcyjnym z automatycznym odnawianiem.
         </p>
-        <ul className="list-disc pl-5 space-y-2">
+        <ul>
           <li>Operatorem płatności jest <strong>Stripe, Inc.</strong> oraz powiązane z nim podmioty. WynajemPRO nie przechowuje pełnych danych kart płatniczych.</li>
           <li>Płatności pobierane są z góry za każdy kolejny cykl rozliczeniowy (np. miesiąc).</li>
           <li><strong>Anulowanie subskrypcji:</strong> Użytkownik ma pełne prawo anulować subskrypcję w dowolnym momencie korzystając z panelu Customer Portal dostępnego w ustawieniach konta. Po anulowaniu, funkcjonalność Premium zostaje zachowana do końca opłaconego cyklu.</li>
@@ -41,9 +41,9 @@ export default function TermsPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">4. Odpowiedzialność i Ograniczenia</h2>
-        <p className="mb-3">Użytkownik zobowiązuje się do:</p>
-        <ul className="list-disc pl-5 space-y-2 mb-3">
+        <h2>4. Odpowiedzialność i Ograniczenia</h2>
+        <p>Użytkownik zobowiązuje się do:</p>
+        <ul>
           <li>Podawania prawdziwych danych podczas rejestracji oraz autoryzacji gości.</li>
           <li>Niewykorzystywania Aplikacji do celów niezgodnych z prawem, w tym przesyłania nielegalnych treści poprzez formularze Przewodników dla Gości.</li>
           <li>Zabezpieczenia swoich danych dostępowych do panelu administracyjnego przed osobami trzecimi.</li>
@@ -56,19 +56,19 @@ export default function TermsPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">5. Ochrona Danych i Własność Intelektualna</h2>
+        <h2>5. Ochrona Danych i Własność Intelektualna</h2>
         <p>
           Szczegółowe informacje na temat przetwarzania danych osobowych zawiera 
-          <a href="/prywatnosc" className="text-blue-600 hover:underline mx-1">Polityka Prywatności</a>. 
+          <a href="/prywatnosc">Polityka Prywatności</a>. 
           Wszelkie kody źródłowe, interfejsy oraz nazwa WynajemPRO podlegają ochronie prawno-autorskiej.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-3">6. Rozwiązywanie Sporów i Kontakt</h2>
+        <h2>6. Rozwiązywanie Sporów i Kontakt</h2>
         <p>
           Wszelkie reklamacje i wątpliwości związane z działaniem usługi należy zgłaszać na adres e-mail 
-          dostępny na stronie <a href="/kontakt" className="text-blue-600 hover:underline">Kontakt</a>. 
+          dostępny na stronie <a href="/kontakt">Kontakt</a>. 
           Odpowiedź na reklamację zostanie udzielona w terminie do 14 dni roboczych.
         </p>
       </section>

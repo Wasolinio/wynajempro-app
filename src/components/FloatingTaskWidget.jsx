@@ -1,55 +1,47 @@
 import React, { useState } from 'react';
 import { Bell, X, CalendarClock } from 'lucide-react';
 
+/*
+  Pływający widget zadań na dziś. Renderowany wewnątrz panelu (.wpd),
+  więc korzysta z tokenów var(--…) tego namespace'u — identyfikacja WynajemPRO v2.
+*/
 export default function FloatingTaskWidget({ tasks = [] }) {
   const [isVisible, setIsVisible] = useState(true);
-
   if (!isVisible || tasks.length === 0) return null;
 
-  // Sortujemy od najpilniejszych (najmniejsza wartość days)
   const sortedTasks = [...tasks].sort((a, b) => a.days - b.days);
   const mostUrgent = sortedTasks[0];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/40 dark:border-slate-700/50 p-5 min-w-[280px] max-w-sm">
-        
-        {/* Pulsing Dot */}
-        <div className="absolute -top-1.5 -left-1.5 flex h-4 w-4">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white dark:border-slate-800"></span>
-        </div>
+    <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 50, width: 300, maxWidth: 'calc(100vw - 32px)' }}>
+      <div style={{
+        position: 'relative', background: 'var(--surface)', border: '1px solid var(--hairline)',
+        borderRadius: 4, padding: 18, boxShadow: '0 10px 30px rgba(23,21,15,.12)',
+      }}>
+        <span style={{ position: 'absolute', top: -5, left: -5, width: 12, height: 12, borderRadius: '50%', background: 'var(--cynober)', border: '2px solid var(--surface)' }} />
 
-        {/* Close Button */}
-        <button 
-          onClick={() => setIsVisible(false)}
-          className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          title="Ukryj"
-        >
-          <X className="w-4 h-4" />
+        <button onClick={() => setIsVisible(false)} title="Ukryj"
+          style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', display: 'flex', padding: 2 }}>
+          <X style={{ width: 16, height: 16 }} />
         </button>
 
-        <div className="flex items-start gap-4">
-          <div className="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 p-2.5 rounded-xl">
-            <Bell className="w-5 h-5" />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ width: 34, height: 34, borderRadius: 3, border: '1px solid var(--hairline)', background: 'var(--paper)', color: 'var(--cynober)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 34px' }}>
+            <Bell style={{ width: 16, height: 16 }} />
+          </span>
           <div>
-            <h3 className="font-extrabold text-slate-800 dark:text-white text-sm">Zadania na dziś</h3>
-            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mt-0.5">
-              Oczekujące zadania: {tasks.length}
-            </p>
+            <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0, color: 'var(--ink)' }}>Zadania na dziś</h3>
+            <p className="wpd-mono" style={{ fontSize: 11, color: 'var(--cynober)', margin: '2px 0 0' }}>Oczekujące: {tasks.length}</p>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Najpilniejsze:</p>
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200 line-clamp-2">
-              {mostUrgent.text}
-            </p>
-            <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-slate-400">
-              <CalendarClock className="w-3.5 h-3.5" />
-              <span className="truncate">{mostUrgent.property} {mostUrgent.guest ? `(${mostUrgent.guest})` : ''}</span>
+        <div style={{ marginTop: 14, paddingTop: 13, borderTop: '1px solid var(--hairline)' }}>
+          <p className="wpd-mono" style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--label)', margin: '0 0 8px' }}>Najpilniejsze</p>
+          <div style={{ background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 4, padding: 12 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--ink)', margin: 0, lineHeight: 1.4 }}>{mostUrgent.text}</p>
+            <div className="wpd-mono" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 10, color: 'var(--faint)' }}>
+              <CalendarClock style={{ width: 13, height: 13 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mostUrgent.property}{mostUrgent.guest ? ` · ${mostUrgent.guest}` : ''}</span>
             </div>
           </div>
         </div>

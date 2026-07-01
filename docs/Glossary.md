@@ -7,39 +7,39 @@ Terms, acronyms, and definitions used in WynajemPRO.
 ## Application Terms
 
 ### Property
-A rental unit managed by an owner. Contains: name, address, capacity, access codes.
+A rental unit managed by an owner. The object is minimal: `{ id, name, color, secretToken }`. There is no address/capacity/codes on a property.
 
-**Related**: `properties/{propId}` collection in Firestore
+**Related**: item in the `users/{uid}/settings/properties.items[]` array (not a top-level collection)
 
 ### Guide (Guest Guide)
 Public instructions for guests staying at a property. Includes WiFi password, entry codes, house rules.
 
-**Related**: `guides/{guideId}` collection, `/guide/:guideId` route
+**Related**: `guides/{guideId}` collection (public read), `/guide/:guideId` route
 
 ### Booking
-A guest's reservation for specific dates. Contains payment info, guest contact, special requests.
+A guest's reservation for specific dates. Stored as a calendar entry with `type: 'booking'` (date, property name, price). No card/payment data is stored on it.
 
-**Related**: `bookings/{bookingId}` collection
+**Related**: entry in the `users/{uid}/rentals` subcollection (shared with `type: 'utility'` and `'reminder'` entries)
 
 ### Owner
-User who manages properties. Can create guides, set access codes, receive payments.
+User who manages properties. Can create guides, set access codes, and holds the account subscription.
 
-**Related**: `users/{uid}` where `role = 'owner'`
+**Related**: `users/{uid}` document
 
 ### Guest
 Someone renting a property. Receives guide link, must sign terms to see codes.
 
-**Related**: Anonymous user accessing `/guide/:guideId`
+**Related**: Anonymous auth user accessing `/guide/:guideId`
 
 ### Access Code
-Security credentials shared with guests (PIN, WiFi password, parking spot, etc.)
+Security credentials shared with guests (PIN, WiFi password, etc.). Held per guide, not per property, and revealed only after the guest signs.
 
-**Related**: `properties/{propId}.codes` in Firestore
+**Related**: `guides/{guideId}/secrets/data` in Firestore
 
 ### Secret Token
-Unique token used to authenticate iCal export requests.
+Unique token that authenticates iCal export requests for a property.
 
-**Related**: `properties/{propId}.secretToken` (⚠️ Not generated - BUG)
+**Related**: `secretToken` on each property in `users/{uid}/settings/properties.items[]`. Generated in `ManagerApp.jsx` via `crypto.randomUUID()`.
 
 ---
 
@@ -102,7 +102,7 @@ Web app that loads once and updates dynamically without full page reloads.
 ### Component
 A reusable piece of UI code. React apps are built from components.
 
-**Examples**: `PropertyCard.jsx`, `GuestGuide.jsx`
+**Examples**: `GuestGuideView.jsx`, `PulpitView.jsx`
 
 ### Hook
 A React feature for managing state and side effects.
@@ -112,7 +112,7 @@ A React feature for managing state and side effects.
 ### State
 Data that can change and trigger UI updates when changed.
 
-**Types**: Local state (component), Global state (Context/Redux)
+**Types**: Local state (component), Global state (React Context — `WynajemContext`), Server cache (TanStack React Query). No Redux.
 
 ### Props
 Data passed from parent component to child component.
