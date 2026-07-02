@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
+  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
 } from 'lucide-react';
@@ -32,6 +32,7 @@ import CalendarView from './views/CalendarView';
 import ObjectsView from './views/ObjectsView';
 import FinanceView from './views/FinanceView';
 import BookingDetailView from './views/BookingDetailView';
+import AnalyticsView from './views/AnalyticsView';
 import GuideBuilder from './GuideBuilder';
 
 const getIconComponent = (name) => {
@@ -52,7 +53,8 @@ const NAV = [
   { key: 'objects', num: '03', label: 'Obiekty', icon: Building2 },
   { key: 'bookings', num: '04', label: 'Rezerwacje', icon: List },
   { key: 'finance', num: '05', label: 'Finanse', icon: BarChart3 },
-  { key: 'guides', num: '06', label: 'Przewodniki', icon: BookOpen },
+  { key: 'analytics', num: '06', label: 'Analityka', icon: LineChart },
+  { key: 'guides', num: '07', label: 'Przewodniki', icon: BookOpen },
 ];
 
 const todaySubtitle = () => {
@@ -65,6 +67,7 @@ const VIEW_META = {
   objects: { title: 'Obiekty', sub: 'Twoje miejsca na wynajem' },
   bookings: { title: 'Rezerwacje', sub: 'Wszystkie rezerwacje' },
   finance: { title: 'Finanse', sub: 'Przychody, koszty i wypłaty' },
+  analytics: { title: 'Analityka', sub: 'Statystyki: miesiąc · kwartał · półrocze · rok' },
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
 };
 
@@ -226,7 +229,7 @@ export default function ManagerApp() {
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
-  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides'].includes(activeView) ? 'bookings' : activeView;
+  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'analytics', 'pulpit', 'guides'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
 
@@ -545,6 +548,12 @@ export default function ManagerApp() {
               <FinanceView
                 rentals={rentals} selectedYear={selectedYear} currentYearData={currentYearData}
                 onExport={() => setShowStatsModal(true)}
+              />
+            )}
+            {renderView === 'analytics' && (
+              <AnalyticsView
+                rentals={rentals} properties={properties} user={user}
+                selectedYear={selectedYear} setSelectedYear={setSelectedYear}
               />
             )}
             {renderView === 'guides' && (

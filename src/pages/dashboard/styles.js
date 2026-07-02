@@ -533,10 +533,79 @@ export const DASHBOARD_CSS = `
   font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink); background:var(--surface);
   border:1px solid var(--hairline); border-radius:3px; padding:4px 8px; }
 
+/* ── Analityka ── */
+.wpd-anl-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.wpd-step{ display:inline-flex; align-items:center; border:1px solid var(--hairline); border-radius:3px; background:var(--surface); }
+.wpd-step__btn{ width:34px; height:38px; border:none; background:none; cursor:pointer; color:var(--muted); display:flex; align-items:center; justify-content:center; transition:color .14s; }
+.wpd-step__btn:hover{ color:var(--ink); }
+.wpd-step__btn:disabled{ opacity:.3; cursor:default; }
+.wpd-step__btn svg{ width:15px; height:15px; }
+.wpd-step__label{ min-width:132px; text-align:center; font-family:'IBM Plex Mono', monospace; font-weight:500; font-size:13px; color:var(--ink); padding:0 8px; border-left:1px solid var(--hairline); border-right:1px solid var(--hairline); align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-transform:capitalize; }
+.wpd-step__label small{ font-size:8.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin-bottom:1px; }
+
+.wpd-kpi{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.wpd-delta{ display:inline-flex; align-items:center; gap:4px; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.03em; }
+.wpd-delta--up{ color:var(--green); }
+.wpd-delta--down{ color:var(--cynober); }
+.wpd-delta--flat{ color:var(--faint); }
+.wpd-delta--up.wpd-delta--inv{ color:var(--cynober); }
+.wpd-delta--down.wpd-delta--inv{ color:var(--green); }
+
+/* wykres trendu (słupki + oś) */
+.wpd-trend__head{ display:flex; align-items:center; gap:14px; padding:16px 20px; border-bottom:1px solid var(--hairline); }
+.wpd-trend__legend{ display:flex; gap:16px; margin-left:auto; }
+.wpd-trend__leg{ display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.wpd-trend__body{ padding:20px 20px 14px; }
+.wpd-trend__bars{ display:flex; align-items:flex-end; gap:5px; height:196px; }
+.wpd-trend__col{ flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:9px; height:100%; justify-content:flex-end; position:relative; }
+.wpd-trend__bar{ width:100%; max-width:38px; background:var(--inner-2); border-radius:2px 2px 0 0; transform:scaleY(0); transform-origin:bottom; transition:transform .7s cubic-bezier(.22,1,.36,1); }
+.wpd-trend__bar--hi{ background:var(--cynober); }
+.wpd-trend__col:hover .wpd-trend__bar{ background:var(--ink); }
+.wpd-trend__col:hover .wpd-trend__bar--hi{ background:var(--cynober-hover); }
+.wpd-trend__x{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.03em; text-transform:uppercase; color:var(--faint); white-space:nowrap; }
+.wpd-trend__tip{ position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; border-radius:3px; padding:7px 9px; font-size:11px; line-height:1.5; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .12s; z-index:5; }
+.wpd-trend__col:hover .wpd-trend__tip{ opacity:1; }
+.wpd-trend__tip b{ font-family:'IBM Plex Mono', monospace; }
+
+/* poziome słupki (kanał / obiekt) */
+.wpd-hbar{ padding:9px 0; }
+.wpd-hbar:first-child{ padding-top:2px; }
+.wpd-hbar__head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:7px; }
+.wpd-hbar__name{ font-size:13.5px; font-weight:500; display:inline-flex; align-items:center; gap:8px; }
+.wpd-hbar__val{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--faint); white-space:nowrap; }
+.wpd-hbar__val b{ color:var(--ink); font-weight:600; }
+.wpd-hbar__track{ height:8px; border-radius:3px; background:var(--inner-2); overflow:hidden; }
+.wpd-hbar__fill{ height:100%; border-radius:3px; transform:scaleX(0); transform-origin:left; transition:transform .7s cubic-bezier(.22,1,.36,1); }
+
+.wpd-anl-bar__sp{ flex:1 1 auto; }
+.wpd-anl-load{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint); display:inline-flex; align-items:center; gap:7px; }
+.wpd-date{ display:inline-flex; align-items:center; gap:8px; }
+.wpd-date__sep{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--faint); }
+.wpd-date input{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--hairline); border-radius:3px; padding:8px 10px; outline:none; cursor:pointer; }
+.wpd-date input:focus{ border-color:var(--ink); }
+
+/* słupki trendu — nakładka roku poprzedniego (YoY) */
+.wpd-trend__barwrap{ position:relative; width:100%; flex:1 1 auto; display:flex; align-items:flex-end; justify-content:center; }
+.wpd-trend__barwrap .wpd-trend__bar{ position:relative; z-index:1; }
+.wpd-trend__bar--ghost{ position:absolute; bottom:0; left:0; right:0; margin:0 auto; z-index:0; background:transparent;
+  border:1px dashed var(--faint); border-bottom:none; border-radius:2px 2px 0 0; }
+
+/* wejście sekcji */
+.wpd-rise{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
+.wpd-rise.is-in{ opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .wpd-trend__bar{ transition:none !important; }
+  .wpd-hbar__fill{ transition:none !important; }
+  .wpd-rise{ transition:none !important; opacity:1 !important; transform:none !important; }
+}
+
 /* ── Responsywność ── */
 @media (max-width:980px){
   .wpd-side{ display:none; }
   .wpd-stats{ grid-template-columns:repeat(2,1fr); }
+  .wpd-kpi{ grid-template-columns:repeat(2,1fr); }
   .wpd-grid-2{ grid-template-columns:1fr; }
   .wpd-objs{ grid-template-columns:1fr; }
   .wpd-content{ padding:18px 16px 56px; }

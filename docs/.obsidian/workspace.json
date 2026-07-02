@@ -11,10 +11,14 @@
             "id": "9912920efc1740fc",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Podgląd grafu"
+              "type": "markdown",
+              "state": {
+                "file": "Do zrobienia w przyszłości.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Do zrobienia w przyszłości"
             }
           }
         ]
