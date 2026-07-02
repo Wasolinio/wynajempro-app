@@ -1,22 +1,33 @@
 import React from 'react';
-import { ArrowLeft, Edit, Trash2, ExternalLink, BookOpen } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw } from 'lucide-react';
+import { channelTone } from '../styles';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const initials = (name) => (name || 'Gość').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-const fmtDate = (d) => {
-  if (!d) return '—';
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+// Pełna data: "2 lipca 2026" + dzień tygodnia
+const fmtFull = (d) => {
+  if (!d) return null;
   const dt = new Date(d);
-  if (isNaN(dt.getTime())) return d;
-  return dt.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+  if (isNaN(dt.getTime())) return null;
+  return {
+    date: dt.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }),
+    weekday: cap(dt.toLocaleDateString('pl-PL', { weekday: 'long' })),
+  };
+};
+const fmtShort = (d) => {
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '—';
+  return `${dt.toLocaleDateString('pl-PL', { weekday: 'short' })}, ${dt.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}`;
 };
 
 /*
-  Szczegóły rezerwacji (05-app2). Lewa kolumna: dane rezerwacji + rozliczenie (realne).
-  Prawa: przewodnik dla gości. UWAGA: model danych nie wiąże rezerwacji z przewodnikiem
-  (kody/WiFi żyją w kolekcji guides/{id}/secrets per-przewodnik), więc kod/WiFi to pola
-  do uzupełnienia, a dojazd bierzemy z profilu gospodarza. Pełne wpięcie kreatora — w dopracowaniu.
+  Szczegóły rezerwacji. Lewa kolumna: karta gościa (pełne daty z dniem tygodnia),
+  kontakt (klikalne tel:/mailto:) i rozliczenie. Prawa: zadania i przypomnienia
+  z szablonów (templates) z odhaczaniem — stan w rentals.completedTasks.
 */
-export default function BookingDetailView({ booking: r, hostProfile, onBack, onEdit, onDelete, onOpenGuides }) {
+export default function BookingDetailView({ booking: r, templates = [], toggleDynamicTask, onBack, onEdit, onDelete }) {
   if (!r) return null;
   const propName = typeof r.property === 'object' ? r.property?.name : r.property;
   const income = Number(r.income) || 0;
@@ -30,8 +41,24 @@ export default function BookingDetailView({ booking: r, hostProfile, onBack, onE
   const payout = income - commission - tax;
   const shortId = String(r.id || '').slice(-4).toUpperCase();
 
+  const arrival = fmtFull(r.date);
+  const departure = fmtFull(r.endDate);
+
   const payTone = r.isPaid ? 'green' : advance > 0 && r.isAdvancePaid ? 'granat' : 'amber';
   const payLabel = r.isPaid ? 'Opłacona' : advance > 0 && r.isAdvancePaid ? 'Zaliczka wpłacona' : 'Do opłacenia';
+  const telHref = r.phone ? `tel:${String(r.phone).replace(/[^\d+]/g, '')}` : null;
+
+  // Zadania z szablonów — stan ukończenia jak w dailyReport/tabeli rezerwacji
+  const isDone = (t) => !!(r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent));
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const tasks = templates.map((t) => {
+    let due = null;
+    if (s && !isNaN(s.getTime())) { due = new Date(s); due.setHours(0, 0, 0, 0); due.setDate(due.getDate() - (t.daysBefore || 0)); }
+    return { ...t, done: isDone(t), due, overdue: due && due < today && !isDone(t) };
+  });
+  const doneCount = tasks.filter((t) => t.done).length;
+
+  const contactLink = { fontFamily: 'inherit', fontWeight: 600, color: 'var(--cynober)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 };
 
   return (
     <>
@@ -46,29 +73,38 @@ export default function BookingDetailView({ booking: r, hostProfile, onBack, onE
       </div>
 
       <div className="wpd-grid-2">
-        {/* Lewa: rezerwacja */}
+        {/* Lewa: gość + kontakt + rozliczenie */}
         <div>
           <div className="wpd-panel">
             <div className="wpd-guest">
               <span className="wpd-guest__av">{initials(r.guest)}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="wpd-guest__name">{r.guest || 'Rezerwacja'}</div>
-                <div className="wpd-guest__sub">{propName || '—'}</div>
+                <div className="wpd-guest__sub">{propName || '—'} · #{shortId}</div>
               </div>
-              <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
+              <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {r.source && <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>}
+                {r.syncId && <span className="wpd-tag wpd-tag--muted"><RefreshCw style={{ width: 10, height: 10 }} /> iCal</span>}
+                <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
+              </span>
             </div>
             <div className="wpd-cells">
               <div className="wpd-cell">
                 <div className="wpd-cell__label">Przyjazd</div>
-                <div className="wpd-cell__val">{fmtDate(r.date)}</div>
+                <div className="wpd-cell__val" style={{ fontSize: 14.5 }}>{arrival ? arrival.date : '—'}</div>
+                {arrival && <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{arrival.weekday}</div>}
               </div>
               <div className="wpd-cell">
                 <div className="wpd-cell__label">Wyjazd</div>
-                <div className="wpd-cell__val">{fmtDate(r.endDate)}</div>
+                <div className="wpd-cell__val" style={{ fontSize: 14.5 }}>{departure ? departure.date : '—'}</div>
+                {departure && <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{departure.weekday}</div>}
               </div>
               <div className="wpd-cell">
-                <div className="wpd-cell__label">Kanał</div>
-                <div className="wpd-cell__val wpd-cell__val--accent">{r.source || '—'}</div>
+                <div className="wpd-cell__label">Pobyt</div>
+                <div className="wpd-cell__val" style={{ fontSize: 14.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <Moon style={{ width: 14, height: 14, color: 'var(--faint)' }} /> {nights} {nights === 1 ? 'noc' : nights < 5 ? 'noce' : 'nocy'}
+                </div>
+                <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{fmt(rate)} zł / noc</div>
               </div>
             </div>
           </div>
@@ -77,9 +113,28 @@ export default function BookingDetailView({ booking: r, hostProfile, onBack, onE
             <div className="wpd-panel" style={{ marginTop: 16 }}>
               <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Kontakt i notatki</h2></div>
               <div style={{ padding: 16 }}>
-                {r.email && <div className="wpd-settle__row"><span className="wpd-settle__k">E-mail</span><span className="wpd-settle__v" style={{ fontFamily: 'inherit' }}>{r.email}</span></div>}
-                {r.phone && <div className="wpd-settle__row"><span className="wpd-settle__k">Telefon</span><span className="wpd-settle__v">{r.phone}</span></div>}
-                {r.guestNote && <div className="wpd-settle__row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}><span className="wpd-settle__k">Notatka</span><span style={{ fontSize: 13.5, color: 'var(--ink)' }}>{r.guestNote}</span></div>}
+                {r.phone && (
+                  <div className="wpd-settle__row">
+                    <span className="wpd-settle__k">Telefon</span>
+                    <a href={telHref} className="wpd-settle__v" style={contactLink} title="Zadzwoń">
+                      <Phone style={{ width: 14, height: 14 }} /> <span className="wpd-mono">{r.phone}</span>
+                    </a>
+                  </div>
+                )}
+                {r.email && (
+                  <div className="wpd-settle__row">
+                    <span className="wpd-settle__k">E-mail</span>
+                    <a href={`mailto:${r.email}`} className="wpd-settle__v" style={contactLink} title="Napisz e-mail">
+                      <Mail style={{ width: 14, height: 14 }} /> {r.email}
+                    </a>
+                  </div>
+                )}
+                {r.guestNote && (
+                  <div className="wpd-settle__row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                    <span className="wpd-settle__k">Notatka</span>
+                    <span style={{ fontSize: 13.5, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{r.guestNote}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -96,32 +151,34 @@ export default function BookingDetailView({ booking: r, hostProfile, onBack, onE
           </div>
         </div>
 
-        {/* Prawa: przewodnik dla gości */}
+        {/* Prawa: zadania i przypomnienia */}
         <div className="wpd-panel" style={{ alignSelf: 'start' }}>
           <div className="wpd-panel__head">
-            <BookOpen style={{ width: 16, height: 16, color: 'var(--cynober)' }} />
-            <h2 className="wpd-h2" style={{ fontSize: 15 }}>Przewodnik dla gości</h2>
-            <span className="wpd-tag wpd-tag--muted" style={{ marginLeft: 'auto' }}>Roboczy</span>
+            <ClipboardList style={{ width: 16, height: 16, color: 'var(--cynober)' }} />
+            <h2 className="wpd-h2" style={{ fontSize: 15 }}>Zadania i przypomnienia</h2>
+            <span className="wpd-nav__badge" style={{ marginLeft: 'auto', background: 'var(--inner)', color: 'var(--muted)' }}>{doneCount}/{tasks.length}</span>
           </div>
-          <div style={{ padding: 18 }}>
-            <div className="wpd-guide__code">
-              <p className="wpd-guide__codelabel">Kod do skrytki z kluczami</p>
-              <div className="wpd-guide__pin wpd-guide__pin--empty">— — — —</div>
-              <p className="wpd-guide__note">Ustaw w kreatorze przewodnika — widoczny dla gościa po podpisie.</p>
-            </div>
-            <div className="wpd-kvgrid">
-              <div className="wpd-kv"><div className="wpd-kv__k">WiFi</div><div className="wpd-kv__v" style={{ color: 'var(--faint)' }}>—</div></div>
-              <div className="wpd-kv"><div className="wpd-kv__k">Hasło WiFi</div><div className="wpd-kv__v" style={{ color: 'var(--faint)' }}>—</div></div>
-            </div>
-            <div className="wpd-kv" style={{ marginBottom: 16 }}>
-              <div className="wpd-kv__k">Dojazd</div>
-              <div className="wpd-kv__v" style={{ fontFamily: 'inherit', fontWeight: 400, fontSize: 13.5, color: hostProfile?.address ? 'var(--ink)' : 'var(--faint)' }}>
-                {hostProfile?.address || 'Uzupełnij adres w profilu gospodarza'}
+          <div className="wpd-list">
+            {tasks.map((t) => (
+              <div className="wpd-row" key={t.id}>
+                <button
+                  className={`wpd-check ${t.done ? 'wpd-check--on' : 'wpd-check--off'}`}
+                  title={t.done ? 'Oznacz jako niewykonane' : 'Oznacz jako wykonane'}
+                  onClick={() => toggleDynamicTask(r.id, t.id, t.done)}
+                ><CheckCircle /></button>
+                <div className="wpd-row__main">
+                  <div className="wpd-row__name" style={t.done ? { textDecoration: 'line-through', color: 'var(--faint)' } : undefined}>{t.text || t.shortName}</div>
+                  <div className="wpd-row__meta" style={t.overdue ? { color: 'var(--cynober)' } : undefined}>
+                    {t.due ? `Do: ${fmtShort(t.due)}` : ''}{t.due && t.daysBefore != null ? ' · ' : ''}{t.daysBefore != null ? `${t.daysBefore} dni przed przyjazdem` : ''}{t.overdue ? ' · zaległe' : ''}
+                  </div>
+                </div>
               </div>
-            </div>
-            <button className="wpd-btn" style={{ width: '100%' }} onClick={onOpenGuides}>
-              <ExternalLink /> Otwórz kreator przewodnika
-            </button>
+            ))}
+            {tasks.length === 0 && (
+              <div className="wpd-empty">
+                <p>Brak szablonów zadań.<br />Dodaj je w Ustawieniach → Powiadomienia.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

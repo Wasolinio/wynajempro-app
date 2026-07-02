@@ -78,7 +78,7 @@ export default function ManagerApp() {
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
     selectedYear, setSelectedYear,
-    handleLogout, toggleStatus, completeTask,
+    handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
   } = useWynajem();
@@ -497,10 +497,9 @@ export default function ManagerApp() {
           <main className="wpd-content">
             {detailBooking ? (
               <BookingDetailView
-                booking={detailBooking} hostProfile={hostProfile}
+                booking={detailBooking} templates={templates} toggleDynamicTask={toggleDynamicTask}
                 onBack={() => setDetailId(null)} onEdit={openEditModal}
                 onDelete={(id) => { setDetailId(null); handleDeleteClick(id); }}
-                onOpenGuides={() => { setDetailId(null); changeView('guides'); }}
               />
             ) : (
             <>
