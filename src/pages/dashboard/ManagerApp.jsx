@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart,
+  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart, FileSignature,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
 } from 'lucide-react';
@@ -33,6 +33,7 @@ import ObjectsView from './views/ObjectsView';
 import FinanceView from './views/FinanceView';
 import BookingDetailView from './views/BookingDetailView';
 import AnalyticsView from './views/AnalyticsView';
+import ContractGeneratorView from './views/ContractGeneratorView';
 import GuideBuilder from './GuideBuilder';
 
 const getIconComponent = (name) => {
@@ -55,6 +56,7 @@ const NAV = [
   { key: 'finance', num: '05', label: 'Finanse', icon: BarChart3 },
   { key: 'analytics', num: '06', label: 'Analityka', icon: LineChart },
   { key: 'guides', num: '07', label: 'Przewodniki', icon: BookOpen },
+  { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature },
 ];
 
 const todaySubtitle = () => {
@@ -69,6 +71,7 @@ const VIEW_META = {
   finance: { title: 'Finanse', sub: 'Przychody, koszty i wypłaty' },
   analytics: { title: 'Analityka', sub: 'Statystyki: miesiąc · kwartał · półrocze · rok' },
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
+  contracts: { title: 'Generator umów', sub: 'Umowy najmu z danych rezerwacji' },
 };
 
 export default function ManagerApp() {
@@ -229,7 +232,7 @@ export default function ManagerApp() {
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
-  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'analytics', 'pulpit', 'guides'].includes(activeView) ? 'bookings' : activeView;
+  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'analytics', 'pulpit', 'guides', 'contracts'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
 
@@ -557,6 +560,9 @@ export default function ManagerApp() {
             )}
             {renderView === 'guides' && (
               <GuideBuilder user={user} properties={properties} />
+            )}
+            {renderView === 'contracts' && (
+              <ContractGeneratorView rentals={rentals} hostProfile={hostProfile} />
             )}
             </>
             )}

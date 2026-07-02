@@ -591,6 +591,53 @@ export const DASHBOARD_CSS = `
 .wpd-trend__bar--ghost{ position:absolute; bottom:0; left:0; right:0; margin:0 auto; z-index:0; background:transparent;
   border:1px dashed var(--faint); border-bottom:none; border-radius:2px 2px 0 0; }
 
+/* ── Generator umów ── */
+.wpd-ctr-layout{ display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:start; }
+.wpd-ctr-list{ max-height:380px; overflow-y:auto; }
+.wpd-ctr-row{ cursor:pointer; border-left:2px solid transparent; transition:background .12s, border-color .12s; }
+.wpd-ctr-row:hover{ background:var(--inner); }
+.wpd-ctr-row--on{ background:var(--inner); border-left-color:var(--cynober); }
+
+/* arkusz umowy */
+.wpd-ctr-sheet{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px; padding:46px 52px 40px; }
+.wpd-ctr-title{ text-align:center; font-weight:700; font-size:22px; letter-spacing:-.02em; margin:0; }
+.wpd-ctr-title em{ font-family:'Newsreader', serif; font-style:italic; font-weight:400; }
+.wpd-ctr-meta{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--faint); margin:10px 0 0; }
+.wpd-ctr-parties{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:28px 0 6px; }
+.wpd-ctr-party{ border:1px solid var(--hairline); border-radius:4px; padding:14px 16px; }
+.wpd-ctr-party b{ display:block; font-size:14px; margin:3px 0 6px; }
+.wpd-ctr-party p{ font-size:12.5px; color:var(--muted); margin:2px 0; line-height:1.5; }
+.wpd-ctr-h{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:11px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--muted); text-align:center; margin:24px 0 8px; }
+.wpd-ctr-par{ font-size:13px; line-height:1.7; color:var(--ink); text-align:justify; margin:0 0 4px; }
+.wpd-ctr-sign{ display:grid; grid-template-columns:1fr 1fr; gap:56px; margin-top:64px; }
+.wpd-ctr-sign > div{ border-top:1px solid var(--ink); padding-top:9px; text-align:center; }
+.wpd-ctr-empty{ border:1px dashed var(--hairline); border-radius:4px; min-height:340px; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--faint); text-align:center;
+  background-image:linear-gradient(var(--inner) 1px, transparent 1px), linear-gradient(90deg, var(--inner) 1px, transparent 1px);
+  background-size:18px 18px; background-color:var(--surface); }
+
+/* animacja „pisania" dokumentu */
+.wpd-ctr-gen{ min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  border:1px solid var(--hairline); border-radius:4px; background:var(--surface); }
+.wpd-ctr-gen__paper{ width:230px; border:1px solid var(--hairline); border-radius:4px; background:var(--paper);
+  padding:22px 20px; display:flex; flex-direction:column; gap:10px; }
+.wpd-ctr-gen__line{ height:6px; border-radius:2px; background:var(--inner-2); transform-origin:left;
+  animation:wpd-write .5s cubic-bezier(.22,1,.36,1) both; }
+.wpd-ctr-gen__line--accent{ background:var(--cynober); }
+@keyframes wpd-write{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+@media (prefers-reduced-motion: reduce){ .wpd-ctr-gen__line{ animation:none; } }
+
+/* druk — tylko arkusz umowy */
+@media print{
+  body *{ visibility:hidden !important; }
+  .wpd-ctr-sheet, .wpd-ctr-sheet *{ visibility:visible !important; }
+  .wpd-ctr-sheet{ position:absolute !important; left:0 !important; top:0 !important; width:100% !important;
+    border:none !important; border-radius:0 !important; padding:0 !important; background:#fff !important; }
+  .wpd-noprint{ display:none !important; }
+}
+
 /* wejście sekcji */
 .wpd-rise{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
 .wpd-rise.is-in{ opacity:1; transform:none; }
