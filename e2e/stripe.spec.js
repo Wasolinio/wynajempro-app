@@ -71,8 +71,6 @@ test.describe('Stripe Paywall — Tier 1: Feature Coverage', () => {
   });
 
   test('Subscribe button triggers createCheckoutSession and attempts redirect', async ({ page }) => {
-    // Track navigation attempts — window.location.assign is called with the Stripe URL
-    let capturedUrl = null;
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
 
     // Intercept window.location.assign to capture the Stripe redirect URL
