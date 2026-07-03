@@ -715,7 +715,8 @@ const CSS = `
   --green:#2F6B53; --granat:#234B7A; --amber:#C99A2E;
   --hairline:#DDD5C3; --inner:#EFE9DA;
   --tint-cynober:#F6E5DF; --tint-green:#E7EDE7; --tint-amber:#FBF1D9;
-  --muted:#524C3F; --faint:#9A917D; --label:#A0987F;
+  /* --faint/--label: minimum 4.5:1 (WCAG AA) na --paper dla mikro-etykiet */
+  --muted:#524C3F; --faint:#716951; --label:#746C54;
   --ink-on:#E4DDCE; --ink-faint:#8C8576; --ink-label:#6B6555; --ink-line:#2C2920;
 
   background:var(--paper);
@@ -768,8 +769,11 @@ const CSS = `
   display:inline-flex; align-items:center; gap:8px; justify-content:center;
   font-family:'Schibsted Grotesk', sans-serif; font-weight:600; font-size:15px;
   padding:13px 22px; border-radius:3px; border:1px solid transparent;
-  cursor:pointer; text-decoration:none; transition:background .15s, border-color .15s, color .15s;
+  cursor:pointer; text-decoration:none;
+  transition:background .15s, border-color .15s, color .15s, transform .15s cubic-bezier(.22,1,.36,1);
 }
+.wp4-btn:active:not(:disabled){ transform:scale(.98); }
+.wp4 :is(button, a):focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 .wp4-btn--sm{ padding:9px 16px; font-size:14px; }
 .wp4-btn--lg{ padding:15px 28px; font-size:16px; }
 .wp4-btn--primary{ background:var(--cynober); color:#fff; }

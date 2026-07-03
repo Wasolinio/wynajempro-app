@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FileSignature, Search, Printer, RotateCcw } from 'lucide-react';
 import { channelTone } from '../styles';
+import { plural } from '../../../utils/plural';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const fmtFull = (d) => {
@@ -23,11 +24,6 @@ const triple = (n) => {
   const parts = [HUNDS[h]];
   if (t === 1) parts.push(TEENS[o]); else { parts.push(TENS[t]); parts.push(ONES[o]); }
   return parts.filter(Boolean).join(' ');
-};
-const plural = (n, [f1, f24, f5]) => {
-  if (n === 1) return f1;
-  const t = n % 100; const o = n % 10;
-  return o >= 2 && o <= 4 && !(t >= 12 && t <= 14) ? f24 : f5;
 };
 const slownie = (num) => {
   let n = Math.round(Number(num) || 0);
@@ -155,7 +151,7 @@ export default function ContractGeneratorView({ rentals, hostProfile }) {
         <div className="wpd-panel">
           <div className="wpd-panel__head">
             <h2 className="wpd-h2" style={{ fontSize: 15 }}>Wybierz rezerwację</h2>
-            <span className="wpd-nav__badge" style={{ marginLeft: 'auto', background: 'var(--inner)', color: 'var(--muted)' }}>{bookings.length}</span>
+            <span className="wpd-rep__count" style={{ marginLeft: 'auto' }}>{bookings.length}</span>
           </div>
           <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--hairline)' }}>
             <div className="wpd-search" style={{ width: '100%', height: 34 }}>
@@ -210,7 +206,7 @@ export default function ContractGeneratorView({ rentals, hostProfile }) {
             <button className="wpd-btn wpd-btn--primary" style={{ width: '100%' }} disabled={!booking || phase === 'generating'} onClick={generate}>
               <FileSignature /> {phase === 'ready' ? 'Generuj ponownie' : 'Generuj umowę'}
             </button>
-            <p className="wpd-fig" style={{ margin: '10px 0 0', textAlign: 'center' }}>Wzór dokumentu — dostosuj do własnych potrzeb</p>
+            <p className="wpd-label" style={{ margin: '10px 0 0', textAlign: 'center' }}>Wzór dokumentu — dostosuj do własnych potrzeb</p>
           </div>
         </div>
       </div>
@@ -225,7 +221,7 @@ export default function ContractGeneratorView({ rentals, hostProfile }) {
                   style={{ width: `${w}%`, animationDelay: `${i * 95}ms` }} />
               ))}
             </div>
-            <span className="wpd-anl-load"><span className="wpd-spin" style={{ width: 12, height: 12 }} /> Generuję umowę…</span>
+            <span className="wpd-anl-load"><span className="wpd-spin wpd-spin--xs" /> Generuję umowę…</span>
           </div>
         )}
 

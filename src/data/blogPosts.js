@@ -7,7 +7,6 @@ export const blogPosts = [
     date: '2026-06-11',
     readTime: '4 min',
     category: 'Szkolenia',
-    image: 'bg-blue-500', // Użyjemy gradientu lub ikony zamiast pliku, by było szybciej
     blocks: [
       { type: 'h2', content: 'Koszmar podwójnej rezerwacji' },
       { type: 'p', content: 'Dostajesz powiadomienie o nowej rezerwacji z Booking.com. Cieszysz się, ale po minucie wibruje telefon - kolejna rezerwacja, tym razem z Airbnb. W ten sam weekend, na ten sam apartament. Brzmi znajomo? Overbooking to nie tylko stres, ale też ryzyko ogromnych kar finansowych i zablokowania konta na portalu.' },
@@ -32,7 +31,6 @@ export const blogPosts = [
     date: '2026-06-08',
     readTime: '6 min',
     category: 'Finanse',
-    image: 'bg-purple-500',
     blocks: [
       { type: 'h2', content: 'Wynajem krótkoterminowy a podatki w Polsce' },
       { type: 'p', content: 'Podatki w Polsce to temat rzeka. W przypadku najmu krótkoterminowego (na doby), urzędy skarbowe najczęściej traktują to jako działalność gospodarczą, ale wielu gospodarzy rozlicza się ryczałtem ewidencjonowanym.' },
@@ -51,7 +49,6 @@ export const blogPosts = [
     date: '2026-06-01',
     readTime: '3 min',
     category: 'Obsługa',
-    image: 'bg-emerald-500',
     blocks: [
       { type: 'h2', content: 'Efekt pierwszego wrażenia' },
       { type: 'p', content: 'Gość, który musi czekać na odpowiedź z hasłem do WiFi, zaczyna pobyt od frustracji. Cyfrowy Przewodnik Gościa to link, który wysyłasz mu 24h przed przyjazdem.' },

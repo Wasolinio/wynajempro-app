@@ -9,7 +9,7 @@ src/
 ├── main.jsx ........................ Punkt wejścia (montuje <App/>)
 ├── App.jsx ......................... Routing + ProtectedRoute (patrz komentarze w pliku)
 ├── firebase.js ..................... Inicjalizacja Firebase (auth, Firestore, Storage, App Check, Analytics)
-├── index.css / App.css ............. Style globalne (Tailwind + bazowe)
+├── index.css ....................... Style globalne (Tailwind + bazowe)
 ├── GlobalErrorBoundary.jsx ......... Łapanie błędów renderu
 │
 ├── context/

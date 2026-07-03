@@ -454,7 +454,7 @@ export default function ManagerApp() {
           <div className="wpd-sync">
             <button className="wpd-sync__title" onClick={handleSyncCalendars} disabled={isSyncing}
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-              Synchronizacja <RefreshCw style={{ width: 11, height: 11, color: 'var(--on-side-faint)' }} className={isSyncing ? 'wpd-spin' : ''} />
+              Synchronizacja <RefreshCw style={{ width: 11, height: 11, color: 'var(--on-side-faint)' }} className={isSyncing ? 'wpd-rotate' : ''} />
             </button>
             {syncRows.map((s) => (
               <div className="wpd-sync__row" key={s.name}>

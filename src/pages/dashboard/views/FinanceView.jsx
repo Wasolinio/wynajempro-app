@@ -109,7 +109,7 @@ export default function FinanceView({ rentals, selectedYear, currentYearData, on
               {monthly.map((m, i) => (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, height: '100%', justifyContent: 'flex-end' }} title={`${m.label}: ${fmt(m.value)} zł`}>
                   <div className={`wpd-chartl__bar${m.hi ? ' wpd-chartl__bar--hi' : ''}`} style={{ height: `${Math.max(2, m.pct)}%`, width: '100%' }} />
-                  <span className="wpd-cal__day" style={{ fontSize: 9.5 }}>{m.label}</span>
+                  <span className="wpd-trend__x" style={{ fontSize: 9.5 }}>{m.label}</span>
                 </div>
               ))}
             </div>

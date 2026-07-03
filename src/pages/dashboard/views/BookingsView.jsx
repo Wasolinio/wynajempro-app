@@ -1,10 +1,8 @@
 import React from 'react';
 import { CheckCircle, XCircle, Edit, Trash2, ArrowDown, ArrowUp, CalendarDays } from 'lucide-react';
-import { propHex } from '../styles';
+import { propHex, channelTone } from '../styles';
 
 const fmt = (n) => (n || n === 0 ? new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0)) : '—');
-
-const SOURCE_TONE = { 'Airbnb': 'cynober', 'Booking': 'granat', 'Booking.com': 'granat', 'Facebook': 'amber' };
 
 /*
   Rezerwacje (02) — tabela rezerwacji z filtrami (wszystkie / nadchodzące / archiwalne),
@@ -76,7 +74,7 @@ export default function BookingsView({
                   </td>
                   <td>
                     {r.source
-                      ? <span className={`wpd-tag wpd-tag--${SOURCE_TONE[r.source] || 'muted'}`}>{r.source}</span>
+                      ? <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>
                       : <span className="wpd-tag wpd-tag--muted">—</span>}
                   </td>
                   <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(r.income)} zł</td>

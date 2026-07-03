@@ -17,7 +17,8 @@ export const BRAND_CSS = `
   --green:#2F6B53; --granat:#234B7A; --amber:#C99A2E;
   --hairline:#DDD5C3; --inner:#EFE9DA; --inner-2:#E0D8C6;
   --tint-cynober:#F6E5DF; --tint-green:#E7EDE7; --tint-granat:#E4EAF1;
-  --muted:#524C3F; --faint:#9A917D; --label:#A0987F;
+  /* --faint/--label: minimum 4.5:1 (WCAG AA) na --paper dla mikro-etykiet */
+  --muted:#524C3F; --faint:#716951; --label:#746C54;
 
   min-height:100vh; background:var(--paper); color:var(--ink);
   font-family:'Schibsted Grotesk', system-ui, sans-serif;
@@ -58,6 +59,8 @@ export const BRAND_CSS = `
 .wpb-display em, .wpb-h1 em, .wpb-h2 em{ font-family:'Newsreader', serif; font-style:italic; font-weight:400; }
 .wpb-h1{ font-weight:700; font-size:34px; line-height:1.1; letter-spacing:-.03em; margin:12px 0 0; }
 .wpb-h2{ font-weight:700; font-size:22px; line-height:1.2; letter-spacing:-.02em; margin:0; }
+.wpb-body{ font-size:15px; line-height:1.6; color:var(--muted); }
+.wpb-mono{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; }
 .wpb-lead{ font-size:18px; line-height:1.6; color:var(--muted); margin:14px 0 0; }
 .wpb-meta{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--faint); margin:12px 0 0; }
 .wpb-accent{ color:var(--cynober); }
@@ -88,6 +91,7 @@ export const BRAND_CSS = `
 .wpb-btn svg{ width:16px; height:16px; }
 .wpb-btn:hover{ border-color:var(--ink); }
 .wpb-btn:active:not(:disabled){ transform:scale(.98); }
+.wpb :is(button, a, [role="button"]):focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 .wpb-btn--primary{ background:var(--cynober); border-color:var(--cynober); color:#fff; }
 .wpb-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
 .wpb-btn--block{ width:100%; }
@@ -148,6 +152,7 @@ export const BRAND_CSS = `
 .wpb-spin{ width:32px; height:32px; border:2px solid var(--hairline); border-top-color:var(--cynober);
   border-radius:50%; animation:wpb-spin .8s linear infinite; }
 @keyframes wpb-spin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){ .wpb-spin{ animation-duration:2s; } }
 
 /* ── Responsywność ── */
 @media (max-width:820px){

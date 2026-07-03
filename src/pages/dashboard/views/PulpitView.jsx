@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles } from 'lucide-react';
 import { channelTone } from '../styles';
+import { plural } from '../../../utils/plural';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -64,7 +65,7 @@ export default function PulpitView({
           </div>
           <div className="wpd-stat__value">{pulpit.arrivals}</div>
           <div className="wpd-stat__foot">
-            <span className="wpd-stat__sub">{pulpit.departures > 0 ? `+ ${pulpit.departures} wyjazd` : 'brak wyjazdów'}</span>
+            <span className="wpd-stat__sub">{pulpit.departures > 0 ? `+ ${pulpit.departures} ${plural(pulpit.departures, ['wyjazd', 'wyjazdy', 'wyjazdów'])}` : 'brak wyjazdów'}</span>
           </div>
         </div>
 

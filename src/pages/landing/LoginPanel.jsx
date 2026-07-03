@@ -529,7 +529,8 @@ const CSS = `
   --green:#2F6B53; --granat:#234B7A; --amber:#C99A2E;
   --hairline:#DDD5C3; --inner:#EFE9DA;
   --tint-cynober:#F6E5DF; --tint-green:#E7EDE7;
-  --muted:#524C3F; --faint:#9A917D; --label:#A0987F;
+  /* --faint/--label: minimum 4.5:1 (WCAG AA) na --paper dla mikro-etykiet */
+  --muted:#524C3F; --faint:#716951; --label:#746C54;
   --ink-on:#E4DDCE; --ink-faint:#8C8576; --ink-label:#6B6555; --ink-line:#2C2920;
 
   min-height:100vh; display:flex; background:var(--paper); color:var(--ink);
@@ -603,7 +604,10 @@ const CSS = `
 .wp4a-btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px;
   font-family:'Schibsted Grotesk', sans-serif; font-weight:600; font-size:15px;
   padding:14px 22px; border-radius:3px; border:1px solid transparent; cursor:pointer;
-  text-decoration:none; transition:background .15s, border-color .15s, color .15s; }
+  text-decoration:none;
+  transition:background .15s, border-color .15s, color .15s, transform .15s cubic-bezier(.22,1,.36,1); }
+.wp4a-btn:active:not(:disabled){ transform:scale(.98); }
+.wp4a :is(button, a):focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 .wp4a-btn--full{ width:100%; }
 .wp4a-btn--primary{ background:var(--cynober); color:#fff; }
 .wp4a-btn--primary:hover{ background:var(--cynober-hover); }

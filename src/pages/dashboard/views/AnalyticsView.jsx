@@ -353,7 +353,7 @@ export default function AnalyticsView({ rentals, properties, selectedYear, setSe
         )}
 
         <div className="wpd-anl-bar__sp" />
-        {allRentals === null && <span className="wpd-anl-load"><span className="wpd-spin" style={{ width: 12, height: 12 }} /> Wczytuję historię</span>}
+        {allRentals === null && <span className="wpd-anl-load"><span className="wpd-spin wpd-spin--xs" /> Wczytuję historię</span>}
         <div className="wpd-seg">
           <button className={`wpd-seg__btn${compareMode === 'prev' ? ' wpd-seg__btn--active' : ''}`} onClick={() => setCompareMode('prev')}>Poprzedni okres</button>
           <button className={`wpd-seg__btn${compareMode === 'yoy' ? ' wpd-seg__btn--active' : ''}`} onClick={() => setCompareMode('yoy')}>Rok do roku</button>

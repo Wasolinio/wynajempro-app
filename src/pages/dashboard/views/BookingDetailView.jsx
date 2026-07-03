@@ -156,7 +156,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
           <div className="wpd-panel__head">
             <ClipboardList style={{ width: 16, height: 16, color: 'var(--cynober)' }} />
             <h2 className="wpd-h2" style={{ fontSize: 15 }}>Zadania i przypomnienia</h2>
-            <span className="wpd-nav__badge" style={{ marginLeft: 'auto', background: 'var(--inner)', color: 'var(--muted)' }}>{doneCount}/{tasks.length}</span>
+            <span className="wpd-rep__count" style={{ marginLeft: 'auto' }}>{doneCount}/{tasks.length}</span>
           </div>
           <div className="wpd-list">
             {tasks.map((t) => (

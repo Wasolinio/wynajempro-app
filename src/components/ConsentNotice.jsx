@@ -61,7 +61,7 @@ const CSS = `
 .wpc{
   --paper:#F3EFE5; --surface:#FBFAF6; --ink:#17150F;
   --cynober:#D9492B; --cynober-hover:#C23E22;
-  --hairline:#DDD5C3; --muted:#524C3F; --label:#A0987F;
+  --hairline:#DDD5C3; --muted:#524C3F; --label:#746C54;
   position:fixed; left:0; right:0; bottom:0; z-index:90; padding:18px;
   font-family:'Schibsted Grotesk', system-ui, sans-serif;
   animation:wpc-up .4s cubic-bezier(.22,1,.36,1);
@@ -102,6 +102,7 @@ const CSS = `
   transition:background .15s, border-color .15s, color .15s, transform .15s cubic-bezier(.22,1,.36,1);
 }
 .wpc-btn:active{ transform:scale(.98); }
+.wpc :is(button, a):focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 .wpc-btn--primary{ background:var(--cynober); color:#fff; border-color:var(--cynober); }
 .wpc-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
 .wpc-btn--ghost{ background:transparent; color:var(--ink); border-color:var(--hairline); }

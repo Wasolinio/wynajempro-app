@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Plus, Building2 } from 'lucide-react';
+import { plural } from '../../../utils/plural';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -64,7 +65,7 @@ export default function ObjectsView({ properties, rentals, selectedYear, onAddPr
   return (
     <>
       <div className="wpd-objs__head">
-        <span className="wpd-label">{properties.length} {properties.length === 1 ? 'obiekt' : 'obiekty'} · wszystkie aktywne</span>
+        <span className="wpd-label">{properties.length} {plural(properties.length, ['obiekt', 'obiekty', 'obiektów'])} · wszystkie aktywne</span>
         <button className="wpd-btn" onClick={onAddProperty}><Plus /> Dodaj obiekt</button>
       </div>
 

@@ -14,7 +14,8 @@ export const DASHBOARD_CSS = `
   --green:#2F6B53; --green-dot:#5FB389; --granat:#234B7A; --amber:#C99A2E;
   --hairline:#DDD5C3; --inner:#EFE9DA; --inner-2:#E0D8C6;
   --tint-cynober:#F6E5DF; --tint-green:#E7EDE7; --tint-amber:#FBF1D9; --tint-granat:#E4EAF1;
-  --muted:#524C3F; --faint:#9A917D; --label:#A0987F;
+  /* --faint/--label/--amber-ink: minimum 4.5:1 (WCAG AA) na --paper dla mikro-etykiet */
+  --muted:#524C3F; --faint:#716951; --label:#746C54; --amber-ink:#7E6119;
   /* ciemny sidebar */
   --side:#17150F; --side-2:#221F17; --side-active:#2C2920; --side-line:#2C2920;
   --on-side:#E4DDCE; --on-side-faint:#8C8576; --on-side-label:#6B6555;
@@ -139,6 +140,7 @@ export const DASHBOARD_CSS = `
 .wpd-iconbtn svg{ width:17px; height:17px; }
 .wpd-iconbtn:hover{ border-color:var(--ink); color:var(--ink); }
 .wpd-iconbtn:active:not(:disabled){ transform:scale(.97); }
+.wpd :is(button, a, [role="button"]):focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 .wpd-iconbtn__dot{ position:absolute; top:7px; right:8px; width:6px; height:6px; border-radius:50%;
   background:var(--cynober); }
 .wpd-iconbtn__badge{ position:absolute; top:-7px; right:-7px; min-width:18px; height:18px; padding:0 4px;
@@ -206,7 +208,7 @@ export const DASHBOARD_CSS = `
   font-weight:500; font-size:10px; letter-spacing:.05em; text-transform:uppercase; padding:4px 8px;
   border-radius:3px; border:1px solid var(--hairline); color:var(--muted); white-space:nowrap; }
 .wpd-tag--green{ color:var(--green); background:var(--tint-green); border-color:#D7E2DA; }
-.wpd-tag--amber{ color:var(--amber); background:var(--tint-amber); border-color:#EFE2C2; }
+.wpd-tag--amber{ color:var(--amber-ink); background:var(--tint-amber); border-color:#EFE2C2; }
 .wpd-tag--cynober{ color:var(--cynober); background:var(--tint-cynober); border-color:#EBD3CB; }
 .wpd-tag--granat{ color:var(--granat); background:var(--tint-granat); border-color:#C9D3E0; }
 .wpd-tag--muted{ color:var(--faint); }
@@ -327,6 +329,9 @@ export const DASHBOARD_CSS = `
 .wpd-spin{ width:34px; height:34px; border:2px solid var(--hairline); border-top-color:var(--cynober);
   border-radius:50%; animation:wpd-spin .8s linear infinite; }
 @keyframes wpd-spin{ to{ transform:rotate(360deg); } }
+.wpd-spin--xs{ width:12px; height:12px; }
+/* sama rotacja dla ikon (np. RefreshCw) — bez obwódki-kółka .wpd-spin */
+.wpd-rotate{ animation:wpd-spin .8s linear infinite; }
 
 /* ── Kalendarz (timeline / gantt) ── */
 .wpd-cal__head{ display:flex; align-items:center; gap:14px; padding:16px 20px; border-bottom:1px solid var(--hairline); }
@@ -662,6 +667,8 @@ export const DASHBOARD_CSS = `
   .wpd-rise{ transition:none !important; opacity:1 !important; transform:none !important; }
   .wpd-view{ animation:none !important; }
   .wpd-overlay, .wpd-dialog{ animation:none !important; }
+  /* spinnery zostają (informacja o trwającej operacji), ale spokojniejsze */
+  .wpd-spin, .wpd-spin--xs, .wpd-rotate{ animation-duration:2s; }
 }
 
 /* ── Responsywność ── */

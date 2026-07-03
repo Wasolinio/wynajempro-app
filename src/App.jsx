@@ -43,6 +43,7 @@ const Loader = () => (
       .wp-load{ width:34px; height:34px; border:2px solid #DDD5C3; border-top-color:#D9492B;
         border-radius:50%; opacity:0;
         animation:wp-load-in .2s ease-out .15s forwards, wp-load-spin .8s linear infinite; }
+      @media (prefers-reduced-motion: reduce){ .wp-load{ animation-duration:.2s, 2s; } }
     `}</style>
     <div className="wp-load" />
   </div>
