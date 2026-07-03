@@ -1,98 +1,57 @@
-# 🎯 WynajemPRO Main Project
+# 🎯 WynajemPRO — przegląd projektu
 
-Central tracking for the WynajemPRO rental management app.
-
----
-
-## Project Overview
-
-**Goal**: Build a professional rental property management platform
-
-**Status**: 🟡 IN DEVELOPMENT (Beta)
-
-**Start Date**: 2025-01-15  
-**Target Launch**: Q3 2026
-
-**Team**: Solo development + Claude AI
+Centralna notatka projektu. Plan pracy: [[Projects/Roadmap]] (jedyne źródło prawdy).
 
 ---
 
-## Vision
+## Co budujemy
 
-Make it easy for property owners to:
-1. ✅ Manage multiple rental properties
-2. ✅ Generate secure access codes for guests
-3. ✅ Create guest guides (WiFi, entry, parking info)
-4. ✅ Integrate with guest calendars (iCal)
-5. ✅ Accept online payments (Stripe)
-6. ✅ Track guest communications
+SaaS do zarządzania wynajmem dla polskich gospodarzy: kalendarz rezerwacji i finansów
+wielu obiektów, synchronizacja iCal, rozliczenia podatkowe (ryczałt/skala/VAT),
+przewodniki dla gości z QR i danymi dostępowymi po podpisie, generator umów najmu,
+analityka okresowa. Model: trial 14 dni → subskrypcja (Stripe).
 
----
+**Status:** 🟡 **pre-launch hardening** — wersja V2 wdrożona na Firebase Hosting
+(`moje-domki-6c77d`), launch publiczny wstrzymany do domknięcia blokerów
+(sekcja NOW w [[Projects/Roadmap]]: weryfikacja e-mail, paywall, walidacja schematu,
+dokumenty prawne, audyt).
 
-## Key Metrics
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| Properties Managed | 3 | 100 |
-| Active Guides | 5 | 50 |
-| Guest Satisfaction | ? | > 4.5/5 |
-| System Uptime | 99% | 99.9% |
-| Page Load Time | 2s | < 1s |
+**Zespół:** właściciel (wszystkie decyzje biznesowe) + zespół 8 agentów Claude
+(`.claude/agents/`: dev, code-reviewer, designer, seo, marketing, support, legal,
+strategist) pracujących wg [[Team-Playbook]].
 
 ---
 
-## Current Phase
+## Fazy
 
-**Phase 1: MVP Stabilization** (NOW)
-- Fix critical bugs (iCal token, storage leak)
-- Implement comprehensive E2E tests
-- Content audit (Polish language corrections)
+1. **Pre-launch (teraz):** blokery N1–N5 z roadmapy + dopieszczanie UI v2.
+2. **Launch i pierwsi klienci:** baza wiedzy, demo na landingu, fundament SEO,
+   plan marketingowy — sekcja NEXT roadmapy.
+3. **Rozbudowa wg sygnałów:** decyzje na podstawie zgłoszeń (`support`) i danych
+   (`strategist`), pula pomysłów w [[Projects/Backlog]].
 
-**Phase 2: Feature Parity** (Q3 2026)
-- Email notifications
-- Guest photos/documents
-- Advanced calendar management
+## Metryki
 
-**Phase 3: Scale** (Q4 2026)
-- Multi-user teams (subaccounts)
-- Marketplace integration
-- Analytics dashboard
+Mierzymy od launchu: rejestracje → aktywacja (pierwszy obiekt + rezerwacja) →
+konwersja trial→płatny → churn. **Dziś brak danych — nie wpisujemy wymyślonych liczb.**
+Przed launchem jedyna „metryka" to: ile blokerów NOW zostało.
 
----
+## Ryzyka (realne, z przeciwdziałaniem)
 
-## Dependencies
+| Ryzyko | Przeciwdziałanie |
+|---|---|
+| Prawne: dane najemców/gości, wzorce umów najmu | N4 + N5 w roadmapie; `legal` + prawnik-człowiek przed launchem |
+| Bezpieczeństwo: sekrety gości, reguły Firestore | audyt `code-reviewer` (N5), walidacja schematu (N3) |
+| Brak przychodu mimo użytkowników | paywall (N2) + decyzja cenowa u `strategist` przed launchem |
+| Niska adopcja | demo (X2), SEO (X9), plan marketingowy (X11); weryfikacja ICP zamiast założeń |
+| Koszty Firebase przy skali | monitoring po launchu (backlog: dług techniczny) |
 
-- **Firebase**: Backend-as-a-Service
-- **Stripe**: Payment processing
-- **Google OAuth**: Authentication
-- **Playwright**: E2E testing
+## Zależności
 
----
-
-## Risks & Mitigations
-
-| Risk | Probability | Mitigation |
-|------|-------------|-----------|
-| Firebase cost scaling | Medium | Monitor usage, implement caching |
-| Data loss | Low | Regular backups, Firestore audit logs |
-| Security breach | Low | Firestore rules, App Check, HTTPS |
-| Low adoption | Medium | Marketing, user feedback loops |
+Firebase (Auth, Firestore, Storage, Functions v2, Hosting, App Check) · Stripe ·
+Google OAuth · Playwright (e2e na emulatorach).
 
 ---
 
-## Success Criteria
-
-- ✅ All critical bugs fixed
-- ✅ E2E test coverage > 80%
-- ✅ Zero unresolved security issues
-- ✅ Page load < 1 second
-- ✅ User satisfaction > 4.5/5
-
----
-
-## Related
-
-- [[Projects/Milestones]] - Timeline and deliverables
-- [[Projects/Backlog]] - Feature ideas and tasks
-- [[Known-Issues]] - Current bugs
-
+**Related:** [[Projects/Roadmap]] · [[Projects/Milestones]] · [[Projects/Backlog]] ·
+[[Team-Playbook]] · [[Known-Issues]] · [[Architecture]]

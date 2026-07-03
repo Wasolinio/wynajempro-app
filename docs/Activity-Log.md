@@ -4,7 +4,27 @@ Project timeline and key milestones.
 
 ---
 
-## 2026-06-29 (Today)
+## 2026-07-02
+
+### Zespół agentów + konsolidacja planowania
+- ✅ Utworzono zespół 8 agentów w `.claude/agents/` (dev, code-reviewer, designer, seo, marketing, support, legal, strategist) + wspólna metodologia: [[Team-Playbook]]
+- ✅ Konsolidacja planowania: [[Projects/Roadmap]] = jedyne źródło prawdy (NOW/NEXT/LATER); [[Projects/Milestones]] → sam widok dat; [[Projects/Backlog]] → poczekalnia pomysłów; „Do zrobienia w przyszłości" → wskaźnik na roadmapę
+- ✅ Sprzątnięto nieaktualne dane planistyczne: fałszywe P0 w Backlogu (iCal token, storage leak), wróżone metryki (Lighthouse, godziny), 4 konkurujące listy „Next Steps"
+
+### Aplikacja (commity 2026-06-30 → 2026-07-02)
+- ✅ `76f53ff` — generator umów najmu (nawigacja 08)
+- ✅ `ce2b80f` — przebudowa szczegółów rezerwacji: zadania zamiast przewodnika
+- ✅ `af4af47` — widok Analityka: statystyki okresowe z porównaniem YoY
+- ✅ `76a3059` — fix ujawniania danych dostępowych w przewodniku + restyl v2
+- ✅ `c6f2975` — identyfikacja v2 na stronach publicznych i ekranach pobocznych
+- ✅ `416b4cc` — baner zgody cookie w identyfikacji v2
+- ✅ `fb8a00e` — porządek repo: jedna wersja produkcyjna (stare → `/_legacy`)
+- ✅ `dd4aec2` — kreator przewodników V4 + limit uploadu 10 MB
+- ⚠️ `b4aeb4e` — bypass weryfikacji e-mail dla testów V4 — **DO COFNIĘCIA przed launchem** (roadmapa N1)
+
+---
+
+## 2026-06-29
 
 ### Knowledge Base Expansion
 - ✅ Created comprehensive Obsidian vault with 12+ documents
@@ -145,28 +165,17 @@ See: `git log` for full history
 | Total Commits | 20+ |
 | E2E Tests Written | 8 |
 | Documentation Pages | 16 |
-| Known Bugs | 2 (critical) |
+| Known Bugs | 0 krytycznych (2 dawne = fałszywe alarmy, [[Known-Issues]]) |
 | Features Working | 8+ |
 | Time to Development | 6 months |
 
 ---
 
-## Next Steps (By Priority)
+## Next Steps
 
-### This Week
-- [x] iCal token generation — verified working (not a bug)
-- [ ] Write E2E test for iCal export
-- [x] Storage cleanup on account deletion — verified working (not a bug)
-
-### Next Week
-- [ ] Complete E2E test suite
-- [ ] Polish language audit
-- [ ] Setup CI/CD
-
-### This Month
-- [ ] Performance optimization
-- [ ] Security review
-- [ ] Beta launch prep
+➡️ **Przeniesione do [[Projects/Roadmap]]** (jedyne źródło prawdy planowania).
+Log nie prowadzi własnej listy zadań — poprzednia natychmiast rozjechała się
+z Milestones i Backlogiem. Tu zostaje wyłącznie historia.
 
 ---
 
@@ -191,7 +200,7 @@ When adding updates:
 
 ---
 
-**Last Updated**: 2026-06-29  
+**Last Updated**: 2026-07-02  
 **Maintained By**: Szymon + Claude
 
 ---

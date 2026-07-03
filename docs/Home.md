@@ -8,10 +8,10 @@
 
 | Aspekt | Status | Link |
 |--------|--------|------|
-| **Project** | 🟡 IN_PROGRESS | [[Projects/WynajemPRO]] |
-| **Development** | 🟢 ACTIVE | [[Development]] |
-| **Known Bugs** | 🔴 2 CRITICAL | [[Known-Issues]] |
-| **Next Milestone** | 📅 E2E Tests | [[Projects/Milestones]] |
+| **Project** | 🟡 PRE-LAUNCH (V2 na hostingu) | [[Projects/WynajemPRO]] |
+| **Roadmap** | 🔴 5 blokerów launchu (NOW) | [[Projects/Roadmap]] |
+| **Known Bugs** | 🟢 0 krytycznych (2 dawne = fałszywe alarmy) | [[Known-Issues]] |
+| **Zespół agentów** | 🤖 8 ról + wspólna metodologia | [[Team-Playbook]] |
 
 ---
 
@@ -35,9 +35,11 @@
 - **[[Performance]]** - Optimization tips and patterns
 
 ### 📋 Planning & Tracking
+- **[[Projects/Roadmap]]** - ⭐ JEDYNE źródło prawdy planowania (NOW / NEXT / LATER)
 - **[[Projects/WynajemPRO]]** - Main project overview
-- **[[Projects/Milestones]]** - Roadmap and timeline
-- **[[Projects/Backlog]]** - Feature ideas and tasks
+- **[[Projects/Milestones]]** - Widok dat (same kamienie, bez list zadań)
+- **[[Projects/Backlog]]** - Poczekalnia pomysłów (niezaplanowane)
+- **[[Team-Playbook]]** - Zespół agentów + metodologia pracy
 - **[[Decisions]]** - Architecture decisions log
 
 ### 📖 Resources & Reference
@@ -55,7 +57,7 @@
 
 **...understand the app** → [[Architecture]] → Read "Data Flow" and "Component Hierarchy"
 
-**...add a new feature** → [[Projects/Backlog]] → Create task → Read [[Development]] "Common Tasks"
+**...add a new feature** → pomysł do [[Projects/Backlog]] → decyzja właściciela → wpis w [[Projects/Roadmap]] → [[Development]] "Common Tasks"
 
 **...fix a bug** → [[Known-Issues]] → Pick issue → Check [[Debugging]] for similar cases
 
@@ -69,6 +71,9 @@
 
 ## 📅 Recent Activity
 
+- **2026-07-02** - Zespół 8 agentów + [[Team-Playbook]]; konsolidacja roadmapy; generator umów najmu, widok Analityka, przebudowa szczegółów rezerwacji
+- **2026-07-01** - Identyfikacja v2 na stronach publicznych; fix odkrywania danych dostępowych w przewodniku
+- **2026-06-30** - Porządek repo (jedna wersja produkcyjna, reszta → `/_legacy`); dashboard V4 produkcyjny
 - **2026-06-29** - Set up knowledge base system (CLAUDE.md, memory/, docs/)
 - **2026-06-28** - Fixed App Check re-enablement
 - **2026-06-25** - Fixed Google login loop
@@ -81,7 +86,7 @@
 ## 🎯 Next Steps
 
 1. **Read** [[Projects/WynajemPRO]] to understand current status
-2. **Pick** from [[Projects/Milestones]] what to work on
+2. **Pick** from [[Projects/Roadmap]] what to work on (najpierw sekcja NOW)
 3. **Follow** [[Development]] setup guide
 4. **Contribute** → Create branch → Write tests → PR → Merge
 
@@ -109,7 +114,7 @@
 
 ---
 
-**Last Updated**: 2026-06-29  
+**Last Updated**: 2026-07-02  
 **Maintained By**: Claude + You  
 **Update Frequency**: When significant changes occur
 

@@ -16,6 +16,11 @@ Materiały projektowe/brand: **`/_design-reference`**.
 UWAGA: produkcyjny panel przeniesiony do `src/pages/dashboard/` (logika 1:1 jak opisana w mapie);
 stary `src/ManagerApp.jsx` i `src/pages/LoginPanel.jsx` są teraz w `/_legacy`.
 
+## Zespół agentów
+Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`, `seo`,
+`marketing`, `support`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.
+Wspólna metodologia (obowiązuje wszystkich, także głównego Claude'a): `docs/Team-Playbook.md`.
+
 ## Kluczowe pliki (produkcja)
 - `src/App.jsx` — routing (tylko trasy produkcyjne)
 - `src/pages/dashboard/ManagerApp.jsx` — panel zarządzania (powłoka)
@@ -29,5 +34,6 @@ Wersja produkcyjna V2 wdrożona (Firebase Hosting: moje-domki-6c77d) i wypchnię
 Branch: main.
 
 ## Zadania w trakcie
+Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowania (Now/Next/Later).
 - [ ] Dopieszczanie UI końcowej wersji
-- [ ] Przed launchem: przywrócić weryfikację e-mail, sprawdzanie subskrypcji i walidację schematu (reguły + front)
+- [ ] Przed launchem (blokery — szczegóły w roadmapie): weryfikacja e-mail, sprawdzanie subskrypcji, walidacja schematu (reguły + front)
