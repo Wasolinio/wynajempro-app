@@ -9,8 +9,8 @@ test('Landing Page has spelling corrections', async ({ page }) => {
   // Verify 'liczby rezerwacji' is used instead of 'ilości rezerwacji'
   await expect(page.locator('text=niezależnie od liczby rezerwacji')).toBeVisible();
 
-  // Verify 'Nielimitowana liczba rezerwacji' is used instead of 'Nielimitowana ilość rezerwacji'
-  await expect(page.locator('text=Nielimitowana liczba rezerwacji')).toBeVisible();
+  // Verify 'Nielimitowana liczba…' is used instead of 'Nielimitowana ilość…' (treść po reorganizacji fb8a00e)
+  await expect(page.locator('text=Nielimitowana liczba obiektów i rezerwacji')).toBeVisible();
 });
 
 test('Privacy Page has spelling corrections', async ({ page }) => {
@@ -23,8 +23,8 @@ test('Privacy Page has spelling corrections', async ({ page }) => {
 test('Contact Page has spelling corrections', async ({ page }) => {
   await page.goto('/kontakt');
 
-  // Verify 'w ciągu' is used instead of 'w przeciągu'
-  await expect(page.locator('text=w ciągu 24 do 48 godzin')).toBeVisible();
+  // Verify 'w ciągu' is used instead of 'w przeciągu' (treść po reorganizacji fb8a00e)
+  await expect(page.locator('text=w ciągu 24–48 godzin roboczych')).toBeVisible();
 });
 
 test('Terms Page has spelling corrections', async ({ page }) => {
