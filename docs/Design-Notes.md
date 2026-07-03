@@ -1,5 +1,39 @@
 # 🎨 Design Notes
 
+## Audyt UI v2 — 2026-07-03 (agent: `designer`)
+
+Pełny przegląd panelu, stron publicznych i bloga względem identyfikacji v2 i WCAG.
+15 pozycji, realizacja partiami; status aktualizowany tutaj. Decyzje właściciela:
+partie 1–3 zatwierdzone · mobile = dolny pasek ([[Projects/Roadmap]] X12) ·
+kontrast tokenów = minimalna korekta hexów.
+
+**Partia 1 — ✅ 2026-07-03 (`0a7d12b`):** :focus-visible zbiorczo (.wpd/.wpb/.wpc/.wp4/.wp4a,
+outline 2px cynober); klasy widmowe → istniejące + definicje `.wpb-body`/`.wpb-mono`;
+`.wpd-rotate` dla ikon (artefakt obwódki na sync) + spinnery pod `prefers-reduced-motion`;
+kanały spójnie przez `channelTone` (Nocowanie=amber wszędzie); `plural()` → `src/utils/`;
+press-scale na landing/login; martwy `App.css` usunięty; tokeny AA: `--faint #716951` (4.76:1),
+`--label #746C54` (4.55:1), `--amber-ink #7E6119` (5.17:1 na tint-amber).
+
+**Partia 2 — ✅ 2026-07-03:** hit-area ≥40px przez pseudo-elementy (check 22px, navbtn 30px,
+user__out, sync, swatch, breadcrumb — bez zmiany wyglądu); klawiatura dla klikalnych
+kart/wierszy przez `utils/a11y.js` (Pulpit ×5, Rezerwacje, Kalendarz, Obiekty, Generator;
+guard na Enter z zagnieżdżonych przycisków); modale: `useDialogA11y` — Escape zamyka
+najwyższy dialog (z-index-aware), fokus wchodzi przy otwarciu, `role=dialog`/`aria-modal`
+(5 modali). Weryfikacja: lint+build, `e2e/panel-v2.spec.js` 3/3 (Escape, klawiatura,
+render panelu) — nowy spec, bo stara suita nie testuje panelu v2 (X10).
+
+**Partia 3 — ⬜:** kalendarz (kontrast amber → `--amber-ink`, legenda o Nocowanie, kolizja
+pasków back-to-back — najpierw reprodukcja); GuideBuilder: `window.confirm` → DeleteConfirmModal
++ toasty; zwijanie generatora umów i formularza przewodnika <980px; newsletter: stan błędu
+w cynobrze + `role=status`.
+
+**Partia 4 — ⬜:** dolny pasek nawigacji mobile → [[Projects/Roadmap]] X12.
+
+**Poniżej progu (świadomie nieplanowane):** panel „Najbliższe przyjazdy i wyjazdy" pokazuje
+tylko przyjazdy (`wpd-row__tag--out` nieużywany); tooltip trendu dostępny tylko z hovera.
+
+---
+
 ## Landing Page Design
 
 ### Vision
