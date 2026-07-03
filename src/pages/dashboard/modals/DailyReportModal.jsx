@@ -1,14 +1,16 @@
 import React from 'react';
 import { ClipboardList, X, LogIn, LogOut, CheckSquare, CheckCircle } from 'lucide-react';
+import { useDialogA11y } from './useDialogA11y';
 
 /* Raport dzienny — styl V4. Kontrakt propsów 1:1 z oryginałem. */
 function DailyReportModal({ showDailyReportModal, setShowDailyReportModal, dailyReport, completeTask }) {
-  if (!showDailyReportModal || !dailyReport) return null;
   const close = () => setShowDailyReportModal(false);
+  const dialogA11y = useDialogA11y(showDailyReportModal && !!dailyReport, close);
+  if (!showDailyReportModal || !dailyReport) return null;
 
   return (
     <div className="wpd-overlay" style={{ zIndex: 85 }} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
-      <div className="wpd-dialog">
+      <div className="wpd-dialog" {...dialogA11y}>
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><ClipboardList /></span>
           <div>

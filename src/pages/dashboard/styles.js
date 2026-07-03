@@ -651,6 +651,15 @@ export const DASHBOARD_CSS = `
   .wpd-noprint{ display:none !important; }
 }
 
+/* ── Dotykowe pola ≥40px bez zmiany wyglądu (audyt poz. 5) ── */
+.wpd-check, .wpd-cal__navbtn, .wpd-user__out, .wpd-swatch, .wpd-bc button, .wpd-sync__title{ position:relative; }
+.wpd-check::after{ content:''; position:absolute; inset:-9px; }
+.wpd-cal__navbtn::after{ content:''; position:absolute; inset:-5px; }
+.wpd-user__out::after{ content:''; position:absolute; inset:-12px; }
+.wpd-sync__title::after{ content:''; position:absolute; inset:-13px 0 -13px -13px; }
+.wpd-swatch::after{ content:''; position:absolute; inset:-7px; }
+.wpd-bc button::after{ content:''; position:absolute; inset:-6px; }
+
 /* wejście sekcji */
 .wpd-rise{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
 .wpd-rise.is-in{ opacity:1; transform:none; }

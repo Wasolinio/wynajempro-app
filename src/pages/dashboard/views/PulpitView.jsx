@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles } from 'lucide-react';
 import { channelTone } from '../styles';
 import { plural } from '../../../utils/plural';
+import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -32,7 +33,7 @@ export default function PulpitView({
     <>
       {/* ── Karty metryk ── */}
       <div className="wpd-stats">
-        <div className="wpd-stat" onClick={onOpenStats} role="button" tabIndex={0}>
+        <div className="wpd-stat" {...clickableProps(onOpenStats)}>
           <div className="wpd-stat__head">
             <p className="wpd-stat__label">Przychód · {up(pulpit.monthName)}</p>
             <span className="wpd-stat__ic"><Banknote /></span>
@@ -47,7 +48,7 @@ export default function PulpitView({
           </div>
         </div>
 
-        <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
+        <div className="wpd-stat" {...clickableProps(onGoCalendar)}>
           <div className="wpd-stat__head">
             <p className="wpd-stat__label">Obłożenie</p>
             <span className="wpd-stat__ic"><PieChart /></span>
@@ -58,7 +59,7 @@ export default function PulpitView({
           </div>
         </div>
 
-        <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
+        <div className="wpd-stat" {...clickableProps(onGoCalendar)}>
           <div className="wpd-stat__head">
             <p className="wpd-stat__label">Przyjazdy dziś</p>
             <span className="wpd-stat__ic"><LogIn /></span>
@@ -69,7 +70,7 @@ export default function PulpitView({
           </div>
         </div>
 
-        <div className="wpd-stat" onClick={onGoCalendar} role="button" tabIndex={0}>
+        <div className="wpd-stat" {...clickableProps(onGoCalendar)}>
           <div className="wpd-stat__head">
             <p className="wpd-stat__label">Do posprzątania</p>
             <span className="wpd-stat__ic"><Sparkles /></span>
@@ -94,7 +95,7 @@ export default function PulpitView({
             {arrivalsSoon.map((r) => {
               const propName = typeof r.property === 'object' ? r.property?.name : r.property;
               return (
-                <div className="wpd-row" key={r.id} onClick={() => onEditRental(r)} style={{ cursor: 'pointer' }}>
+                <div className="wpd-row" key={r.id} {...clickableProps(() => onEditRental(r))} style={{ cursor: 'pointer' }}>
                   <span className="wpd-row__tag">PRZY</span>
                   <div className="wpd-row__main">
                     <div className="wpd-row__name">{r.guest || 'Rezerwacja'}</div>

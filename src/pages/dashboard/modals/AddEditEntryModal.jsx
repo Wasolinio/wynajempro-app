@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit, X, Wallet } from 'lucide-react';
+import { useDialogA11y } from './useDialogA11y';
 
 const propName = (p) => (typeof p === 'object' ? p.name : p);
 
@@ -8,11 +9,12 @@ function AddEditEntryModal({
   showAddModal, handleCloseModal, handleAddRental, editingId,
   newRental, setNewRental, handleRentalChange, properties, sources, categories,
 }) {
+  const dialogA11y = useDialogA11y(showAddModal, handleCloseModal);
   if (!showAddModal) return null;
 
   return (
     <div className="wpd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}>
-      <div className="wpd-dialog">
+      <div className="wpd-dialog" {...dialogA11y}>
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><Edit /></span>
           <div>

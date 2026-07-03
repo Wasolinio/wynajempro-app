@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { FileSignature, Search, Printer, RotateCcw } from 'lucide-react';
 import { channelTone } from '../styles';
 import { plural } from '../../../utils/plural';
+import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const fmtFull = (d) => {
@@ -163,7 +164,7 @@ export default function ContractGeneratorView({ rentals, hostProfile }) {
             {bookings.map((r) => {
               const pn = typeof r.property === 'object' ? r.property?.name : r.property;
               return (
-                <div key={r.id} className={`wpd-row wpd-ctr-row${selectedId === r.id ? ' wpd-ctr-row--on' : ''}`} onClick={() => pick(r.id)}>
+                <div key={r.id} className={`wpd-row wpd-ctr-row${selectedId === r.id ? ' wpd-ctr-row--on' : ''}`} {...clickableProps(() => pick(r.id))}>
                   <div className="wpd-row__main">
                     <div className="wpd-row__name">{r.guest || 'Rezerwacja'}</div>
                     <div className="wpd-row__meta">{pn} · {fmtShort(r.date)} → {fmtShort(r.endDate || r.date)}</div>

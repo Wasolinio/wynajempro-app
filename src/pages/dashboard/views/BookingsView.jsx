@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle, XCircle, Edit, Trash2, ArrowDown, ArrowUp, CalendarDays } from 'lucide-react';
 import { propHex, channelTone } from '../styles';
+import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => (n || n === 0 ? new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0)) : '—');
 
@@ -58,7 +59,7 @@ export default function BookingsView({
             {paginatedBookings.map((r) => {
               const propName = typeof r.property === 'object' ? r.property?.name : r.property;
               return (
-                <tr key={r.id} onClick={() => onOpenDetail?.(r)} style={{ cursor: 'pointer' }}>
+                <tr key={r.id} {...clickableProps(() => onOpenDetail?.(r))} style={{ cursor: 'pointer' }}>
                   <td>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                       <span className="wpd-dot" style={{ background: propColor(propName) }} />

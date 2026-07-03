@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarCheck, Moon, Clock } from 'lucide-react';
 import { channelColor } from '../styles';
+import { clickableProps } from '../../../utils/a11y';
 
 const WD = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'sb'];
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
@@ -119,7 +120,7 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
                     <div key={r.id} className="wpd-cal__bar"
                       style={{ gridColumn: `${startNum} / ${endNum + 1}`, background: channelColor(r.source) }}
                       title={`${r.guest || 'Rezerwacja'} · ${r.date}${r.endDate ? ` → ${r.endDate}` : ''}`}
-                      onClick={() => onEditRental(r)}>
+                      {...clickableProps(() => onEditRental(r))}>
                       {surname(r.guest)}
                     </div>
                   ))}

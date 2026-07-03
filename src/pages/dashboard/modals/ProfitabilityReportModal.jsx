@@ -1,17 +1,19 @@
 import React from 'react';
 import { BarChart3, X } from 'lucide-react';
 import { monthNames } from '../../../utils/constants';
+import { useDialogA11y } from './useDialogA11y';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 
 /* Raport rentowności — styl V4. Kontrakt propsów 1:1 z oryginałem. */
 function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedYear, handleYearChange, availableYears, currentYearData }) {
+  const dialogA11y = useDialogA11y(showStatsModal, () => setShowStatsModal(false));
   if (!showStatsModal) return null;
   const t = currentYearData.total;
 
   return (
     <div className="wpd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowStatsModal(false); }}>
-      <div className="wpd-dialog wpd-dialog--lg">
+      <div className="wpd-dialog wpd-dialog--lg" {...dialogA11y}>
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><BarChart3 /></span>
           <div>

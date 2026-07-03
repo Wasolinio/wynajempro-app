@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Plus, Building2 } from 'lucide-react';
 import { plural } from '../../../utils/plural';
+import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -84,7 +85,7 @@ export default function ObjectsView({ properties, rentals, selectedYear, onAddPr
             const next = relDay(s.nextArrival ? new Date(s.nextArrival).toISOString().split('T')[0] : null);
             const hasIcal = !!p.secretToken;
             return (
-              <div className="wpd-obj" key={p.name} onClick={() => onOpenProperty(p)} style={{ cursor: 'pointer' }}>
+              <div className="wpd-obj" key={p.name} {...clickableProps(() => onOpenProperty(p))} style={{ cursor: 'pointer' }}>
                 <div className="wpd-obj__photo">
                   <span className="wpd-obj__fot">FOT. {String(i + 1).padStart(2, '0')}</span>
                   <span className="wpd-obj__status"><span className="wpd-dot" style={{ background: 'var(--green-dot)' }} /> Aktywny</span>

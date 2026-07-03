@@ -8,6 +8,7 @@ import { EmailAuthProvider, reauthenticateWithCredential, signOut } from 'fireba
 import { httpsCallable } from 'firebase/functions';
 import toast from 'react-hot-toast';
 import { propHex } from '../styles';
+import { useDialogA11y } from './useDialogA11y';
 
 const TABS = [
   ['hostProfile', 'Profil gospodarza'], ['properties', 'Nieruchomości'], ['sources', 'Źródła'],
@@ -33,6 +34,7 @@ function SettingsModal(props) {
 
   const [deletePassword, setDeletePassword] = useState('');
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const dialogA11y = useDialogA11y(showSettingsModal, () => setShowSettingsModal(false));
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) return toast.error('Wprowadź hasło by potwierdzić.');
@@ -63,7 +65,7 @@ function SettingsModal(props) {
 
   return (
     <div className="wpd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowSettingsModal(false); }}>
-      <div className="wpd-dialog wpd-dialog--lg">
+      <div className="wpd-dialog wpd-dialog--lg" {...dialogA11y}>
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><Settings /></span>
           <div><h2 className="wpd-h2">Ustawienia systemu</h2></div>
