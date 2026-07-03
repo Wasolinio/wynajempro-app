@@ -84,9 +84,10 @@ export const BRAND_CSS = `
 .wpb-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 22px;
   font-family:inherit; font-weight:600; font-size:15px; border-radius:3px; border:1px solid var(--hairline);
   background:var(--surface); color:var(--ink); cursor:pointer; text-decoration:none; white-space:nowrap;
-  transition:background .15s, border-color .15s, color .15s; }
+  transition:background .15s, border-color .15s, color .15s, transform .15s cubic-bezier(.22,1,.36,1); }
 .wpb-btn svg{ width:16px; height:16px; }
 .wpb-btn:hover{ border-color:var(--ink); }
+.wpb-btn:active:not(:disabled){ transform:scale(.98); }
 .wpb-btn--primary{ background:var(--cynober); border-color:var(--cynober); color:#fff; }
 .wpb-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
 .wpb-btn--block{ width:100%; }

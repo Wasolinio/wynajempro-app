@@ -31,10 +31,20 @@ const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 // Część zalogowana (panel zarządzania)
 const ManagerApp = lazy(() => import('./pages/dashboard/ManagerApp'));
 
-// Loader wyświetlany podczas doczytywania paczek
+// Loader wyświetlany podczas doczytywania paczek i sprawdzania sesji.
+// Samowystarczalny (inline <style>), bo renderuje się zanim dociągną się arkusze stron.
+// Kolory = tokeny identyfikacji v2 (paper / hairline / cynober); opóźnione pojawienie
+// (150 ms) zapobiega miganiu spinnera przy szybkich wczytaniach.
 const Loader = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-    <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+  <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F3EFE5' }}>
+    <style>{`
+      @keyframes wp-load-in{ to{ opacity:1; } }
+      @keyframes wp-load-spin{ to{ transform:rotate(360deg); } }
+      .wp-load{ width:34px; height:34px; border:2px solid #DDD5C3; border-top-color:#D9492B;
+        border-radius:50%; opacity:0;
+        animation:wp-load-in .2s ease-out .15s forwards, wp-load-spin .8s linear infinite; }
+    `}</style>
+    <div className="wp-load" />
   </div>
 );
 
@@ -84,9 +94,15 @@ export default function App() {
         position="bottom-right"
         reverseOrder={false}
         toastOptions={{
-          style: { borderRadius: '16px', background: '#333', color: '#fff', fontWeight: 'bold' },
-          success: { style: { background: '#10b981' } },
-          error: { style: { background: '#ef4444' } },
+          // Identyfikacja v2: surface + linia 1px ink, radius 4px, zero cieni;
+          // ikony statusów w kolorach marki (green / cynober)
+          style: {
+            background: '#FBFAF6', color: '#17150F', border: '1px solid #17150F',
+            borderRadius: '4px', boxShadow: 'none', padding: '12px 16px',
+            fontFamily: "'Schibsted Grotesk', system-ui, sans-serif", fontSize: '14px', fontWeight: 500,
+          },
+          success: { iconTheme: { primary: '#2F6B53', secondary: '#FBFAF6' } },
+          error: { iconTheme: { primary: '#D9492B', secondary: '#FBFAF6' } },
         }}
       />
       <GlobalErrorBoundary>

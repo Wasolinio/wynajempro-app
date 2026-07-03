@@ -498,6 +498,7 @@ export default function ManagerApp() {
           </header>
 
           <main className="wpd-content">
+            <div className="wpd-view" key={detailBooking ? `detail-${detailBooking.id}` : renderView}>
             {detailBooking ? (
               <BookingDetailView
                 booking={detailBooking} templates={templates} toggleDynamicTask={toggleDynamicTask}
@@ -566,6 +567,7 @@ export default function ManagerApp() {
             )}
             </>
             )}
+            </div>
           </main>
         </div>
       </div>

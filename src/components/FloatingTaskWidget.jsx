@@ -15,8 +15,9 @@ export default function FloatingTaskWidget({ tasks = [] }) {
   return (
     <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 50, width: 300, maxWidth: 'calc(100vw - 32px)' }}>
       <div style={{
-        position: 'relative', background: 'var(--surface)', border: '1px solid var(--hairline)',
-        borderRadius: 4, padding: 18, boxShadow: '0 10px 30px rgba(23,21,15,.12)',
+        // separacja od tła linią 1px ink zamiast cienia — zasada v2 „zero cieni"
+        position: 'relative', background: 'var(--surface)', border: '1px solid var(--ink)',
+        borderRadius: 4, padding: 18,
       }}>
         <span style={{ position: 'absolute', top: -5, left: -5, width: 12, height: 12, borderRadius: '50%', background: 'var(--cynober)', border: '2px solid var(--surface)' }} />
 

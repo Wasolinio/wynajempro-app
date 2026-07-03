@@ -71,8 +71,7 @@ const CSS = `
 
 .wpc-bar{
   max-width:1080px; margin:0 auto; position:relative;
-  background:var(--surface); border:1px solid var(--hairline); border-radius:4px;
-  box-shadow:0 8px 28px rgba(23,21,15,.12);
+  background:var(--surface); border:1px solid var(--ink); border-radius:4px;
   display:flex; align-items:center; gap:20px; padding:18px 22px;
 }
 .wpc-ic{
@@ -99,8 +98,10 @@ const CSS = `
 .wpc-btn{
   display:inline-flex; align-items:center; justify-content:center; height:42px; padding:0 20px;
   font-family:inherit; font-weight:600; font-size:14px; border-radius:3px; cursor:pointer;
-  border:1px solid transparent; white-space:nowrap; transition:background .15s, border-color .15s, color .15s;
+  border:1px solid transparent; white-space:nowrap;
+  transition:background .15s, border-color .15s, color .15s, transform .15s cubic-bezier(.22,1,.36,1);
 }
+.wpc-btn:active{ transform:scale(.98); }
 .wpc-btn--primary{ background:var(--cynober); color:#fff; border-color:var(--cynober); }
 .wpc-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
 .wpc-btn--ghost{ background:transparent; color:var(--ink); border-color:var(--hairline); }

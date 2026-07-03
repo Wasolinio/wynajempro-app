@@ -119,10 +119,11 @@ export const DASHBOARD_CSS = `
   font-family:inherit; font-weight:600; font-size:14px; height:40px; padding:0 16px;
   border-radius:3px; border:1px solid var(--hairline); background:var(--surface);
   color:var(--ink); cursor:pointer; text-decoration:none; white-space:nowrap;
-  transition:background .14s, border-color .14s, color .14s;
+  transition:background .14s, border-color .14s, color .14s, transform .14s cubic-bezier(.22,1,.36,1);
 }
 .wpd-btn svg{ width:16px; height:16px; flex:0 0 16px; }
 .wpd-btn:hover{ border-color:var(--ink); }
+.wpd-btn:active:not(:disabled){ transform:scale(.97); }
 .wpd-btn--primary{ background:var(--cynober); border-color:var(--cynober); color:#fff; }
 .wpd-btn--primary:hover{ background:var(--cynober-hover); border-color:var(--cynober-hover); }
 .wpd-btn--sm{ height:34px; padding:0 12px; font-size:13px; gap:6px; }
@@ -133,10 +134,11 @@ export const DASHBOARD_CSS = `
 .wpd-iconbtn{
   display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0;
   border:1px solid var(--hairline); background:var(--surface); border-radius:3px; flex:0 0 40px;
-  color:var(--muted); cursor:pointer; position:relative; transition:border-color .14s, color .14s;
+  color:var(--muted); cursor:pointer; position:relative; transition:border-color .14s, color .14s, transform .14s cubic-bezier(.22,1,.36,1);
 }
 .wpd-iconbtn svg{ width:17px; height:17px; }
 .wpd-iconbtn:hover{ border-color:var(--ink); color:var(--ink); }
+.wpd-iconbtn:active:not(:disabled){ transform:scale(.97); }
 .wpd-iconbtn__dot{ position:absolute; top:7px; right:8px; width:6px; height:6px; border-radius:50%;
   background:var(--cynober); }
 .wpd-iconbtn__badge{ position:absolute; top:-7px; right:-7px; min-width:18px; height:18px; padding:0 4px;
@@ -359,10 +361,16 @@ export const DASHBOARD_CSS = `
 .wpd-cal__empty{ grid-column:1 / -1; }
 
 /* ── Modale ── */
+/* wejście: overlay 180ms fade + dialog 200ms ease-out od scale(.97) — nic nie pojawia się „z niczego";
+   transform-origin zostaje domyślny (center) — modal nie jest kotwiczony do triggera */
 .wpd-overlay{ position:fixed; inset:0; background:rgba(23,21,15,.42); backdrop-filter:blur(3px);
-  display:flex; align-items:center; justify-content:center; padding:20px; z-index:80; }
+  display:flex; align-items:center; justify-content:center; padding:20px; z-index:80;
+  animation:wpd-fade-in .18s ease-out; }
+@keyframes wpd-fade-in{ from{ opacity:0; } }
 .wpd-dialog{ background:var(--paper); border:1px solid var(--hairline); border-radius:4px;
-  width:100%; max-width:600px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; }
+  width:100%; max-width:600px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
+  animation:wpd-dialog-in .2s cubic-bezier(.22,1,.36,1); }
+@keyframes wpd-dialog-in{ from{ opacity:0; transform:scale(.97) translateY(8px); } }
 .wpd-dialog--lg{ max-width:860px; }
 .wpd-dialog--sm{ max-width:400px; }
 .wpd-dialog__head{ display:flex; align-items:flex-start; gap:14px; padding:20px 24px;
@@ -642,10 +650,18 @@ export const DASHBOARD_CSS = `
 .wpd-rise{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
 .wpd-rise.is-in{ opacity:1; transform:none; }
 
+/* wejście widoku — ten sam charakter co „pisanie" umowy w generatorze
+   (ta sama krzywa cubic-bezier(.22,1,.36,1)). Odtwarzane przy każdej zmianie
+   widoku dzięki atrybutowi key (remount) w ManagerApp. */
+@keyframes wpd-view-in{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+.wpd-view{ animation:wpd-view-in .32s cubic-bezier(.22,1,.36,1) both; }
+
 @media (prefers-reduced-motion: reduce){
   .wpd-trend__bar{ transition:none !important; }
   .wpd-hbar__fill{ transition:none !important; }
   .wpd-rise{ transition:none !important; opacity:1 !important; transform:none !important; }
+  .wpd-view{ animation:none !important; }
+  .wpd-overlay, .wpd-dialog{ animation:none !important; }
 }
 
 /* ── Responsywność ── */

@@ -1,34 +1,36 @@
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { BrandStyles } from './styles/brand';
 
-// Widok fallbackowy, gdy aplikacja napotka błąd renderowania
+// Widok fallbackowy, gdy aplikacja napotka błąd renderowania — identyfikacja WynajemPRO v2 (.wpb)
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50 p-6">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-          <AlertTriangle className="h-8 w-8 text-red-600" />
-        </div>
-        <h2 className="mb-2 text-2xl font-bold text-slate-800">Ups, coś poszło nie tak</h2>
-        <p className="mb-6 text-sm text-slate-500">
-          Wystąpił nieoczekiwany błąd w aplikacji. Przepraszamy za niedogodności.
-        </p>
-        
-        {/* Kontener ze szczegółami błędu, przydatny do debugowania */}
-        <div className="mb-8 rounded-lg bg-red-50 p-4 text-left">
-          <p className="text-xs font-mono text-red-800 break-words line-clamp-3">
-            {error.message}
+    <div className="wpb">
+      <BrandStyles />
+      <div className="wpb-center">
+        <div className="wpb-panel" style={{ textAlign: 'center' }}>
+          <span className="wpb-ic" style={{ margin: '0 auto 16px' }}><AlertTriangle /></span>
+          <span className="wpb-label">Błąd aplikacji</span>
+          <h2 className="wpb-h2" style={{ margin: '6px 0 8px' }}>Ups, coś poszło nie tak</h2>
+          <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.55, margin: '0 0 18px' }}>
+            Wystąpił nieoczekiwany błąd. Odśwież aplikację — Twoje dane są bezpieczne.
           </p>
-        </div>
 
-        <button
-          onClick={resetErrorBoundary}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <RefreshCw className="h-5 w-5" />
-          Odśwież aplikację
-        </button>
+          {/* Kontener ze szczegółami błędu, przydatny do debugowania */}
+          <div className="wpb-note wpb-note--err" style={{ textAlign: 'left', marginBottom: 20 }}>
+            <span style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, wordBreak: 'break-word',
+              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+            }}>
+              {error.message}
+            </span>
+          </div>
+
+          <button onClick={resetErrorBoundary} className="wpb-btn wpb-btn--primary wpb-btn--block">
+            <RefreshCw /> Odśwież aplikację
+          </button>
+        </div>
       </div>
     </div>
   );
