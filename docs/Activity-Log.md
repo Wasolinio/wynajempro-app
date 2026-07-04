@@ -13,6 +13,12 @@ Project timeline and key milestones.
 - ✅ Newsletter (landing): stan błędu odróżniony kolorem (#E8836B, 6.9:1 na ciemnym tle) + `role=status` dla czytników
 - Weryfikacja: lint+build, e2e panel-v2+smoke+spelling 9/9 → [[Design-Notes]] (statusy partii)
 
+### X12 — dolny pasek nawigacji mobile (partia 4)
+- ✅ Pasek <980px w tokenach `--side`: Pulpit · Kalendarz · Rezerwacje · Finanse + „Więcej" (podział zatwierdzony przez właściciela)
+- ✅ Arkusz „Więcej": Obiekty, Analityka, Przewodniki, Generator umów + wylogowanie + status synchronizacji; Escape/fokus/aria przez `useDialogA11y`
+- ✅ Zwinięte `.wpd-cells`/`.wpd-fgrid` <980px; treść z paddingiem pod pasek (safe-area); widget zadań podniesiony nad pasek
+- ✅ Weryfikacja: lint+build, e2e panel-v2 (z nowym testem mobile 375px) + smoke 6/6
+
 ---
 
 ## 2026-07-03

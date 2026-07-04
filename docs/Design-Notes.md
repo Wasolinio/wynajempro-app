@@ -31,7 +31,10 @@ GuideBuilder — `window.confirm`/`alert` ×6 → sparametryzowany DeleteConfirm
 błędu `.wp4-news__note--err` (#E8836B, 6.9:1 na ink) + `role=status`. Weryfikacja: lint+build,
 panel-v2+smoke+spelling 9/9, kolor błędu potwierdzony w computed styles.
 
-**Partia 4 — ⬜:** dolny pasek nawigacji mobile → [[Projects/Roadmap]] X12.
+**Partia 4 — ✅ 2026-07-04:** dolny pasek nawigacji mobile ([[Projects/Roadmap]] X12 ✅) —
+pasek w tokenach `--side` (Pulpit · Kalendarz · Rezerwacje · Finanse + „Więcej"), arkusz
+„Więcej" z resztą nawigacji, wylogowaniem i statusem synchronizacji (Escape/aria przez
+`useDialogA11y`), safe-area, widget zadań nad paskiem. Weryfikacja: e2e mobile 375px 6/6.
 
 **Poniżej progu (świadomie nieplanowane):** panel „Najbliższe przyjazdy i wyjazdy" pokazuje
 tylko przyjazdy (`wpd-row__tag--out` nieużywany); tooltip trendu dostępny tylko z hovera.
