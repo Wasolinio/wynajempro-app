@@ -3,7 +3,9 @@ import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart, FileSignature,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
+  MoreHorizontal,
 } from 'lucide-react';
+import { useDialogA11y } from './modals/useDialogA11y';
 import toast from 'react-hot-toast';
 
 import { db } from '../../firebase';
@@ -59,6 +61,10 @@ const NAV = [
   { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature },
 ];
 
+/* Dolny pasek mobile (X12): 4 pozycje pod kciukiem — decyzja właściciela 2026-07-04;
+   reszta + wylogowanie + status synchronizacji w arkuszu „Więcej". */
+const MOBILE_BAR = ['pulpit', 'calendar', 'bookings', 'finance'];
+
 const todaySubtitle = () => {
   const s = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   return s.toUpperCase();
@@ -92,6 +98,8 @@ export default function ManagerApp() {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDailyReportModal, setShowDailyReportModal] = useState(false);
+  const [showMobileMore, setShowMobileMore] = useState(false);
+  const moreSheetA11y = useDialogA11y(showMobileMore, () => setShowMobileMore(false));
   const [settingsTab, setSettingsTab] = useState('sync');
   const [itemToDelete, setItemToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -597,6 +605,58 @@ export default function ManagerApp() {
         editingId={editingId} newRental={newRental} setNewRental={setNewRental} handleRentalChange={handleRentalChange}
         properties={properties} sources={sources} categories={categories} />
       {itemToDelete && <DeleteConfirmModal onCancel={() => setItemToDelete(null)} onConfirm={confirmDelete} />}
+
+      {/* ── Dolny pasek nawigacji (mobile <980px, X12) ── */}
+      <nav className="wpd-bottombar" aria-label="Nawigacja">
+        {NAV.filter((i) => MOBILE_BAR.includes(i.key)).map((item) => {
+          const Icon = item.icon;
+          return (
+            <button key={item.key}
+              className={`wpd-bottombar__item${activeView === item.key && !showMobileMore ? ' wpd-bottombar__item--active' : ''}`}
+              onClick={() => { setShowMobileMore(false); changeView(item.key); }}>
+              <Icon /><span>{item.label}</span>
+            </button>
+          );
+        })}
+        <button className={`wpd-bottombar__item${showMobileMore ? ' wpd-bottombar__item--active' : ''}`}
+          aria-expanded={showMobileMore} onClick={() => setShowMobileMore((v) => !v)}>
+          <MoreHorizontal /><span>Więcej</span>
+        </button>
+      </nav>
+      {showMobileMore && (
+        <div className="wpd-overlay wpd-overlay--sheet" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowMobileMore(false); }}>
+          <div className="wpd-sheet" {...moreSheetA11y}>
+            <nav className="wpd-nav">
+              {NAV.filter((i) => !MOBILE_BAR.includes(i.key)).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.key}
+                    className={`wpd-nav__item${activeView === item.key ? ' wpd-nav__item--active' : ''}`}
+                    onClick={() => { setShowMobileMore(false); changeView(item.key); }}>
+                    <span className="wpd-nav__num">{item.num}</span>
+                    <Icon style={{ width: 17, height: 17 }} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+              <button className="wpd-nav__item" onClick={handleLogout}>
+                <span className="wpd-nav__num">—</span>
+                <Power style={{ width: 17, height: 17 }} />
+                <span>Wyloguj</span>
+              </button>
+            </nav>
+            <div className="wpd-sheet__sync">
+              {syncRows.map((s) => (
+                <div className="wpd-sync__row" key={s.name}>
+                  <span className="wpd-sync__dot" style={{ background: s.on ? 'var(--green-dot)' : 'var(--amber)' }} />
+                  <span className="wpd-sync__name">{s.name}</span>
+                  <span className="wpd-sync__time">{s.on ? 'OK' : '—'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <FloatingTaskWidget tasks={dailyReport.tasks} />
     </div>
   );

@@ -653,6 +653,17 @@ export const DASHBOARD_CSS = `
   .wpd-noprint{ display:none !important; }
 }
 
+/* ── Dolny pasek nawigacji + arkusz „Więcej" (mobile <980px, roadmapa X12) ── */
+.wpd-bottombar{ display:none; }
+.wpd-overlay--sheet{ align-items:flex-end; padding:0; }
+.wpd-sheet{ width:100%; background:var(--side); color:var(--on-side); border-top:1px solid var(--side-line);
+  border-radius:4px 4px 0 0; padding:14px 0 calc(78px + env(safe-area-inset-bottom));
+  animation:wpd-sheet-in .22s cubic-bezier(.22,1,.36,1); }
+@keyframes wpd-sheet-in{ from{ opacity:0; transform:translateY(24px); } }
+.wpd-sheet .wpd-nav{ padding:0; }
+.wpd-sheet__sync{ border-top:1px solid var(--side-line); margin-top:10px; padding:12px 24px 0;
+  display:flex; flex-direction:column; gap:7px; }
+
 /* ── Dotykowe pola ≥40px bez zmiany wyglądu (audyt poz. 5) ── */
 .wpd-check, .wpd-cal__navbtn, .wpd-user__out, .wpd-swatch, .wpd-bc button, .wpd-sync__title{ position:relative; }
 .wpd-check::after{ content:''; position:absolute; inset:-9px; }
@@ -680,17 +691,33 @@ export const DASHBOARD_CSS = `
   .wpd-overlay, .wpd-dialog{ animation:none !important; }
   /* spinnery zostają (informacja o trwającej operacji), ale spokojniejsze */
   .wpd-spin, .wpd-spin--xs, .wpd-rotate{ animation-duration:2s; }
+  .wpd-sheet{ animation:none !important; }
 }
 
 /* ── Responsywność ── */
 @media (max-width:980px){
   .wpd-side{ display:none; }
   .wpd-ctr-layout, .wpd-gb-form{ grid-template-columns:1fr; }
+  .wpd-cells{ grid-template-columns:1fr; }
+  .wpd-fgrid{ grid-template-columns:1fr; }
+  .wpd-bottombar{ position:fixed; left:0; right:0; bottom:0; z-index:70;
+    display:grid; grid-template-columns:repeat(5,1fr); gap:2px;
+    background:var(--side); border-top:1px solid var(--side-line);
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom)); }
+  .wpd-bottombar__item{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    min-height:48px; background:none; border:none; border-radius:3px; cursor:pointer;
+    color:var(--on-side-faint); font-family:'IBM Plex Mono', monospace; font-size:9px;
+    font-weight:500; letter-spacing:.05em; text-transform:uppercase; }
+  .wpd-bottombar__item svg{ width:19px; height:19px; }
+  .wpd-bottombar__item--active{ color:#fff; }
+  .wpd-bottombar__item--active svg{ color:var(--cynober); }
+  /* widget zadań nad paskiem */
+  .wpd-taskwidget{ bottom:86px !important; }
   .wpd-stats{ grid-template-columns:repeat(2,1fr); }
   .wpd-kpi{ grid-template-columns:repeat(2,1fr); }
   .wpd-grid-2{ grid-template-columns:1fr; }
   .wpd-objs{ grid-template-columns:1fr; }
-  .wpd-content{ padding:18px 16px 56px; }
+  .wpd-content{ padding:18px 16px calc(96px + env(safe-area-inset-bottom)); }
   .wpd-top{ padding:0 16px; }
   .wpd-search{ width:140px; }
   .wpd-top__title h1{ font-size:21px; }

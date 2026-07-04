@@ -44,6 +44,28 @@ test('Modal ustawień: semantyka dialogu i zamykanie Escape (audyt poz. 12)', as
   await expect(dialog).toBeHidden();
 });
 
+test('Mobile: dolny pasek zastępuje sidebar, arkusz „Więcej" działa (X12)', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });
+  await page.goto('/dashboard');
+
+  await expect(page.locator('.wpd-bottombar')).toBeVisible();
+  await expect(page.locator('.wpd-side')).toBeHidden();
+
+  // przełączenie widoku z paska
+  await page.locator('.wpd-bottombar__item', { hasText: 'Kalendarz' }).click();
+  await expect(page.locator('.wpd-cal__head')).toBeVisible();
+
+  // arkusz „Więcej": pozycje spoza paska + wylogowanie; Escape zamyka
+  await page.locator('.wpd-bottombar__item', { hasText: 'Więcej' }).click();
+  const sheet = page.locator('.wpd-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(sheet.locator('text=Analityka')).toBeVisible();
+  await expect(sheet.locator('text=Wyloguj')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+});
+
 test('Karta pulpitu aktywowana z klawiatury otwiera raport (audyt poz. 6)', async ({ page }) => {
   await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });
   await page.goto('/dashboard');

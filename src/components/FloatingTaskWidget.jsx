@@ -13,7 +13,7 @@ export default function FloatingTaskWidget({ tasks = [] }) {
   const mostUrgent = sortedTasks[0];
 
   return (
-    <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 50, width: 300, maxWidth: 'calc(100vw - 32px)' }}>
+    <div className="wpd-taskwidget" style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 50, width: 300, maxWidth: 'calc(100vw - 32px)' }}>
       <div style={{
         // separacja od tła linią 1px ink zamiast cienia — zasada v2 „zero cieni"
         position: 'relative', background: 'var(--surface)', border: '1px solid var(--ink)',
