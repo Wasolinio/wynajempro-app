@@ -4,6 +4,17 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-04
+
+### Dopieszczanie UI — partia 3 (widoki)
+- ✅ Kalendarz: naprawiona kolizja pasków rezerwacji back-to-back (gantt hotelowy — pasek kończy się przed dniem wyjazdu), czytelny tekst na paskach amber (`--ink`), legenda uzupełniona o kanał Nocowanie
+- ✅ GuideBuilder: 6× `window.confirm`/`alert` zastąpione brandowym DeleteConfirmModal (sparametryzowany) i toastami v2
+- ✅ Responsywność: generator umów i formularz przewodnika zwijają się do 1 kolumny <980px
+- ✅ Newsletter (landing): stan błędu odróżniony kolorem (#E8836B, 6.9:1 na ciemnym tle) + `role=status` dla czytników
+- Weryfikacja: lint+build, e2e panel-v2+smoke+spelling 9/9 → [[Design-Notes]] (statusy partii)
+
+---
+
 ## 2026-07-03
 
 ### Dopieszczanie UI — audyt i partia 1 (+ plan wdrożenia)

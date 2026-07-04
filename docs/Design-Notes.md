@@ -22,10 +22,14 @@ najwyższy dialog (z-index-aware), fokus wchodzi przy otwarciu, `role=dialog`/`a
 (5 modali). Weryfikacja: lint+build, `e2e/panel-v2.spec.js` 3/3 (Escape, klawiatura,
 render panelu) — nowy spec, bo stara suita nie testuje panelu v2 (X10).
 
-**Partia 3 — ⬜:** kalendarz (kontrast amber → `--amber-ink`, legenda o Nocowanie, kolizja
-pasków back-to-back — najpierw reprodukcja); GuideBuilder: `window.confirm` → DeleteConfirmModal
-+ toasty; zwijanie generatora umów i formularza przewodnika <980px; newsletter: stan błędu
-w cynobrze + `role=status`.
+**Partia 3 — ✅ 2026-07-04:** kalendarz — kolizja pasków back-to-back POTWIERDZONA w kodzie
+(wszystkie paski `grid-row:1`, span obejmował dzień wyjazdu) i naprawiona konwencją gantta
+hotelowego (pasek = noce, dzień wyjazdu wolny; jednodniowe i ucięte końcem miesiąca zachowują
+szerokość), tekst na amber → `var(--ink)` (~6.3:1), legenda uzupełniona o Nocowanie;
+GuideBuilder — `window.confirm`/`alert` ×6 → sparametryzowany DeleteConfirmModal + `toast.error`;
+`.wpd-ctr-layout` i nowy `.wpd-gb-form` zwijają się do 1 kolumny <980px; newsletter — stan
+błędu `.wp4-news__note--err` (#E8836B, 6.9:1 na ink) + `role=status`. Weryfikacja: lint+build,
+panel-v2+smoke+spelling 9/9, kolor błędu potwierdzony w computed styles.
 
 **Partia 4 — ⬜:** dolny pasek nawigacji mobile → [[Projects/Roadmap]] X12.
 
