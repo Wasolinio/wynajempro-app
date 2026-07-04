@@ -69,6 +69,7 @@ export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState('');
+  const [noteErr, setNoteErr] = useState(false);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -82,10 +83,12 @@ export default function LandingPage() {
         source: 'landing_v4',
       });
       setNote('Dziękujemy — otrzymasz nasze poradniki.');
+      setNoteErr(false);
       setEmail('');
     } catch (err) {
       console.error('Błąd newslettera', err);
       setNote('Błąd zapisu. Spróbuj ponownie.');
+      setNoteErr(true);
     } finally {
       setSubmitting(false);
     }
@@ -647,7 +650,7 @@ export default function LandingPage() {
               {submitting ? 'Zapisuję…' : 'Zapisz się'}
             </button>
           </form>
-          {note && <p className="wp4-news__note">{note}</p>}
+          {note && <p className={`wp4-news__note${noteErr ? ' wp4-news__note--err' : ''}`} role="status">{note}</p>}
 
           <div className="wp4-cta__or">
             <span className="wp4-label wp4-label--ink-faint">lub</span>
@@ -1022,6 +1025,8 @@ const CSS = `
 .wp4-news__field input::placeholder{ color:var(--ink-faint); }
 .wp4-news__field input:focus{ border-color:var(--cynober); }
 .wp4-news__note{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-on); margin:14px 0 0; }
+/* stan błędu: ton cynobru rozjaśniony pod ciemne tło CTA (6.9:1 na --ink) */
+.wp4-news__note--err{ color:#E8836B; }
 .wp4-cta__or{ margin:28px 0 16px; }
 .wp4-cta__inner > .wp4-label{ margin-top:16px; }
 

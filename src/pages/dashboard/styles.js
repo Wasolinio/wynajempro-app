@@ -606,6 +606,8 @@ export const DASHBOARD_CSS = `
 
 /* ── Generator umów ── */
 .wpd-ctr-layout{ display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:start; }
+/* formularz kreatora przewodników (GuideBuilder) — ten sam wzorzec dwóch kolumn */
+.wpd-gb-form{ display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:start; }
 .wpd-ctr-list{ max-height:380px; overflow-y:auto; }
 .wpd-ctr-row{ cursor:pointer; border-left:2px solid transparent; transition:background .12s, border-color .12s; }
 .wpd-ctr-row:hover{ background:var(--inner); }
@@ -683,6 +685,7 @@ export const DASHBOARD_CSS = `
 /* ── Responsywność ── */
 @media (max-width:980px){
   .wpd-side{ display:none; }
+  .wpd-ctr-layout, .wpd-gb-form{ grid-template-columns:1fr; }
   .wpd-stats{ grid-template-columns:repeat(2,1fr); }
   .wpd-kpi{ grid-template-columns:repeat(2,1fr); }
   .wpd-grid-2{ grid-template-columns:1fr; }

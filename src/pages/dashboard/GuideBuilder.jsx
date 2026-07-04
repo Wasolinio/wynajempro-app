@@ -8,6 +8,7 @@ import {
   Key, BookOpen, Navigation, FileText, Upload, ShieldAlert,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import DeleteConfirmModal from './modals/DeleteConfirmModal';
 
 const MAX_UPLOAD = 10 * 1024 * 1024; // 10 MB
 
@@ -23,6 +24,8 @@ export default function GuideBuilder({ user, properties }) {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  // potwierdzenia w brandowym dialogu zamiast window.confirm: { title, message, action }
+  const [confirmBox, setConfirmBox] = useState(null);
 
   useEffect(() => {
     fetchGuides();
@@ -85,24 +88,28 @@ export default function GuideBuilder({ user, properties }) {
     setEditingGuide({ ...guide, ...secrets, ppoRules: guide.ppoRules || defaultPpoRules });
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Czy na pewno chcesz usunąć ten przewodnik? Ten link przestanie działać dla gości.')) {
-      try {
-        await deleteDoc(doc(db, 'guides', id));
-        toast.success('Usunięto przewodnik');
-        setGuides(guides.filter((g) => g.id !== id));
-      } catch (err) {
-        console.error('Błąd usuwania przewodnika:', err);
-        toast.error('Błąd podczas usuwania');
-      }
+  const deleteGuide = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'guides', id));
+      toast.success('Usunięto przewodnik');
+      setGuides((prev) => prev.filter((g) => g.id !== id));
+    } catch (err) {
+      console.error('Błąd usuwania przewodnika:', err);
+      toast.error('Błąd podczas usuwania');
     }
   };
+
+  const handleDelete = (id) => setConfirmBox({
+    title: 'Usuwanie przewodnika',
+    message: 'Czy na pewno chcesz usunąć ten przewodnik? Ten link przestanie działać dla gości.',
+    action: () => deleteGuide(id),
+  });
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > MAX_UPLOAD) {
-      alert('Plik jest za duży. Maksymalny rozmiar to 10MB.');
+      toast.error('Plik jest za duży. Maksymalny rozmiar to 10 MB.');
       return;
     }
     setUploadingImage(true);
@@ -113,7 +120,7 @@ export default function GuideBuilder({ user, properties }) {
       setEditingGuide({ ...editingGuide, coverImage: url });
     } catch (err) {
       console.error('Błąd przesyłania zdjęcia:', err);
-      alert('Nie udało się przesłać zdjęcia.');
+      toast.error('Nie udało się przesłać zdjęcia.');
     } finally {
       setUploadingImage(false);
     }
@@ -123,7 +130,7 @@ export default function GuideBuilder({ user, properties }) {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > MAX_UPLOAD) {
-      alert('Plik jest za duży. Maksymalny rozmiar to 10MB.');
+      toast.error('Plik jest za duży. Maksymalny rozmiar to 10 MB.');
       return;
     }
     setUploadingFile(true);
@@ -134,17 +141,27 @@ export default function GuideBuilder({ user, properties }) {
       setEditingGuide({ ...editingGuide, houseRulesFile: { name: file.name, url } });
     } catch (err) {
       console.error('Błąd przesyłania pliku:', err);
-      alert('Nie udało się przesłać pliku. Upewnij się, że ma format PDF lub DOC/DOCX.');
+      toast.error('Nie udało się przesłać pliku. Upewnij się, że ma format PDF lub DOC/DOCX.');
     } finally {
       setUploadingFile(false);
     }
   };
 
-  const handleRemoveFile = async () => {
-    if (window.confirm('Czy na pewno usunąć ten plik regulaminu?')) {
-      setEditingGuide({ ...editingGuide, houseRulesFile: null });
-    }
-  };
+  const handleRemoveFile = () => setConfirmBox({
+    title: 'Usuwanie pliku',
+    message: 'Czy na pewno usunąć ten plik regulaminu?',
+    action: () => setEditingGuide((prev) => ({ ...prev, houseRulesFile: null })),
+  });
+
+  // wspólny dla obu gałęzi renderu (lista / edycja)
+  const confirmModal = confirmBox && (
+    <DeleteConfirmModal
+      title={confirmBox.title}
+      message={confirmBox.message}
+      onCancel={() => setConfirmBox(null)}
+      onConfirm={() => { confirmBox.action(); setConfirmBox(null); }}
+    />
+  );
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -202,6 +219,7 @@ export default function GuideBuilder({ user, properties }) {
 
     return (
       <>
+        {confirmModal}
         <div className="wpd-panel" style={{ marginBottom: 18 }}>
           <div className="wpd-panel__head">
             <div>
@@ -212,7 +230,7 @@ export default function GuideBuilder({ user, properties }) {
           </div>
         </div>
 
-        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 18, alignItems: 'start' }}>
+        <form onSubmit={handleSave} className="wpd-gb-form">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             {/* Podstawowe informacje */}
             <div className="wpd-panel">
@@ -361,6 +379,7 @@ export default function GuideBuilder({ user, properties }) {
   // --- WIDOK LISTY ---
   return (
     <>
+      {confirmModal}
       <div className="wpd-objs__head">
         <span className="wpd-label">Przewodniki dla gości — mobilne strony powitalne</span>
         <button className="wpd-btn wpd-btn--primary" onClick={handleCreateNew}><Plus /> Nowy przewodnik</button>

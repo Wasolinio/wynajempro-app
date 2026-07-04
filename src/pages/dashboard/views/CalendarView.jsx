@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarCheck, Moon, Clock } from 'lucide-react';
-import { channelColor } from '../styles';
+import { channelColor, channelTone } from '../styles';
 import { clickableProps } from '../../../utils/a11y';
 
 const WD = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'sb'];
@@ -44,7 +44,8 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
       if (isNaN(s.getTime()) || e.getTime() < mStart || s.getTime() > mEnd) return;
       const startNum = s.getTime() < mStart ? 1 : s.getDate();
       const endNum = e.getTime() > mEnd ? dim : e.getDate();
-      map[propName].push({ r, startNum, endNum, propName });
+      const clipEnd = e.getTime() > mEnd;
+      map[propName].push({ r, startNum, endNum, clipEnd, propName });
     });
     return map;
   }, [rentals, properties, calendarDate]);
@@ -82,6 +83,7 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
           <div className="wpd-cal__legend">
             <span className="wpd-cal__leg"><span className="wpd-dot" style={{ background: 'var(--cynober)' }} /> Airbnb</span>
             <span className="wpd-cal__leg"><span className="wpd-dot" style={{ background: 'var(--granat)' }} /> Booking</span>
+            <span className="wpd-cal__leg"><span className="wpd-dot" style={{ background: 'var(--amber)' }} /> Nocowanie</span>
             <span className="wpd-cal__leg"><span className="wpd-dot" style={{ background: 'var(--green)' }} /> Bezpośrednia</span>
           </div>
         </div>
@@ -116,9 +118,16 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
                     const isToday = isThisMonth && d === todayNum;
                     return <div key={d} className={`wpd-cal__daycell${isToday ? ' wpd-cal__daycell--today' : ''}`} style={{ gridColumn: i + 1 }} />;
                   })}
-                  {barsByProp[p.name]?.map(({ r, startNum, endNum }) => (
+                  {barsByProp[p.name]?.map(({ r, startNum, endNum, clipEnd }) => (
                     <div key={r.id} className="wpd-cal__bar"
-                      style={{ gridColumn: `${startNum} / ${endNum + 1}`, background: channelColor(r.source) }}
+                      style={{
+                        /* gantt hotelowy: pasek = noce, dzień wyjazdu zostaje wolny pod przyjazd
+                           back-to-back; rezerwacje jednodniowe i ucięte końcem miesiąca
+                           zachowują pełną szerokość */
+                        gridColumn: `${startNum} / ${clipEnd ? endNum + 1 : Math.max(endNum, startNum + 1)}`,
+                        background: channelColor(r.source),
+                        ...(channelTone(r.source) === 'amber' ? { color: 'var(--ink)' } : {}),
+                      }}
                       title={`${r.guest || 'Rezerwacja'} · ${r.date}${r.endDate ? ` → ${r.endDate}` : ''}`}
                       {...clickableProps(() => onEditRental(r))}>
                       {surname(r.guest)}
