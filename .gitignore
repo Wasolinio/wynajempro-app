@@ -22,7 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env.local 
+
+# Sekrety / zmienne środowiskowe — NIGDY nie commituj prawdziwych sekretów
+.env
+.env.*
+!.env.example
+!*.env.example
+
 # Firebase
 .firebase/
 firebase-debug.log*
@@ -32,8 +38,14 @@ firebase-debug.log*
 
 # AI Agents workspace
 .agents/
+.claude/worktrees/
 PROJECT.md
 
 # Playwright
 test-results/
-playwright-report/.npm_cache/
+playwright-report/
+
+# Obsidian — osobisty układ paneli/grafu (szum, nie do repo; konfiguracja vaulta zostaje)
+docs/.obsidian/workspace*.json
+docs/.obsidian/graph.json
+docs/.obsidian/cache
