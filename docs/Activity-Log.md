@@ -19,6 +19,23 @@ Project timeline and key milestones.
 - ✅ Zwinięte `.wpd-cells`/`.wpd-fgrid` <980px; treść z paddingiem pod pasek (safe-area); widget zadań podniesiony nad pasek
 - ✅ Weryfikacja: lint+build, e2e panel-v2 (z nowym testem mobile 375px) + smoke 6/6
 
+### Decyzje właściciela + kierunek prac (2026-07-04)
+- ✅ **Cennik na launch rozstrzygnięty**: 29,99 zł/mc + founding members (rabat roczny dla bety); pakiety wg liczby obiektów odłożone. Zamyka otwartą decyzję nr 2 w [[Projects/Roadmap]].
+- ✅ **Kierunek po N1**: najpierw tor prawny **N4** — `legal` przygotowuje projekty regulaminu, polityki prywatności i DPA (najdłuższy lead time u prawnika). Kod (N2 paywall) po torze prawnym.
+
+### N1 — przywrócenie weryfikacji e-mail (bloker launchu, rozpoczęte Fable → dokończone Opus)
+- ✅ Usunięty bypass z `b4aeb4e` w 3 miejscach: `App.jsx` (ProtectedRoute), `WynajemContext.jsx`, `LoginPanel.jsx`; wszystkie 3 TODO wycięte. Niezweryfikowane konto hasłowe nie wchodzi do panelu; Google pomija wymóg.
+- ✅ Dowód pre-existing vs regresja: `auth.spec` padał 12/12 także BEZ zmian N1 (test na stashu) — porażki nie były regresją, tylko zastaną wadą mocka + stale selektorami.
+- ✅ Naprawiony `e2e/firebase-mock.js`: dodane brakujące eksporty `firebase/auth` (`setPersistence`, `browserLocalPersistence`, `browserSessionPersistence`, `sendPasswordResetEmail`) — bez nich import ESM w LoginPanel padał i `/login` renderował pustą stronę (stąd 12 timeoutów).
+- ✅ Zaktualizowane stale selektory pod v2: przełącznik trybu (`Rozpocznij 14-dniowy test` → zakładka `Rejestracja`), toggle hasła (ikona lucide → tekst `Pokaż`/`Ukryj`), akceptacja regulaminu (nowy wymóg v2 — klik `.wp4a-check__box` przed submitem rejestracji).
+- ✅ **`auth.spec` 13/13** (było 0/12); pełna suita zaufana: auth 13 + panel-v2 4 + smoke 2 + spelling 4 = zielone. lint+build 0.
+- ⏸ **Zostaje ręczny test właściciela** (real e-mail / emulator Auth) — bypass powstał przez App Check/403, runtime nie do sprawdzenia w środowisku agenta.
+
+### N4 — projekty dokumentów prawnych (agent `legal`)
+- ✅ Cztery projekty w `docs/legal/`: `Regulamin.md`, `Polityka-prywatnosci.md`, `DPA-powierzenie.md`, `Checklista-zgodnosci.md` — oparte na kodzie (dwuwarstwowość danych, podpisy gości, sekrety, publiczny hostProfile) i źródłach oficjalnych (ISAP/UOKiK/UODO, linki w checkliście). Placeholdery zamiast zmyślonych danych firmy.
+- ⚠️ **Kluczowe odkrycie (potwierdzone w kodzie):** `firestore.rules` ma zaślepione N1/N2/N3 — `isOwnerAndVerified` bez `email_verified` (`:9-13`), `hasActiveSubscription`→`true` (`:29-32`), `isValidRental/Guide`→`true` (`:38-62`). Nasze N1 działa na froncie, ale reguły backendu nie egzekwują ani weryfikacji, ani subskrypcji, ani schematu. Ujęte w roadmapie przy N1/N2/N3.
+- 🔴 **Bramka legal**: dokumentów nie wolno publikować, dopóki N1–N3 nie wdrożone (rozliczalność RODO). Czeka: decyzje właściciela (dane firmy, VAT, founding members) + prawnik‑człowiek + wdrożenie `dev`.
+
 ---
 
 ## 2026-07-03

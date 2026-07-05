@@ -72,12 +72,13 @@ const ProtectedRoute = ({ children }) => {
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // TODO: PRZED LAUNCHEM — przywrócić wymóg weryfikacji e-mail (po naprawie App Check / HTTP 403)
-      // if (currentUser && !currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
-      //   setUser(null);
-      // } else {
-      setUser(currentUser);
-      // }
+      // konta hasłowe bez potwierdzonego adresu nie wchodzą do panelu (N1);
+      // konta Google mają adres zweryfikowany przez dostawcę
+      if (currentUser && !currentUser.emailVerified && currentUser.providerData[0]?.providerId === 'password') {
+        setUser(null);
+      } else {
+        setUser(currentUser);
+      }
       setLoading(false);
     });
     return () => unsubscribe();

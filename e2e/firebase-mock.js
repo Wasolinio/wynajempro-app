@@ -129,6 +129,12 @@ export async function setupFirebaseMocks(page, options = {}) {
           credential: (email, password) => ({ email, password })
         };
         export const reauthenticateWithCredential = async (user, credential) => {};
+        // Trwałość sesji ("Zapamiętaj mnie") + reset hasła — no-op na mockach.
+        // Bez tych eksportów import ESM w LoginPanel.jsx pada i /login renderuje pustą stronę.
+        export const browserLocalPersistence = { type: 'LOCAL' };
+        export const browserSessionPersistence = { type: 'SESSION' };
+        export const setPersistence = async (auth, persistence) => {};
+        export const sendPasswordResetEmail = async (auth, email) => {};
       `
     });
   });

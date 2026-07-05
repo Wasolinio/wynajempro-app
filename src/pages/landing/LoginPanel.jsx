@@ -128,13 +128,12 @@ export default function LoginPanel() {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
         await userCredential.user.reload();
-        // TODO: CLEANUP - Przywrócić wymóg weryfikacji e-mail po testach
-        // if (!userCredential.user.emailVerified) {
-        //   setError('Twój adres email nie został jeszcze zweryfikowany. Sprawdź swoją skrzynkę pocztową.');
-        //   await signOut(auth);
-        //   setIsLoading(false);
-        //   return;
-        // }
+        if (!userCredential.user.emailVerified) {
+          setError('Twój adres email nie został jeszcze zweryfikowany. Sprawdź swoją skrzynkę pocztową.');
+          await signOut(auth);
+          setIsLoading(false);
+          return;
+        }
         const currentAnalytics = analytics || initAnalytics();
         if (currentAnalytics) logEvent(currentAnalytics, 'login', { method: 'email' });
         navigate('/dashboard');

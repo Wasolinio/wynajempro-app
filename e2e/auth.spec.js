@@ -16,7 +16,7 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     // Switch to Register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     
     const nameInput = page.locator('input[name="name"]');
     const emailInput = page.locator('input[name="email"]');
@@ -70,12 +70,12 @@ test.describe('Authentication Tests', () => {
     const passwordInput = page.locator('input[name="password"]');
     await expect(passwordInput).toHaveAttribute('type', 'password');
     
-    // Toggle visibility (the eye icon button)
-    await page.locator('button:has(svg.lucide-eye)').first().click();
+    // Toggle visibility (v2 to przycisk tekstowy Pokaż/Ukryj, nie ikona)
+    await page.getByRole('button', { name: 'Pokaż' }).click();
     await expect(passwordInput).toHaveAttribute('type', 'text');
-    
+
     // Toggle back
-    await page.locator('button:has(svg.lucide-eye-off)').first().click();
+    await page.getByRole('button', { name: 'Ukryj' }).click();
     await expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
@@ -97,11 +97,12 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     // Switch to register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     
     await page.fill('input[name="name"]', 'New User');
     await page.fill('input[name="email"]', 'weak@example.com');
     await page.fill('input[name="password"]', '12345');
+    await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
     await expect(page.locator('text=Hasło jest za słabe (wymagane minimum 6 znaków).')).toBeVisible();
@@ -112,11 +113,12 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     // Switch to register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     
     await page.fill('input[name="name"]', 'Existing User');
     await page.fill('input[name="email"]', 'existing@example.com');
     await page.fill('input[name="password"]', 'password123');
+    await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
     await expect(page.locator('text=Konto z tym adresem e-mail już istnieje.')).toBeVisible();
@@ -153,16 +155,27 @@ test.describe('Authentication Tests', () => {
     await expect(page.locator('text=Twój adres email nie został jeszcze zweryfikowany.')).toBeVisible();
   });
 
+  test('Niezweryfikowany użytkownik hasłowy nie wejdzie na /dashboard (N1)', async ({ page }) => {
+    await setupFirebaseMocks(page, {
+      user: { uid: 'uid-unverified', email: 'unverified@example.com', displayName: 'Test User', emailVerified: false },
+      dbData: mockDbData,
+    });
+    await page.goto('/dashboard');
+    // ProtectedRoute odrzuca niezweryfikowane konto hasłowe → przekierowanie na logowanie
+    await expect(page).toHaveURL(/\/login/);
+  });
+
   test('Test verification email resend cooldown button behavior', async ({ page }) => {
     await setupFirebaseMocks(page, { dbData: mockDbData });
     await page.goto('/login');
     
     // Switch to register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     
     await page.fill('input[name="name"]', 'Verify User');
     await page.fill('input[name="email"]', 'verifyresend@example.com');
     await page.fill('input[name="password"]', 'password123');
+    await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
     // Should be redirected to verification screen
@@ -183,11 +196,12 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     // Go to register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     
     await page.fill('input[name="name"]', 'Combo User');
     await page.fill('input[name="email"]', 'combo@example.com');
     await page.fill('input[name="password"]', 'password123');
+    await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
     // Checks email verification screen
@@ -206,10 +220,11 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     // Register
-    await page.click('text=Rozpocznij 14-dniowy test');
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     await page.fill('input[name="name"]', 'Real User');
     await page.fill('input[name="email"]', 'realuser@example.com');
     await page.fill('input[name="password"]', 'securepassword123');
+    await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
     // Verify screen is shown
