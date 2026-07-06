@@ -27,6 +27,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
+const ReviewPageView = lazy(() => import('./pages/ReviewPageView'));
 
 // Część zalogowana (panel zarządzania)
 const ManagerApp = lazy(() => import('./pages/dashboard/ManagerApp'));
@@ -123,6 +124,7 @@ export default function App() {
               <Route path="/blog" element={<BlogListPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/guide/:guideId" element={<GuestGuideView />} />
+              <Route path="/opinie/:pageId" element={<ReviewPageView />} />
 
               {/* ── Panel zarządzania (chroniony) ── */}
               <Route

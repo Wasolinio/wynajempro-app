@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart, FileSignature,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
-  MoreHorizontal,
+  MoreHorizontal, Star,
 } from 'lucide-react';
 import { useDialogA11y } from './modals/useDialogA11y';
 import toast from 'react-hot-toast';
@@ -37,6 +37,7 @@ import BookingDetailView from './views/BookingDetailView';
 import AnalyticsView from './views/AnalyticsView';
 import ContractGeneratorView from './views/ContractGeneratorView';
 import GuideBuilder from './GuideBuilder';
+import ReviewBuilder from './ReviewBuilder';
 
 const getIconComponent = (name) => {
   switch (name) {
@@ -59,6 +60,7 @@ const NAV = [
   { key: 'analytics', num: '06', label: 'Analityka', icon: LineChart },
   { key: 'guides', num: '07', label: 'Przewodniki', icon: BookOpen },
   { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature },
+  { key: 'reviews', num: '09', label: 'Opinie', icon: Star },
 ];
 
 /* Dolny pasek mobile (X12): 4 pozycje pod kciukiem — decyzja właściciela 2026-07-04;
@@ -78,6 +80,7 @@ const VIEW_META = {
   analytics: { title: 'Analityka', sub: 'Statystyki: miesiąc · kwartał · półrocze · rok' },
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
   contracts: { title: 'Generator umów', sub: 'Umowy najmu z danych rezerwacji' },
+  reviews: { title: 'Opinie', sub: 'Podziękowania i prośby o opinie po pobycie' },
 };
 
 export default function ManagerApp() {
@@ -572,6 +575,9 @@ export default function ManagerApp() {
             )}
             {renderView === 'contracts' && (
               <ContractGeneratorView rentals={rentals} hostProfile={hostProfile} />
+            )}
+            {renderView === 'reviews' && (
+              <ReviewBuilder user={user} properties={properties} />
             )}
             </>
             )}

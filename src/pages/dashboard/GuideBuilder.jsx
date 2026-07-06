@@ -39,7 +39,8 @@ export default function GuideBuilder({ user, properties }) {
       const q = query(collection(db, 'guides'), where('ownerId', '==', user.uid));
       const snap = await getDocs(q);
       const fetched = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setGuides(fetched);
+      // strony opinii (type:'review', X13) żyją w tej samej kolekcji, ale mają własny edytor (ReviewBuilder)
+      setGuides(fetched.filter((g) => g.type !== 'review'));
     } catch (err) {
       console.error('Błąd pobierania przewodników:', err);
     } finally {
