@@ -4,6 +4,16 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-06
+
+### X13 — poprawki z przeglądu designera (finalizacja MVP)
+- ✅ Naniesione findingi przeglądu tonu: `Dziękujemy za pobyt` bez wykrzyknika (tytuł + fallback), bezosobowy DEFAULT_MESSAGE („Jeśli znajdzie się chwila…"), toast przy błędzie pobierania listy, toasty błędów ze wskazaniem akcji („…Spróbuj ponownie."), mikro-copy `To zajmie około minuty.` jako `wpb-meta`, kredyt ujednolicony z przewodnikiem („Stworzono za pomocą WynajemPRO", bez linku)
+- ✅ Weryfikacja: lint+build 0; e2e 28/28 (review-pages 5 + panel-v2 4 + auth 13 + smoke 2 + spelling 4)
+- ✅ Punkt Booking.com rozstrzygnięty przez właściciela: hint z zastrzeżeniem „Booking prosi o opinię własnym mailem" (finding nr 6 designera)
+- ✅ Całość X13 zacommitowana: `f1c47ec`
+
+---
+
 ## 2026-07-04
 
 ### Dopieszczanie UI — partia 3 (widoki)
@@ -22,6 +32,7 @@ Project timeline and key milestones.
 ### Decyzje właściciela + kierunek prac (2026-07-04)
 - ✅ **Cennik na launch rozstrzygnięty**: 29,99 zł/mc + founding members (rabat roczny dla bety); pakiety wg liczby obiektów odłożone. Zamyka otwartą decyzję nr 2 w [[Projects/Roadmap]].
 - ✅ **Kierunek po N1**: najpierw tor prawny **N4** — `legal` przygotowuje projekty regulaminu, polityki prywatności i DPA (najdłuższy lead time u prawnika). Kod (N2 paywall) po torze prawnym.
+- 💡 **Nowy pomysł właściciela → X13 „przewodnik opinii"**: strona podziękowania po pobycie z łączami do portali opinii (Google/Booking/Airbnb), na wzór przewodnika gościa. Decyzje: roadmapa NEXT (X13), MVP = strona per obiekt z ręcznym linkiem (bez danych osobowych, bez auto-wysyłki). Rozszerzenia odłożone w [[Projects/Backlog]].
 
 ### N1 — przywrócenie weryfikacji e-mail (bloker launchu, rozpoczęte Fable → dokończone Opus)
 - ✅ Usunięty bypass z `b4aeb4e` w 3 miejscach: `App.jsx` (ProtectedRoute), `WynajemContext.jsx`, `LoginPanel.jsx`; wszystkie 3 TODO wycięte. Niezweryfikowane konto hasłowe nie wchodzi do panelu; Google pomija wymóg.
@@ -30,6 +41,13 @@ Project timeline and key milestones.
 - ✅ Zaktualizowane stale selektory pod v2: przełącznik trybu (`Rozpocznij 14-dniowy test` → zakładka `Rejestracja`), toggle hasła (ikona lucide → tekst `Pokaż`/`Ukryj`), akceptacja regulaminu (nowy wymóg v2 — klik `.wp4a-check__box` przed submitem rejestracji).
 - ✅ **`auth.spec` 13/13** (było 0/12); pełna suita zaufana: auth 13 + panel-v2 4 + smoke 2 + spelling 4 = zielone. lint+build 0.
 - ⏸ **Zostaje ręczny test właściciela** (real e-mail / emulator Auth) — bypass powstał przez App Check/403, runtime nie do sprawdzenia w środowisku agenta.
+
+### X13 — „przewodnik opinii" zbudowany (MVP)
+- ✅ Edytor w panelu (nawigacja 09 „Opinie"): szablon podziękowania + łącza do portali (presety Google/Booking/Airbnb/TripAdvisor/Facebook), kopiowanie publicznego linku, QR do wydruku w obiekcie
+- ✅ Publiczna strona `/opinie/{id}` w identyfikacji v2 (.wpb, mobile-first) — podziękowanie przed prośbą, bez danych osobowych gościa
+- ✅ Architektura: reużycie kolekcji `guides` z `type:'review'` → zero zmian w firestore.rules; GuideBuilder filtruje typy (przewodniki i strony opinii się nie mieszają)
+- ✅ Publiczny odczyt przez anonimową sesję — dokładnie wzorzec GuestGuideView sprawdzony u gości na produkcji (odkrycie: reguły wdrożone mogą różnić się od repo → notatka przy N3)
+- ✅ Weryfikacja: lint+build 0, e2e `review-pages.spec.js` 5/5 + regresja panel-v2/smoke 6/6; przegląd tonu `designer` w toku
 
 ### N4 — projekty dokumentów prawnych (agent `legal`)
 - ✅ Cztery projekty w `docs/legal/`: `Regulamin.md`, `Polityka-prywatnosci.md`, `DPA-powierzenie.md`, `Checklista-zgodnosci.md` — oparte na kodzie (dwuwarstwowość danych, podpisy gości, sekrety, publiczny hostProfile) i źródłach oficjalnych (ISAP/UOKiK/UODO, linki w checkliście). Placeholdery zamiast zmyślonych danych firmy.

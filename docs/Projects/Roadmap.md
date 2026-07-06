@@ -53,6 +53,7 @@ po domknięciu sekcji NOW.
 **Weryfikacja:** testy reguł na emulatorze (zapis poprawny przechodzi, wadliwy odrzucany) + regresja e2e.
 **Agent:** `dev` + `code-reviewer` (audyt reguł). **Status:** ⬜
 - ⚠️ **Potwierdzone 2026-07-04**: `firestore.rules` `isValidRental` (`:38-41`) i `isValidGuide` (`:59-62`) → `return true` (walidacja ominięta). Tu też domknąć `email_verified` z N1 (jeden plik reguł).
+- ⚠️ **Reguły wdrożone ≠ zweryfikowane z repo** (odkrycie przy X13, 2026-07-04): niezalogowany odczyt publicznej kolekcji `guides` z localhost dostał `permission-denied`, mimo że repo deklaruje `allow read: if true` — możliwa różnica repo↔produkcja albo egzekwowanie App Check. PRZED deployem reguł przy N3 pobrać faktycznie wdrożone reguły (konsola Firebase) i porównać z repo. Walidacja `isValidGuide` musi uwzględnić `type:'review'` (X13).
 
 ### N4. Regulamin, polityka prywatności, powierzenie danych (DPA)
 **Po co:** przyjmowanie płatności bez regulaminu i podstaw RODO to ryzyko prawne; gospodarze przetwarzają w aplikacji dane SWOICH najemców — potrzebne powierzenie przetwarzania. (Pozycja nr 1 z listy właściciela.)
@@ -115,6 +116,17 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 **Weryfikacja:** przejście wszystkich widoków na viewporcie mobile (375px) + e2e ui-scaling.
 **Agent:** `designer` (projekt podziału) + `dev`. **Status:** ✅ 2026-07-04 (podział zatwierdzony przez właściciela: Pulpit · Kalendarz · Rezerwacje · Finanse + „Więcej"; e2e mobile w `panel-v2.spec.js`)
 
+### X13. „Przewodnik opinii" — strona podziękowania z prośbą o opinię (pomysł właściciela 2026-07-04)
+**Po co:** opinie na Google/Booking/Airbnb to bezpośrednia dźwignia rezerwacji gospodarza; nieinwazyjna strona-podziękowanie kieruje gościa dokładnie tam, gdzie opinia ma dla gospodarza wartość — wzmacnia główną obietnicę produktu.
+**Zakres MVP (decyzja właściciela 2026-07-04):** strona per obiekt na wzór przewodnika gościa (reużycie architektury `guides` → tani build): edytor szablonu w panelu (tekst podziękowania + lista łączy do portali opinii), publiczna strona pod linkiem udostępnianym ręcznie po wyjeździe. Bez danych osobowych gościa na stronie i bez automatycznej wysyłki — warianty „personalizacja per rezerwacja" i „auto-wysyłka e-mail" świadomie odłożone ([[Projects/Backlog]]: automatyczne wiadomości; przy auto-wysyłce konsultacja `legal`).
+**Gotowe, gdy:** gospodarz tworzy/edytuje stronę opinii dla obiektu; publiczny link działa bez logowania; strona w identyfikacji v2, dopracowana na mobile (goście otwierają na telefonie); e2e podstawowego przepływu.
+**Weryfikacja:** e2e (utworzenie → publiczny podgląd → łącza) + przegląd `designer` (nieinwazyjny ton) + `code-reviewer` (reguły dostępu publicznego).
+**Agent:** `designer` (koncept i ton) + `dev`. **Status:** ✅ 2026-07-06 (`f1c47ec`)
+- ✅ **Zbudowane**: edytor `ReviewBuilder` (nawigacja 09 „Opinie": szablon podziękowania, łącza z presetami Google/Booking/Airbnb/TripAdvisor/Facebook, kopiowanie linku, QR do wydruku), publiczna strona `ReviewPageView` (`/opinie/{id}`, .wpb, mobile-first, anonimowa sesja jak w GuestGuideView), filtr typów w GuideBuilder. Zero zmian w firestore.rules (reużycie `guides` z `type:'review'`).
+- ✅ **Weryfikacja**: lint+build 0; e2e `review-pages.spec.js` 5/5 (publiczna strona z łączami, 404, rozdzielenie typów, lista w panelu, szablon nowej strony) + regresja panel-v2/smoke.
+- ✅ **Przegląd `designer` (2026-07-06)**: hierarchia strony („podziękowanie przed prośbą") oceniona jako wzorowa; 7 findingów naniesionych — m.in. tytuł bez wykrzyknika (głos marki), bezosobowy szablon wiadomości, toast przy błędzie pobierania (pusty stan nie kłamie), mikro-copy i kredyt ujednolicone z GuestGuideView (`wpb-meta`, bez linku). Po poprawkach: e2e 28/28.
+- ✅ Punkt designera nr 6 rozstrzygnięty przez właściciela (2026-07-06): hint Booking.com z zastrzeżeniem „Booking prosi o opinię własnym mailem". Całość w `f1c47ec`.
+
 ---
 
 ## 🟢 LATER — kierunkowo (szczegóły i pełna pula: [[Projects/Backlog]])
@@ -127,6 +139,7 @@ głębsza synchronizacja kalendarzy · aplikacja mobilna · TypeScript · monito
 
 ## ✅ Ostatnio ukończone (pełna historia: [[Activity-Log]])
 
+- **2026-07-06** — **X13 „przewodnik opinii"** (`f1c47ec`): edytor w panelu (nawigacja 09) + publiczna strona `/opinie/{id}`, z naniesionym przeglądem tonu `designer`; e2e 28/28.
 - **2026-07-04** — partia 3 audytu: kalendarz (kolizja pasków back-to-back, kontrast amber, legenda), GuideBuilder bez systemowych okien, responsywność generatora, stan błędu newslettera (`432ea6a`); **X12**: dolny pasek nawigacji mobile + arkusz „Więcej" z testem e2e; **N1** kod przywrócony + `auth.spec` odtworzona 13/13 (zostaje ręczny test właściciela).
 - **2026-07-03** — zielony lint (`7e64c5a`, `9b4f363`); dopieszczenie v2 — mikrointerakcje i zero cieni (`f2a6c17`); audyt UI 15 pozycji ([[Design-Notes]]) + partia 1: focus-visible, kontrast AA, spójność (`0a7d12b`); naprawa spelling.spec (`c89a3ce`); plan wdrożenia na rynek ([[strategy/Plan-wdrożenia-na-rynek]]).
 - **2026-07-02** — zespół 8 agentów + [[Team-Playbook]]; konsolidacja roadmapy (ten plik); generator umów najmu (`76f53ff`); przebudowa szczegółów rezerwacji (`ce2b80f`); widok Analityka (`af4af47`).
