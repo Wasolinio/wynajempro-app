@@ -1,5 +1,14 @@
 # 🎨 Design Notes
 
+## Wzorzec ruchu danych — useCountUp (2026-07-06)
+
+Wszystkie liczby agregatów w panelu wjeżdżają wspólnym wzorcem z Analityki:
+`src/pages/dashboard/useCountUp.js` — jeden `progress` 0→1 (700 ms, ease-out cubic)
+mnoży wartości, więc liczby widoku finiszują RAZEM; `prefers-reduced-motion` → od razu 1.
+Stosowany w: Analityka, Pulpit, Finanse, Obiekty, Kalendarz. Nowe widoki z agregatami
+mają używać tego hooka (spójność ruchu = decyzja właściciela). Nie stosować do liczb
+w wierszach tabel (animacja przy paginacji/filtrach to szum, nie komunikat stanu).
+
 ## Audyt UI v2 — 2026-07-03 (agent: `designer`)
 
 Pełny przegląd panelu, stron publicznych i bloga względem identyfikacji v2 i WCAG.

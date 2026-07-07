@@ -91,7 +91,9 @@ Pozycja nr 5. **⏸ czeka na decyzję:** zakres do doprecyzowania z właściciel
 Pozycja nr 6, **możliwe częściowe pokrycie**: widok Analityka (statystyki okresowe + YoY) dodany w `af4af47`. **⏸ czeka na decyzję:** czego brakuje względem nowej Analityki? **Agent:** `dev` + `designer`. ⏸
 
 ### X6. Ustawienia konta w lewym dolnym rogu + profil
-Pozycja nr 7: przeniesienie ustawień obok nazwy gospodarza, zdjęcie profilowe itd. **Agent:** `designer` + `dev`. ⬜
+Pozycja nr 7: przeniesienie ustawień obok nazwy gospodarza, zdjęcie profilowe itd. **Agent:** `designer` + `dev`. 🔄
+- ✅ **Rdzeń (2026-07-06, decyzja właściciela):** SettingsModal rozdzielony — nowy **AccountModal** (profil gospodarza, subskrypcja, usunięcie konta) otwierany kliknięciem w imię i nazwisko w sidebarze oraz z pozycji „Konto" w mobilnym arkuszu „Więcej"; zębatka = „Ustawienia aplikacji" (obiekty, źródła, kategorie, podatki, integracje, powiadomienia). Konto ma własny, wąski zapis `settings/hostProfile` (celowo nie reużywa `saveSettings`, który zapisuje wszystkie stany `editing*` — nieseedowane groziłyby nadpisaniem obiektów pustką). Weryfikacja: lint+build 0, e2e panel-v2+review+smoke 12/12 (w tym nowy test X6).
+- ⬜ Zostaje: zdjęcie profilowe (osobny kawałek — upload do Storage).
 
 ### X7. Rozbudowa szczegółów rezerwacji
 Pozycja nr 8, **częściowo zrobiona**: przebudowa szczegółów rezerwacji (zadania zamiast przewodnika) ✅ (`ce2b80f`). **⏸ czeka na decyzję:** jakie informacje dodać w kolejnym kroku? **Agent:** `dev`. ⏸

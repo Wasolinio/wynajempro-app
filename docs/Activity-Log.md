@@ -6,7 +6,19 @@ Project timeline and key milestones.
 
 ## 2026-07-06
 
-### X13 — poprawki z przeglądu designera (finalizacja MVP)
+### X6 — ustawienia konta pod imieniem gospodarza (rdzeń)
+- ✅ Split SettingsModal (decyzja właściciela): nowy **AccountModal** — profil gospodarza + subskrypcja + usunięcie konta — otwierany kliknięciem w imię w sidebarze i z pozycji „Konto" w mobilnym arkuszu „Więcej"; zębatka zostaje jako „Ustawienia aplikacji" (6 zakładek)
+- ✅ Bezpieczny zapis: konto zapisuje WYŁĄCZNIE `settings/hostProfile` — uniknięta pułapka `saveSettings` (zapis wszystkich nieseedowanych stanów `editing*` nadpisałby np. listę obiektów pustką)
+- ✅ Blok tożsamości jako button (hover, focus-visible), logika usuwania konta przeniesiona 1:1
+- ✅ Weryfikacja: lint+build 0; e2e 12/12 (nowy test X6: otwarcie z imienia, seed profilu, zakładka subskrypcji, Escape)
+- ⬜ Zostaje w X6: zdjęcie profilowe (upload do Storage)
+
+### Mobile header + count-up liczb w całym panelu (zgłoszenie właściciela, skill impeccable)
+- ✅ Nagłówek panelu <640px: data ukryta (zawijała się na 3 linie), tytuł z pierwszeństwem miejsca i elipsą, search elastyczny (min. lupa 44px), „+ Rezerwacja" jako sam plus 40px — nic nie wystaje poza ekran (dowód: zrzuty Playwright 375px, krótki i najdłuższy tytuł)
+- ✅ Animacja liczb z Analityki wyciągnięta do `src/pages/dashboard/useCountUp.js` (progress 0→1, 700ms ease-out cubic, wszystkie liczby finiszują razem, reduced-motion → natychmiast) i wdrożona: Pulpit (4 karty + pasek obłożenia), Finanse (4 KPI), Obiekty (rezerwacje/śr. cena/obłożenie), Kalendarz (rezerwacje/wolne doby); Analityka zrefaktorowana na wspólny hook
+- ✅ PRODUCT.md utworzony (wymóg skilla impeccable; rejestr product, zasady v2)
+- ✅ Weryfikacja: lint+build 0; e2e 29/29; zrzuty mobilne przed/po w scratchpadzie
+- ℹ️ Świadomie pominięte: ceny w wierszach tabel (animacja przy paginacji/filtrach = szum, wzorzec Analityki dotyczy agregatów); `metrics.avg` w Kalendarzu (sformatowany string)
 - ✅ Naniesione findingi przeglądu tonu: `Dziękujemy za pobyt` bez wykrzyknika (tytuł + fallback), bezosobowy DEFAULT_MESSAGE („Jeśli znajdzie się chwila…"), toast przy błędzie pobierania listy, toasty błędów ze wskazaniem akcji („…Spróbuj ponownie."), mikro-copy `To zajmie około minuty.` jako `wpb-meta`, kredyt ujednolicony z przewodnikiem („Stworzono za pomocą WynajemPRO", bez linku)
 - ✅ Weryfikacja: lint+build 0; e2e 28/28 (review-pages 5 + panel-v2 4 + auth 13 + smoke 2 + spelling 4)
 - ✅ Punkt Booking.com rozstrzygnięty przez właściciela: hint z zastrzeżeniem „Booking prosi o opinię własnym mailem" (finding nr 6 designera)
