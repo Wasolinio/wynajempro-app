@@ -92,6 +92,11 @@ export const DASHBOARD_CSS = `
   display:flex; padding:4px; transition:color .14s; }
 .wpd-user__out:hover{ color:var(--cynober); }
 .wpd-user__out svg{ width:17px; height:17px; }
+/* klik w tożsamość otwiera Konto (X6) */
+.wpd-user__btn{ display:flex; align-items:center; gap:11px; flex:1 1 auto; min-width:0;
+  background:none; border:none; padding:6px; margin:-6px; border-radius:3px;
+  cursor:pointer; color:inherit; font:inherit; text-align:left; }
+.wpd-user__btn:hover .wpd-user__name{ color:#fff; }
 
 /* ── Topbar ── */
 .wpd-top{
@@ -721,6 +726,18 @@ export const DASHBOARD_CSS = `
   .wpd-top{ padding:0 16px; }
   .wpd-search{ width:140px; }
   .wpd-top__title h1{ font-size:21px; }
+}
+
+/* ── Wąski telefon: nagłówek panelu bez zawijania i ucinania (zgłoszenie właściciela) ── */
+@media (max-width:640px){
+  .wpd-top{ gap:8px; }
+  .wpd-top__sub{ display:none; }            /* data zawijała się na 3 linie */
+  .wpd-top__title{ flex:1 1 auto; min-width:0; } /* tytuł ma pierwszeństwo w walce o miejsce */
+  .wpd-top__title h1{ font-size:19px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wpd-top__spacer{ display:none; }
+  .wpd-search{ flex:1 1 60px; width:auto; min-width:44px; max-width:200px; } /* dzieli luz z tytułem, kurczy się pierwszy */
+  .wpd-top__btnlabel{ display:none; }       /* „+ Rezerwacja" → sam plus, nic nie wystaje */
+  .wpd-top .wpd-btn--primary{ width:40px; padding:0; flex:0 0 40px; }
 }
 `;
 

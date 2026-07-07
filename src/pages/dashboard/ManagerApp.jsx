@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart, FileSignature,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
-  MoreHorizontal, Star,
+  MoreHorizontal, Star, User as UserIcon,
 } from 'lucide-react';
 import { useDialogA11y } from './modals/useDialogA11y';
 import toast from 'react-hot-toast';
@@ -38,6 +38,7 @@ import AnalyticsView from './views/AnalyticsView';
 import ContractGeneratorView from './views/ContractGeneratorView';
 import GuideBuilder from './GuideBuilder';
 import ReviewBuilder from './ReviewBuilder';
+import AccountModal from './modals/AccountModal';
 
 const getIconComponent = (name) => {
   switch (name) {
@@ -86,7 +87,7 @@ const VIEW_META = {
 export default function ManagerApp() {
   const {
     user, loading, rentals,
-    accountStatus, trialEndsAt, scheduledDeletionAt,
+    accountStatus, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
     selectedYear, setSelectedYear,
@@ -103,6 +104,7 @@ export default function ManagerApp() {
   const [showDailyReportModal, setShowDailyReportModal] = useState(false);
   const [showMobileMore, setShowMobileMore] = useState(false);
   const moreSheetA11y = useDialogA11y(showMobileMore, () => setShowMobileMore(false));
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const [settingsTab, setSettingsTab] = useState('sync');
   const [itemToDelete, setItemToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -415,6 +417,23 @@ export default function ManagerApp() {
 
   const openSettingsOn = useCallback((tab) => { openSettingsModal(); setSettingsTab(tab); }, [openSettingsModal]);
 
+  // ── Konto (X6): profil gospodarza + subskrypcja pod kliknięciem w tożsamość ──
+  const openAccountModal = useCallback(() => {
+    setEditingHostProfile(hostProfile); // seed jak w openSettingsModal — bez tego formularz byłby pusty
+    setShowAccountModal(true);
+  }, [hostProfile]);
+
+  // zapis WYŁĄCZNIE profilu — saveSettings zapisuje wszystkie stany editing*,
+  // które przy wejściu z konta nie są seedowane (ryzyko nadpisania np. obiektów pustką)
+  const saveAccount = useCallback(async () => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'hostProfile'), editingHostProfile);
+      toast.success('Profil gospodarza został zapisany');
+      setShowAccountModal(false);
+    } catch (err) { console.error(err); toast.error('Błąd podczas zapisywania profilu'); }
+  }, [user, editingHostProfile]);
+
   // ── Ekrany bramkujące ──
   if (loading) return (<div className="wpd"><style>{DASHBOARD_CSS}</style><div className="wpd-loader"><div className="wpd-spin" /></div></div>);
   if (isAccessLocked()) return (
@@ -477,11 +496,14 @@ export default function ManagerApp() {
           </div>
 
           <div className="wpd-user">
-            <span className="wpd-user__av">{userInitials}</span>
-            <div style={{ minWidth: 0 }}>
-              <div className="wpd-user__name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
-              <div className="wpd-user__plan">{planLabel}</div>
-            </div>
+            {/* klik w tożsamość otwiera Konto (X6): profil gospodarza + subskrypcja */}
+            <button type="button" className="wpd-user__btn" title="Konto i subskrypcja" onClick={openAccountModal}>
+              <span className="wpd-user__av">{userInitials}</span>
+              <div style={{ minWidth: 0 }}>
+                <div className="wpd-user__name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
+                <div className="wpd-user__plan">{planLabel}</div>
+              </div>
+            </button>
             <button className="wpd-user__out" title="Wyloguj" onClick={handleLogout}><Power /></button>
           </div>
         </aside>
@@ -503,8 +525,8 @@ export default function ManagerApp() {
             <button className="wpd-iconbtn" title="Raport dzienny" onClick={() => setShowDailyReportModal(true)}>
               <Bell />{dailyReport.total > 0 && <span className="wpd-iconbtn__dot" />}
             </button>
-            <button className="wpd-btn wpd-btn--primary" onClick={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}>
-              <Plus /> Rezerwacja
+            <button className="wpd-btn wpd-btn--primary" title="Nowa rezerwacja" onClick={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}>
+              <Plus /><span className="wpd-top__btnlabel">Rezerwacja</span>
             </button>
           </header>
 
@@ -595,7 +617,7 @@ export default function ManagerApp() {
         showSettingsModal={showSettingsModal} setShowSettingsModal={setShowSettingsModal}
         settingsTab={settingsTab} setSettingsTab={setSettingsTab}
         properties={properties} editingSyncLinks={editingSyncLinks} setEditingSyncLinks={setEditingSyncLinks}
-        user={user} editingHostProfile={editingHostProfile} setEditingHostProfile={setEditingHostProfile}
+        user={user}
         editingProperties={editingProperties} updateProperty={updateProperty} removeProperty={removeProperty}
         handleAddProperty={handleAddProperty} newPropertyName={newPropertyName} setNewPropertyName={setNewPropertyName}
         availableColors={availableColors} newPropertyColor={newPropertyColor} setNewPropertyColor={setNewPropertyColor}
@@ -605,8 +627,12 @@ export default function ManagerApp() {
         handleAddCategory={handleAddCategory} newCategoryName={newCategoryName} setNewCategoryName={setNewCategoryName}
         editingTaxSettings={editingTaxSettings} setEditingTaxSettings={setEditingTaxSettings}
         editingTemplates={editingTemplates} updateTemplate={updateTemplate} removeTemplate={removeTemplate} addTemplate={addTemplate}
-        accountStatus={accountStatus} trialEndsAt={trialEndsAt} handleManageSubscription={handleManageSubscription}
-        isBillingPortalLoading={isBillingPortalLoading} saveSettings={saveSettings} />
+        saveSettings={saveSettings} />
+      <AccountModal
+        showAccountModal={showAccountModal} setShowAccountModal={setShowAccountModal}
+        editingHostProfile={editingHostProfile} setEditingHostProfile={setEditingHostProfile}
+        accountStatus={accountStatus} handleManageSubscription={handleManageSubscription}
+        isBillingPortalLoading={isBillingPortalLoading} saveAccount={saveAccount} />
       <AddEditEntryModal showAddModal={showAddModal} handleCloseModal={handleCloseModal} handleAddRental={handleAddRental}
         editingId={editingId} newRental={newRental} setNewRental={setNewRental} handleRentalChange={handleRentalChange}
         properties={properties} sources={sources} categories={categories} />
@@ -645,6 +671,11 @@ export default function ManagerApp() {
                   </button>
                 );
               })}
+              <button className="wpd-nav__item" onClick={() => { setShowMobileMore(false); openAccountModal(); }}>
+                <span className="wpd-nav__num">—</span>
+                <UserIcon style={{ width: 17, height: 17 }} />
+                <span>Konto</span>
+              </button>
               <button className="wpd-nav__item" onClick={handleLogout}>
                 <span className="wpd-nav__num">—</span>
                 <Power style={{ width: 17, height: 17 }} />

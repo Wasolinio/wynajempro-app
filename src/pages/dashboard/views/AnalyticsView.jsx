@@ -6,6 +6,7 @@ import {
 import { db } from '../../../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { channelColor, propHex } from '../styles';
+import { useCountUp } from '../useCountUp';
 
 const MONTHS = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 const MONTHS_SHORT = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
@@ -74,20 +75,10 @@ function Trend({ buckets, prevBuckets, maxV, shown }) {
   );
 }
 
-function Report({ data, reduced, compareLabel, yoy }) {
+function Report({ data, compareLabel, yoy }) {
   const { cur, prev } = data;
-  const [shown, setShown] = useState(reduced);
-  const [progress, setProgress] = useState(reduced ? 1 : 0);
-
-  useEffect(() => {
-    if (reduced) return;
-    const rAppear = requestAnimationFrame(() => setShown(true));
-    const startT = performance.now();
-    let raf;
-    const tick = (t) => { const p = Math.min(1, (t - startT) / 700); setProgress(1 - Math.pow(1 - p, 3)); if (p < 1) raf = requestAnimationFrame(tick); };
-    raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); cancelAnimationFrame(rAppear); };
-  }, [reduced]);
+  // animacja liczb i wejścia sekcji — wspólny wzorzec panelu (hook wyciągnięty stąd)
+  const { progress, shown } = useCountUp();
 
   return (
     <>
@@ -181,7 +172,6 @@ export default function AnalyticsView({ rentals, properties, selectedYear, setSe
   const [compareMode, setCompareMode] = useState('prev'); // 'prev' | 'yoy'
   const [allRentals, setAllRentals] = useState(null);
 
-  const reduced = useMemo(() => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, []);
 
   // Pełna historia rezerwacji (poza rocznym zakresem kontekstu) — dla zakresów i porównań YoY
   useEffect(() => {
@@ -367,7 +357,7 @@ export default function AnalyticsView({ rentals, properties, selectedYear, setSe
           <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>Wybierz inny okres lub zakres dat, aby zobaczyć statystyki.</p>
         </div></div>
       ) : (
-        <Report key={periodKey} data={data} reduced={reduced} compareLabel={data.prevLabel} yoy={yoy} />
+        <Report key={periodKey} data={data} compareLabel={data.prevLabel} yoy={yoy} />
       )}
     </>
   );

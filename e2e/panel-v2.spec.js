@@ -44,6 +44,26 @@ test('Modal ustawień: semantyka dialogu i zamykanie Escape (audyt poz. 12)', as
   await expect(dialog).toBeHidden();
 });
 
+test('Konto: profil i subskrypcja otwierają się z imienia gospodarza (X6)', async ({ page }) => {
+  await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });
+  await page.goto('/dashboard');
+
+  await page.locator('.wpd-user__btn').click();
+  const dialog = page.locator('[role="dialog"]');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('Twoje konto')).toBeVisible();
+
+  // profil zaczytany z hostProfile (seed przy otwarciu)
+  await expect(dialog.locator('input.wpd-input').first()).toHaveValue('Test Company');
+
+  // zakładka subskrypcji pokazuje status i cenę
+  await dialog.getByRole('button', { name: 'Subskrypcja' }).click();
+  await expect(dialog.getByText('29,99')).toBeVisible();
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+});
+
 test('Mobile: dolny pasek zastępuje sidebar, arkusz „Więcej" działa (X12)', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });

@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Settings, X, Building2, Calendar as CalendarIcon, Copy, Trash2, Plus, Globe, Tags,
-  ExternalLink, CheckCircle, AlertTriangle,
 } from 'lucide-react';
-import { auth, functions } from '../../../firebase';
-import { EmailAuthProvider, reauthenticateWithCredential, signOut } from 'firebase/auth';
-import { httpsCallable } from 'firebase/functions';
 import toast from 'react-hot-toast';
 import { propHex } from '../styles';
 import { useDialogA11y } from './useDialogA11y';
 
+/* Ustawienia APLIKACJI — profil gospodarza, subskrypcja i usunięcie konta
+   przeniesione do AccountModal (X6, klik w imię w sidebarze). */
 const TABS = [
-  ['hostProfile', 'Profil gospodarza'], ['properties', 'Nieruchomości'], ['sources', 'Źródła'],
-  ['categories', 'Kategorie'], ['tax', 'Podatki'], ['sync', 'Integracje'],
-  ['reminders', 'Powiadomienia'], ['subscription', 'Subskrypcja'], ['account', 'Konto'],
+  ['properties', 'Nieruchomości'], ['sources', 'Źródła'], ['categories', 'Kategorie'],
+  ['tax', 'Podatki'], ['sync', 'Integracje'], ['reminders', 'Powiadomienia'],
 ];
 
 const exportUrl = (uid, name, token) =>
@@ -23,44 +20,19 @@ const exportUrl = (uid, name, token) =>
 function SettingsModal(props) {
   const {
     showSettingsModal, setShowSettingsModal, settingsTab, setSettingsTab,
-    editingSyncLinks, setEditingSyncLinks, user, editingHostProfile, setEditingHostProfile,
+    editingSyncLinks, setEditingSyncLinks, user,
     editingProperties, updateProperty, removeProperty, handleAddProperty, newPropertyName, setNewPropertyName,
     availableColors, newPropertyColor, setNewPropertyColor,
     editingSources, updateSource, removeSource, handleAddSource, newSourceName, setNewSourceName,
     editingCategories, updateCategory, removeCategory, handleAddCategory, newCategoryName, setNewCategoryName,
     editingTaxSettings, setEditingTaxSettings, editingTemplates, updateTemplate, removeTemplate, addTemplate,
-    accountStatus, handleManageSubscription, isBillingPortalLoading, saveSettings,
+    saveSettings,
   } = props;
 
-  const [deletePassword, setDeletePassword] = useState('');
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const dialogA11y = useDialogA11y(showSettingsModal, () => setShowSettingsModal(false));
 
-  const handleDeleteAccount = async () => {
-    if (!deletePassword) return toast.error('Wprowadź hasło by potwierdzić.');
-    setIsDeletingAccount(true);
-    try {
-      if (auth.currentUser) {
-        const credential = EmailAuthProvider.credential(auth.currentUser.email, deletePassword);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-        const deleteAccountFn = httpsCallable(functions, 'deleteUserAccount');
-        await deleteAccountFn();
-        await signOut(auth);
-        window.location.href = '/';
-      }
-    } catch (error) {
-      console.error(error);
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') toast.error('Błędne hasło.');
-      else toast.error('Wystąpił błąd podczas usuwania konta.');
-    } finally {
-      setIsDeletingAccount(false);
-    }
-  };
-
   if (!showSettingsModal) return null;
-  const hp = editingHostProfile;
   const ts = editingTaxSettings;
-  const setHp = (patch) => setEditingHostProfile({ ...hp, ...patch });
   const setTs = (patch) => setEditingTaxSettings({ ...ts, ...patch });
 
   return (
@@ -68,7 +40,7 @@ function SettingsModal(props) {
       <div className="wpd-dialog wpd-dialog--lg" {...dialogA11y}>
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><Settings /></span>
-          <div><h2 className="wpd-h2">Ustawienia systemu</h2></div>
+          <div><h2 className="wpd-h2">Ustawienia aplikacji</h2></div>
           <button className="wpd-dialog__close" onClick={() => setShowSettingsModal(false)}><X /></button>
         </div>
 
@@ -78,42 +50,6 @@ function SettingsModal(props) {
               <button key={key} type="button" className={`wpd-tab${settingsTab === key ? ' wpd-tab--active' : ''}`} onClick={() => setSettingsTab(key)}>{label}</button>
             ))}
           </div>
-
-          {/* PROFIL GOSPODARZA */}
-          {settingsTab === 'hostProfile' && (
-            <>
-              <div className="wpd-field">
-                <label className="wpd-flabel">Pełna nazwa podmiotu / Imię i nazwisko</label>
-                <input className="wpd-input" value={hp.entityName || ''} onChange={(e) => setHp({ entityName: e.target.value })} />
-              </div>
-              <div className="wpd-fgrid">
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Typ identyfikatora</label>
-                  <select className="wpd-select" value={hp.identifierType || 'NIP'} onChange={(e) => setHp({ identifierType: e.target.value })}>
-                    <option value="NIP">NIP</option><option value="PESEL">PESEL</option>
-                  </select>
-                </div>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Twój NIP / PESEL</label>
-                  <input className="wpd-input wpd-input--num" placeholder="np. 1234567890" value={hp.taxIdentifier || ''} onChange={(e) => setHp({ taxIdentifier: e.target.value })} />
-                </div>
-              </div>
-              <div className="wpd-field">
-                <label className="wpd-flabel">Adres</label>
-                <input className="wpd-input" value={hp.address || ''} onChange={(e) => setHp({ address: e.target.value })} />
-              </div>
-              <div className="wpd-fgrid">
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Numer telefonu</label>
-                  <input className="wpd-input wpd-input--num" value={hp.phone || ''} onChange={(e) => setHp({ phone: e.target.value })} />
-                </div>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Adres e-mail</label>
-                  <input className="wpd-input" type="email" value={hp.email || ''} onChange={(e) => setHp({ email: e.target.value })} />
-                </div>
-              </div>
-            </>
-          )}
 
           {/* NIERUCHOMOŚCI */}
           {settingsTab === 'properties' && (
@@ -304,56 +240,6 @@ function SettingsModal(props) {
             </>
           )}
 
-          {/* SUBSKRYPCJA */}
-          {settingsTab === 'subscription' && (
-            <>
-              <div className="wpd-panel" style={{ marginBottom: 14 }}>
-                <div className="wpd-panel__head">
-                  <h2 className="wpd-h2" style={{ fontSize: 15 }}>Status subskrypcji</h2>
-                  <span className={`wpd-tag wpd-tag--${accountStatus === 'active' ? 'green' : accountStatus === 'trialing' ? 'granat' : 'cynober'}`} style={{ marginLeft: 'auto' }}>
-                    {accountStatus === 'active' ? 'Aktywna' : accountStatus === 'trialing' ? 'Trial' : accountStatus === 'past_due' ? 'Zaległa' : 'Anulowana'}
-                  </span>
-                </div>
-                <div style={{ padding: 18 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    <span style={{ fontWeight: 800, fontSize: 28 }} className="wpd-mono">29,99</span>
-                    <span style={{ color: 'var(--faint)', fontSize: 13 }}>zł / miesiąc</span>
-                  </div>
-                  <p className="wpd-stat__sub" style={{ marginTop: 6 }}>Plan Gospodarza — pełen dostęp do systemu</p>
-                </div>
-              </div>
-              <button type="button" className="wpd-btn wpd-btn--primary" style={{ width: '100%' }} onClick={handleManageSubscription} disabled={isBillingPortalLoading}>
-                <ExternalLink /> {isBillingPortalLoading ? 'Otwieram…' : 'Otwórz panel zarządzania'}
-              </button>
-              <div className="wpd-note" style={{ marginTop: 14 }}>
-                <p style={{ display: 'flex', gap: 7, margin: '0 0 6px' }}><CheckCircle style={{ width: 15, height: 15, flex: '0 0 15px', marginTop: 2, color: 'var(--green)' }} /> Zmiana karty bez przerwy w dostępie.</p>
-                <p style={{ display: 'flex', gap: 7, margin: '0 0 6px' }}><CheckCircle style={{ width: 15, height: 15, flex: '0 0 15px', marginTop: 2, color: 'var(--green)' }} /> Faktury VAT do pobrania w PDF.</p>
-                <p style={{ display: 'flex', gap: 7, margin: 0 }}><CheckCircle style={{ width: 15, height: 15, flex: '0 0 15px', marginTop: 2, color: 'var(--green)' }} /> Anulowanie w dowolnym momencie.</p>
-              </div>
-            </>
-          )}
-
-          {/* KONTO */}
-          {settingsTab === 'account' && (
-            <>
-              <div className="wpd-note wpd-note--danger" style={{ marginBottom: 14 }}>
-                <h4><AlertTriangle /> Strefa zagrożenia: trwałe usuwanie konta</h4>
-                Usunięcie konta bezpowrotnie kasuje konto, subskrypcję, nieruchomości i historię rezerwacji.
-              </div>
-              <div className="wpd-panel" style={{ padding: 18 }}>
-                <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 14px', lineHeight: 1.6 }}>
-                  Zgodnie z RODO możesz w każdej chwili zażądać usunięcia danych z systemu WynajemPRO. Wymagane potwierdzenie hasłem.
-                </p>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Twoje hasło do WynajemPRO</label>
-                  <input className="wpd-input" type="password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="Wprowadź hasło by potwierdzić…" />
-                </div>
-                <button type="button" className="wpd-btn wpd-btn--primary" style={{ width: '100%' }} onClick={handleDeleteAccount} disabled={isDeletingAccount || !deletePassword}>
-                  <Trash2 /> {isDeletingAccount ? 'Trwa kasowanie danych…' : 'Usuń trwale moje konto'}
-                </button>
-              </div>
-            </>
-          )}
         </div>
 
         <div className="wpd-dialog__foot">

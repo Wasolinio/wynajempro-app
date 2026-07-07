@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarCheck, Moon, Clock } from 'lucide-react';
 import { channelColor, channelTone } from '../styles';
 import { clickableProps } from '../../../utils/a11y';
+import { useCountUp } from '../useCountUp';
 
 const WD = ['nd', 'pn', 'wt', 'śr', 'cz', 'pt', 'sb'];
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
@@ -69,6 +70,9 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
       avg: count ? (totalNights / count).toFixed(1).replace('.', ',') : '0',
     };
   }, [barsByProp, properties.length, calendarDate]);
+
+  // metryki miesiąca wjeżdżają jak w Analityce — wspólny progress
+  const { progress } = useCountUp();
 
   return (
     <>
@@ -151,11 +155,11 @@ export default function CalendarView({ calendarDate, rentals, properties, onPrev
       <div className="wpd-section wpd-stats" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
           <div className="wpd-stat__head"><p className="wpd-stat__label">Rezerwacje w tym mies.</p><span className="wpd-stat__ic"><CalendarCheck /></span></div>
-          <div className="wpd-stat__value">{metrics.count}</div>
+          <div className="wpd-stat__value">{Math.round(metrics.count * progress)}</div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
           <div className="wpd-stat__head"><p className="wpd-stat__label">Wolnych nocy</p><span className="wpd-stat__ic"><Moon /></span></div>
-          <div className="wpd-stat__value">{fmt(metrics.free)}</div>
+          <div className="wpd-stat__value">{fmt(metrics.free * progress)}</div>
         </div>
         <div className="wpd-stat" style={{ cursor: 'default', minHeight: 0 }}>
           <div className="wpd-stat__head"><p className="wpd-stat__label">Śr. długość pobytu</p><span className="wpd-stat__ic"><Clock /></span></div>

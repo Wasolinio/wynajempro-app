@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Plus, Building2 } from 'lucide-react';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
+import { useCountUp } from '../useCountUp';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -63,6 +64,9 @@ export default function ObjectsView({ properties, rentals, selectedYear, onAddPr
     return map;
   }, [properties, rentals, selectedYear]);
 
+  // liczby kart wjeżdżają jak w Analityce — wspólny progress, finiszują razem
+  const { progress } = useCountUp();
+
   return (
     <>
       <div className="wpd-objs__head">
@@ -92,16 +96,16 @@ export default function ObjectsView({ properties, rentals, selectedYear, onAddPr
                 </div>
                 <div className="wpd-obj__body">
                   <h3 className="wpd-obj__name">{p.name}</h3>
-                  <div className="wpd-obj__addr">{s.count || 0} rezerwacji w {selectedYear}</div>
+                  <div className="wpd-obj__addr">{Math.round((s.count || 0) * progress)} rezerwacji w {selectedYear}</div>
 
                   <div className="wpd-obj__metrics">
                     <div>
                       <div className="wpd-obj__mlabel">Śr. cena/noc</div>
-                      <div className="wpd-obj__mval">{s.avgRate ? <>{fmt(s.avgRate)} <small>zł</small></> : '—'}</div>
+                      <div className="wpd-obj__mval">{s.avgRate ? <>{fmt(s.avgRate * progress)} <small>zł</small></> : '—'}</div>
                     </div>
                     <div>
                       <div className="wpd-obj__mlabel">Obłożenie · {up(monthName)}</div>
-                      <div className="wpd-obj__mval">{s.occupancy || 0}<small>%</small></div>
+                      <div className="wpd-obj__mval">{Math.round((s.occupancy || 0) * progress)}<small>%</small></div>
                     </div>
                   </div>
 

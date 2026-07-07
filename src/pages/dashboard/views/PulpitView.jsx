@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Spar
 import { channelTone } from '../styles';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
+import { useCountUp } from '../useCountUp';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -28,6 +29,8 @@ export default function PulpitView({
 }) {
   const arrivalsSoon = (upcoming || []).slice(0, 5);
   const tasksToday = dailyReport.tasks;
+  // liczby kart wjeżdżają jak w Analityce — wspólny progress, finiszują razem
+  const { progress } = useCountUp();
 
   return (
     <>
@@ -38,7 +41,7 @@ export default function PulpitView({
             <p className="wpd-stat__label">Przychód · {up(pulpit.monthName)}</p>
             <span className="wpd-stat__ic"><Banknote /></span>
           </div>
-          <div className="wpd-stat__value">{fmt(pulpit.monthRevenue)} <small>zł</small></div>
+          <div className="wpd-stat__value">{fmt(pulpit.monthRevenue * progress)} <small>zł</small></div>
           <div className="wpd-stat__foot">
             {pulpit.delta === null
               ? <span className="wpd-stat__sub">Bieżący miesiąc</span>
@@ -53,9 +56,9 @@ export default function PulpitView({
             <p className="wpd-stat__label">Obłożenie</p>
             <span className="wpd-stat__ic"><PieChart /></span>
           </div>
-          <div className="wpd-stat__value">{pulpit.occupancy}%</div>
+          <div className="wpd-stat__value">{Math.round(pulpit.occupancy * progress)}%</div>
           <div className="wpd-stat__foot">
-            <div className="wpd-bar"><div className="wpd-bar__fill" style={{ width: `${pulpit.occupancy}%` }} /></div>
+            <div className="wpd-bar"><div className="wpd-bar__fill" style={{ width: `${pulpit.occupancy * progress}%` }} /></div>
           </div>
         </div>
 
@@ -64,7 +67,7 @@ export default function PulpitView({
             <p className="wpd-stat__label">Przyjazdy dziś</p>
             <span className="wpd-stat__ic"><LogIn /></span>
           </div>
-          <div className="wpd-stat__value">{pulpit.arrivals}</div>
+          <div className="wpd-stat__value">{Math.round(pulpit.arrivals * progress)}</div>
           <div className="wpd-stat__foot">
             <span className="wpd-stat__sub">{pulpit.departures > 0 ? `+ ${pulpit.departures} ${plural(pulpit.departures, ['wyjazd', 'wyjazdy', 'wyjazdów'])}` : 'brak wyjazdów'}</span>
           </div>
@@ -75,7 +78,7 @@ export default function PulpitView({
             <p className="wpd-stat__label">Do posprzątania</p>
             <span className="wpd-stat__ic"><Sparkles /></span>
           </div>
-          <div className="wpd-stat__value">{pulpit.cleaning}</div>
+          <div className="wpd-stat__value">{Math.round(pulpit.cleaning * progress)}</div>
           <div className="wpd-stat__foot">
             <span className="wpd-stat__sub wpd-stat__sub--accent">{pulpit.cleaningInfo ? `${up(pulpit.cleaningInfo)} · dziś` : '—'}</span>
           </div>
