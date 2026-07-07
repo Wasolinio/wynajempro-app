@@ -39,6 +39,7 @@ firebase-debug.log*
 # AI Agents workspace
 .agents/
 .claude/worktrees/
+.codex/
 PROJECT.md
 
 # Playwright
