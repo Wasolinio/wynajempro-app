@@ -53,7 +53,9 @@ export const useFirebaseData = (user, selectedYear) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         queryClient.setQueryData(['profile', user.uid], {
-          accountStatus: data.accountStatus || data.status || 'trialing',
+          // 'status' jest kanoniczne (pisze je webhook Stripe i rejestracja);
+          // accountStatus tylko jako alias historyczny — precedencja jak w firestore.rules
+          accountStatus: data.status || data.accountStatus || 'trialing',
           trialEndsAt: data.trialEndsAt ? (data.trialEndsAt.toDate ? data.trialEndsAt.toDate() : new Date(data.trialEndsAt)) : null,
           scheduledDeletionAt: data.scheduledDeletionAt ? (data.scheduledDeletionAt.toDate ? data.scheduledDeletionAt.toDate() : new Date(data.scheduledDeletionAt)) : null,
         });
@@ -66,7 +68,8 @@ export const useFirebaseData = (user, selectedYear) => {
           setDoc(doc(db, 'users', user.uid), {
             email: user.email || '',
             createdAt: serverTimestamp(),
-            accountStatus: 'trialing',
+            // MUSI być 'status' — reguła create w firestore.rules wymaga status=='trialing'
+            status: 'trialing',
             trialEndsAt: Timestamp.fromDate(trialEndDate)
           }).catch(console.error);
         });

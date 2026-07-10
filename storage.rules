@@ -1,15 +1,35 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Fallback subskrypcji z dokumentu users — lustro checkFallbackSubscription
+    // z firestore.rules (status kanoniczne, accountStatus historyczne).
+    function hasActiveSubscriptionDoc(uid) {
+      let docData = firestore.get(/databases/(default)/documents/users/$(uid)).data;
+      let status = docData.get('status', docData.get('accountStatus', 'none'));
+      return status == 'active'
+          || (status == 'trialing'
+              && docData.get('trialEndsAt', null) != null
+              && docData.trialEndsAt is timestamp
+              && docData.trialEndsAt > request.time);
+    }
+
     match /guides/{guideId}/{fileName} {
       // Publiczny odczyt zdjęć i dokumentów w przewodnikach (goście potrzebują dostępu)
       allow read: if true;
 
-      // Zapis: wyłącznie zalogowany użytkownik.
-      // Ograniczenie: max 10MB, typy MIME: obrazy, PDF, DOC/DOCX
-      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ RESTRYKCYJNE REGUŁY
-      // Poniższe pozwala na zapis dla każdego zalogowanego, omijając cross-service check dla testowej wersji aplikacji.
+      // Zapis (N2): zweryfikowany subskrybent; dla ISTNIEJĄCEGO przewodnika tylko
+      // jego właściciel (cross-service check do Firestore). Przewodnik jeszcze
+      // niezapisany (upload okładki przed pierwszym „Zapisz" w GuideBuilder) →
+      // przepuszczamy subskrybenta; id przewodnika to guide_{UUID} (nieodgadywalne).
+      // Subskrypcja: claim stripeStatus (szybka ścieżka) lub dokument users
+      // (active / trialing z żywym Timestampem) — lustro hasActiveSubscription
+      // z firestore.rules.
       allow write: if request.auth != null
+                   && request.auth.token.get('email_verified', false) == true
+                   && (request.auth.token.get('stripeStatus', '') == 'active'
+                       || hasActiveSubscriptionDoc(request.auth.uid))
+                   && (!firestore.exists(/databases/(default)/documents/guides/$(guideId))
+                       || firestore.get(/databases/(default)/documents/guides/$(guideId)).data.ownerId == request.auth.uid)
                    && request.resource.size < 10 * 1024 * 1024
                    && (request.resource.contentType.matches('image/.*') ||
                        request.resource.contentType == 'application/pdf' ||

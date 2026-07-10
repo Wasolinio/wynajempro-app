@@ -28,6 +28,10 @@ dist-ssr
 .env.*
 !.env.example
 !*.env.example
+# klucze serwisowe Firebase/GCP (pełny dostęp do projektu)
+*service-account*.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
 
 # Firebase
 .firebase/

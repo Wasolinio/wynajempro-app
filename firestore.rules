@@ -7,10 +7,12 @@ service cloud.firestore {
     // GLOBALNA FUNKCJA BEZPIECZEŃSTWA
     // =====================================================================
     function isOwnerAndVerified(userId) {
+      // email_verified: konta Google mają true od dostawcy; anonimowi goście nie
+      // przechodzą przez tę funkcję (podpisy/sekrety mają własne reguły).
+      // .get(..., false) = fail-closed przy braku klucza w tokenie.
       return request.auth != null
-        && request.auth.uid == userId;
-        // TODO: PRZED LAUNCHEM APKI - ODKOMENTOWAĆ WERYFIKACJĘ EMAIL
-        // && request.auth.token.email_verified == true; 
+        && request.auth.uid == userId
+        && request.auth.token.get('email_verified', false) == true;
     }
 
     // =====================================================================
@@ -19,17 +21,25 @@ service cloud.firestore {
     function checkFallbackSubscription(userId) {
       let docSnap = get(/databases/$(database)/documents/users/$(userId));
       let docData = docSnap != null ? docSnap.data : {};
-      
-      let status = docData.get('status', 'none');
-      
-      // Dla prototypu: jeśli status to trialing lub active, przepuszczamy bez sprawdzania daty
-      return status == 'active' || status == 'trialing';
+
+      // webhook Stripe pisze 'status'; 'accountStatus' honorowany dla danych historycznych
+      let status = docData.get('status', docData.get('accountStatus', 'none'));
+
+      // active → wstęp; trialing → tylko z żywym trialEndsAt (Timestamp).
+      // trialEndsAt zapisany jako string (stare dane) nie przedłuża trialu — fail-closed.
+      return status == 'active'
+          || (status == 'trialing'
+              && docData.get('trialEndsAt', null) != null
+              && docData.trialEndsAt is timestamp
+              && docData.trialEndsAt > request.time);
     }
 
     function hasActiveSubscription(userId) {
-      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ SPRAWDZANIE SUBSKRYPCJI STRIPE
-      // Poniższe wymusza true dla całej aplikacji testowej, omijając płatności.
-      return true; 
+      // Szybka ścieżka: claim stripeStatus z webhooka (bez odczytu dokumentu);
+      // past_due/canceled/trialing NIE przechodzą claimem — o trialu decyduje
+      // data w dokumencie (fallback). Fail-closed przez .get().
+      return request.auth.token.get('stripeStatus', '') == 'active'
+          || checkFallbackSubscription(userId);
     }
 
     // =====================================================================

@@ -55,7 +55,9 @@ export default function GuideBuilder({ user, properties }) {
 
   const handleCreateNew = () => {
     setEditingGuide({
-      id: `guide_${Date.now()}`,
+      // UUID zamiast Date.now(): id jest w publicznym URL i w ścieżce Storage —
+      // musi być nieodgadywalne (okno uploadu przed pierwszym zapisem, storage.rules)
+      id: `guide_${window.crypto?.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)}`,
       name: '',
       propertyId: properties.length > 0 ? properties[0].name : '',
       coverImage: '',

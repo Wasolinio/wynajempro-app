@@ -73,7 +73,8 @@ export default function ReviewBuilder({ user, properties }) {
   };
 
   const handleCreateNew = () => setEditingPage({
-    id: `review_${Date.now()}`,
+    // UUID jak w GuideBuilder — id żyje w publicznym URL, ma być nieodgadywalne
+    id: `review_${window.crypto?.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)}`,
     type: 'review',
     property: properties.length > 0 ? properties[0].name : '',
     title: DEFAULT_TITLE,
