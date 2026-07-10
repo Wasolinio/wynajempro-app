@@ -4,6 +4,26 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-07
+
+### N2 — egzekwowanie subskrypcji w regułach (+ ogon N1)
+- ✅ `firestore.rules`: realny `hasActiveSubscription` (claim `stripeStatus` → fallback dokumentowy z żywym trialem) + przywrócony `email_verified` w `isOwnerAndVerified`; wszystko fail-closed przez `.get()`
+- ✅ `storage.rules`: bramka zapisu `guides/` (verified + subskrypcja przez cross-service + warunkowy owner-check) — TODO z linii 10 domknięty
+- ✅ Przegląd `code-reviewer`: diff bezpieczny; naprawione odkryte bugi frontu (self-heal `status:'trialing'`, alias `status||accountStatus`) — bez nich deploy odmaskowałby blokadę starych kont i paywall dla płacących
+- ✅ `functions/audit-users-n2.cjs` — audyt danych przed deployem (dla właściciela)
+- ✅ Runda 2 przeglądu: storage.rules i poprawki potwierdzone; wzmocnienie id przewodników/stron opinii na `crypto.randomUUID()` (Date.now() był enumerowalny — okno uploadu przed zapisem); dług „osierocone pliki Storage" → Backlog
+- ✅ Weryfikacja: lint+build 0, e2e 20/20 + 12/12 po wzmocnieniu UUID
+- ✅ Diff reguł konsola↔repo wykonany (właściciel wkleił): **identyczne** — zero driftu; zagadka permission-denied z X13 = App Check (localhost bez atestacji), nie reguły
+- ✅ **Audyt danych wykonany** (5 kont produkcyjnych): konto właściciela `wasyl515@gmail.com` = `status:'active'` → **dostęp bezterminowy** (string trialEndsAt 2028 nieszkodliwy, reguła nie czyta go przy active). 4 konta testowe/rodzinne stracą zapis: 2× wygasły trial (test@test.pl 2023, piotrwasyl4 2026-05 — blokada i tak poprawna), 2× brak pola `status` (szymonwasiak1, kamilwasyl1402). **Żadne legalne konto nie jest błędnie blokowane** (oba trialing-string są wygasłe, nie przyszłe).
+- 🔧 Poprawiony `audit-users-n2.cjs` — pierwotna logika flagowała tylko „trialing bez Timestampa", przeoczyła konta bez `status`; teraz liczy faktyczny wynik reguły (active OR żywy trial-Timestamp) i wykrywa wszystkie 4.
+- ✅ Diff `storage.rules` konsola↔repo: **identyczne** — oba pliki reguł bez driftu, deploy podmienia znany stan (rollback = deploy wersji z gita)
+- ✅ **Decyzja właściciela + wykonanie (2026-07-09)**: 4 konta testowe usunięte w całości (Auth + Firestore z podkolekcjami; skrypt z bezpiecznikiem na konto właściciela; weryfikacja: została 1 para users/Auth = wasyl515, status active)
+- ✅ **DEPLOY reguł wykonany** (`firebase deploy --only firestore:rules,storage`): obie pary skompilowane i released; 2 nieszkodliwe warningi (unused `data` w zaślepkach isValidRental/isValidGuide — znikną przy N3)
+- ⚠️ **Incydent wdrożeniowy wykryty i obsłużony**: deploy w terminalu nieinteraktywnym POMIJA prompt CLI o cross-service IAM — weryfikacja polityki (REST getIamPolicy) wykazała BRAK roli `firebaserules.firestoreServiceAgent` dla agenta Storage → uploady przewodników chwilowo martwe (impact ~0: po usunięciu kont testowych jedyny gospodarz to właściciel). Programowe nadanie roli: 403 (Editor nie może setIamPolicy) → naprawa po stronie właściciela: `firebase deploy --only storage` w TTY z odpowiedzią `y` na prompt (albo IAM w konsoli GCP)
+- ⏸ Po nadaniu roli: smoke test właściciela (konto active: dane + upload okładki przewodnika)
+
+---
+
 ## 2026-07-06
 
 ### X6 — ustawienia konta pod imieniem gospodarza (rdzeń)

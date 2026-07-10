@@ -44,8 +44,13 @@ po domknięciu sekcji NOW.
 **Po co:** bez sprawdzania statusu subskrypcji/trialu aplikacja jest realnie darmowa — brak przychodu.
 **Gotowe, gdy:** po wygaśnięciu trialu i braku subskrypcji użytkownik widzi `PaywallScreen` i nie ma dostępu do panelu; ścieżki Stripe (checkout → webhook → status) przetestowane.
 **Weryfikacja:** test na emulatorach/koncie testowym Stripe: trial aktywny / wygasły / subskrypcja opłacona / anulowana.
-**Agent:** `dev`, przegląd `code-reviewer`. **Status:** ⬜
-- ⚠️ **Backend zaślepiony** (potwierdzone 2026-07-04): `firestore.rules:29-32` `hasActiveSubscription` → `return true` (reguły przepuszczają wszystkich). Front (`WynajemContext.isAccessLocked` + `PaywallScreen`) działa, ale reguły trzeba przywrócić.
+**Agent:** `dev`, przegląd `code-reviewer`. **Status:** 🔄 (2026-07-07)
+- ✅ **Reguły napisane** (`firestore.rules`): `hasActiveSubscription` = claim `stripeStatus=='active'` (szybka ścieżka, zero odczytów) lub fallback dokumentowy (`status`/`accountStatus`; trialing tylko z żywym `trialEndsAt` Timestampem, fail-closed). Przy okazji domknięty ogon N1: `email_verified` w `isOwnerAndVerified` (Google przechodzi, anonimowi goście nietknięci). Ścieżki paywalla zachowane: odczyt własnego profilu i `checkout_sessions` bez subskrypcji.
+- ✅ **storage.rules** (odkrycie reviewera — własny TODO bramki): zapis `guides/` wymaga teraz verified + subskrypcji (cross-service lustro) + warunkowego owner-checka (upload okładki przed zapisem przewodnika przepuszczony świadomie).
+- ✅ **Przegląd `code-reviewer` (2 rundy)**: całość bezpieczna do commita. Runda 1 wykryła 2 bugi frontu (naprawione: self-heal pisał `accountStatus` odrzucany przez regułę create; alias mógł pokazać paywall płacącemu). Runda 2 potwierdziła storage.rules i poprawki; dołożone wzmocnienie: id przewodnika/strony opinii z `crypto.randomUUID()` zamiast enumerowalnego `Date.now()` (id żyje w publicznym URL i ścieżce Storage). Dług odnotowany w Backlogu: osierocone pliki Storage po usunięciu przewodnika.
+- ✅ `functions/audit-users-n2.cjs` — audyt danych produkcyjnych do uruchomienia przez właściciela PRZED deployem (trialing bez Timestampa, samo accountStatus, konta bez dokumentu users).
+- ⏸ **Deploy = decyzja właściciela**: (1) audyt danych (`cd functions && node audit-users-n2.cjs`), (2) diff wdrożonych reguł z konsoli vs repo, (3) `firebase deploy --only firestore:rules,storage` — **przy promptcie CLI o uprawnieniach cross-service POTWIERDZIĆ** (agent Storage musi dostać odczyt Firestore, inaczej wszystkie uploady przewodników padną — finding 🟡 rundy 2), (4) smoke test po deployu: upload okładki na koncie trialowym + kontrolna odmowa zapisu na koncie z wygasłym trialem. Bez Javy brak emulatora — przegląd + audyt danych są bramką; CLI zwaliduje składnię przed publikacją.
+- ⏸ Decyzje produktowe przy okazji: zapis sekretów przewodnika bez bramki subskrypcji (dziś możliwy po wygaśnięciu — finding 🟢); `past_due` blokuje natychmiast (bez grace period).
 
 ### N3. Walidacja schematu danych (reguły + front)
 **Po co:** bez walidacji w `firestore.rules` złośliwy lub wadliwy klient może zapisać dowolne dane — ryzyko bezpieczeństwa i spójności.
@@ -53,7 +58,7 @@ po domknięciu sekcji NOW.
 **Weryfikacja:** testy reguł na emulatorze (zapis poprawny przechodzi, wadliwy odrzucany) + regresja e2e.
 **Agent:** `dev` + `code-reviewer` (audyt reguł). **Status:** ⬜
 - ⚠️ **Potwierdzone 2026-07-04**: `firestore.rules` `isValidRental` (`:38-41`) i `isValidGuide` (`:59-62`) → `return true` (walidacja ominięta). Tu też domknąć `email_verified` z N1 (jeden plik reguł).
-- ⚠️ **Reguły wdrożone ≠ zweryfikowane z repo** (odkrycie przy X13, 2026-07-04): niezalogowany odczyt publicznej kolekcji `guides` z localhost dostał `permission-denied`, mimo że repo deklaruje `allow read: if true` — możliwa różnica repo↔produkcja albo egzekwowanie App Check. PRZED deployem reguł przy N3 pobrać faktycznie wdrożone reguły (konsola Firebase) i porównać z repo. Walidacja `isValidGuide` musi uwzględnić `type:'review'` (X13).
+- ✅ **Reguły wdrożone = repo, zweryfikowane** (2026-07-07): właściciel wkleił reguły z konsoli, `diff -wB` z `git show HEAD:firestore.rules` — identyczne. Zagadka `permission-denied` z X13 rozstrzygnięta: to **App Check** blokował nieatestowany klient localhost (produkcyjna domena przechodzi atestację reCAPTCHA) — nie rozjazd reguł. Walidacja `isValidGuide` przy N3 musi uwzględnić `type:'review'` (X13).
 
 ### N4. Regulamin, polityka prywatności, powierzenie danych (DPA)
 **Po co:** przyjmowanie płatności bez regulaminu i podstaw RODO to ryzyko prawne; gospodarze przetwarzają w aplikacji dane SWOICH najemców — potrzebne powierzenie przetwarzania. (Pozycja nr 1 z listy właściciela.)

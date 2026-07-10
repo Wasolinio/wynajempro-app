@@ -25,6 +25,8 @@
 
 ## Dług techniczny
 
+- **Osierocone pliki Storage przewodników** (finding przeglądu N2, 2026-07-07) — po co: usunięcie przewodnika z panelu (`deleteDoc` w GuideBuilder) nie kasuje plików Storage — zostają publicznie czytelne pod starymi URL-ami; do tego gałąź `!exists` w storage.rules pozwala subskrybentowi hostować pliki pod nieistniejącymi guideId. Kierunki: kasowanie plików przy usuwaniu przewodnika (front lub Cloud Function, wzorzec jest w deleteUserAccount) + okresowe czyszczenie plików bez dokumentu-rodzica.
+
 - **TypeScript** — po co: mniej regresji przy rozbudowie; duży koszt migracji, decyzja świadoma.
 - **Wydzielenie komponentów współdzielonych** — po co: mniej duplikacji między widokami panelu.
 - **Szersze pokrycie e2e** — podstawowy zakres jest w roadmapie (X10); tu: reszta przepływów.
