@@ -4,6 +4,17 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-10
+
+### N3 — walidacja schematu danych (rules) + naprawiony bloker dodawania wpisów
+- ✅ `firestore.rules`: realne `isValidRental` (24 pola, typy, limity), `isValidGuide` (przewodnik + strona opinii X13, legacy sekrety tylko w merge'u update), `isValidSettings`+hostProfile; hardening create przewodnika (odrzuca sekrety na publicznym dokumencie); helpery optStr/optNum/optBool
+- 🐛 **Przegląd wykrył przedistniejący bloker produktowy** (był też w _legacy i na produkcji): ręczne DODANIE wpisu padało — `setDoc` (create) nie przyjmuje sentinela `deleteField()`, SDK rzuca przed regułami; dane właściciela pochodziły z synca iCal (backend), stąd niezauważone. Fix: create pomija puste pola liczbowe, update używa deleteField
+- ✅ `functions/validate-schema-n3.cjs` — lustrzany tester walidacji na danych produkcyjnych (zamiennik emulatora); przegląd potwierdził zgodność z regułami i read-only
+- ✅ Weryfikacja: lint+build 0, e2e 12/12; przegląd code-reviewer (werdykt: bezpieczne do commita, deploy warunkowy od wyniku testera)
+- ✅ Nowy test regresyjny e2e (luka z przeglądu): dodanie rezerwacji z formularza → asercja czystego dokumentu w mocku (bez sentineli deleteField, kwoty jako liczby); panel-v2 6/6
+- ✅ **Tester lustrzany na produkcji: 16/16 dokumentów przechodzi** (2 przebiegi): pierwszy wykrył 4 stare rezerwacje z legacy polem `id` w dokumencie (stare wersje aplikacji je pisały; obecna odcina) → dopuszczone w allowliście jak w guides, bez dotykania danych; hipoteza `property`-jako-mapa NIE potwierdziła się. Kryterium „istniejące dane przechodzą" — udowodnione
+- ⏸ Czeka: commit + deploy za zgodą właściciela (`--only firestore:rules`; storage nietknięte w N3) → smoke test z ręcznym dodaniem wpisu
+
 ## 2026-07-07
 
 ### N2 — egzekwowanie subskrypcji w regułach (+ ogon N1)
@@ -20,7 +31,12 @@ Project timeline and key milestones.
 - ✅ **Decyzja właściciela + wykonanie (2026-07-09)**: 4 konta testowe usunięte w całości (Auth + Firestore z podkolekcjami; skrypt z bezpiecznikiem na konto właściciela; weryfikacja: została 1 para users/Auth = wasyl515, status active)
 - ✅ **DEPLOY reguł wykonany** (`firebase deploy --only firestore:rules,storage`): obie pary skompilowane i released; 2 nieszkodliwe warningi (unused `data` w zaślepkach isValidRental/isValidGuide — znikną przy N3)
 - ⚠️ **Incydent wdrożeniowy wykryty i obsłużony**: deploy w terminalu nieinteraktywnym POMIJA prompt CLI o cross-service IAM — weryfikacja polityki (REST getIamPolicy) wykazała BRAK roli `firebaserules.firestoreServiceAgent` dla agenta Storage → uploady przewodników chwilowo martwe (impact ~0: po usunięciu kont testowych jedyny gospodarz to właściciel). Programowe nadanie roli: 403 (Editor nie może setIamPolicy) → naprawa po stronie właściciela: `firebase deploy --only storage` w TTY z odpowiedzią `y` na prompt (albo IAM w konsoli GCP)
-- ⏸ Po nadaniu roli: smoke test właściciela (konto active: dane + upload okładki przewodnika)
+- ✅ Właściciel nadał rolę cross-service (deploy w TTY) i potwierdził smoke test: „wszystko działa" — **N2 DOMKNIĘTE** (paywall + email_verified live na backendzie)
+
+### DEPLOY HOSTINGU — cały frontend z 2026-07-03→09 na produkcji
+- ✅ Na polecenie właściciela: `npm run build` (z `89ed868`) + `firebase deploy --only hosting` — release complete
+- ✅ Weryfikacja markerów w bundle'ach serwowanych z produkcji: X12 dolny pasek ✓, X6 przycisk konta ✓, X13 nawigacja Opinie ✓, count-up ✓, loader/toasty v2 ✓
+- Zakres wydania: partie 1–4 audytu UI, mobilny nagłówek, X6 (konto pod imieniem), X12 (bottom bar), X13 (przewodnik opinii), count-up liczb, front N1 — wszystko, co zbudowano od ostatniego deployu (~2 lipca)
 
 ---
 

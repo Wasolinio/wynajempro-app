@@ -25,6 +25,8 @@
 
 ## Dług techniczny
 
+- **Frontowe odbicie limitów walidacji N3** (finding przeglądu, 2026-07-10) — po co: reguły limitują m.in. 20 łączy strony opinii i 15000 znaków pól tekstowych, a front (ReviewBuilder, GuideBuilder) pozwala przekroczyć i pokazuje tylko ogólny toast błędu; dodać maxLength/limity w UI z czytelnym komunikatem.
+
 - **Osierocone pliki Storage przewodników** (finding przeglądu N2, 2026-07-07) — po co: usunięcie przewodnika z panelu (`deleteDoc` w GuideBuilder) nie kasuje plików Storage — zostają publicznie czytelne pod starymi URL-ami; do tego gałąź `!exists` w storage.rules pozwala subskrybentowi hostować pliki pod nieistniejącymi guideId. Kierunki: kasowanie plików przy usuwaniu przewodnika (front lub Cloud Function, wzorzec jest w deleteUserAccount) + okresowe czyszczenie plików bez dokumentu-rodzica.
 
 - **TypeScript** — po co: mniej regresji przy rozbudowie; duży koszt migracji, decyzja świadoma.
