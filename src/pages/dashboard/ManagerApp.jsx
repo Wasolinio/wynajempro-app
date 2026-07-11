@@ -347,8 +347,14 @@ export default function ManagerApp() {
     if (!user) return;
     const { id: _id, ...entry } = newRental;
     ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities'].forEach((field) => {
-      if (entry[field] === '' || entry[field] === null || entry[field] === undefined) entry[field] = deleteField();
-      else { const parsed = Number(String(entry[field]).replace(',', '.')); entry[field] = isNaN(parsed) ? 0 : parsed; }
+      if (entry[field] === '' || entry[field] === null || entry[field] === undefined) {
+        // setDoc (create) nie przyjmuje sentinela deleteField() — SDK rzuca zanim
+        // żądanie dotknie reguł; przy tworzeniu pomijamy pole, przy edycji kasujemy
+        if (editingId) entry[field] = deleteField(); else delete entry[field];
+      } else {
+        const parsed = Number(String(entry[field]).replace(',', '.'));
+        entry[field] = isNaN(parsed) ? 0 : parsed;
+      }
     });
     const docRef = editingId ? doc(db, 'users', user.uid, 'rentals', editingId) : doc(db, 'users', user.uid, 'rentals', Date.now().toString());
     try {

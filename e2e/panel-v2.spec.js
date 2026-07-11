@@ -86,6 +86,37 @@ test('Mobile: dolny pasek zastępuje sidebar, arkusz „Więcej" działa (X12)',
   await expect(sheet).toBeHidden();
 });
 
+test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kwot (fix N3)', async ({ page }) => {
+  await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });
+  await page.goto('/dashboard');
+
+  // „+ Rezerwacja" w nagłówku panelu
+  await page.locator('.wpd-top .wpd-btn--primary').click();
+  const dialog = page.locator('[role="dialog"]');
+  await expect(dialog).toBeVisible();
+
+  // minimalny komplet: property/source/date są prefillowane; uzupełniamy resztę wymaganych
+  await dialog.getByPlaceholder('np. Jan Kowalski').fill('Tester E2E');
+  await dialog.locator('input[type="date"]').nth(1).fill('2026-08-15'); // wyjazd
+  await dialog.getByPlaceholder('0,00').first().fill('1200'); // przychód
+  await dialog.locator('button[type="submit"]').click();
+
+  await expect(page.getByText('Dodano pomyślnie!')).toBeVisible();
+
+  // Asercja regresyjna (bloker z przeglądu N3): dokument create nie może zawierać
+  // sentineli deleteField ({_deleteField:true} w mocku) ani '' w polach liczbowych
+  const saved = await page.evaluate(() => {
+    const entries = Object.entries(window.__mockDbData || {}).filter(([k]) => k.includes('/rentals/'));
+    return entries.length ? entries[entries.length - 1][1] : null;
+  });
+  expect(saved).toBeTruthy();
+  expect(saved.guest).toBe('Tester E2E');
+  expect(saved.income).toBe(1200);
+  for (const k of ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities']) {
+    expect(saved[k] === undefined || typeof saved[k] === 'number').toBe(true);
+  }
+});
+
 test('Karta pulpitu aktywowana z klawiatury otwiera raport (audyt poz. 6)', async ({ page }) => {
   await setupFirebaseMocks(page, { user: mockUser, dbData: activeDb });
   await page.goto('/dashboard');

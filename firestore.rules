@@ -43,12 +43,43 @@ service cloud.firestore {
     }
 
     // =====================================================================
-    // FUNKCJE WALIDACJI SCHEMATU (Schema Validation)
+    // FUNKCJE WALIDACJI SCHEMATU (Schema Validation, N3)
+    // Walidacja działa na dokumencie PO merge'u (update), więc allowlisty
+    // muszą obejmować także pola historyczne/z synca iCal.
     // =====================================================================
+    function optStr(data, k, max) {
+      return !(k in data) || (data[k] is string && data[k].size() <= max);
+    }
+    function optNum(data, k) {
+      return !(k in data) || data[k] is number;
+    }
+    function optBool(data, k) {
+      return !(k in data) || data[k] is bool;
+    }
+
     function isValidRental(data) {
-      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ WALIDACJĘ PÓL
-      // Ominięte dla testowej wersji aplikacji
-      return true; 
+      // pola: formularz (ManagerApp.getDefaultRentalState) + sync iCal (functions)
+      // + aktualizacje zadań (WynajemContext: directionsSent/keycodeSent)
+      // + 'id' legacy: stare wersje zapisywały id w dokumencie (test produkcji 2026-07-10:
+      //   4 takie rezerwacje istnieją); obecny kod odcina id przy zapisie
+      return data.keys().hasOnly(['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
+              'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
+              'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
+              'syncId', 'directionsSent', 'keycodeSent', 'id'])
+          && data.get('type', '') in ['booking', 'utility', 'reminder']
+          && data.date is string && data.date.size() <= 30
+          && optStr(data, 'endDate', 30)
+          && optStr(data, 'source', 300) && optStr(data, 'property', 300)
+          && optStr(data, 'category', 300) && optStr(data, 'guest', 300)
+          && optStr(data, 'email', 320) && optStr(data, 'phone', 50)
+          && optStr(data, 'guestNote', 5000) && optStr(data, 'text', 5000)
+          && optStr(data, 'syncId', 300) && optStr(data, 'id', 100)
+          && optNum(data, 'income') && optNum(data, 'advancePayment')
+          && optNum(data, 'commission') && optNum(data, 'utilities')
+          && optNum(data, 'tax') && optNum(data, 'vat')
+          && optBool(data, 'isAdvancePaid') && optBool(data, 'isPaid') && optBool(data, 'isCompleted')
+          && optBool(data, 'directionsSent') && optBool(data, 'keycodeSent')
+          && (!('completedTasks' in data) || data.completedTasks is map);
     }
 
     function isValidSettings(docId, data) {
@@ -59,17 +90,44 @@ service cloud.firestore {
           && (docId == 'sources' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'categories' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'syncLinks' ? (!('links' in data) || data.links is map) : true)
-          && (docId == 'tax' ? (!('rate' in data) || data.rate is number) : true);
+          && (docId == 'tax' ? (!('rate' in data) || data.rate is number) : true)
+          && (docId == 'hostProfile' ? (
+                data.keys().hasOnly(['entityName', 'identifierType', 'taxIdentifier', 'address', 'phone', 'email'])
+                && optStr(data, 'entityName', 300) && optStr(data, 'identifierType', 20)
+                && optStr(data, 'taxIdentifier', 30) && optStr(data, 'address', 500)
+                && optStr(data, 'phone', 50) && optStr(data, 'email', 320)
+              ) : true);
     }
 
     // =====================================================================
     // WALIDACJA GUIDE (Schema Validation dla dokumentów przewodników)
-    // Ogranicza listę dozwolonych pól oraz ich typy.
+    // Dwa kształty w kolekcji guides: przewodnik gościa oraz strona opinii
+    // (type:'review', X13). Ogranicza listę dozwolonych pól oraz ich typy.
     // =====================================================================
+    function isValidReviewPage(data) {
+      return data.keys().hasOnly(['type', 'ownerId', 'property', 'title', 'message', 'links', 'createdAt', 'updatedAt'])
+          && optStr(data, 'property', 300)
+          && optStr(data, 'title', 300)
+          && optStr(data, 'message', 5000)
+          && data.links is list && data.links.size() <= 20;
+    }
+    function isValidGuestGuide(data) {
+      // wifiNetwork/wifiPassword/doorPin: legacy sekrety na STARYCH dokumentach —
+      // dopuszczone w merge'u aktualizacji; front pisze je wyłącznie do secrets/data
+      return data.keys().hasOnly(['id', 'name', 'propertyId', 'coverImage', 'checkInInfo', 'houseRules',
+              'houseRulesFile', 'ppoRules', 'mapLink', 'attractions', 'hasSensitiveData',
+              'ownerId', 'createdAt', 'updatedAt', 'wifiNetwork', 'wifiPassword', 'doorPin'])
+          && data.name is string && data.name.size() > 0 && data.name.size() <= 300
+          && optStr(data, 'id', 100) && optStr(data, 'propertyId', 300)
+          && optStr(data, 'coverImage', 2048) && optStr(data, 'mapLink', 2048)
+          && optStr(data, 'checkInInfo', 15000) && optStr(data, 'houseRules', 15000) && optStr(data, 'ppoRules', 15000)
+          && (!('houseRulesFile' in data) || data.houseRulesFile == null || data.houseRulesFile is map)
+          && (!('attractions' in data) || (data.attractions is list && data.attractions.size() <= 100))
+          && optBool(data, 'hasSensitiveData')
+          && optStr(data, 'wifiNetwork', 200) && optStr(data, 'wifiPassword', 200) && optStr(data, 'doorPin', 50);
+    }
     function isValidGuide(data) {
-      // TODO: PRZED LAUNCHEM APKI - PRZYWRÓCIĆ WALIDACJĘ SCHEMATU
-      // Ominięte dla testowej wersji aplikacji
-      return true; 
+      return data.get('type', '') == 'review' ? isValidReviewPage(data) : isValidGuestGuide(data);
     }
 
     // =====================================================================
@@ -130,9 +188,12 @@ service cloud.firestore {
     match /guides/{guideId} {
       allow read: if true; // Publiczny dostęp do bazowego dokumentu (bez sekretów)
 
+      // legacy sekrety dozwolone tylko w merge'u UPDATE starych dokumentów —
+      // NOWY publiczny dokument nie może ich zawierać (hardening z przeglądu N3)
       allow create: if isOwnerAndVerified(request.auth.uid)
                     && hasActiveSubscription(request.auth.uid)
                     && request.resource.data.ownerId == request.auth.uid
+                    && !request.resource.data.keys().hasAny(['wifiNetwork', 'wifiPassword', 'doorPin'])
                     && isValidGuide(request.resource.data);
 
       allow update: if isOwnerAndVerified(request.auth.uid)
