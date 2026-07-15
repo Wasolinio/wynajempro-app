@@ -29,6 +29,18 @@
 
 - **Osierocone pliki Storage przewodników** (finding przeglądu N2, 2026-07-07) — po co: usunięcie przewodnika z panelu (`deleteDoc` w GuideBuilder) nie kasuje plików Storage — zostają publicznie czytelne pod starymi URL-ami; do tego gałąź `!exists` w storage.rules pozwala subskrybentowi hostować pliki pod nieistniejącymi guideId. Kierunki: kasowanie plików przy usuwaniu przewodnika (front lub Cloud Function, wzorzec jest w deleteUserAccount) + okresowe czyszczenie plików bez dokumentu-rodzica.
 
+- **Retencja przy soft-delete kont** (finding 🟢 audytu N5, 2026-07-10) — po co: `cleanupUserData` (konta `canceled` po karencji) czyści rentals/settings/checkout_sessions, ale zostawia `guides`, `secrets/data`, pliki Storage i podpisy gości (imię + obraz podpisu = dane osobowe) — kasuje je dopiero pełne `deleteUserAccount`; wsad do części `legal` N5 (retencja/RODO).
+
+- **Legacy przewodniki z enumerowalnym id** (audyt N5) — po co: stare id z `Date.now()` da się zgadywać; po migracji sekretów (audit-guides-n5 --fix) ekspozycja ogranicza się do treści publicznej, ale warto zachęcić do odtworzenia tych przewodników (nowy link/QR = decyzja gospodarza).
+
+- **Domknięcie allowlisty guides** (po migracji) — po co: usunięcie `wifiNetwork/wifiPassword/doorPin` z `isValidGuestGuide` po potwierdzonym czystym audycie produkcji zamyka 🔴2 na poziomie reguł całkowicie.
+
+- **Sanityzacja `propertyId` w Content-Disposition eksportu iCal** (finding 🟢 audytu N5) — po co: CRLF w nazwie obiektu = wyjątek 500; kosmetyka defense-in-depth.
+
+- **DNS-rebinding w `isSafeUrl`** (residual 🟡3 audytu N5, 2026-07-10) — po co: walidacja hosta jest stringowa, więc domena rozwiązująca się na adres prywatny przechodzi; ryzyko niskie (treść odpowiedzi nie wraca do wywołującego, metadata GCP wymaga nagłówka). Hardening: rozwiązać DNS i sprawdzać IP, albo allowlista hostów iCal (booking/airbnb itd.).
+
+- **Drobne sygnały z pisania bazy wiedzy X1** (2026-07-10): `isAdvancePaid` tylko wyświetlane (nie da się ustawić w UI); przycisk „Eksport PDF" w Finansach otwiera modal raportu (mylące); źródło „Facebook" zeruje podatek/VAT/prowizję bez wyjaśnienia; na mobile brak ręcznej synchronizacji w arkuszu „Więcej" — po co: spójność obietnic UI z zachowaniem; decyzje produktowe przy dopieszczaniu.
+
 - **TypeScript** — po co: mniej regresji przy rozbudowie; duży koszt migracji, decyzja świadoma.
 - **Wydzielenie komponentów współdzielonych** — po co: mniej duplikacji między widokami panelu.
 - **Szersze pokrycie e2e** — podstawowy zakres jest w roadmapie (X10); tu: reszta przepływów.

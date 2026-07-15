@@ -6,6 +6,20 @@ Project timeline and key milestones.
 
 ## 2026-07-10
 
+### N4 u prawnika → start równoległych strumieni (N5-tech + X1)
+- 📨 Właściciel: dokumenty prawne SĄ u prawnika-człowieka, czekamy na uwagi; pracujemy dalej — zgodnie z roadmapą NEXT działa „równolegle, gdy NOW czeka na prawnika"
+- 🔄 **N5 część techniczna**: `code-reviewer` audytuje firestore.rules + storage.rules + functions/index.js + przepływy sekretów (wifi/PIN, `secretToken`, tokeny iCal) + publiczne strony (XSS) + wycieki w repo/buildzie; część `legal` (przepływy danych osobowych) po raporcie technicznym
+- 🔄 **X1 baza wiedzy**: `support` pisze 8 artykułów + indeks do `docs/support/` (ugruntowane w realnym UI z kodu, ton marki); osadzenie w aplikacji (`dev`) osobnym krokiem po akceptacji właściciela
+
+### N5-tech: audyt → naprawy tego samego dnia
+- 🔍 **Audyt `code-reviewer`**: 2×🔴 + 3×🟡 + 4×🟢, werdykt „NIE wpuszczać płacących". Kluczowe: `allow read` na `guides` obejmował `list` (anonim mógł zrzucić CAŁĄ kolekcję — dane wszystkich klientów, instrukcje wejścia, mapy); legacy sekrety wifi/PIN żyły na publicznych dokumentach, a edycja ich nie czyściła (updateDoc merge'uje); SSRF w sync iCal (redirect follow bez re-walidacji + funkcja dostępna bez subskrypcji/weryfikacji); XSS `javascript:` przez href z danych gospodarza; publiczny `hostProfile` eksponował `taxIdentifier` (może być PESEL) + adres każdego gospodarza.
+- 🔧 **Naprawy (kod, bez commita)**: reguły — `get`/`list` rozdzielone, sekrety w update tylko-do-usunięcia (`MapDiff.addedKeys/changedKeys`), `publicContact` z walidacją; front — migracja sekretów przy każdym zapisie (`deleteField`), czyszczenie `secrets/data`, `safeHref` na wszystkich publicznych href, normalizacja łączy, `publicContact` pisany z konta/onboardingu + samonaprawa w `useFirebaseData`, `GuestGuideView` czyta `publicContact`; functions — bramka verified+subskrypcja w `syncICalCalendars`, `fetchWithSafeRedirects` (manual, re-walidacja hopów, max 3), log hosta zamiast pełnego URL iCal (token!).
+- 🧰 Nowe narzędzia: `src/utils/url.js` (normalizeUrl/safeHref), `functions/audit-guides-n5.cjs` (read-only inwentaryzacja legacy sekretów + `--fix` migracja; wymaga świeżego klucza od właściciela — poprzedni usunięty zgodnie z higieną).
+- ✅ Weryfikacja: lint 0, build OK, `node --check` functions, `firebase deploy --only firestore:rules --dry-run` skompilowane (MapDiff OK), e2e zaufany zestaw **30/30**; powtórny przegląd `code-reviewer` (diff napraw) w toku.
+- 📄 **X1 dostarczone równolegle**: 9 plików `docs/support/` (agent pisał w worktree — skopiowane do repo); sygnały produktowe → [[Known-Issues]] #6–8 i [[Projects/Backlog]].
+- ✅ **Decyzje właściciela (ten sam dzień) + naprawy #6/#7**: pakiet roczny UKRYTY na paywallu (jedna karta 29,99; wraca z founding members po drugiej cenie w Stripe); formularz `/kontakt` podpięty do `contact_messages` (create-only z walidacją w regułach; odczyt w konsoli Firebase). Weryfikacja rundy 2: lint 0, build OK, dry-run reguł OK, e2e 30/30.
+- ✅ **Re-review diffa (`code-reviewer`): BEZPIECZNY DO COMMITA** — findingi domknięte bez regresji; potwierdzone: deleteField-no-op poza MapDiff, undici redirect:'manual' = 302+Location (test lokalny), brak pominiętych czytelników hostProfile. Bramka „płacący klienci" domyka się operacyjnie: `audit-guides-n5.cjs --fix` na produkcji + „✓ Czysto" + odtworzenie przewodników z enumerowalnym id. Nowe 🟢: DNS-rebinding → Backlog; usunięty martwy `WynajemContext.jsx.bak` (git rm).
+
 ### N3 — walidacja schematu danych (rules) + naprawiony bloker dodawania wpisów
 - ✅ `firestore.rules`: realne `isValidRental` (24 pola, typy, limity), `isValidGuide` (przewodnik + strona opinii X13, legacy sekrety tylko w merge'u update), `isValidSettings`+hostProfile; hardening create przewodnika (odrzuca sekrety na publicznym dokumencie); helpery optStr/optNum/optBool
 - 🐛 **Przegląd wykrył przedistniejący bloker produktowy** (był też w _legacy i na produkcji): ręczne DODANIE wpisu padało — `setDoc` (create) nie przyjmuje sentinela `deleteField()`, SDK rzuca przed regułami; dane właściciela pochodziły z synca iCal (backend), stąd niezauważone. Fix: create pomija puste pola liczbowe, update używa deleteField
@@ -13,7 +27,7 @@ Project timeline and key milestones.
 - ✅ Weryfikacja: lint+build 0, e2e 12/12; przegląd code-reviewer (werdykt: bezpieczne do commita, deploy warunkowy od wyniku testera)
 - ✅ Nowy test regresyjny e2e (luka z przeglądu): dodanie rezerwacji z formularza → asercja czystego dokumentu w mocku (bez sentineli deleteField, kwoty jako liczby); panel-v2 6/6
 - ✅ **Tester lustrzany na produkcji: 16/16 dokumentów przechodzi** (2 przebiegi): pierwszy wykrył 4 stare rezerwacje z legacy polem `id` w dokumencie (stare wersje aplikacji je pisały; obecna odcina) → dopuszczone w allowliście jak w guides, bez dotykania danych; hipoteza `property`-jako-mapa NIE potwierdziła się. Kryterium „istniejące dane przechodzą" — udowodnione
-- ⏸ Czeka: commit + deploy za zgodą właściciela (`--only firestore:rules`; storage nietknięte w N3) → smoke test z ręcznym dodaniem wpisu
+- ✅ **Commit (`beafb13`) + DEPLOY wykonane** (decyzja właściciela): firestore:rules (kompilacja czysta, bez warningów) + hosting z fixem dodawania wpisów (bez niego smoke test padłby na starym bugu). Czeka: smoke test właściciela
 
 ## 2026-07-07
 

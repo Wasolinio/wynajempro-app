@@ -49,6 +49,22 @@
 
 ---
 
+## Otwarte (2026-07-10 — sygnały z X1 i audytu N5)
+
+### 6. Formularz /kontakt nie wysyła wiadomości
+**Severity**: 🔴 przed launchem · **Status**: ✅ naprawione w kodzie 2026-07-10 (czeka commit+deploy)
+`ContactPage.jsx` `handleSubmit` pokazywał tylko toast — treść NIGDZIE nie trafiała. **Decyzja właściciela: zapis do Firestore.** Wdrożone: `addDoc` do `contact_messages` (limity 320/5000, toast błędu z adresem awaryjnym), reguły create-only z walidacją kształtu (odczyt wyłącznie w konsoli Firebase). Pamiętać: zaglądać do kolekcji `contact_messages` w konsoli.
+
+### 7. Paywall oferuje „Pakiet roczny", którego backend nie obsługuje
+**Severity**: 🔴 sprzedażowe · **Status**: ✅ obsłużone 2026-07-10 (czeka commit+deploy)
+`PaywallScreen` pokazywał 24,99/mc (299,90/rok), ale `createCheckoutSession` ma zaszyty JEDEN Price ID — klik „roczny" kupowałby miesięczny. **Decyzja właściciela: pakiet UKRYTY** do czasu wdrożenia (jedna karta 29,99 zł/mc, przełącznik okresu usunięty). Wraca razem z ofertą founding members po dodaniu drugiej ceny w Stripe + parametru planu.
+
+### 8. Konta Google nie mogą usunąć konta z poziomu aplikacji
+**Severity**: 🟡 RODO · **Status**: ⬜ do naprawy (`dev`)
+Formularz „Usunięcie konta" wymaga hasła (`EmailAuthProvider.credential`), którego konto Google nie posiada. Naprawa: reauthenticacja przez `reauthenticateWithPopup(GoogleAuthProvider)` dla kont Google. Obejście opisane w artykule supportu (kontakt mailowy).
+
+---
+
 ## Future Improvements (Not Bugs)
 
 - [ ] Add dark mode

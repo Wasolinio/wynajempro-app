@@ -56,7 +56,7 @@ po domknięciu sekcji NOW.
 **Po co:** bez walidacji w `firestore.rules` złośliwy lub wadliwy klient może zapisać dowolne dane — ryzyko bezpieczeństwa i spójności.
 **Gotowe, gdy:** reguły walidują kształt zapisów (typy, wymagane pola, rozmiary) dla `rentals`, `settings`, `guides`; front waliduje przed wysłaniem; istniejące dane produkcyjne przechodzą.
 **Weryfikacja:** testy reguł na emulatorze (zapis poprawny przechodzi, wadliwy odrzucany) + regresja e2e.
-**Agent:** `dev` + `code-reviewer` (audyt reguł). **Status:** 🔄 (2026-07-10)
+**Agent:** `dev` + `code-reviewer` (audyt reguł). **Status:** ✅ 2026-07-10 (`beafb13`) — walidacja WDROŻONA (firestore:rules, kompilacja bez warningów) + hosting z fixem dodawania wpisów; tester produkcyjny 16/16; czeka tylko smoke test właściciela (ręczne dodanie wpisu).
 - ✅ **Walidacja napisana**: `isValidRental` (allowlist 24 pól z trzech źródeł prawdy: formularz + sync iCal + aktualizacje zadań; typy, limity), `isValidGuide` rozdzielony na przewodnik gościa (z legacy sekretami dopuszczonymi w merge'u update) i stronę opinii X13, `isValidSettings` + gałąź hostProfile (6 pól). Hardening: create przewodnika odrzuca legacy sekrety (`hasAny`).
 - ✅ **Przegląd `code-reviewer`**: bezpieczne do commita; składnia zweryfikowana analitycznie (konstrukcje już skompilowane na produkcji przy N2). Wykryty przy okazji **przedistniejący bloker produktowy**: dodawanie wpisu (`setDoc` na create) padało na sentinelu `deleteField()` — SDK rzuca przed regułami; naprawione w `ManagerApp.handleAddRental` (create: pomijanie pola; update: deleteField).
 - ✅ `functions/validate-schema-n3.cjs` — lustrzany tester (te same predykaty w JS) do przepuszczenia WSZYSTKICH dokumentów produkcji; zamiennik emulatora. Zgodność lustra potwierdzona przez przegląd (rozbieżności tylko w stronę ostrzejszą).
@@ -68,7 +68,7 @@ po domknięciu sekcji NOW.
 **Po co:** przyjmowanie płatności bez regulaminu i podstaw RODO to ryzyko prawne; gospodarze przetwarzają w aplikacji dane SWOICH najemców — potrzebne powierzenie przetwarzania. (Pozycja nr 1 z listy właściciela.)
 **Gotowe, gdy:** projekty dokumentów w `docs/legal/` + weryfikacja przez prawnika-człowieka + wdrożone w aplikacji (`Terms`/`Privacy`) przez `dev`.
 **Weryfikacja:** checklista zgodności `legal` (podstawy prawne z datą) + potwierdzenie prawnika.
-**Agent:** `legal` (projekty) → właściciel + prawnik (akceptacja) → `dev` (wdrożenie). **Status:** 🔄 (2026-07-04)
+**Agent:** `legal` (projekty) → właściciel + prawnik (akceptacja) → `dev` (wdrożenie). **Status:** 🔄 — **dokumenty u prawnika-człowieka (2026-07-10)**, czekamy na uwagi; po nich korekty + wdrożenie przez `dev`.
 - ✅ **Projekty gotowe** w `docs/legal/`: `Regulamin.md`, `Polityka-prywatnosci.md`, `DPA-powierzenie.md`, `Checklista-zgodnosci.md` — oparte na kodzie i źródłach (ISAP/UOKiK/UODO), z placeholderami na dane firmy. Wszystkie oznaczone „PROJEKT".
 - ⏸ **Czeka na właściciela**: uzupełnić sekcję D checklisty (dane rejestrowe firmy, VAT/faktury, warunki founding members, model odstąpienia) + wybór kancelarii (otwarta decyzja nr 4).
 - ⏸ **Czeka na prawnika-człowieka**: 9 punktów z sekcji E (m.in. odstąpienie przy Stripe, status „przedsiębiorcy na prawach konsumenta", kompletność DPA art. 28, nowelizacje 2026).
@@ -78,14 +78,21 @@ po domknięciu sekcji NOW.
 **Po co:** ostatnia bramka przed wpuszczeniem prawdziwych klientów i ich danych.
 **Gotowe, gdy:** `code-reviewer` przejrzał `firestore.rules`, `storage.rules`, `functions/index.js` i przepływy sekretów (PIN/WiFi, `secretToken`); `legal` przejrzał przepływy danych osobowych; wszystkie 🔴 findingi rozwiązane.
 **Weryfikacja:** raporty obu agentów z listą findingów i ich statusem.
-**Agent:** `code-reviewer` + `legal`. **Status:** ⬜
+**Agent:** `code-reviewer` + `legal`. **Status:** 🔄 — część techniczna (`code-reviewer`) ruszyła 2026-07-10 równolegle do N4 u prawnika; część `legal` (przepływy danych osobowych) pójdzie po raporcie technicznym, żeby czytała jego findingi.
+- ✅ **Audyt techniczny wykonany** (2026-07-10): 2×🔴 (publiczny `list` całej kolekcji `guides` — anonim mógł zrzucić dane wszystkich klientów; legacy sekrety wifi/PIN na publicznych dokumentach, edycja ich NIE czyściła), 3×🟡 (SSRF w sync iCal: redirecty bez re-walidacji + brak bramki subskrypcji; XSS `javascript:` w łączach stron publicznych; publiczny `hostProfile` z `taxIdentifier` — może być PESEL), 4×🟢. Werdykt przed naprawami: NIE wpuszczać płacących klientów.
+- ✅ **Naprawy wdrożone w kodzie** (ten sam dzień): reguły `get`/`list` rozdzielone + sekrety w update wolno tylko usuwać (`diff().addedKeys()/changedKeys()`); migracja sekretów przy każdym zapisie przewodnika (`deleteField`) + czyszczenie `secrets/data`; `safeHref` (tylko http/s w href) na obu stronach publicznych + normalizacja łączy w edytorze; `publicContact` (wąski publiczny kontakt) zamiast publicznego `hostProfile` — zapis w koncie/onboardingu + samonaprawa starych kont; bramka verified+subskrypcja w `syncICalCalendars` + `fetchWithSafeRedirects` (re-walidacja SSRF każdego przekierowania). Weryfikacja: lint 0, build OK, reguły dry-run skompilowane, e2e 30/30.
+- ✅ **Re-review `code-reviewer` (2026-07-10): diff BEZPIECZNY DO COMMITA** — wszystkie findingi domknięte w kodzie, bez regresji; potwierdzone m.in.: `deleteField` na nieobecnym polu nie wpada do MapDiff (czyste przewodniki zapisują się normalnie), undici `redirect:'manual'` daje realny 302+Location (legalne iCale za przekierowaniem dalej działają), jedyny publiczny czytelnik `hostProfile` przełączony. Nowe 🟢: DNS-rebinding w `isSafeUrl` ([[Projects/Backlog]]), usunięty martwy `WynajemContext.jsx.bak`.
+- ⏸ **Czeka na właściciela:** commit + deploy (rules + hosting + **functions** — pierwszy raz w tym cyklu) → świeży klucz serwisowy → `functions/audit-guides-n5.cjs` (inwentaryzacja; z `--fix` migruje sekrety do `secrets/data`) → wynik „✓ Czysto" → **odtworzenie w aplikacji przewodników ze starym enumerowalnym id** (link zgadywalny, a podpis odblokowuje sekrety — nowy link/QR trafia do gości). Dopiero to domyka bramkę „wpuszczamy płacących". Follow-up: usunięcie wifi/pin z allowlisty reguł po czystym audycie.
+- ⏸ **Wsad do części `legal`:** 🟡5 (PII gospodarza), 🟢 retencja: `cleanupUserData` przy kontach `canceled` nie czyści `guides`/`secrets`/podpisów gości (imię + obraz podpisu = dane osobowe).
 
 ---
 
 ## 🟡 NEXT — po odblokowaniu launchu (lub równolegle, gdy NOW czeka na prawnika)
 
 ### X1. Baza wiedzy / centrum pomocy dla użytkowników
-Pozycja nr 2 z listy właściciela. **Po co:** mniej powtarzalnych pytań, łatwiejszy onboarding. **Gotowe, gdy:** artykuły FAQ w `docs/support/` (od `support`) + osadzone w aplikacji (`dev`). **Agent:** `support` → `dev`. ⬜
+Pozycja nr 2 z listy właściciela. **Po co:** mniej powtarzalnych pytań, łatwiejszy onboarding. **Gotowe, gdy:** artykuły FAQ w `docs/support/` (od `support`) + osadzone w aplikacji (`dev`). **Agent:** `support` → `dev`. 🔄 — 2026-07-10 `support` pisze artykuły (8 + indeks) ugruntowane w kodzie UI; osadzenie w aplikacji po akceptacji treści przez właściciela.
+- ✅ **Artykuły gotowe** (2026-07-10): 9 plików w `docs/support/` — każdy krok i etykieta zweryfikowane w kodzie (cytaty 1:1), trial = 14 dni potwierdzony, zero markerów niepewności. Czeka: akceptacja właściciela → osadzenie w aplikacji (`dev`).
+- ⚠️ **Sygnały produktowe z pisania** (support nie zgadywał — treść je omija): martwy formularz `/kontakt`, pakiet roczny na paywallu bez obsługi w backendzie, brak możliwości usunięcia konta Google z UI → [[Known-Issues]] #6–8; drobne (isAdvancePaid bez UI, mylący „Eksport PDF", Facebook zeruje podatki) → [[Projects/Backlog]].
 
 ### X2. Interaktywne demo panelu na landingu
 Pozycja nr 3: obecne demo nie działa; pomysł — mockup w stylu „apple scroll" (scrollowanie podświetla funkcje). **Po co:** pokazanie produktu bez rejestracji = wyższa konwersja. **Gotowe, gdy:** działające demo na landingu, zweryfikowane na mobile. **Agent:** `designer` + `dev`, przekaz `marketing`. ⬜
