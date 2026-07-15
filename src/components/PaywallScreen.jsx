@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Lock, Clock, AlertTriangle } from 'lucide-react';
 import { BrandStyles } from '../styles/brand';
 
@@ -31,8 +31,6 @@ export default function PaywallScreen({
   accountStatus, scheduledDeletionAt, onSubscribe, isCheckoutLoading,
   onManageSubscription, isBillingPortalLoading, onLogout,
 }) {
-  const [billingInterval, setBillingInterval] = useState('monthly');
-
   const getDaysRemaining = (targetDate) => {
     if (!targetDate) return 0;
     const diffDays = Math.ceil((targetDate.getTime() - new Date().getTime()) / 86400000);
@@ -84,27 +82,12 @@ export default function PaywallScreen({
             </div>
           )}
 
-          {/* Przełącznik okresu */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
-            <div style={{ display: 'inline-flex', gap: 3, background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 3, padding: 3 }}>
-              {[['monthly', 'Miesięcznie'], ['yearly', 'Rocznie · −17%']].map(([val, lbl]) => (
-                <button key={val} type="button" onClick={() => setBillingInterval(val)}
-                  style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 2,
-                    background: billingInterval === val ? 'var(--ink)' : 'transparent', color: billingInterval === val ? '#fff' : 'var(--muted)' }}>
-                  {lbl}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Pakiety */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+          {/* Pakiet roczny ukryty decyzją właściciela (2026-07-10): backend ma jeden
+              Price ID i klik „roczny" kupowałby miesięczny (Known-Issues #7).
+              Wraca razem z ofertą founding members po wdrożeniu drugiej ceny w Stripe. */}
+          <div style={{ maxWidth: 320, margin: '0 auto 20px' }}>
             <PriceCard plan="monthly" name="Pakiet miesięczny" badge="Wybór" price="29,99" unit="zł / msc" note="Elastyczna subskrypcja."
-              active={billingInterval === 'monthly'} isCheckoutLoading={isCheckoutLoading} onSubscribe={onSubscribe} />
-            <PriceCard plan="yearly" name="Pakiet roczny" badge="Zalecany"
-              price={billingInterval === 'monthly' ? '24,99' : '299,90'}
-              unit={billingInterval === 'monthly' ? 'zł / msc' : 'zł / rok'} note="Dwa miesiące gratis."
-              active={billingInterval === 'yearly'} isCheckoutLoading={isCheckoutLoading} onSubscribe={onSubscribe} />
+              active isCheckoutLoading={isCheckoutLoading} onSubscribe={onSubscribe} />
           </div>
 
           {(accountStatus === 'canceled' || accountStatus === 'past_due') && (

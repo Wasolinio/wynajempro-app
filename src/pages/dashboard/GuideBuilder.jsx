@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, storage } from '../../firebase';
-import { collection, query, where, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, deleteField, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DeleteConfirmModal from './modals/DeleteConfirmModal';
+import { normalizeUrl } from '../../utils/url';
 
 const MAX_UPLOAD = 10 * 1024 * 1024; // 10 MB
 
@@ -175,17 +176,26 @@ export default function GuideBuilder({ user, properties }) {
       const docRef = doc(db, 'guides', editingGuide.id);
       const { wifiNetwork, wifiPassword, doorPin, ...publicGuideData } = editingGuide;
       const hasSensitiveData = !!(wifiNetwork || wifiPassword || doorPin);
+      // łącza bez protokołu dostają https:// — strona publiczna renderuje href
+      // wyłącznie dla http(s) (safeHref), więc bez normalizacji zniknęłyby gościom
+      publicGuideData.mapLink = normalizeUrl(publicGuideData.mapLink);
+      publicGuideData.attractions = (publicGuideData.attractions || []).map((a) => ({ ...a, link: normalizeUrl(a.link) }));
       const guideDataToSave = { ...publicGuideData, hasSensitiveData, ownerId: user.uid, updatedAt: serverTimestamp() };
 
       if (isNew) {
         await setDoc(docRef, { ...guideDataToSave, createdAt: serverTimestamp() });
       } else {
-        await updateDoc(docRef, guideDataToSave);
+        // migracja legacy przy każdej edycji: sekrety znikają z publicznego dokumentu
+        // (żyją wyłącznie w secrets/data); reguły blokują ich dodawanie/zmianę (N5 🔴2)
+        await updateDoc(docRef, { ...guideDataToSave, wifiNetwork: deleteField(), wifiPassword: deleteField(), doorPin: deleteField() });
       }
 
+      const secretsRef = doc(db, 'guides', editingGuide.id, 'secrets', 'data');
       if (hasSensitiveData) {
-        const secretsRef = doc(db, 'guides', editingGuide.id, 'secrets', 'data');
         await setDoc(secretsRef, { wifiNetwork: wifiNetwork || '', wifiPassword: wifiPassword || '', doorPin: doorPin || '' });
+      } else if (!isNew) {
+        // wyczyszczenie pól w edytorze usuwa też stare wartości z secrets/data
+        await deleteDoc(secretsRef);
       }
 
       toast.success(isNew ? 'Przewodnik został zapisany' : 'Przewodnik został zaktualizowany');

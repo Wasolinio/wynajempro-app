@@ -83,7 +83,7 @@ service cloud.firestore {
     }
 
     function isValidSettings(docId, data) {
-      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile'];
+      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact'];
       return docId in knownIds
           && (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'properties' ? (!('items' in data) || data.items is list) : true)
@@ -96,6 +96,10 @@ service cloud.firestore {
                 && optStr(data, 'entityName', 300) && optStr(data, 'identifierType', 20)
                 && optStr(data, 'taxIdentifier', 30) && optStr(data, 'address', 500)
                 && optStr(data, 'phone', 50) && optStr(data, 'email', 320)
+              ) : true)
+          && (docId == 'publicContact' ? (
+                data.keys().hasOnly(['entityName', 'phone', 'email'])
+                && optStr(data, 'entityName', 300) && optStr(data, 'phone', 50) && optStr(data, 'email', 320)
               ) : true);
     }
 
@@ -163,8 +167,10 @@ service cloud.firestore {
 
       // Ustawienia użytkownika - wymagają subskrypcji
       match /settings/{docId} {
-        // hostProfile jest odczytywany publicznie (kontakt w przewodniku dla gości)
-        allow read: if docId == 'hostProfile'
+        // publicContact: wąski publiczny odczyt (kontakt w przewodniku dla gości).
+        // hostProfile z taxIdentifier (może być PESEL) i adresem NIE jest już
+        // publiczny — wcześniej każdy znający uid czytał pełne dane. Audyt N5 🟡5.
+        allow read: if docId == 'publicContact'
                     || (isOwnerAndVerified(userId) && hasActiveSubscription(userId));
         allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidSettings(docId, request.resource.data);
         allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
@@ -186,7 +192,11 @@ service cloud.firestore {
     // Pola wrażliwe (wifi, kody) ukryte są w subkolekcji secrets, odczyt warunkowy.
     // =====================================================================
     match /guides/{guideId} {
-      allow read: if true; // Publiczny dostęp do bazowego dokumentu (bez sekretów)
+      // get: publiczny (gość zna link); list: TYLKO właściciel nad własnymi dokumentami.
+      // Otwarte `allow read` obejmowało też list — anonim mógł zrzucić CAŁĄ kolekcję
+      // (wszyscy klienci, adresy, instrukcje wejścia). Audyt N5 🔴1.
+      allow get: if true;
+      allow list: if request.auth != null && resource.data.ownerId == request.auth.uid;
 
       // legacy sekrety dozwolone tylko w merge'u UPDATE starych dokumentów —
       // NOWY publiczny dokument nie może ich zawierać (hardening z przeglądu N3)
@@ -196,10 +206,14 @@ service cloud.firestore {
                     && !request.resource.data.keys().hasAny(['wifiNetwork', 'wifiPassword', 'doorPin'])
                     && isValidGuide(request.resource.data);
 
+      // legacy sekrety wolno wyłącznie USUWAĆ (migracja przy zapisie) — nigdy
+      // dodawać ani zmieniać na publicznym dokumencie. Audyt N5 🔴2.
       allow update: if isOwnerAndVerified(request.auth.uid)
                     && hasActiveSubscription(request.auth.uid)
                     && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == request.auth.uid
+                    && !request.resource.data.diff(resource.data).addedKeys().hasAny(['wifiNetwork', 'wifiPassword', 'doorPin'])
+                    && !request.resource.data.diff(resource.data).changedKeys().hasAny(['wifiNetwork', 'wifiPassword', 'doorPin'])
                     && isValidGuide(request.resource.data);
 
       allow delete: if isOwnerAndVerified(request.auth.uid)
@@ -247,6 +261,25 @@ service cloud.firestore {
       allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt', 'source'])
                     && request.resource.data.email is string
                     && request.resource.data.email.matches('.*@.*\\..*');
+      allow read, update, delete: if false;
+    }
+
+    // =====================================================================
+    // WIADOMOŚCI Z FORMULARZA KONTAKTOWEGO (Known-Issues #6)
+    // Create-only jak newsletter; odczyt wyłącznie w konsoli Firebase.
+    // =====================================================================
+    match /contact_messages/{docId} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'message', 'createdAt', 'source'])
+                    && request.resource.data.keys().hasAll(['email', 'message', 'createdAt'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.matches('.*@.*\\..*')
+                    && request.resource.data.email.size() <= 320
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() > 0
+                    && request.resource.data.message.size() <= 5000
+                    && request.resource.data.createdAt == request.time
+                    && (!('source' in request.resource.data)
+                        || (request.resource.data.source is string && request.resource.data.source.size() <= 50));
       allow read, update, delete: if false;
     }
   }

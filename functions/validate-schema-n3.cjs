@@ -47,7 +47,7 @@ function whyInvalidRental(d) {
 }
 
 // ── Lustro isValidSettings ──
-const KNOWN_SETTINGS = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile'];
+const KNOWN_SETTINGS = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact'];
 function whyInvalidSettings(docId, d) {
   if (!KNOWN_SETTINGS.includes(docId)) return `nieznany docId '${docId}'`;
   if (['reminders', 'properties', 'sources', 'categories'].includes(docId) && 'items' in d && !isList(d.items)) return 'items nie jest listą';
@@ -58,6 +58,13 @@ function whyInvalidSettings(docId, d) {
     if (!hasOnly(d, HP)) return `hostProfile nieznane pola: ${Object.keys(d).filter((k) => !HP.includes(k)).join(',')}`;
     for (const [k, m] of [['entityName', 300], ['identifierType', 20], ['taxIdentifier', 30], ['address', 500], ['phone', 50], ['email', 320]]) {
       if (!optStr(d, k, m)) return `hostProfile.${k}: ${typeof d[k]}`;
+    }
+  }
+  if (docId === 'publicContact') {
+    const PC = ['entityName', 'phone', 'email'];
+    if (!hasOnly(d, PC)) return `publicContact nieznane pola: ${Object.keys(d).filter((k) => !PC.includes(k)).join(',')}`;
+    for (const [k, m] of [['entityName', 300], ['phone', 50], ['email', 320]]) {
+      if (!optStr(d, k, m)) return `publicContact.${k}: ${typeof d[k]}`;
     }
   }
   return null;

@@ -463,7 +463,31 @@ exports.syncICalCalendars = onCall(
       );
     }
 
+    // Bramka spójna z regułami rentals (audyt N5 🟡3): bez niej dowolne świeże
+    // konto (niezweryfikowane, bez subskrypcji) mogło używać funkcji jako proxy SSRF.
+    if (request.auth.token.email_verified !== true) {
+      throw new HttpsError(
+        "permission-denied",
+        "Zweryfikuj adres e-mail, aby synchronizować kalendarze."
+      );
+    }
+
     const uid = request.auth.uid;
+
+    if (request.auth.token.stripeStatus !== "active") {
+      const userSnap = await db.collection("users").doc(uid).get();
+      const u = userSnap.exists ? userSnap.data() : {};
+      const status = u.status || u.accountStatus || "none";
+      const trialAlive = status === "trialing" && u.trialEndsAt &&
+        typeof u.trialEndsAt.toDate === "function" && u.trialEndsAt.toDate() > new Date();
+      if (status !== "active" && !trialAlive) {
+        throw new HttpsError(
+          "permission-denied",
+          "Synchronizacja wymaga aktywnej subskrypcji lub okresu próbnego."
+        );
+      }
+    }
+
     const { syncLinks } = request.data;
 
     // Walidacja danych wejściowych
@@ -484,7 +508,10 @@ exports.syncICalCalendars = onCall(
           if (!url || typeof url !== "string") continue;
 
           if (!isSafeUrl(url)) {
-            console.warn(`⚠️ Odrzucono niebezpieczny URL: ${url}`);
+            // logujemy sam host — pełny URL iCal bywa nośnikiem sekretu (token w ścieżce)
+            let rejectedHost = "nieparsowalny";
+            try { rejectedHost = new URL(url).host; } catch { /* zostaje */ }
+            console.warn(`⚠️ Odrzucono niebezpieczny URL iCal (host: ${rejectedHost})`);
             continue;
           }
 
@@ -493,7 +520,7 @@ exports.syncICalCalendars = onCall(
           const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
           let icalText = "";
           try {
-            const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+            const response = await fetchWithSafeRedirects(url);
             if (!response.ok) {
               console.warn(`⚠️ Nie udało się pobrać iCal dla ${propertyName}/${sourceName}: HTTP ${response.status}`);
               continue;
@@ -674,7 +701,7 @@ exports.dailyICalSync = onSchedule(
               const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
               let icalText = "";
               try {
-                const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+                const response = await fetchWithSafeRedirects(url);
                 if (!response.ok) {
                   logger.warn(`⚠️ [${uid}] HTTP ${response.status} dla ${propertyName}/${sourceName}`);
                   continue;
@@ -894,6 +921,29 @@ function isSafeUrl(url) {
   } catch {
     return false;
   }
+}
+
+// =============================================================================
+// HELPER: fetch z RĘCZNĄ obsługą przekierowań — każdy hop przechodzi isSafeUrl
+// od nowa. Domyślne redirect:'follow' pozwalało ominąć walidację SSRF przez
+// 302 z bezpiecznego hosta na adres wewnętrzny/metadata (audyt N5 🟡3).
+// =============================================================================
+async function fetchWithSafeRedirects(url, timeoutMs = 15000, maxRedirects = 3) {
+  let current = url;
+  for (let i = 0; i <= maxRedirects; i++) {
+    if (!isSafeUrl(current)) {
+      throw new Error("Adres odrzucony przez walidację SSRF (przekierowanie)");
+    }
+    const response = await fetch(current, { signal: AbortSignal.timeout(timeoutMs), redirect: "manual" });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) return response;
+      current = new URL(location, current).toString();
+      continue;
+    }
+    return response;
+  }
+  throw new Error("Przekroczono limit przekierowań (3)");
 }
 
 // =============================================================================

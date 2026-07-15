@@ -28,6 +28,12 @@ export default function CompleteProfileScreen({ user, onComplete }) {
         phone: formData.phone,
         email: user.email,
       });
+      // lustro publiczne dla przewodnika gościa — hostProfile (NIP/adres) nie jest publiczny (N5 🟡5)
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
+        entityName: formData.name,
+        phone: formData.phone,
+        email: user.email,
+      });
       if (onComplete) onComplete();
     } catch (err) {
       console.error('Błąd podczas zapisywania profilu:', err);

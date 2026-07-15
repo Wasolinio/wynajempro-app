@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, setDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { 
   DEFAULT_PROPERTIES, DEFAULT_SOURCES, DEFAULT_CATEGORIES, 
@@ -94,7 +94,17 @@ export const useFirebaseData = (user, selectedYear) => {
           if (id === 'syncLinks') newSettings.syncLinks = data.links || {};
           if (id === 'hostProfile') newSettings.hostProfile = { ...defaultHostProfile, ...data };
         });
-        
+
+        // samonaprawa kont sprzed rozdzielenia kontaktu publicznego (N5 🟡5):
+        // hostProfile przestał być publiczny; gościom przewodnika służy publicContact
+        const hostDoc = snapshot.docs.find((d) => d.id === 'hostProfile');
+        if (hostDoc && !snapshot.docs.some((d) => d.id === 'publicContact')) {
+          const hp = hostDoc.data();
+          setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
+            entityName: hp.entityName || '', phone: hp.phone || '', email: hp.email || '',
+          }).catch(() => { /* bez subskrypcji zapis odpadnie — kontakt po prostu nie wyświetli się gościom */ });
+        }
+
         queryClient.setQueryData(['settings', user.uid], newSettings);
       }
     }, (error) => {

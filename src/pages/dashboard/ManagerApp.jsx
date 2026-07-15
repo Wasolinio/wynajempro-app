@@ -435,6 +435,12 @@ export default function ManagerApp() {
     if (!user) return;
     try {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'hostProfile'), editingHostProfile);
+      // lustro publiczne dla przewodnika gościa — hostProfile (NIP/adres) nie jest już publiczny (N5 🟡5)
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
+        entityName: editingHostProfile.entityName || '',
+        phone: editingHostProfile.phone || '',
+        email: editingHostProfile.email || '',
+      });
       toast.success('Profil gospodarza został zapisany');
       setShowAccountModal(false);
     } catch (err) { console.error(err); toast.error('Błąd podczas zapisywania profilu'); }

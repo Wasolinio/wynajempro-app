@@ -2,19 +2,38 @@ import React, { useState } from 'react';
 import LegalLayout from './LegalLayout';
 import { Mail, ShieldCheck, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function ContactPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = (e) => {
+  // zapis do contact_messages (reguły: create-only, walidacja kształtu) — wcześniej
+  // formularz tylko pokazywał toast, a treść przepadała (Known-Issues #6)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !message) return;
-    setIsSubmitted(true);
-    toast.success('Wiadomość została wysłana!');
-    setEmail('');
-    setMessage('');
+    if (!email || !message || isSending) return;
+    setIsSending(true);
+    try {
+      await addDoc(collection(db, 'contact_messages'), {
+        email: email.trim().slice(0, 320),
+        message: message.trim().slice(0, 5000),
+        createdAt: serverTimestamp(),
+        source: 'kontakt',
+      });
+      setIsSubmitted(true);
+      toast.success('Wiadomość została wysłana!');
+      setEmail('');
+      setMessage('');
+    } catch (err) {
+      console.error('Błąd wysyłki formularza kontaktowego:', err);
+      toast.error('Nie udało się wysłać wiadomości. Napisz na kontakt@wynajempro.pl');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -63,8 +82,8 @@ export default function ContactPage() {
               <textarea className="wpb-textarea" required value={message} rows="4"
                 onChange={(e) => setMessage(e.target.value)} placeholder="W czym możemy pomóc?" />
             </div>
-            <button type="submit" className="wpb-btn wpb-btn--primary wpb-btn--block">
-              <Send /> Wyślij wiadomość
+            <button type="submit" className="wpb-btn wpb-btn--primary wpb-btn--block" disabled={isSending}>
+              {isSending ? 'Wysyłanie…' : <><Send /> Wyślij wiadomość</>}
             </button>
           </form>
           {isSubmitted && (

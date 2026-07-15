@@ -5,13 +5,13 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { Heart, ExternalLink, AlertCircle } from 'lucide-react';
 import { BrandStyles } from '../styles/brand';
+import { safeHref } from '../utils/url';
 
 /*
   Publiczna strona podziękowania z prośbą o opinię (X13) — /opinie/{pageId}.
-  Czyta bazowy dokument guides/{id}. Strona nie zawiera sekretów ani danych osobowych
-  gościa. Odczyt poprzedza anonimowe logowanie — DOKŁADNIE ten wzorzec działa u gości
-  w GuestGuideView na produkcji; reguły w repo deklarują publiczny odczyt guides, ale
-  stan reguł faktycznie wdrożonych nie jest zweryfikowany (do porównania przy N3).
+  Czyta bazowy dokument guides/{id} pojedynczym getDoc (reguły: publiczny `get`,
+  bez `list`). Strona nie zawiera sekretów ani danych osobowych gościa. Odczyt
+  poprzedza anonimowe logowanie — ten sam wzorzec co w GuestGuideView.
   Ton celowo nieinwazyjny: najpierw podziękowanie, prośba o opinię jako zaproszenie.
 */
 export default function ReviewPageView() {
@@ -81,7 +81,9 @@ export default function ReviewPageView() {
     );
   }
 
-  const links = (page.links || []).filter((l) => l.url);
+  // do href trafia wyłącznie http(s) — javascript:/data: od (przejętego) gospodarza
+  // nie może wykonać się na urządzeniu gościa (audyt N5 🟡4)
+  const links = (page.links || []).map((l) => ({ ...l, url: safeHref(l.url) })).filter((l) => l.url);
 
   return (
     <div className="wpb">

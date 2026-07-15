@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BrandStyles } from '../styles/brand';
+import { safeHref } from '../utils/url';
 
 export default function GuestGuideView() {
   const { guideId } = useParams();
@@ -58,7 +59,9 @@ export default function GuestGuideView() {
 
         if (data.ownerId) {
           try {
-            const hostSnap = await getDoc(doc(db, 'users', data.ownerId, 'settings', 'hostProfile'));
+            // publicContact = wąski publiczny kontakt (entityName/phone/email);
+            // pełny hostProfile (NIP/PESEL, adres) nie jest już czytelny publicznie (N5 🟡5)
+            const hostSnap = await getDoc(doc(db, 'users', data.ownerId, 'settings', 'publicContact'));
             if (hostSnap.exists()) setHostContact(hostSnap.data());
           } catch { /* pomijamy sekcję kontaktu */ }
         }
@@ -264,8 +267,8 @@ export default function GuestGuideView() {
               <MapPin style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Dotarcie i zameldowanie
             </h2>
             {guide.checkInInfo && <p className="wpb-body" style={{ color: 'var(--muted)', whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>{guide.checkInInfo}</p>}
-            {guide.mapLink && (
-              <a href={guide.mapLink} target="_blank" rel="noreferrer" className="wpb-btn"><MapPin /> Nawiguj (Mapy Google)</a>
+            {safeHref(guide.mapLink) && (
+              <a href={safeHref(guide.mapLink)} target="_blank" rel="noreferrer" className="wpb-btn"><MapPin /> Nawiguj (Mapy Google)</a>
             )}
           </div>
         )}
@@ -281,7 +284,7 @@ export default function GuestGuideView() {
                 <div key={idx} style={{ background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 4, padding: 16 }}>
                   <h3 style={{ fontWeight: 700, fontSize: 15, margin: '0 0 4px' }}>{attr.name}</h3>
                   {attr.description && <p className="wpb-body" style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}>{attr.description}</p>}
-                  {attr.link && <a href={attr.link} target="_blank" rel="noreferrer" className="wpb-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>Sprawdź <ExternalLink style={{ width: 13, height: 13 }} /></a>}
+                  {safeHref(attr.link) && <a href={safeHref(attr.link)} target="_blank" rel="noreferrer" className="wpb-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>Sprawdź <ExternalLink style={{ width: 13, height: 13 }} /></a>}
                 </div>
               ))}
             </div>
@@ -295,8 +298,8 @@ export default function GuestGuideView() {
               <BookOpen style={{ width: 18, height: 18, color: 'var(--granat)' }} /> Regulamin obiektu
             </h2>
             {guide.houseRules && <p className="wpb-body" style={{ color: 'var(--muted)', whiteSpace: 'pre-wrap', margin: '0 0 16px' }}>{guide.houseRules}</p>}
-            {guide.houseRulesFile && (
-              <a href={guide.houseRulesFile.url} target="_blank" rel="noreferrer"
+            {guide.houseRulesFile && safeHref(guide.houseRulesFile.url) && (
+              <a href={safeHref(guide.houseRulesFile.url)} target="_blank" rel="noreferrer"
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, background: 'var(--inner)', border: '1px solid var(--hairline)', borderRadius: 4, textDecoration: 'none', color: 'inherit' }}>
                 <span className="wpb-ic" style={{ width: 38, height: 38, color: 'var(--granat)' }}><FileText /></span>
                 <div style={{ flex: 1, minWidth: 0 }}>
