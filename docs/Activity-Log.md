@@ -4,6 +4,13 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-16
+
+### DEPLOY wiszącej partii (decyzja właściciela „deploy na serwer oraz na githuba")
+- ✅ **GitHub** (3 commity): `7c8ee78` feat(security) N5 F1/F3+A/B (functions+klient), `e211c8d` feat(dashboard) X4+X14+X16+reguły N3/N5, `2cbc1fc` docs. Push origin main.
+- ✅ **Firebase deploy** (`firestore:rules,hosting,functions`): **nowa funkcja `deleteGuide` utworzona**, 9 funkcji zaktualizowanych (m.in. deleteExpiredAccountsData pełne usunięcie, deleteUserAccount kolejność Auth→dok), reguły released (guides delete:false, `guests`, `recurringCosts`), hosting released. storage.rules nietknięte → bez promptu IAM. Bramka: lint 0, build, e2e 30/30, reguły dry-run.
+- ⏸ **Smoke testy właściciela**: (1) dodanie rezerwacji z liczbą gości, (2) dodanie/edycja/usunięcie kosztu stałego w Finansach, (3) Raport rentowności → **Drukuj/PDF** i **eksport CSV**, (4) usunięcie przewodnika (idzie teraz przez callable). Po deployu dane powierzone są faktycznie usuwane → odblokowana bramka publikacji dokumentów N4.
+
 ## 2026-07-15
 
 ### X4 partia 1 — fuzja Finanse+Analityka + zakładka „Koszty i opłaty" (skill impeccable)
