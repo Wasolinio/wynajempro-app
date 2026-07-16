@@ -27,7 +27,7 @@ const hasOnly = (d, allowed) => Object.keys(d).every((k) => allowed.includes(k))
 const RENTAL_KEYS = ['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
   'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
   'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-  'syncId', 'directionsSent', 'keycodeSent', 'id'];
+  'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests'];
 function whyInvalidRental(d) {
   if (!hasOnly(d, RENTAL_KEYS)) return `nieznane pola: ${Object.keys(d).filter((k) => !RENTAL_KEYS.includes(k)).join(',')}`;
   if (!['booking', 'utility', 'reminder'].includes(d.type ?? '')) return `type='${d.type}'`;
@@ -36,7 +36,7 @@ function whyInvalidRental(d) {
   for (const [k, m] of [['source', 300], ['property', 300], ['category', 300], ['guest', 300], ['email', 320], ['phone', 50], ['guestNote', 5000], ['text', 5000], ['syncId', 300], ['id', 100]]) {
     if (!optStr(d, k, m)) return `${k}: ${typeof d[k]}${isStr(d[k]) ? ` (długość ${d[k].length})` : ''}`;
   }
-  for (const k of ['income', 'advancePayment', 'commission', 'utilities', 'tax', 'vat']) {
+  for (const k of ['income', 'advancePayment', 'commission', 'utilities', 'tax', 'vat', 'guests']) {
     if (!optNum(d, k)) return `${k}: ${typeof d[k]} (${JSON.stringify(d[k])})`;
   }
   for (const k of ['isAdvancePaid', 'isPaid', 'isCompleted', 'directionsSent', 'keycodeSent']) {
@@ -47,10 +47,10 @@ function whyInvalidRental(d) {
 }
 
 // ── Lustro isValidSettings ──
-const KNOWN_SETTINGS = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact'];
+const KNOWN_SETTINGS = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact', 'recurringCosts'];
 function whyInvalidSettings(docId, d) {
   if (!KNOWN_SETTINGS.includes(docId)) return `nieznany docId '${docId}'`;
-  if (['reminders', 'properties', 'sources', 'categories'].includes(docId) && 'items' in d && !isList(d.items)) return 'items nie jest listą';
+  if (['reminders', 'properties', 'sources', 'categories', 'recurringCosts'].includes(docId) && 'items' in d && !isList(d.items)) return 'items nie jest listą';
   if (docId === 'syncLinks' && 'links' in d && !isMap(d.links)) return 'links nie jest mapą';
   if (docId === 'tax' && 'rate' in d && !isNum(d.rate)) return 'rate nie jest liczbą';
   if (docId === 'hostProfile') {

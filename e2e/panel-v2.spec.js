@@ -80,7 +80,9 @@ test('Mobile: dolny pasek zastępuje sidebar, arkusz „Więcej" działa (X12)',
   await page.locator('.wpd-bottombar__item', { hasText: 'Więcej' }).click();
   const sheet = page.locator('.wpd-sheet');
   await expect(sheet).toBeVisible();
-  await expect(sheet.locator('text=Analityka')).toBeVisible();
+  // Przewodniki jest poza paskiem mobilnym (MOBILE_BAR), więc żyje w arkuszu „Więcej".
+  // (Analityka wchłonięta przez Finanse w X4 — dawniej sprawdzano tu jej obecność.)
+  await expect(sheet.locator('text=Przewodniki')).toBeVisible();
   await expect(sheet.locator('text=Wyloguj')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet).toBeHidden();
@@ -98,6 +100,7 @@ test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kw
   // minimalny komplet: property/source/date są prefillowane; uzupełniamy resztę wymaganych
   await dialog.getByPlaceholder('np. Jan Kowalski').fill('Tester E2E');
   await dialog.locator('input[type="date"]').nth(1).fill('2026-08-15'); // wyjazd
+  await dialog.getByPlaceholder('np. 2').fill('3'); // liczba gości (X14)
   await dialog.getByPlaceholder('0,00').first().fill('1200'); // przychód
   await dialog.locator('button[type="submit"]').click();
 
@@ -112,7 +115,8 @@ test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kw
   expect(saved).toBeTruthy();
   expect(saved.guest).toBe('Tester E2E');
   expect(saved.income).toBe(1200);
-  for (const k of ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities']) {
+  expect(saved.guests).toBe(3); // X14: liczba gości zapisana jako liczba
+  for (const k of ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', 'guests']) {
     expect(saved[k] === undefined || typeof saved[k] === 'number').toBe(true);
   }
 });

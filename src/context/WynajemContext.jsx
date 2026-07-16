@@ -36,6 +36,7 @@ export const WynajemProvider = ({ children }) => {
   const syncLinks = settings?.syncLinks || EMPTY_OBJECT;
   const taxSettings = settings?.taxSettings || defaultTaxSettings;
   const hostProfile = settings?.hostProfile || defaultHostProfile;
+  const recurringCosts = settings?.recurringCosts || EMPTY_ARRAY;
 
   // CZYNNOSCI FIREBASE AUTH
   useEffect(() => {
@@ -165,7 +166,7 @@ export const WynajemProvider = ({ children }) => {
     user, loading, rentals, settings, profile,
     accountStatus, trialEndsAt, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
-    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
+    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     isAccessLocked, handleSubscribe, handleManageSubscription,
@@ -175,7 +176,7 @@ export const WynajemProvider = ({ children }) => {
     user, loading, rentals, settings, profile,
     accountStatus, trialEndsAt, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
-    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
+    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     isAccessLocked, handleSubscribe, handleManageSubscription,

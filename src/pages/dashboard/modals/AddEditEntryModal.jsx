@@ -66,7 +66,7 @@ function AddEditEntryModal({
                   <label className="wpd-flabel">Prywatna notatka o gościu</label>
                   <textarea className="wpd-textarea" rows="2" placeholder="np. preferuje cichy pokój, ustalenia cenowe…" value={newRental.guestNote || ''} onChange={(e) => handleRentalChange('guestNote', e.target.value)} />
                 </div>
-                <div className="wpd-fgrid">
+                <div className="wpd-fgrid wpd-fgrid--3">
                   <div className="wpd-field">
                     <label className="wpd-flabel">Data przyjazdu</label>
                     <input className="wpd-input wpd-input--num" required type="date" value={newRental.date} onChange={(e) => handleRentalChange('date', e.target.value)} />
@@ -74,6 +74,10 @@ function AddEditEntryModal({
                   <div className="wpd-field">
                     <label className="wpd-flabel">Data wyjazdu</label>
                     <input className="wpd-input wpd-input--num" required type="date" value={newRental.endDate} onChange={(e) => handleRentalChange('endDate', e.target.value)} />
+                  </div>
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Liczba gości</label>
+                    <input className="wpd-input wpd-input--num" type="number" min="1" step="1" placeholder="np. 2" value={newRental.guests ?? ''} onChange={(e) => handleRentalChange('guests', e.target.value)} />
                   </div>
                 </div>
                 <div className="wpd-fieldset">

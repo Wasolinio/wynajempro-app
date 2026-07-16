@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen, LineChart, FileSignature,
+  LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
   MoreHorizontal, Star, User as UserIcon,
@@ -32,9 +32,8 @@ import PulpitView from './views/PulpitView';
 import BookingsView from './views/BookingsView';
 import CalendarView from './views/CalendarView';
 import ObjectsView from './views/ObjectsView';
-import FinanceView from './views/FinanceView';
 import BookingDetailView from './views/BookingDetailView';
-import AnalyticsView from './views/AnalyticsView';
+import FinanceHub from './views/FinanceHub';
 import ContractGeneratorView from './views/ContractGeneratorView';
 import GuideBuilder from './GuideBuilder';
 import ReviewBuilder from './ReviewBuilder';
@@ -57,11 +56,14 @@ const NAV = [
   { key: 'calendar', num: '02', label: 'Kalendarz', icon: CalendarDays },
   { key: 'objects', num: '03', label: 'Obiekty', icon: Building2 },
   { key: 'bookings', num: '04', label: 'Rezerwacje', icon: List },
+  // Finanse (05) — fuzja Finanse+Analityka (X4): jeden moduł z podzakładkami
+  // Przegląd · Koszty i opłaty · Raporty. Dawna osobna „Analityka" (06) wchłonięta.
   { key: 'finance', num: '05', label: 'Finanse', icon: BarChart3 },
-  { key: 'analytics', num: '06', label: 'Analityka', icon: LineChart },
-  { key: 'guides', num: '07', label: 'Przewodniki', icon: BookOpen },
-  { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature },
-  { key: 'reviews', num: '09', label: 'Opinie', icon: Star },
+  { key: 'guides', num: '06', label: 'Przewodniki', icon: BookOpen },
+  // Generator umów WYŁĄCZONY decyzją właściciela 2026-07-15 (X16): wzorce umów
+  // czekają na akceptację prawnika (N4). Kod widoku zostaje — po akceptacji
+  // przywrócić wpis: { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature }
+  { key: 'reviews', num: '07', label: 'Opinie', icon: Star },
 ];
 
 /* Dolny pasek mobile (X12): 4 pozycje pod kciukiem — decyzja właściciela 2026-07-04;
@@ -77,8 +79,7 @@ const VIEW_META = {
   calendar: { title: 'Kalendarz', sub: 'Rezerwacje wszystkich obiektów' },
   objects: { title: 'Obiekty', sub: 'Twoje miejsca na wynajem' },
   bookings: { title: 'Rezerwacje', sub: 'Wszystkie rezerwacje' },
-  finance: { title: 'Finanse', sub: 'Przychody, koszty i wypłaty' },
-  analytics: { title: 'Analityka', sub: 'Statystyki: miesiąc · kwartał · półrocze · rok' },
+  finance: { title: 'Finanse', sub: 'Przegląd, koszty i raporty rentowności' },
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
   contracts: { title: 'Generator umów', sub: 'Umowy najmu z danych rezerwacji' },
   reviews: { title: 'Opinie', sub: 'Podziękowania i prośby o opinie po pobycie' },
@@ -89,7 +90,7 @@ export default function ManagerApp() {
     user, loading, rentals,
     accountStatus, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
-    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile,
+    templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     isAccessLocked, handleSubscribe, handleManageSubscription,
@@ -143,7 +144,7 @@ export default function ManagerApp() {
 
   const getDefaultRentalState = useCallback(() => ({
     type: 'booking', source: sources.length > 0 ? sources[0] : '', property: properties.length > 0 ? properties[0].name : '',
-    category: categories.length > 0 ? categories[0] : '', guest: '', email: '', phone: '', guestNote: '', text: '',
+    category: categories.length > 0 ? categories[0] : '', guest: '', email: '', phone: '', guestNote: '', text: '', guests: '',
     date: new Date().toISOString().split('T')[0], endDate: '', income: '', advancePayment: '', isAdvancePaid: false, commission: '',
     utilities: '', tax: '', vat: '', isPaid: false, isCompleted: false, completedTasks: {}, syncId: '',
   }), [sources, properties, categories]);
@@ -245,7 +246,7 @@ export default function ManagerApp() {
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
-  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'analytics', 'pulpit', 'guides', 'contracts'].includes(activeView) ? 'bookings' : activeView;
+  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides', 'contracts'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
 
@@ -346,7 +347,7 @@ export default function ManagerApp() {
     e.preventDefault();
     if (!user) return;
     const { id: _id, ...entry } = newRental;
-    ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities'].forEach((field) => {
+    ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', 'guests'].forEach((field) => {
       if (entry[field] === '' || entry[field] === null || entry[field] === undefined) {
         // setDoc (create) nie przyjmuje sentinela deleteField() — SDK rzuca zanim
         // żądanie dotknie reguł; przy tworzeniu pomijamy pole, przy edycji kasujemy
@@ -593,15 +594,11 @@ export default function ManagerApp() {
               />
             )}
             {renderView === 'finance' && (
-              <FinanceView
-                rentals={rentals} selectedYear={selectedYear} currentYearData={currentYearData}
-                onExport={() => setShowStatsModal(true)}
-              />
-            )}
-            {renderView === 'analytics' && (
-              <AnalyticsView
+              <FinanceHub
                 rentals={rentals} properties={properties} user={user}
+                categories={categories} recurringCosts={recurringCosts}
                 selectedYear={selectedYear} setSelectedYear={setSelectedYear}
+                onOpenReport={() => setShowStatsModal(true)}
               />
             )}
             {renderView === 'guides' && (
@@ -622,7 +619,8 @@ export default function ManagerApp() {
 
       {/* ── Modale (reużyte, restyl w etapie 2) ── */}
       <ProfitabilityReportModal showStatsModal={showStatsModal} setShowStatsModal={setShowStatsModal}
-        selectedYear={selectedYear} handleYearChange={handleYearChange} availableYears={availableYears} currentYearData={currentYearData} />
+        selectedYear={selectedYear} handleYearChange={handleYearChange} availableYears={availableYears}
+        rentals={rentals} recurringCosts={recurringCosts} hostProfile={hostProfile} />
       <DailyReportModal showDailyReportModal={showDailyReportModal} setShowDailyReportModal={setShowDailyReportModal}
         dailyReport={dailyReport} completeTask={completeTask} />
       <SettingsModal

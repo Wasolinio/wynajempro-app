@@ -415,6 +415,8 @@ export const DASHBOARD_CSS = `
 .wpd-input:focus, .wpd-select:focus, .wpd-textarea:focus{ border-color:var(--ink); }
 .wpd-input::placeholder, .wpd-textarea::placeholder{ color:var(--faint); }
 .wpd-select{ cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239A917D' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
+/* Kompaktowy select do pasków narzędzi (filtr obiektu w Kosztach) — spójny z .wpd-seg wysokością */
+.wpd-select--sm{ width:auto; min-width:150px; max-width:220px; padding:8px 30px 8px 12px; font-size:12.5px; background-position:right 10px center; }
 .wpd-textarea{ resize:vertical; min-height:64px; }
 .wpd-input--num{ font-family:'IBM Plex Mono', monospace; }
 .wpd-fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -499,6 +501,7 @@ export const DASHBOARD_CSS = `
 .wpd-guest__sub{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.05em;
   text-transform:uppercase; color:var(--faint); margin-top:3px; }
 .wpd-cells{ display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--hairline); }
+.wpd-cells--4{ grid-template-columns:repeat(4,1fr); }
 .wpd-cell{ padding:14px 18px; border-right:1px solid var(--hairline); }
 .wpd-cell:last-child{ border-right:none; }
 .wpd-cell__label{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.07em;
@@ -594,6 +597,61 @@ export const DASHBOARD_CSS = `
 .wpd-hbar__val b{ color:var(--ink); font-weight:600; }
 .wpd-hbar__track{ height:8px; border-radius:3px; background:var(--inner-2); overflow:hidden; }
 .wpd-hbar__fill{ height:100%; border-radius:3px; transform:scaleX(0); transform-origin:left; transition:transform .7s cubic-bezier(.22,1,.36,1); }
+
+/* Tabela ostatnich kosztów (Koszty i opłaty) — linie 1px, mono na kwotach, restacking na mobile */
+.wpd-ctable{ display:flex; flex-direction:column; padding:4px 0 6px; }
+.wpd-ctable__row{ display:grid; align-items:center; gap:14px; padding:11px 20px; border-top:1px solid var(--hairline);
+  grid-template-columns:84px minmax(110px,1fr) minmax(140px,1.6fr) minmax(90px,1fr) auto;
+  grid-template-areas:"date cat detail prop amt"; }
+.wpd-ctable__row:first-child{ border-top:none; }
+.wpd-ctable__date{ grid-area:date; color:var(--faint); font-size:12px; }
+.wpd-ctable__cat{ grid-area:cat; font-weight:600; font-size:13.5px; }
+.wpd-ctable__detail{ grid-area:detail; color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wpd-ctable__prop{ grid-area:prop; color:var(--faint); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wpd-ctable__amt{ grid-area:amt; text-align:right; font-weight:600; font-size:13.5px; color:var(--cynober); white-space:nowrap; }
+@media (max-width:720px){
+  .wpd-ctable__row{ grid-template-columns:1fr auto; column-gap:12px; row-gap:3px;
+    grid-template-areas:"cat amt" "detail amt" "date prop"; }
+  .wpd-ctable__prop{ text-align:right; }
+}
+
+/* Zysk wg obiektu (X4 partia 2) — te same tokeny co wpd-ctable */
+.wpd-ptable{ display:flex; flex-direction:column; padding:4px 0 6px; }
+.wpd-ptable__row{ display:grid; align-items:center; gap:12px; padding:11px 18px; border-top:1px solid var(--hairline);
+  grid-template-columns:minmax(90px,1.4fr) minmax(96px,1fr) auto 46px;
+  grid-template-areas:"name meta profit margin"; }
+.wpd-ptable__row:first-child{ border-top:none; }
+.wpd-ptable__name{ grid-area:name; font-weight:600; font-size:13.5px; display:inline-flex; align-items:center; gap:8px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wpd-ptable__meta{ grid-area:meta; color:var(--faint); font-size:12px; white-space:nowrap; }
+.wpd-ptable__profit{ grid-area:profit; text-align:right; font-weight:600; font-size:13.5px; white-space:nowrap; }
+.wpd-ptable__margin{ grid-area:margin; text-align:right; color:var(--muted); font-size:12px; }
+@media (max-width:720px){
+  .wpd-ptable__row{ grid-template-columns:1fr auto; column-gap:12px; row-gap:2px;
+    grid-template-areas:"name profit" "meta margin"; }
+}
+
+/* ── Raport rentowności: ekran + druk A4→PDF (X4 partia 3) ── */
+.wpd-report-onlyprint{ display:none; }
+.wpd-rpt-total td{ border-top:2px solid var(--ink); padding-top:10px; }
+@media print {
+  body * { visibility:hidden !important; }
+  .wpd-report-print, .wpd-report-print * { visibility:visible !important; }
+  .wpd-overlay{ position:static !important; display:block !important; background:#fff !important; padding:0 !important; }
+  .wpd-dialog{ position:static !important; box-shadow:none !important; border:none !important; border-radius:0 !important; width:100% !important; max-width:none !important; max-height:none !important; }
+  .wpd-report-print{ position:absolute !important; left:0; top:0; width:100%; max-height:none !important; overflow:visible !important; padding:0 !important; background:#fff !important; }
+  .wpd-report-noprint{ display:none !important; }
+  .wpd-report-onlyprint{ display:block !important; visibility:visible !important; }
+  .wpd-rpt-section{ break-inside:avoid; page-break-inside:avoid; margin-bottom:16px !important; }
+  .wpd-rpt-head{ display:flex !important; justify-content:space-between; align-items:flex-end; gap:16px; border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:18px; }
+  .wpd-rpt-head__title{ font-size:20px; font-weight:800; letter-spacing:-0.01em; }
+  .wpd-rpt-head__ent{ font-size:13px; color:var(--muted); margin-top:2px; }
+  .wpd-rpt-head__meta{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; }
+  .wpd-rpt-foot{ margin-top:16px; padding-top:10px; border-top:1px solid var(--hairline); font-size:11px; color:var(--faint); }
+  .wpd-stat{ background:#fff !important; border:1px solid var(--hairline) !important; }
+  .wpd-stat--dark{ background:var(--ink) !important; }
+  .wpd-panel{ box-shadow:none !important; }
+  @page { size:A4; margin:14mm; }
+}
 
 .wpd-anl-bar__sp{ flex:1 1 auto; }
 .wpd-anl-load{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint); display:inline-flex; align-items:center; gap:7px; }

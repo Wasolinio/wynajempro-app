@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw, Users } from 'lucide-react';
 import { channelTone } from '../styles';
+import { plural } from '../../../utils/plural';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const initials = (name) => (name || 'Gość').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -88,7 +89,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
               </span>
             </div>
-            <div className="wpd-cells">
+            <div className={`wpd-cells${r.guests ? ' wpd-cells--4' : ''}`}>
               <div className="wpd-cell">
                 <div className="wpd-cell__label">Przyjazd</div>
                 <div className="wpd-cell__val" style={{ fontSize: 14.5 }}>{arrival ? arrival.date : '—'}</div>
@@ -106,6 +107,14 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 </div>
                 <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{fmt(rate)} zł / noc</div>
               </div>
+              {r.guests ? (
+                <div className="wpd-cell">
+                  <div className="wpd-cell__label">Goście</div>
+                  <div className="wpd-cell__val" style={{ fontSize: 14.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <Users style={{ width: 14, height: 14, color: 'var(--faint)' }} /> {r.guests} {plural(r.guests, ['osoba', 'osoby', 'osób'])}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 

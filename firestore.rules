@@ -65,7 +65,7 @@ service cloud.firestore {
       return data.keys().hasOnly(['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
               'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
               'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-              'syncId', 'directionsSent', 'keycodeSent', 'id'])
+              'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests'])
           && data.get('type', '') in ['booking', 'utility', 'reminder']
           && data.date is string && data.date.size() <= 30
           && optStr(data, 'endDate', 30)
@@ -76,19 +76,20 @@ service cloud.firestore {
           && optStr(data, 'syncId', 300) && optStr(data, 'id', 100)
           && optNum(data, 'income') && optNum(data, 'advancePayment')
           && optNum(data, 'commission') && optNum(data, 'utilities')
-          && optNum(data, 'tax') && optNum(data, 'vat')
+          && optNum(data, 'tax') && optNum(data, 'vat') && optNum(data, 'guests')
           && optBool(data, 'isAdvancePaid') && optBool(data, 'isPaid') && optBool(data, 'isCompleted')
           && optBool(data, 'directionsSent') && optBool(data, 'keycodeSent')
           && (!('completedTasks' in data) || data.completedTasks is map);
     }
 
     function isValidSettings(docId, data) {
-      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact'];
+      let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact', 'recurringCosts'];
       return docId in knownIds
           && (docId == 'reminders' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'properties' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'sources' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'categories' ? (!('items' in data) || data.items is list) : true)
+          && (docId == 'recurringCosts' ? (!('items' in data) || data.items is list) : true)
           && (docId == 'syncLinks' ? (!('links' in data) || data.links is map) : true)
           && (docId == 'tax' ? (!('rate' in data) || data.rate is number) : true)
           && (docId == 'hostProfile' ? (
@@ -216,8 +217,10 @@ service cloud.firestore {
                     && !request.resource.data.diff(resource.data).changedKeys().hasAny(['wifiNetwork', 'wifiPassword', 'doorPin'])
                     && isValidGuide(request.resource.data);
 
-      allow delete: if isOwnerAndVerified(request.auth.uid)
-                    && resource.data.ownerId == request.auth.uid;
+      // Kasowanie WYŁĄCZNIE przez callable deleteGuide (Admin SDK): kliencki delete
+      // bazowego dokumentu nie kaskaduje na secrets/signatures/Storage i osierociłby
+      // dane gości — dokładnie to, co zamyka F3 (audyt N5 🟡B). Zamknięte dla klienta.
+      allow delete: if false;
 
       // =====================================================================
       // SEKRETY (Wrażliwe dane: WiFi, Pin dostępu)

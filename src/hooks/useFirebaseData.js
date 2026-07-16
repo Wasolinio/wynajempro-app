@@ -79,7 +79,7 @@ export const useFirebaseData = (user, selectedYear) => {
     // Subskrypcja Ustawień (Settings)
     const unsubSettings = onSnapshot(collection(db, 'users', user.uid, 'settings'), (snapshot) => {
       if (!snapshot.empty) {
-        let newSettings = { properties: DEFAULT_PROPERTIES, sources: DEFAULT_SOURCES, categories: DEFAULT_CATEGORIES, templates: DEFAULT_TEMPLATES, taxSettings: defaultTaxSettings, syncLinks: {}, hostProfile: defaultHostProfile };
+        let newSettings = { properties: DEFAULT_PROPERTIES, sources: DEFAULT_SOURCES, categories: DEFAULT_CATEGORIES, templates: DEFAULT_TEMPLATES, taxSettings: defaultTaxSettings, syncLinks: {}, hostProfile: defaultHostProfile, recurringCosts: [] };
 
         snapshot.docs.forEach(docSnap => {
           const id = docSnap.id;
@@ -93,6 +93,7 @@ export const useFirebaseData = (user, selectedYear) => {
           if (id === 'tax') newSettings.taxSettings = { ...defaultTaxSettings, ...data };
           if (id === 'syncLinks') newSettings.syncLinks = data.links || {};
           if (id === 'hostProfile') newSettings.hostProfile = { ...defaultHostProfile, ...data };
+          if (id === 'recurringCosts' && Array.isArray(data.items)) newSettings.recurringCosts = data.items;
         });
 
         // samonaprawa kont sprzed rozdzielenia kontaktu publicznego (N5 🟡5):
