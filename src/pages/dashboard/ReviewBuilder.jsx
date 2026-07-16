@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase';
-import { collection, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { db, functions } from '../../firebase';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { QRCodeSVG } from 'qrcode.react';
 import { Plus, Edit, Trash2, Copy, X, Star, ExternalLink, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -84,7 +85,9 @@ export default function ReviewBuilder({ user, properties }) {
 
   const deletePage = async (id) => {
     try {
-      await deleteDoc(doc(db, 'guides', id));
+      // serwerowo (ta sama funkcja co przewodniki) — sprząta ewentualne subkolekcje;
+      // strona opinii żyje w kolekcji guides, więc idzie tą samą ścieżką (audyt N5 F3)
+      await httpsCallable(functions, 'deleteGuide')({ guideId: id });
       toast.success('Usunięto stronę opinii');
       setPages((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage } from '../../firebase';
+import { db, storage, functions } from '../../firebase';
 import { collection, query, where, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, deleteField, serverTimestamp } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -94,7 +95,9 @@ export default function GuideBuilder({ user, properties }) {
 
   const deleteGuide = async (id) => {
     try {
-      await deleteDoc(doc(db, 'guides', id));
+      // serwerowo — kasuje też sekrety, podpisy gości i pliki Storage (audyt N5 F3);
+      // klienckie deleteDoc zostawiało je osierocone
+      await httpsCallable(functions, 'deleteGuide')({ guideId: id });
       toast.success('Usunięto przewodnik');
       setGuides((prev) => prev.filter((g) => g.id !== id));
     } catch (err) {

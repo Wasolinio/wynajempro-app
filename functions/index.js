@@ -64,6 +64,35 @@ async function cleanupUserData(uid) {
 }
 
 // =============================================================================
+// HELPER: Usuwanie JEDNEGO przewodnika w całości — pliki Storage + subkolekcje
+// secrets (PIN/WiFi) i signatures (podpisy gości = dane osobowe) + dokument.
+// Wspólne dla: usuwania konta, cyklicznego czyszczenia i ręcznego kasowania
+// przewodnika (audyt N5: dane gości nie mogą zostawać osierocone).
+// =============================================================================
+async function deleteGuideCompletely(guideRef, bucket) {
+  const guideId = guideRef.id;
+  try {
+    await bucket.deleteFiles({ prefix: `guides/${guideId}/` });
+  } catch (storageErr) {
+    console.warn(`⚠️ Błąd usuwania plików Storage dla przewodnika ${guideId}:`, storageErr.message);
+  }
+  await deleteSubcollection(guideRef, "secrets");
+  await deleteSubcollection(guideRef, "signatures");
+  await guideRef.delete();
+}
+
+// Usuwa WSZYSTKIE przewodniki użytkownika (wraz z danymi gości). Zwraca liczbę.
+async function deleteUserGuides(uid) {
+  const guidesSnap = await db.collection("guides").where("ownerId", "==", uid).get();
+  if (guidesSnap.empty) return 0;
+  const bucket = getStorage(app).bucket();
+  for (const guide of guidesSnap.docs) {
+    await deleteGuideCompletely(guide.ref, bucket);
+  }
+  return guidesSnap.size;
+}
+
+// =============================================================================
 // 1. TWORZENIE SESJI STRIPE CHECKOUT (Callable Function)
 // =============================================================================
 exports.createCheckoutSession = onCall(
@@ -427,17 +456,27 @@ exports.deleteExpiredAccountsData = onSchedule(
       const promises = snapshot.docs.map(async (docSnap) => {
         const uid = docSnap.id;
         try {
-          console.log(`🧹 Rozpoczynanie usuwania danych dla użytkownika: ${uid}`);
-          const result = await cleanupUserData(uid);
-          
-          // Usuwamy również pole scheduledDeletionAt, aby zapobiec ponownemu czyszczeniu
-          await docSnap.ref.update({
-            scheduledDeletionAt: FieldValue.delete(),
-          });
-          
-          console.log(`✅ Pomyślnie wyczyszczono dane dla ${uid}:`, result);
+          console.log(`🧹 Rozpoczynanie trwałego usuwania konta: ${uid}`);
+          // Dane biznesowe (rentals/settings/checkout)
+          await cleanupUserData(uid);
+          // NAPRAWA F1 (audyt N5): przewodniki z danymi gości (sekrety, podpisy,
+          // pliki Storage) wcześniej ZOSTAWAŁY bezterminowo mimo obietnicy
+          // „trwale usunięte" z ekranu blokady — teraz kasowane jak przy usuwaniu konta.
+          const guidesDeleted = await deleteUserGuides(uid);
+          // Trwałe usunięcie konta (decyzja właściciela 2026-07-15): login Auth
+          // (e-mail, imię) + dokument users. Powrót klienta = ponowna rejestracja.
+          // Auth kasujemy PRZED dokumentem: gdy padnie z realnego powodu, dokument
+          // zostaje i jutrzejszy przebieg ponowi (inaczej osierocony login +
+          // self-heal w useFirebaseData wskrzesiłby trial).
+          try {
+            await getAuth().deleteUser(uid);
+          } catch (authErr) {
+            if (authErr.code !== "auth/user-not-found") throw authErr;
+          }
+          await docSnap.ref.delete();
+          console.log(`✅ Konto ${uid} trwale usunięte (przewodników: ${guidesDeleted}).`);
         } catch (err) {
-          console.error(`❌ Błąd czyszczenia danych dla użytkownika ${uid}:`, err);
+          console.error(`❌ Błąd usuwania konta ${uid}:`, err);
         }
       });
       await Promise.allSettled(promises);
@@ -976,32 +1015,65 @@ exports.deleteUserAccount = onCall(
 
       // 2. Wyczyść dane biznesowe użytkownika
       await cleanupUserData(uid);
-      await userDoc.ref.delete();
 
-      // 3. Usuń przewodniki użytkownika
-      const guidesSnap = await db.collection("guides").where("ownerId", "==", uid).get();
-      const bucket = getStorage(app).bucket();
-      for (const guide of guidesSnap.docs) {
-        const guideId = guide.id;
-        try {
-          await bucket.deleteFiles({ prefix: `guides/${guideId}/` });
-          console.log(`✅ Pliki w Storage dla przewodnika ${guideId} usunięte.`);
-        } catch (storageErr) {
-          console.warn(`⚠️ Błąd usuwania plików Storage dla przewodnika ${guideId}:`, storageErr);
-        }
-        await deleteSubcollection(guide.ref, "secrets");
-        await deleteSubcollection(guide.ref, "signatures");
-        await guide.ref.delete();
+      // 3. Usuń przewodniki użytkownika (pliki Storage + sekrety + podpisy gości)
+      const guidesDeleted = await deleteUserGuides(uid);
+      console.log(`✅ Usunięto ${guidesDeleted} przewodników użytkownika ${uid}.`);
+
+      // 4. Usuń login Auth PRZED dokumentem (finding N5 🟡A, lustro fixu F1): przy
+      // otwartej aplikacji skasowanie dokumentu przed Auth wyzwalało self-heal
+      // w useFirebaseData, który wskrzeszał dokument z nowym 14-dniowym trialem.
+      try {
+        await getAuth().deleteUser(uid);
+      } catch (authErr) {
+        if (authErr.code !== "auth/user-not-found") throw authErr;
       }
-
-      // 4. Usuń użytkownika z Firebase Auth
-      await getAuth().deleteUser(uid);
+      await userDoc.ref.delete();
       console.log(`✅ Użytkownik ${uid} został całkowicie usunięty z systemu.`);
       
       return { success: true };
     } catch (error) {
       console.error(`❌ Błąd usuwania konta ${uid}:`, error);
       throw new HttpsError("internal", "Wystąpił błąd podczas usuwania konta.");
+    }
+  }
+);
+
+// =============================================================================
+// 7b. USUWANIE POJEDYNCZEGO PRZEWODNIKA (serwerowo — z subkolekcjami i Storage)
+// Klient (deleteDoc) kasował tylko dokument główny; sekrety, podpisy gości i pliki
+// Storage zostawały osierocone i nieusuwalne (audyt N5 🟡 F3). Tu kasujemy komplet
+// po weryfikacji właściciela.
+// =============================================================================
+exports.deleteGuide = onCall(
+  { enforceAppCheck: true, maxInstances: 5 },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Musisz być zalogowany, aby usunąć przewodnik.");
+    }
+    const uid = request.auth.uid;
+    const guideId = (request.data?.guideId || "").toString();
+    if (!guideId || !/^[a-zA-Z0-9_-]+$/.test(guideId)) {
+      throw new HttpsError("invalid-argument", "Nieprawidłowy identyfikator przewodnika.");
+    }
+
+    const guideRef = db.collection("guides").doc(guideId);
+    const snap = await guideRef.get();
+    if (!snap.exists) {
+      return { success: true }; // już usunięty — idempotentnie
+    }
+    if (snap.data().ownerId !== uid) {
+      throw new HttpsError("permission-denied", "To nie jest Twój przewodnik.");
+    }
+
+    try {
+      const bucket = getStorage(app).bucket();
+      await deleteGuideCompletely(guideRef, bucket);
+      console.log(`✅ Przewodnik ${guideId} usunięty w całości przez właściciela ${uid}.`);
+      return { success: true };
+    } catch (error) {
+      console.error(`❌ Błąd usuwania przewodnika ${guideId}:`, error);
+      throw new HttpsError("internal", "Wystąpił błąd podczas usuwania przewodnika.");
     }
   }
 );
