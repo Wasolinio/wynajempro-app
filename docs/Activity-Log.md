@@ -4,6 +4,49 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-15
+
+### X4 partia 1 — fuzja Finanse+Analityka + zakładka „Koszty i opłaty" (skill impeccable)
+- ✅ **`FinanceHub`**: jeden moduł „Finanse" (05) z podzakładkami Przegląd (=Analityka) · Koszty i opłaty · Raporty (`.wpd-tabs`). Dawna Analityka (06) wchłonięta; `FinanceView.jsx` usunięty jako zastąpiony; NAV przenumerowana (Przewodniki 06, Opinie 07), tablica search i VIEW_META zaktualizowane.
+- ✅ **`CostsView`** (nowy): filtr zakres+obiekt, 4 KPI count-up (Koszty łącznie/Prowizje/Podatek+VAT/Operacyjne), rozbicie „Na co poszły pieniądze" (słupki `.wpd-hbar`, kategorie syntetyczne + własne), „Koszty wg obiektu", tabela „Ostatnie koszty". Nowe klasy: `.wpd-select--sm`, `.wpd-ctable` (grid-areas restacking na mobile).
+- ✅ **Raporty**: surfacuje istniejący Raport rentowności + rząd „Eksport dla księgowego / Wkrótce" (uczciwie); naprawia mylącą etykietę „Eksport PDF" (sygnał support z X1).
+- ✅ Weryfikacja impeccable: kontekst PRODUCT.md + rejestr product (earned familiarity, reużycie słownika komponentów, zero nowych idiomów); lint 0, build OK, e2e 30/30 (test X12 zaktualizowany — arkusz „Więcej" sprawdza Przewodniki zamiast wchłoniętej Analityki); zrzuty desktop/Raporty/mobile potwierdzają .wpd + AA + responsywność.
+
+### X4 partia 2 — rozbudowane śledzenie finansów (skill impeccable)
+- ✅ **Koszty stałe (cykliczne)** — decyzja właściciela „osobne koszty cykliczne": nowy model `settings/recurringCosts` {items:[{id,name,amount,category,property,startMonth,endMonth}]} przez cały łańcuch (useFirebaseData → WynajemContext → ManagerApp → FinanceHub → CostsView); reguły `isValidSettings` + lustrzany tester rozszerzone o `recurringCosts` (items is list). Kwota miesięczna liczona za PONIESIONE miesiące (rok bieżący = do bieżącego mies., bez projekcji niezapłaconej przyszłości — uczciwe śledzenie zysku).
+- ✅ **CRUD** `RecurringCostModal` (dodaj/edytuj, walidacja zakresu miesięcy) + manager w zakładce Koszty i opłaty (lista + edycja + usuwanie, zapis do settings, onSnapshot odświeża).
+- ✅ **CostsView przepisany**: KPI Koszty łącznie/zmienne/stałe/zysk netto (+marża), „na co poszły pieniądze" (koszty stałe wtopione w kategorie), **prowizje wg portalu**, **zysk wg obiektu** (income−cost, marża, kolor ujemnego), manager kosztów stałych. Nowe klasy `.wpd-ptable`.
+- ✅ **Weryfikacja wizualna**: tymczasowa trasa podglądu z realnym komponentem i przykładowymi danymi w dev serverze (obejście: worktree okazał się starszy niż main → zsync src; App Check/overlay/`.env` wyciszone tylko na czas podglądu). Potwierdzone: wszystkie liczby spójne (łącznie=zmienne+stałe, zysk=przychód−koszty, zysk wg obiektu, prowizje per portal), zero błędów konsoli, kolorowanie ujemnego zysku, sortowanie. **Całe rusztowanie podglądu USUNIĘTE** (git checkout App.jsx/index.html, skasowany plik podglądu, sekrety z worktree wyczyszczone).
+- ✅ lint 0, build OK, reguły dry-run, tester, e2e 30/30 na czystym main.
+- ⏳ Partia 3 (następna): Raport Rentowności PDF + eksport dla księgowego (skill dataviz na wykresy).
+
+### X4 — fuzja Finanse+Analityka + rozbudowa finansów (3 partie, dev + skille impeccable/dataviz)
+- ✅ **Partia 1**: FinanceHub (zakładki Przegląd · Koszty i opłaty · Raporty), CostsView (rozbicie kosztów), FinanceView usunięty; jedna pozycja nawigacji.
+- ✅ **Partia 2**: koszty stałe cykliczne — model settings/recurringCosts + reguły isValidSettings + lustrzany tester + useFirebaseData/WynajemContext mapping; RecurringCostModal (dodaj/edytuj); CostsView rozbudowany: KPI koszty łącznie/zmienne/stałe/zysk netto, prowizje wg portalu, zysk wg obiektu (wpd-ptable), manager kosztów stałych. Właściciel skorygował liczenie kosztów stałych bieżącego roku „do dziś" (uczciwy zysk).
+- ✅ **Partia 3**: ProfitabilityReportModal przepisany na pełne P&L z kosztami stałymi + wykres zysku miesiąc-po-miesiącu i struktura kosztów (inline SVG, bez bibliotek — etos marki; skill dataviz: pasmo CVD 8-12 legalne dzięki etykietom na każdym słupku); druk A4→PDF (window.print + @media print) + eksport CSV dla księgowego (utils/reportExport.js: separator ;, przecinek dziesiętny, BOM, wiersz SUMA — przetestowany w node). Podgląd wizualny na realnym CSS panelu zatwierdzony (App Check blokuje lokalny dev, więc podgląd jako samodzielny artefakt).
+- ✅ Weryfikacja całości: lint 0, build OK, reguły dry-run skompilowane, e2e zaufany zielony. **Czeka:** deploy reguł (recurringCosts) w wiszącej partii + test wydruku PDF właściciela. X5 „lepsze podsumowanie miesiąca" scalone z X4.
+
+### Nowe zadania właściciela (X14–X16, X4 przepisane) + wykonanie X16 i X14
+- 📋 Właściciel dorzucił listę zadań → roadmapa: **X4 przepisane** (fuzja Finanse+Analityka, ewidencja kosztów, prowizje per portal, zyski, zakładka „Koszty i opłaty", Raport Rentowności PDF + eksport dla księgowego; wchłania X5), **X14** liczba gości, **X15** emotikony, **X16** wyłączenie generatora umów. Kolejność ustalona: X16 → X14 → X4 partiami → X15 (po przemeblowaniu kosztów).
+- ✅ **X16**: generator umów zdjęty z nawigacji (desktop + mobilne „Więcej" automatycznie), Opinie → 08, kod widoku zostaje z komentarzem przywracającym; powód: wzorce bez akceptacji prawnika (N4).
+- ✅ **X14**: pole „Liczba gości" (opcjonalne) w formularzu rezerwacji obok dat; parsowanie liczbowe; `guests` w allowliście reguł + lustrzanym testerze; komórka „Goście" w szczegółach rezerwacji (odmiana przez util plural, grid 3→4). E2e rozszerzone o asercję `guests: 3`.
+- ✅ Weryfikacja partii: lint 0, build OK, reguły dry-run skompilowane, e2e 30/30. Deploy wstrzymany decyzją właściciela („jeszcze popracujemy") — partia wisząca rośnie: F1/F3+🟡A/B, kontakt, paywall, X14, X16.
+
+### #21 (F1+F3) — trwałe usuwanie danych powierzonych (dev, decyzja: pełne usunięcie konta)
+- ✅ **F1**: `deleteExpiredAccountsData` (cykliczne, konta canceled po karencji) usuwał tylko dane biznesowe — przewodniki z sekretami i podpisami gości ZOSTAWAŁY bezterminowo mimo obietnicy „trwale usunięte". Teraz: `deleteUserGuides(uid)` (Storage+secrets+signatures+doc) + **pełne usunięcie konta** (Auth przed dokumentem, guard `auth/user-not-found`; decyzja właściciela 2026-07-15). Kolejność chroni przed osieroconym loginem + wskrzeszeniem trialu przez self-heal.
+- ✅ **F3**: klienckie `deleteDoc` kasowało tylko dokument przewodnika → sekrety/podpisy/pliki osierocone. Nowy callable `deleteGuide` (owner-check, App Check, idempotentny) kasuje komplet serwerowo; GuideBuilder i ReviewBuilder (strony opinii żyją w tej samej kolekcji) podpięte.
+- ✅ Wspólny helper `deleteGuideCompletely`/`deleteUserGuides` — `deleteUserAccount` zrefaktorowany na ten sam kod (parytet 1:1).
+- ✅ **Re-review `code-reviewer`: BEZPIECZNE DO COMMITA** (parytet helpera 1:1, retry cyklicznego usuwania zbieżny bez podwójnego kasowania, `deleteGuide` bez path-traversal). Zgłosił 2×🟡 dot. tej samej obietnicy erasure — **oba domknięte od razu**:
+  - 🟡A: `deleteUserAccount` (na żądanie) kasował dokument PRZED Auth → przy otwartej apce self-heal wskrzeszał trial; odwrócono kolejność (Auth→dokument, guard user-not-found) jak w F1.
+  - 🟡B: `firestore.rules` `allow delete` na `guides` był otwarty dla klienta (obejście F3 przez bezpośredni deleteDoc) → `allow delete: if false` (kasowanie wyłącznie przez callable).
+- ✅ Weryfikacja końcowa: node --check OK, lint 0, build OK, reguły dry-run skompilowane, e2e zaufany 30/30.
+- 🟢 Residual (recenzent, `useFirebaseData` self-heal ↔ ~1 h ważność tokena po deleteUser): nawet kolejność Auth→dokument nie blokuje online-klienta w pełni — trwałe domknięcie po stronie self-heal (tombstone „deleted" + `revokeRefreshTokens`/wymuszony signOut) → zadanie #24, follow-up z `legal`/`dev`.
+- ⏸ Czeka: commit + deploy (functions + rules + hosting) za zgodą właściciela. Po deployu domyka bramkę publikacji dokumentów N4 (dane powierzone faktycznie usuwane).
+
+### Smoke test właściciela → bug uploadu odtworzony na żywo + raport legal N5
+- 🐛→✅ **„W przewodnikach nie działa wgrywanie zdjęcia"** — odtworzone w sesji właściciela (Chrome, wstrzyknięty testowy PNG 70 B): `storage/unauthorized` na gałęzi `!exists` (nowy przewodnik). Eliminacja wskazała **brak roli cross-service** `firebaserules.firestoreServiceAgent` dla agenta Storage — **potwierdzone zrzutem z konsoli IAM** (agent miał tylko domyślną rolę); prompt CLI przy N2 nie zadziałał skutecznie; funkcja martwa od deployu storage.rules (09.07), niezauważona, bo smoke N2 nie objął uploadu. **NAPRAWIONE**: właściciel nadał rolę ręcznie w IAM → ponowny test na żywo (upload okładki) przeszedł, zero błędów w konsoli → [[Known-Issues]] #9 zamknięte. Przy okazji smoke test N3: dodanie/usunięcie rezerwacji z formularza zadziałało (świeżo naprawiona ścieżka create). Drobiazg: 1 testowy plik 70 B osierocony w Storage (przewodnik anulowany bez zapisu) → dług „osierocone pliki Storage" w Backlogu
+- 📋 **Raport `legal` N5 (przepływy danych osobowych)**: dostęp OK po naprawach technicznych; cykl życia — 🔴 F1 czyszczenie karencyjne nie usuwa danych powierzonych (bloker publikacji dokumentów N4!), 🟡 F2–F7 (m.in. porzucone triale bez retencji, osierocone podpisy po skasowaniu przewodnika, klauzule informacyjne /kontakt i publicContact, rozjazdy dokumentów po 2026-07-10); wsad dla prawnika: `docs/legal/Uwagi-N5-dla-prawnika.md`; zadania #21 (F1+F3) i #22 (F4/F5/#8)
+
 ## 2026-07-10
 
 ### N4 u prawnika → start równoległych strumieni (N5-tech + X1)
@@ -18,6 +61,7 @@ Project timeline and key milestones.
 - ✅ Weryfikacja: lint 0, build OK, `node --check` functions, `firebase deploy --only firestore:rules --dry-run` skompilowane (MapDiff OK), e2e zaufany zestaw **30/30**; powtórny przegląd `code-reviewer` (diff napraw) w toku.
 - 📄 **X1 dostarczone równolegle**: 9 plików `docs/support/` (agent pisał w worktree — skopiowane do repo); sygnały produktowe → [[Known-Issues]] #6–8 i [[Projects/Backlog]].
 - ✅ **Decyzje właściciela (ten sam dzień) + naprawy #6/#7**: pakiet roczny UKRYTY na paywallu (jedna karta 29,99; wraca z founding members po drugiej cenie w Stripe); formularz `/kontakt` podpięty do `contact_messages` (create-only z walidacją w regułach; odczyt w konsoli Firebase). Weryfikacja rundy 2: lint 0, build OK, dry-run reguł OK, e2e 30/30.
+- ✅ **Commit (`f10b029` + chore `62f74c2` + docs `ba07cbb`) → DEPLOY (rules+hosting+functions, 9 funkcji) → MIGRACJA (decyzja właściciela)**: produkcja CZYSTA — zero legacy sekretów, zero enumerowalnych id (nic do odtwarzania), `publicContact` właściciela utworzony (`--fix`), kontrola „✓ Czysto", tester N3 20/20. **Część techniczna N5 domknięta**; uruchomiona część `legal` (wsad z audytu → uwagi dla prawnika)
 - ✅ **Re-review diffa (`code-reviewer`): BEZPIECZNY DO COMMITA** — findingi domknięte bez regresji; potwierdzone: deleteField-no-op poza MapDiff, undici redirect:'manual' = 302+Location (test lokalny), brak pominiętych czytelników hostProfile. Bramka „płacący klienci" domyka się operacyjnie: `audit-guides-n5.cjs --fix` na produkcji + „✓ Czysto" + odtworzenie przewodników z enumerowalnym id. Nowe 🟢: DNS-rebinding → Backlog; usunięty martwy `WynajemContext.jsx.bak` (git rm).
 
 ### N3 — walidacja schematu danych (rules) + naprawiony bloker dodawania wpisów
