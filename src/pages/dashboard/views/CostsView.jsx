@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Receipt, Percent, Wrench, Repeat, Plus, Edit, Trash2, TrendingUp, PiggyBank, Coins } from 'lucide-react';
+import { Receipt, Percent, Wrench, Repeat, Plus, Edit, Trash2, TrendingUp, PiggyBank, Coins, Landmark, Plug } from 'lucide-react';
 import { propHex, channelTone } from '../styles';
+import { categoryIcon, sourceIcon } from '../glyphs';
 import { useCountUp } from '../useCountUp';
 import { db } from '../../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -24,13 +25,20 @@ const SYNTH = {
 };
 const CAT_RAMP = ['var(--green)', '#8A6BA8', 'var(--brick)', 'var(--label)', '#4C7BA0', 'var(--faint)'];
 const CHANNEL_HEX = { cynober: 'var(--cynober)', granat: 'var(--granat)', amber: 'var(--amber)', green: 'var(--green)' };
+// ikony słupka „Na co poszły pieniądze": syntetyczne kategorie mają stałą ikonę,
+// własne dostają ikonę po nazwie (X15 — spójne z listą i ostatnimi kosztami)
+const CAT_ICON = { 'Prowizje portali': Percent, 'Podatek i VAT': Landmark, 'Media w rezerwacjach': Plug };
+const catBarIcon = (name) => CAT_ICON[name] || categoryIcon(name);
 
 /* Poziomy słupek — ten sam idiom co w Analityce (spójny słownik komponentów). */
-function CostBar({ name, dot, amount, pct, color, shown, delay }) {
+function CostBar({ name, dot, Icon, amount, pct, color, shown, delay }) {
   return (
     <div className="wpd-hbar">
       <div className="wpd-hbar__head">
-        <span className="wpd-hbar__name">{dot && <span className="wpd-dot" style={{ background: dot }} />}{name}</span>
+        <span className="wpd-hbar__name">
+          {Icon ? <Icon style={{ width: 13, height: 13, color, flex: '0 0 13px' }} /> : dot ? <span className="wpd-dot" style={{ background: dot }} /> : null}
+          {name}
+        </span>
         <span className="wpd-hbar__val"><b>{fmt(amount)} zł</b> · {pct}%</span>
       </div>
       <div className="wpd-hbar__track">
@@ -255,7 +263,7 @@ export default function CostsView({ rentals, properties, user, categories = [], 
               <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Na co poszły pieniądze</h2></div>
               <div style={{ padding: '10px 18px 16px' }}>
                 {data.categoriesRows.map((c, i) => (
-                  <CostBar key={c.name} name={c.name} amount={c.amount} pct={c.pct} color={c.color} shown={shown} delay={i * 55} />
+                  <CostBar key={c.name} name={c.name} Icon={catBarIcon(c.name)} amount={c.amount} pct={c.pct} color={c.color} shown={shown} delay={i * 55} />
                 ))}
               </div>
             </div>
@@ -268,7 +276,7 @@ export default function CostsView({ rentals, properties, user, categories = [], 
                 {data.portalRows.length === 0
                   ? <p className="wpd-body" style={{ color: 'var(--faint)', margin: '10px 0' }}>Brak prowizji w tym zakresie. Uzupełnij pole „Prowizja portalu" przy rezerwacjach.</p>
                   : data.portalRows.map((p, i) => (
-                    <CostBar key={p.name} name={p.name} dot={p.color} amount={p.amount} pct={p.pct} color={p.color} shown={shown} delay={i * 55} />
+                    <CostBar key={p.name} name={p.name} Icon={sourceIcon(p.name)} amount={p.amount} pct={p.pct} color={p.color} shown={shown} delay={i * 55} />
                   ))}
               </div>
             </div>
@@ -309,7 +317,7 @@ export default function CostsView({ rentals, properties, user, categories = [], 
                   </div>
                 ) : data.fixedRows.map((c) => (
                   <div className="wpd-listrow" key={c.id}>
-                    <span className="wpd-listrow__ic" style={{ background: 'var(--inner-2)', color: 'var(--amber-ink)' }}><Repeat /></span>
+                    <span className="wpd-listrow__ic" style={{ background: 'var(--inner-2)', color: 'var(--amber-ink)' }}>{React.createElement(categoryIcon(c.category))}</span>
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: 'block', fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
                       <span className="wpd-body" style={{ display: 'block', color: 'var(--faint)', fontSize: 12, marginTop: 1 }}>
@@ -342,7 +350,7 @@ export default function CostsView({ rentals, properties, user, categories = [], 
                 {data.recent.map((e) => (
                   <div className="wpd-ctable__row" key={e.id}>
                     <span className="wpd-ctable__date wpd-mono">{fmtDate(e.date)}</span>
-                    <span className="wpd-ctable__cat">{e.category}</span>
+                    <span className="wpd-ctable__cat">{React.createElement(categoryIcon(e.category), { style: { width: 12, height: 12, verticalAlign: '-2px', marginRight: 6, color: 'var(--faint)' } })}{e.category}</span>
                     <span className="wpd-ctable__detail" title={e.detail}>{e.detail}</span>
                     <span className="wpd-ctable__prop">{e.property || '—'}</span>
                     <span className="wpd-ctable__amt wpd-mono">{fmt(e.amount)} zł</span>

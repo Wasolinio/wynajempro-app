@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { FileSignature, Search, Printer, RotateCcw } from 'lucide-react';
-import { channelTone } from '../styles';
+import { SourceTag } from '../SourceTag';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
 
@@ -169,7 +169,7 @@ export default function ContractGeneratorView({ rentals, hostProfile }) {
                     <div className="wpd-row__name">{r.guest || 'Rezerwacja'}</div>
                     <div className="wpd-row__meta">{pn} · {fmtShort(r.date)} → {fmtShort(r.endDate || r.date)}</div>
                   </div>
-                  {r.source && <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>}
+                  <SourceTag source={r.source} />
                 </div>
               );
             })}

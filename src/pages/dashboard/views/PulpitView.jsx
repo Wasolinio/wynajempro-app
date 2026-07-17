@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles } from 'lucide-react';
-import { channelTone } from '../styles';
+import { SourceTag } from '../SourceTag';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
 import { useCountUp } from '../useCountUp';
@@ -105,7 +105,7 @@ export default function PulpitView({
                     <div className="wpd-row__meta">{propName || '—'}</div>
                   </div>
                   <span className="wpd-row__when"><b>{relDay(r.date)}</b></span>
-                  {r.source && <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>}
+                  <SourceTag source={r.source} />
                 </div>
               );
             })}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw, Users } from 'lucide-react';
-import { channelTone } from '../styles';
+import { SourceTag } from '../SourceTag';
 import { plural } from '../../../utils/plural';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
@@ -84,7 +84,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 <div className="wpd-guest__sub">{propName || '—'} · #{shortId}</div>
               </div>
               <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                {r.source && <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>}
+                <SourceTag source={r.source} />
                 {r.syncId && <span className="wpd-tag wpd-tag--muted"><RefreshCw style={{ width: 10, height: 10 }} /> iCal</span>}
                 <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
               </span>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle, XCircle, Edit, Trash2, ArrowDown, ArrowUp, CalendarDays } from 'lucide-react';
-import { propHex, channelTone } from '../styles';
+import { propHex } from '../styles';
+import { SourceTag } from '../SourceTag';
 import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => (n || n === 0 ? new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0)) : '—');
@@ -75,7 +76,7 @@ export default function BookingsView({
                   </td>
                   <td>
                     {r.source
-                      ? <span className={`wpd-tag wpd-tag--${channelTone(r.source)}`}>{r.source}</span>
+                      ? <SourceTag source={r.source} />
                       : <span className="wpd-tag wpd-tag--muted">—</span>}
                   </td>
                   <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(r.income)} zł</td>
