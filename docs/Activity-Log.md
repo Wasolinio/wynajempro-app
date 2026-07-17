@@ -6,6 +6,12 @@ Project timeline and key milestones.
 
 ## 2026-07-16
 
+### X15 — ikony kategorii/źródeł (decyzja: lucide zamiast emoji)
+- ⚠️ **Konflikt identyfikacyjny wychwycony**: właściciel prosił o emoji, ale design system ma udokumentowane „zero emoji" (`styles.js:5`, `LandingPage.jsx:22`), a podkreślił spójność jako priorytet. Zapytany → wybrał **ikony liniowe lucide** (zalecane): ten sam język 1px, kolor z tokenów, cel „lepszej czytelności" bez łamania zasady.
+- ✅ `glyphs.js` (categoryIcon/sourceIcon — regexy po słowie kluczowym bez diakrytyków, więc łapią też kategorie własne i nietypowe źródła) + `SourceTag.jsx` (createElement, nie `<Ic/>` — czysty react-hooks/static-components). Rozdzielone na 2 pliki przez react-refresh/only-export-components.
+- ✅ Wpięte: tagi źródeł w 4 widokach (Pulpit, Rezerwacje, Szczegóły rezerwacji, Generator umów) + CostsView (ikona przy kategorii w breakdown, ikona źródła w „Prowizje wg portalu", ikona kategorii w listach kosztów stałych i ostatnich kosztów). Lint 0, build OK.
+- ⏸ Podgląd wizualny — smoke test właściciela (App Check blokuje zalogowany panel na localhost).
+
 ### DEPLOY wiszącej partii (decyzja właściciela „deploy na serwer oraz na githuba")
 - ✅ **GitHub** (3 commity): `7c8ee78` feat(security) N5 F1/F3+A/B (functions+klient), `e211c8d` feat(dashboard) X4+X14+X16+reguły N3/N5, `2cbc1fc` docs. Push origin main.
 - ✅ **Firebase deploy** (`firestore:rules,hosting,functions`): **nowa funkcja `deleteGuide` utworzona**, 9 funkcji zaktualizowanych (m.in. deleteExpiredAccountsData pełne usunięcie, deleteUserAccount kolejność Auth→dok), reguły released (guides delete:false, `guests`, `recurringCosts`), hosting released. storage.rules nietknięte → bez promptu IAM. Bramka: lint 0, build, e2e 30/30, reguły dry-run.
