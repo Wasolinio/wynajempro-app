@@ -64,6 +64,15 @@ po domknięciu sekcji NOW.
 - Front: bez zmian kodu (13 required w formularzu, parsowanie liczb, normalizacja URL — wystarczające); limity UI (20 łączy, maxLength) → Backlog.
 - ✅ **Reguły wdrożone = repo, zweryfikowane** (2026-07-07): właściciel wkleił reguły z konsoli, `diff -wB` z `git show HEAD:firestore.rules` — identyczne. Zagadka `permission-denied` z X13 rozstrzygnięta: to **App Check** blokował nieatestowany klient localhost (produkcyjna domena przechodzi atestację reCAPTCHA) — nie rozjazd reguł. Walidacja `isValidGuide` przy N3 musi uwzględnić `type:'review'` (X13).
 
+### RODO-UI (#22) — klauzule i usuwanie kont (2026-07-16)
+**Po co:** domknięcie findingów F4/F5/F6 z części legal audytu N5. **Agent:** `legal` (brzmienia) + `dev` (wdrożenie). **Status:** ✅ kod 2026-07-16 (czeka na deploy)
+- ✅ **F6/#8**: usuwanie kont Google — `AccountModal` wykrywa provider; hasło (email) LUB `reauthenticateWithPopup(Google)`. Domyka art. 17 dla kont Google.
+- ✅ **F5**: klauzula informacyjna (warstwa pierwsza) pod formularzem `/kontakt` + link do Polityki. Operator = „serwis WynajemPRO" (pełny podmiot w Polityce).
+- ✅ **F4**: informacja przy danych kontaktowych (CompleteProfileScreen + AccountModal) + **osobne pole publicznego e-maila** (`publicEmail` — e-mail logowania NIE jest już auto-publikowany) + **przełącznik „Pokazuj dane kontaktowe gościom"** (`showPublicContact`; wyłączenie realnie kasuje `settings/publicContact`). Model rozszerzony przez reguły+tester+self-heal.
+- ✅ **Generator umów w dokumentach**: `legal` oznaczył wyłączenie (Regulamin §4 „obecnie niedostępna", Checklista poz. 8 status WYŁĄCZONA, notatka w Uwagi-N5). Disclaimer nienaruszony (wraca z funkcją).
+- ✅ **Osobne pole publicznego e-maila + przełącznik** wdrożone (2026-07-16, na polecenie właściciela). Domyka główne ryzyko F4 (prywatny e-mail logowania nie wycieka).
+- ⏸ **Otwarte decyzje właściciela/prawnika** (zadanie #31): retencja `contact_messages` (~12 mies.?) + wiersz w Polityce §2, pełna nazwa Operatora. Dług: stare `publicContact` z e-mailem logowania czyszczą się dopiero przy następnym zapisie profilu (rozważyć migrację).
+
 ### N4. Regulamin, polityka prywatności, powierzenie danych (DPA)
 **Po co:** przyjmowanie płatności bez regulaminu i podstaw RODO to ryzyko prawne; gospodarze przetwarzają w aplikacji dane SWOICH najemców — potrzebne powierzenie przetwarzania. (Pozycja nr 1 z listy właściciela.)
 **Gotowe, gdy:** projekty dokumentów w `docs/legal/` + weryfikacja przez prawnika-człowieka + wdrożone w aplikacji (`Terms`/`Privacy`) przez `dev`.

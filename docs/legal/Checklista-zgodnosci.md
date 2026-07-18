@@ -94,7 +94,7 @@ Zweryfikowane 2026-07-04. Preferowane źródła oficjalne. **Nie cytowano przepi
 5. **Reżim reklamacji/zgodności usługi cyfrowej** (rozdz. 5b ustawy o prawach konsumenta) — terminy i skutki.
 6. **Klauzule ograniczające odpowiedzialność** (Regulamin §12) — pod kątem abuzywności.
 7. **Nowelizacje 2026** (patrz sekcja C) — czy zmieniają reżim usług cyfrowych/subskrypcji.
-8. **Generator umów najmu** — brzmienie disclaimera; ocena ryzyka, czy sama funkcja nie rodzi odpowiedzialności Operatora.
+8. **Generator umów najmu** — **[STATUS 2026-07-16 · legal] funkcja WYŁĄCZONA** (ukryta z nawigacji panelu decyzją właściciela — X16; kod widoku `ContractGeneratorView.jsx` pozostaje, ale wejście w UI usunięte, `ManagerApp.jsx` `NAV_ITEMS`; szczegóły w `Uwagi-N5-dla-prawnika.md`, aktualizacja na początku). Na dziś funkcja NIE jest oferowana użytkownikom, więc nie stanowi ryzyka produkcyjnego. Punkt pozostaje otwarty, ale przechodzi w tryb „przed ewentualnym ponownym włączeniem", a nie „przed launchem": finalizacja brzmienia disclaimera i ocena ryzyka, czy sama funkcja nie rodzi odpowiedzialności Operatora. Disclaimer wysokiego ryzyka zachowany w Regulaminie §4 ust. 1 (oznaczony jako „obecnie niedostępna") i wraca razem z funkcją.
 9. **Zgodność deklarowanych środków bezpieczeństwa z faktycznym stanem** po wdrożeniu N1–N3 (koordynacja z `code-reviewer`, bramka N5).
 
 ## F. Warunek publikacji (definicja „gotowe" dla N4)

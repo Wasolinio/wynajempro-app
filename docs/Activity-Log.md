@@ -6,6 +6,14 @@ Project timeline and key milestones.
 
 ## 2026-07-16
 
+### RODO-UI (#22) — klauzule F4/F5, usuwanie kont Google F6, generator w dokumentach
+- ✅ **F6/#8** (dev): `AccountModal.handleDeleteAccount` rozgałęziony po providerze — konta Google reauth przez `reauthenticateWithPopup(GoogleAuthProvider)` zamiast hasła (dotąd niemożliwe → luka art. 17). UI pokazuje pole hasła albo przycisk „Potwierdź przez Google i usuń konto".
+- ✅ **F5** (dev, brzmienie legal): klauzula warstwy pierwszej pod formularzem `/kontakt` (administrator, cel, link do `/prywatnosc`). Operator = „serwis WynajemPRO" (pełny podmiot w Polityce — dane firmy N4).
+- ✅ **F4** (dev, brzmienie legal): mikrocopy przy danych kontaktowych w `CompleteProfileScreen` i `AccountModal` — nazwa/telefon/e-mail publiczne w przewodniku, adres/NIP/PESEL prywatne.
+- ✅ **Generator umów w dokumentach** (agent `legal`): Regulamin §4 „OBECNIE NIEDOSTĘPNA; udostępniona po weryfikacji wzorców" (znacznik `[KOREKTA 2026-07-16]`, disclaimer nienaruszony), Checklista poz. 8 status WYŁĄCZONA, prominentna notatka w `Uwagi-N5-dla-prawnika.md`. (Rozbieżność: opis generatora jest w §4, nie §5 jak wskazał właściciel — naniesione w §4.)
+- ✅ **Osobne pole publicznego e-maila + przełącznik „Pokazuj kontakt gościom"** (polecenie właściciela): model `hostProfile` += `publicEmail`, `showPublicContact` (reguły hasOnly + optBool, lustrzany tester, self-heal używa publicEmail zamiast e-maila logowania); saveAccount i onboarding zapisują publicContact tylko przy włączonym przełączniku (wyłączenie → deleteDoc). AccountModal: przełącznik + pole publicznego e-maila; onboarding: przełącznik (publiczny e-mail w koncie). Bug e2e: mock nie eksportował `reauthenticateWithPopup` → cały panel nie ładował się w testach → dodano export do firebase-mock; po tym e2e **30/30**.
+- ⏸ **Otwarte decyzje** (zadanie #31, zawężone): retencja `contact_messages`, pełna nazwa Operatora. Weryfikacja: lint 0, build OK, reguły dry-run, tester, e2e 30/30 (podgląd lokalny niemożliwy — worktree bez `.env` Firebase).
+
 ### X15 — ikony kategorii/źródeł (decyzja: lucide zamiast emoji)
 - ⚠️ **Konflikt identyfikacyjny wychwycony**: właściciel prosił o emoji, ale design system ma udokumentowane „zero emoji" (`styles.js:5`, `LandingPage.jsx:22`), a podkreślił spójność jako priorytet. Zapytany → wybrał **ikony liniowe lucide** (zalecane): ten sam język 1px, kolor z tokenów, cel „lepszej czytelności" bez łamania zasady.
 - ✅ `glyphs.js` (categoryIcon/sourceIcon — regexy po słowie kluczowym bez diakrytyków, więc łapią też kategorie własne i nietypowe źródła) + `SourceTag.jsx` (createElement, nie `<Ic/>` — czysty react-hooks/static-components). Rozdzielone na 2 pliki przez react-refresh/only-export-components.
