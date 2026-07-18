@@ -39,6 +39,8 @@
 
 - **DNS-rebinding w `isSafeUrl`** (residual 🟡3 audytu N5, 2026-07-10) — po co: walidacja hosta jest stringowa, więc domena rozwiązująca się na adres prywatny przechodzi; ryzyko niskie (treść odpowiedzi nie wraca do wywołującego, metadata GCP wymaga nagłówka). Hardening: rozwiązać DNS i sprawdzać IP, albo allowlista hostów iCal (booking/airbnb itd.).
 
+- **Obsługa `auth/popup-blocked` przy reauth Google** (nit 🟢D z przeglądu RODO-UI, 2026-07-16) — po co: gdy przeglądarka zablokuje popup przy usuwaniu konta Google, użytkownik dostaje generyczny błąd zamiast wskazówki „odblokuj wyskakujące okna"; kosmetyka UX.
+
 - **Drobne sygnały z pisania bazy wiedzy X1** (2026-07-10): `isAdvancePaid` tylko wyświetlane (nie da się ustawić w UI); przycisk „Eksport PDF" w Finansach otwiera modal raportu (mylące); źródło „Facebook" zeruje podatek/VAT/prowizję bez wyjaśnienia; na mobile brak ręcznej synchronizacji w arkuszu „Więcej" — po co: spójność obietnic UI z zachowaniem; decyzje produktowe przy dopieszczaniu.
 
 - **TypeScript** — po co: mniej regresji przy rozbudowie; duży koszt migracji, decyzja świadoma.
