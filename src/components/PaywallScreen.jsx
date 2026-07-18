@@ -39,7 +39,8 @@ export default function PaywallScreen({
   const daysRemaining = scheduledDeletionAt ? getDaysRemaining(scheduledDeletionAt) : 0;
 
   let title = 'Koniec okresu próbnego';
-  let desc = 'Twój darmowy 14-dniowy dostęp dobiegł końca. Odblokuj pełen panel zarządzania rezerwacjami, integracje z kalendarzami i automatyczne raporty księgowe.';
+  // 90 dni: jawność retencji porzuconych triali (F2, decyzja właściciela 2026-07-16)
+  let desc = 'Twój darmowy 14-dniowy dostęp dobiegł końca. Odblokuj pełen panel zarządzania rezerwacjami, integracje z kalendarzami i automatyczne raporty księgowe. Dane konta przechowujemy jeszcze 90 dni od zakończenia okresu próbnego — po tym czasie zostaną trwale usunięte.';
   let Icon = Lock;
   let showBanner = false;
 

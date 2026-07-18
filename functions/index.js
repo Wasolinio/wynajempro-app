@@ -429,6 +429,30 @@ exports.createBillingPortalSession = onCall(
 // Uruchamiane raz na dobę. Pobiera konta 'canceled', gdzie scheduledDeletionAt minęło
 // i kasuje ich dane biznesowe.
 // =============================================================================
+// F2 (audyt N5): porzucone triale nie dostają scheduledDeletionAt (ustawia go
+// wyłącznie webhook anulowania subskrypcji), więc ich dane — w tym powierzone
+// dane gości — leżałyby bezterminowo. Decyzja właściciela (2026-07-16):
+// pełne usunięcie po 90 dniach od końca okresu próbnego.
+const TRIAL_RETENTION_DAYS = 90;
+
+// Pełne, trwałe usunięcie konta (wspólne: canceled po karencji i porzucony trial):
+// dane biznesowe → przewodniki z danymi gości → login Auth PRZED dokumentem
+// (guard user-not-found; odwrotna kolejność zostawiałaby osierocony login,
+// a self-heal w useFirebaseData wskrzesiłby trial — finding 🟡A z re-review F1).
+async function purgeAccountCompletely(docSnap, label) {
+  const uid = docSnap.id;
+  console.log(`🧹 Rozpoczynanie trwałego usuwania konta (${label}): ${uid}`);
+  await cleanupUserData(uid);
+  const guidesDeleted = await deleteUserGuides(uid);
+  try {
+    await getAuth().deleteUser(uid);
+  } catch (authErr) {
+    if (authErr.code !== "auth/user-not-found") throw authErr;
+  }
+  await docSnap.ref.delete();
+  console.log(`✅ Konto ${uid} trwale usunięte (${label}; przewodników: ${guidesDeleted}).`);
+}
+
 exports.deleteExpiredAccountsData = onSchedule(
   {
     schedule: "every day 02:00",
@@ -439,49 +463,49 @@ exports.deleteExpiredAccountsData = onSchedule(
     const now = new Date();
     console.log(`🧹 Uruchomiono cykliczne czyszczenie bazy danych: ${now.toISOString()}`);
 
+    // 1) Konta anulowane po 30-dniowej karencji (scheduledDeletionAt z webhooka)
     try {
-      const snapshot = await db
+      const canceledSnap = await db
         .collection("users")
         .where("status", "==", "canceled")
         .where("scheduledDeletionAt", "<=", now)
         .get();
-
-      if (snapshot.empty) {
-        console.log("🧹 Brak kont kwalifikujących się do usunięcia danych.");
-        return;
-      }
-
-      console.log(`🧹 Znaleziono ${snapshot.size} kont do wyczyszczenia.`);
-
-      const promises = snapshot.docs.map(async (docSnap) => {
-        const uid = docSnap.id;
-        try {
-          console.log(`🧹 Rozpoczynanie trwałego usuwania konta: ${uid}`);
-          // Dane biznesowe (rentals/settings/checkout)
-          await cleanupUserData(uid);
-          // NAPRAWA F1 (audyt N5): przewodniki z danymi gości (sekrety, podpisy,
-          // pliki Storage) wcześniej ZOSTAWAŁY bezterminowo mimo obietnicy
-          // „trwale usunięte" z ekranu blokady — teraz kasowane jak przy usuwaniu konta.
-          const guidesDeleted = await deleteUserGuides(uid);
-          // Trwałe usunięcie konta (decyzja właściciela 2026-07-15): login Auth
-          // (e-mail, imię) + dokument users. Powrót klienta = ponowna rejestracja.
-          // Auth kasujemy PRZED dokumentem: gdy padnie z realnego powodu, dokument
-          // zostaje i jutrzejszy przebieg ponowi (inaczej osierocony login +
-          // self-heal w useFirebaseData wskrzesiłby trial).
-          try {
-            await getAuth().deleteUser(uid);
-          } catch (authErr) {
-            if (authErr.code !== "auth/user-not-found") throw authErr;
-          }
-          await docSnap.ref.delete();
-          console.log(`✅ Konto ${uid} trwale usunięte (przewodników: ${guidesDeleted}).`);
-        } catch (err) {
-          console.error(`❌ Błąd usuwania konta ${uid}:`, err);
-        }
-      });
-      await Promise.allSettled(promises);
+      console.log(`🧹 Konta canceled po karencji: ${canceledSnap.size}`);
+      await Promise.allSettled(canceledSnap.docs.map(async (docSnap) => {
+        try { await purgeAccountCompletely(docSnap, "canceled po karencji"); }
+        catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
+      }));
     } catch (error) {
-      console.error("❌ Błąd krytyczny podczas cyklicznego czyszczenia baz danych:", error);
+      console.error("❌ Błąd ścieżki kont canceled:", error);
+    }
+
+    // 2) F2: porzucone triale — status 'trialing', trialEndsAt (Timestamp) starszy
+    // niż TRIAL_RETENTION_DAYS. Zapytanie zakresowe dopasuje wyłącznie wartości
+    // typu Timestamp (legacy stringi bezpiecznie poza zakresem). Przed
+    // nieodwracalnym usunięciem dodatkowa weryfikacja danych dokumentu (fail-safe).
+    try {
+      const trialCutoff = new Date(now);
+      trialCutoff.setDate(trialCutoff.getDate() - TRIAL_RETENTION_DAYS);
+      const abandonedSnap = await db
+        .collection("users")
+        .where("status", "==", "trialing")
+        .where("trialEndsAt", "<=", Timestamp.fromDate(trialCutoff))
+        .get();
+      console.log(`🧹 Porzucone triale (koniec > ${TRIAL_RETENTION_DAYS} dni temu): ${abandonedSnap.size}`);
+      await Promise.allSettled(abandonedSnap.docs.map(async (docSnap) => {
+        const d = docSnap.data();
+        const qualifies = d.status === "trialing"
+          && d.trialEndsAt && typeof d.trialEndsAt.toDate === "function"
+          && d.trialEndsAt.toDate() <= trialCutoff;
+        if (!qualifies) {
+          console.warn(`⚠️ Pominięto ${docSnap.id} — dane dokumentu nie potwierdzają kwalifikacji do usunięcia.`);
+          return;
+        }
+        try { await purgeAccountCompletely(docSnap, `porzucony trial ${TRIAL_RETENTION_DAYS} dni`); }
+        catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
+      }));
+    } catch (error) {
+      console.error("❌ Błąd ścieżki porzuconych triali:", error);
     }
   }
 );
