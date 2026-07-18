@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, X, ExternalLink, CheckCircle, AlertTriangle, Trash2 } from 'lucide-react';
 import { auth, functions } from '../../../firebase';
-import { EmailAuthProvider, reauthenticateWithCredential, signOut } from 'firebase/auth';
+import { EmailAuthProvider, GoogleAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, signOut } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 import toast from 'react-hot-toast';
 import { useDialogA11y } from './useDialogA11y';
@@ -35,20 +35,28 @@ function AccountModal(props) {
   const dialogA11y = useDialogA11y(showAccountModal, () => setShowAccountModal(false));
 
   const handleDeleteAccount = async () => {
-    if (!deletePassword) return toast.error('Wprowadź hasło by potwierdzić.');
+    const user = auth.currentUser;
+    if (!user) return;
+    // konta Google nie mają hasła → reauth przez popup Google, nie EmailAuthProvider
+    // (finding N5 #8/F6: dotąd usunięcie konta Google było niemożliwe z panelu)
+    const usesPassword = user.providerData?.some((p) => p.providerId === 'password');
+    if (usesPassword && !deletePassword) return toast.error('Wprowadź hasło by potwierdzić.');
     setIsDeletingAccount(true);
     try {
-      if (auth.currentUser) {
-        const credential = EmailAuthProvider.credential(auth.currentUser.email, deletePassword);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-        const deleteAccountFn = httpsCallable(functions, 'deleteUserAccount');
-        await deleteAccountFn();
-        await signOut(auth);
-        window.location.href = '/';
+      if (usesPassword) {
+        const credential = EmailAuthProvider.credential(user.email, deletePassword);
+        await reauthenticateWithCredential(user, credential);
+      } else {
+        await reauthenticateWithPopup(user, new GoogleAuthProvider());
       }
+      const deleteAccountFn = httpsCallable(functions, 'deleteUserAccount');
+      await deleteAccountFn();
+      await signOut(auth);
+      window.location.href = '/';
     } catch (error) {
       console.error(error);
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') toast.error('Błędne hasło.');
+      else if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') toast.error('Potwierdzenie anulowane.');
       else toast.error('Wystąpił błąd podczas usuwania konta.');
     } finally {
       setIsDeletingAccount(false);
@@ -58,6 +66,7 @@ function AccountModal(props) {
   if (!showAccountModal) return null;
   const hp = editingHostProfile;
   const setHp = (patch) => setEditingHostProfile({ ...hp, ...patch });
+  const usesPassword = auth.currentUser?.providerData?.some((p) => p.providerId === 'password') ?? false;
 
   return (
     <div className="wpd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowAccountModal(false); }}>
@@ -108,6 +117,31 @@ function AccountModal(props) {
                   <input className="wpd-input" type="email" value={hp.email || ''} onChange={(e) => setHp({ email: e.target.value })} />
                 </div>
               </div>
+              {/* Kontakt publiczny w przewodniku gościa (RODO F4) — przełącznik + osobny e-mail */}
+              <div style={{ borderTop: '1px solid var(--hairline)', marginTop: 16, paddingTop: 16 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={hp.showPublicContact !== false}
+                    onChange={(e) => setHp({ showPublicContact: e.target.checked })}
+                    style={{ width: 16, height: 16, flex: '0 0 16px', accentColor: 'var(--cynober)' }} />
+                  <span style={{ fontWeight: 600, fontSize: 13.5 }}>Pokazuj dane kontaktowe gościom w przewodniku</span>
+                </label>
+                {hp.showPublicContact !== false ? (
+                  <>
+                    <div className="wpd-field" style={{ margin: '12px 0 6px' }}>
+                      <label className="wpd-flabel">Publiczny e-mail (widoczny dla gości)</label>
+                      <input className="wpd-input" type="email" value={hp.publicEmail || ''}
+                        onChange={(e) => setHp({ publicEmail: e.target.value })} placeholder="np. kontakt@twojobiekt.pl" />
+                    </div>
+                    <p className="wpd-body" style={{ fontSize: 12, color: 'var(--faint)', margin: 0, lineHeight: 1.5 }}>
+                      Gościom pokażemy nazwę, telefon i powyższy publiczny e-mail. Adres logowania, adres firmy oraz NIP/PESEL pozostają prywatne.
+                    </p>
+                  </>
+                ) : (
+                  <p className="wpd-body" style={{ fontSize: 12, color: 'var(--faint)', margin: '10px 0 0', lineHeight: 1.5 }}>
+                    Sekcja „Kontakt z gospodarzem" nie pojawi się w przewodniku gościa.
+                  </p>
+                )}
+              </div>
             </>
           )}
 
@@ -149,14 +183,17 @@ function AccountModal(props) {
               </div>
               <div className="wpd-panel" style={{ padding: 18 }}>
                 <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 14px', lineHeight: 1.6 }}>
-                  Zgodnie z RODO możesz w każdej chwili zażądać usunięcia danych z systemu WynajemPRO. Wymagane potwierdzenie hasłem.
+                  Zgodnie z RODO możesz w każdej chwili zażądać usunięcia danych z systemu WynajemPRO.
+                  {usesPassword ? ' Wymagane potwierdzenie hasłem.' : ' Wymagane ponowne potwierdzenie logowania Google.'}
                 </p>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Twoje hasło do WynajemPRO</label>
-                  <input className="wpd-input" type="password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="Wprowadź hasło by potwierdzić…" />
-                </div>
-                <button type="button" className="wpd-btn wpd-btn--primary" style={{ width: '100%' }} onClick={handleDeleteAccount} disabled={isDeletingAccount || !deletePassword}>
-                  <Trash2 /> {isDeletingAccount ? 'Trwa kasowanie danych…' : 'Usuń trwale moje konto'}
+                {usesPassword && (
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Twoje hasło do WynajemPRO</label>
+                    <input className="wpd-input" type="password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="Wprowadź hasło by potwierdzić…" />
+                  </div>
+                )}
+                <button type="button" className="wpd-btn wpd-btn--primary" style={{ width: '100%' }} onClick={handleDeleteAccount} disabled={isDeletingAccount || (usesPassword && !deletePassword)}>
+                  <Trash2 /> {isDeletingAccount ? 'Trwa kasowanie danych…' : usesPassword ? 'Usuń trwale moje konto' : 'Potwierdź przez Google i usuń konto'}
                 </button>
               </div>
             </>

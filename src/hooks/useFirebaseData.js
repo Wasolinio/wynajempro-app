@@ -99,10 +99,11 @@ export const useFirebaseData = (user, selectedYear) => {
         // samonaprawa kont sprzed rozdzielenia kontaktu publicznego (N5 🟡5):
         // hostProfile przestał być publiczny; gościom przewodnika służy publicContact
         const hostDoc = snapshot.docs.find((d) => d.id === 'hostProfile');
-        if (hostDoc && !snapshot.docs.some((d) => d.id === 'publicContact')) {
+        if (hostDoc && hostDoc.data().showPublicContact !== false && !snapshot.docs.some((d) => d.id === 'publicContact')) {
           const hp = hostDoc.data();
+          // e-mail = publicEmail (osobne pole), NIE adres logowania (RODO F4)
           setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
-            entityName: hp.entityName || '', phone: hp.phone || '', email: hp.email || '',
+            entityName: hp.entityName || '', phone: hp.phone || '', email: hp.publicEmail || '',
           }).catch(() => { /* bez subskrypcji zapis odpadnie — kontakt po prostu nie wyświetli się gościom */ });
         }
 

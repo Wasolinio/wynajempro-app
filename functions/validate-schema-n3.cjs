@@ -54,11 +54,12 @@ function whyInvalidSettings(docId, d) {
   if (docId === 'syncLinks' && 'links' in d && !isMap(d.links)) return 'links nie jest mapą';
   if (docId === 'tax' && 'rate' in d && !isNum(d.rate)) return 'rate nie jest liczbą';
   if (docId === 'hostProfile') {
-    const HP = ['entityName', 'identifierType', 'taxIdentifier', 'address', 'phone', 'email'];
+    const HP = ['entityName', 'identifierType', 'taxIdentifier', 'address', 'phone', 'email', 'publicEmail', 'showPublicContact'];
     if (!hasOnly(d, HP)) return `hostProfile nieznane pola: ${Object.keys(d).filter((k) => !HP.includes(k)).join(',')}`;
-    for (const [k, m] of [['entityName', 300], ['identifierType', 20], ['taxIdentifier', 30], ['address', 500], ['phone', 50], ['email', 320]]) {
+    for (const [k, m] of [['entityName', 300], ['identifierType', 20], ['taxIdentifier', 30], ['address', 500], ['phone', 50], ['email', 320], ['publicEmail', 320]]) {
       if (!optStr(d, k, m)) return `hostProfile.${k}: ${typeof d[k]}`;
     }
+    if ('showPublicContact' in d && typeof d.showPublicContact !== 'boolean') return 'hostProfile.showPublicContact nie jest bool';
   }
   if (docId === 'publicContact') {
     const PC = ['entityName', 'phone', 'email'];

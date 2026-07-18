@@ -49,7 +49,9 @@ export const defaultHostProfile = {
   taxIdentifier: '',
   address: '',
   phone: '',
-  email: ''
+  email: '',
+  publicEmail: '',        // osobny e-mail widoczny gościom (NIE adres logowania) — RODO F4
+  showPublicContact: true // czy pokazywać kontakt na publicznej stronie przewodnika
 };
 
 export const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];

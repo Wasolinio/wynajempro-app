@@ -93,10 +93,11 @@ service cloud.firestore {
           && (docId == 'syncLinks' ? (!('links' in data) || data.links is map) : true)
           && (docId == 'tax' ? (!('rate' in data) || data.rate is number) : true)
           && (docId == 'hostProfile' ? (
-                data.keys().hasOnly(['entityName', 'identifierType', 'taxIdentifier', 'address', 'phone', 'email'])
+                data.keys().hasOnly(['entityName', 'identifierType', 'taxIdentifier', 'address', 'phone', 'email', 'publicEmail', 'showPublicContact'])
                 && optStr(data, 'entityName', 300) && optStr(data, 'identifierType', 20)
                 && optStr(data, 'taxIdentifier', 30) && optStr(data, 'address', 500)
                 && optStr(data, 'phone', 50) && optStr(data, 'email', 320)
+                && optStr(data, 'publicEmail', 320) && optBool(data, 'showPublicContact')
               ) : true)
           && (docId == 'publicContact' ? (
                 data.keys().hasOnly(['entityName', 'phone', 'email'])

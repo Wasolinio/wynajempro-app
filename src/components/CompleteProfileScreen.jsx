@@ -12,6 +12,7 @@ export default function CompleteProfileScreen({ user, onComplete }) {
     taxIdentifier: '',
     address: '',
     phone: '',
+    showPublicContact: true,
   });
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,14 +27,18 @@ export default function CompleteProfileScreen({ user, onComplete }) {
         taxIdentifier: formData.taxIdentifier,
         address: formData.address,
         phone: formData.phone,
-        email: user.email,
+        email: user.email,          // adres logowania — prywatny
+        publicEmail: '',            // publiczny e-mail ustawiany osobno w koncie (RODO F4)
+        showPublicContact: formData.showPublicContact,
       });
-      // lustro publiczne dla przewodnika gościa — hostProfile (NIP/adres) nie jest publiczny (N5 🟡5)
-      await setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
-        entityName: formData.name,
-        phone: formData.phone,
-        email: user.email,
-      });
+      // publiczny kontakt tylko gdy włączony; BEZ adresu logowania (email pusty — do ustawienia w koncie)
+      if (formData.showPublicContact) {
+        await setDoc(doc(db, 'users', user.uid, 'settings', 'publicContact'), {
+          entityName: formData.name,
+          phone: formData.phone,
+          email: '',
+        });
+      }
       if (onComplete) onComplete();
     } catch (err) {
       console.error('Błąd podczas zapisywania profilu:', err);
@@ -90,6 +95,16 @@ export default function CompleteProfileScreen({ user, onComplete }) {
                   onChange={handleChange} placeholder="123 456 789" />
               </div>
             </div>
+
+            {/* Kontakt publiczny w przewodniku (RODO F4) — przełącznik; publiczny e-mail w koncie */}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', margin: '2px 0 14px' }}>
+              <input type="checkbox" checked={formData.showPublicContact}
+                onChange={(e) => setFormData({ ...formData, showPublicContact: e.target.checked })}
+                style={{ width: 16, height: 16, flex: '0 0 16px', marginTop: 2, accentColor: 'var(--cynober)' }} />
+              <span className="wpb-body" style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.55 }}>
+                Pokazuj moją nazwę i telefon gościom na publicznej stronie przewodnika. Publiczny e-mail ustawisz później w koncie. Adres oraz NIP/PESEL pozostają prywatne.
+              </span>
+            </label>
 
             <button type="submit" disabled={isLoading || !formData.name}
               className="wpb-btn wpb-btn--primary wpb-btn--block" style={{ marginTop: 10 }}>

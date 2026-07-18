@@ -85,6 +85,11 @@ export default function ContactPage() {
             <button type="submit" className="wpb-btn wpb-btn--primary wpb-btn--block" disabled={isSending}>
               {isSending ? 'Wysyłanie…' : <><Send /> Wyślij wiadomość</>}
             </button>
+            {/* Klauzula informacyjna warstwy pierwszej (F5) — brzmienie od agenta legal.
+                „Operator serwisu WynajemPRO": pełny podmiot-administrator w Polityce. */}
+            <p className="wpb-body" style={{ fontSize: 12, color: 'var(--muted)', margin: '12px 0 0', lineHeight: 1.55 }}>
+              Administratorem danych z formularza (adres e-mail, treść wiadomości) jest operator serwisu WynajemPRO; przetwarzamy je, aby odpowiedzieć na Twoje zgłoszenie. Szczegóły i Twoje prawa opisuje <a href="/prywatnosc" className="wpb-link">Polityka prywatności</a>.
+            </p>
           </form>
           {isSubmitted && (
             <p className="wpb-note wpb-note--ok" style={{ marginTop: 14, textAlign: 'center' }}>
