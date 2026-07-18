@@ -314,6 +314,23 @@ jest gospodarz obiektu") + wzór klauzuli dla gospodarzy w bazie wiedzy. Do decy
 
 ---
 
+## AKTUALIZACJA 2026-07-16 — retencja porzuconych okresów próbnych ROZSTRZYGNIĘTA (F2)
+
+Decyzja właściciela: konta z wygasłym, nigdy nieopłaconym okresem próbnym są **trwale
+usuwane po 90 dniach od końca okresu próbnego** (pełne usunięcie: dane biznesowe,
+przewodniki z danymi gości, dokument konta i login — ta sama ścieżka co po karencji
+anulowanej subskrypcji). Wdrożone w `functions/index.js` (`deleteExpiredAccountsData`,
+`TRIAL_RETENTION_DAYS = 90`). Ekran blokady po trialu informuje: „Dane konta
+przechowujemy jeszcze 90 dni od zakończenia okresu próbnego — po tym czasie zostaną
+trwale usunięte."
+
+**Do ujęcia w Polityce prywatności (§6/§2):** okres przechowywania danych konta
+z nieopłaconym trialem = 90 dni od końca okresu próbnego; po karencji anulowanej
+subskrypcji = 30 dni od anulowania (bez zmian). To domyka rozjazd wskazany w F2
+(poprzednio projekt Polityki deklarował usuwanie, którego kod nie wykonywał).
+
+---
+
 *Uwagi przygotowane na podstawie stanu faktycznego z kodu (firestore.rules,
 functions/index.js, GuestGuideView.jsx, ContactPage.jsx, GuideBuilder.jsx,
 CompleteProfileScreen.jsx, AccountModal.jsx, useFirebaseData.js, PaywallScreen.jsx,

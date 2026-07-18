@@ -6,6 +6,12 @@ Project timeline and key milestones.
 
 ## 2026-07-16
 
+### F2 — retencja porzuconych triali: 90 dni (decyzja właściciela) + re-review
+- ✅ **Kod**: `deleteExpiredAccountsData` z DWIEMA izolowanymi ścieżkami (canceled po karencji + NOWA: trialing z trialEndsAt ≤ now−90 dni), wspólny helper `purgeAccountCompletely` (parytet 1:1, Auth→dokument); potrójne zabezpieczenie żywych kont (filtr status, typowanie zakresu Timestamp — legacy stringi poza, double-check przed purge z warn-skip). Indeks złożony users(status, trialEndsAt) w firestore.indexes.json. PaywallScreen jawnie: „Dane konta przechowujemy jeszcze 90 dni…" (art. 13). Uwagi dla prawnika: retencja do Polityki §6/§2 (90 dni trial / 30 dni po anulowaniu).
+- ✅ **Re-review: BEZPIECZNA DO COMMITA I DEPLOYU** — właściciel i wszystkie żywe/świeżo wygasłe konta DOWODLIWIE poza zakresem (podwójnie); fail-safe w każdym niepewnym przypadku (wątpliwość → BRAK usunięcia); parytet refaktoru 1:1; indeks właściwy; tekst paywalla zgodny z zachowaniem. 🟢D: indeksy wdrożyć przed 02:00 (zła kolejność = tylko opóźnienie czyszczenia o dobę, fail-safe).
+- 🟡 **A (przed launchem, zadanie #32)**: cykliczny purge nie kasuje klienta Stripe (robi to tylko on-demand deleteUserAccount) — e-mail zostaje w Stripe (niepełny art. 17; pre-existing dla canceled). + 🟢C świeży odczyt przed purge, 🟢B jednorazowy check legacy trialEndsAt-stringów.
+- ⏸ Czeka: słowo właściciela → commit + push + deploy (functions + hosting + firestore:indexes).
+
 ### RODO-UI (#22) — klauzule F4/F5, usuwanie kont Google F6, generator w dokumentach
 - ✅ **F6/#8** (dev): `AccountModal.handleDeleteAccount` rozgałęziony po providerze — konta Google reauth przez `reauthenticateWithPopup(GoogleAuthProvider)` zamiast hasła (dotąd niemożliwe → luka art. 17). UI pokazuje pole hasła albo przycisk „Potwierdź przez Google i usuń konto".
 - ✅ **F5** (dev, brzmienie legal): klauzula warstwy pierwszej pod formularzem `/kontakt` (administrator, cel, link do `/prywatnosc`). Operator = „serwis WynajemPRO" (pełny podmiot w Polityce — dane firmy N4).
