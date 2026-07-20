@@ -4,6 +4,15 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-17
+
+### X2 — interaktywne demo panelu na landingu (scroll-demo)
+- 🔍 Diagnoza: „demo nie działa" = link „Otwórz panel demo →" szedł do /login (obietnica bez pokrycia).
+- ✅ Sekcja #panel przebudowana (skill impeccable, rejestr brand — identity-preservation wp4): 4 kroki po lewej + przyklejony mockup okna panelu po prawej; widoki Pulpit/Kalendarz/Finanse/Przewodnik przełączane środkiem viewportu (IntersectionObserver, pas −42%) lub klikiem; kroki to przyciski (aria-current), podpis „RYS. 2 … widok: X" z aria-live; prefers-reduced-motion = podmiana bez animacji. Mobile: mockup sticky NAD krokami (tło papieru — bez prześwitów; RYS. ukryty, semantyka w aria-label), nawigacja mockupu pozioma.
+- ✅ Stały spec `e2e/landing-demo.spec.js` (render+Pulpit, klik→Finanse, scroll→Przewodnik, mobile) + zrzuty przez klatkę viewportu (element-screenshot Playwrighta sam scrolluje i odpalał observer w pół przejścia — udokumentowana pułapka). Zaufany zestaw: **34/34**. Lint 0, build OK.
+- ⏱️ Po drodze: macOS odciął dostęp do plików (ochrona Pulpitu) — właściciel nadał uprawnienia, praca wznowiona bez strat.
+- ⏸ Czeka: commit + deploy hosting na słowo właściciela.
+
 ## 2026-07-16
 
 ### F2 — retencja porzuconych triali: 90 dni (decyzja właściciela) + re-review
