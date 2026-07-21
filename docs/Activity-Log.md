@@ -4,6 +4,21 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-07-21
+
+### X1 — centrum pomocy osadzone w aplikacji + naprawy #10/#11 z przeglądu treści
+- ⚠️ **Bloker wykryty PRZED osadzeniem**: artykuły `docs/support/` pisane 10.07 opisywały panel sprzed X4/X14/X16/RODO-UI/F2. Zweryfikowane w kodzie nieprawdy: osobny widok „Analityka" (nie istnieje — `ManagerApp.NAV` ma Finanse 05 z podzakładkami), FAQ „raportu nie da się pobrać jako plik" (są druk A4→PDF i eksport CSV), „Generator umów" w nawigacji (X16 go zdjął), usuwanie konta Google mailem (F6 dał reauth przez popup), publikowanie e-maila logowania w przewodniku (RODO-UI: `publicContact` + przełącznik), brak „Liczby gości" (X14) i retencji 90/30 dni (F2). Wniosek: **artykuł cytujący UI 1:1 starzeje się z każdym deployem** → do backlogu jako krok w checkliście zmian UI.
+- ✅ **Odświeżenie treści (agent `support`)**: wszystkie 9 plików przepisane pod obecny kod, każda etykieta z cytatu. `finanse-i-raporty` niemal w całości nowy. Świadomie nieopisane (niesprawdzalne w repo): ścieżki w extranetach Booking/Airbnb, czas zaciągania linku przez portale, konfiguracja faktur w Stripe, podłączenie Nocowania (brak pola).
+- ✅ **Osadzenie (`dev`)**: publiczne trasy `/pomoc` i `/pomoc/:slug` (bez logowania — użytkownik odcięty paywallem też musi trafić do instrukcji), `HelpCenterPage` + `HelpArticlePage` na wzorcu bloga i `LegalLayout`, ikony per artykuł powtórzone z nawigacji panelu (`helpIcons.jsx`, lucide — „zero emoji"). Wejścia: stopka landingu, sidebar panelu i mobilny arkusz „Więcej" (nowa karta), odesłanie nad formularzem `/kontakt`. Sitemapa + 9 adresów.
+- ✅ **Jedno źródło prawdy**: `scripts/build-help-articles.mjs` generuje `src/data/helpArticles.js` z markdownu (`npm run help:build`); plik danych oznaczony jako generowany. Ręczne przepisanie treści do JS-a odtworzyłoby rozjazd, który właśnie wykryliśmy. Parser miał błąd (pusta linia rozbijała FAQ na osobne bloki) — złapany i naprawiony przed użyciem.
+- ✅ **Naprawa przy okazji**: Preflight Tailwinda zerował `list-style`, więc instrukcje „krok po kroku" renderowały się BEZ numeracji (reguła `li::marker` w `.wpb-prose` nie miała czego kolorować). Punktory i numery przywrócone jawnie — dotyczyło też bloga i stron prawnych.
+- ✅ **#10 (🔴) wpisy kosztowe i jednorazowe zadania bez edycji/usuwania — NAPRAWIONE**: „Ostatnie koszty" dostały akcje + „Pokaż wszystkie" (bez tego koszt starszy niż 8 wpisów był nieosiągalny), zadania `type:'reminder'` dostały zakładkę „Zadania" w Rezerwacjach z odhaczaniem, edycją i usuwaniem. Front-only — `text`/`isCompleted` i `delete` były już w allowliście `isValidRental`, więc bez zmian reguł.
+- ✅ **#11 (🟡) sygnalizator synchronizacji — NAPRAWIONY**: czytał KLUCZE `syncLinks` (nazwy obiektów) zamiast wartości (portale), więc przy wpiętych linkach zawsze świecił „—". Teraz sterowany danymi; „Nocowanie" usunięte, bo nie ma pola na jego link. Po naprawie zaktualizowane dwa fragmenty świeżo napisanych artykułów, które opisywały obejście („napisz do nas").
+- ✅ **Weryfikacja**: lint 0, build OK, **46/46 e2e** (zaufane 34 + `help-center` 7 + `costs-tasks` 5), podgląd wizualny pomocy desktop+mobile, zrzuty panelu z akcjami kosztów i zakładką zadań.
+- 🧹 Porządek w dokumentacji: odhaczone wdrożone X4/X14/X15/X16 („czeka na deploy" było nieaktualne od 16.07), zamknięte martwe ⬜ przy N1, Known-Issues #6/#7/#8 domknięte (#8 naprawił F6). Chip na osobną sesję: sitemapa wskazuje domenę firebase, choć serwis działa też pod `wynajempro.com` (pozycja do X9).
+
+---
+
 ## 2026-07-17
 
 ### X2 v2 — apple-scroll demo z importu Claude Design („Wynajem Landing Scroll.dc.html")

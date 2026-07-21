@@ -41,6 +41,10 @@
 
 - **Obsługa `auth/popup-blocked` przy reauth Google** (nit 🟢D z przeglądu RODO-UI, 2026-07-16) — po co: gdy przeglądarka zablokuje popup przy usuwaniu konta Google, użytkownik dostaje generyczny błąd zamiast wskazówki „odblokuj wyskakujące okna"; kosmetyka UX.
 
+- **Sygnały z odświeżania bazy wiedzy X1** (2026-07-21, agent `support`; dwa poważne poszły do [[Known-Issues]] #10 i #11): dwie różne definicje „Zysk netto" w jednym module — „Przegląd" (`AnalyticsView`) nie wlicza kosztów stałych, a „Koszty i opłaty" i raport wliczają, więc sąsiednie zakładki pokazują różne kwoty za ten sam okres (ujednolicić albo napisać w kaflu, co wchodzi w skład); wiersz „Eksport dla księgowego / Wkrótce" (`FinanceHub.jsx:71-80`) chowa działający już eksport CSV z okna raportu; martwy status „Zaliczka wpłacona" (`isAdvancePaid` nie ma zapisu w UI); brak wyboru roku w zakładce „Koszty i opłaty" (rok zmienia się tylko z „Przeglądu"); komunikaty synchronizacji przez `alert()` zamiast toastów (`WynajemContext.jsx:146-159`) i brak ręcznej synchronizacji w mobilnym arkuszu „Więcej"; niespójna nazwa planu („Plan Gospodarz" w sidebarze vs „Plan Gospodarza" w modalu konta). — po co: spójność obietnic UI z zachowaniem.
+
+- **Odświeżanie bazy wiedzy jako krok w checkliście zmian UI** (wniosek z X1, 2026-07-21) — po co: artykuły cytują etykiety 1:1, więc każdy deploy zmieniający panel je postarza; treść żyje w `docs/support/*.md` i jest generowana do aplikacji (`npm run help:build`), ale nikt nie przypomni o przejrzeniu jej po zmianie UI.
+
 - **Drobne sygnały z pisania bazy wiedzy X1** (2026-07-10): `isAdvancePaid` tylko wyświetlane (nie da się ustawić w UI); przycisk „Eksport PDF" w Finansach otwiera modal raportu (mylące); źródło „Facebook" zeruje podatek/VAT/prowizję bez wyjaśnienia; na mobile brak ręcznej synchronizacji w arkuszu „Więcej" — po co: spójność obietnic UI z zachowaniem; decyzje produktowe przy dopieszczaniu.
 
 - **TypeScript** — po co: mniej regresji przy rozbudowie; duży koszt migracji, decyzja świadoma.
