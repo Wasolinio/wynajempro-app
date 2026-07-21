@@ -6,6 +6,12 @@ Project timeline and key milestones.
 
 ## 2026-07-17
 
+### X2 v2 — apple-scroll demo z importu Claude Design („Wynajem Landing Scroll.dc.html")
+- 📥 Import projektu przez **claude_design MCP** (DesignSync: get_project/list_files/get_file) — projekt „Apple scroll mockup aplikacji" właściciela. Silnik z `support.js` (osobny plik) + inline-komponent: dyskretny cross-fade sterowany indeksem scrolla (progress = (-rect.top)/(h−100vh), 5 etap), rail=progress×238px, winScale z ResizeObserver (min(w/1160,h/764,0.78)), highlight per etap, nav/dots per index.
+- ✅ Wierny port do React: `LandingScrollDemo.jsx` — sticky 520vh, lewa szyna postępu + 5 bloków tekstu (Pulpit/Kalendarz/Obiekty/Rezerwacja/Finanse), prawa = okno przeglądarki z pełnym mockupem panelu przełączającym 5 ekranów z ruchomym highlightem. Statyczne ekrany przez `dangerouslySetInnerHTML` (markup 1:1 z projektu, autorski → bezpieczne). Dostępność: kropki/kroki jako przyciski (aria-label/aria-current), `data-view` hook, prefers-reduced-motion. Mobile (≤860px): sticky wyłączony, kroki klikalne, okno skalowane do szerokości slotu (skala ze stanu, nie z refa).
+- ✅ Zastąpił prostszy PanelDemo z X2 v1 (usunięty wraz z CSS `.wp4-demo`); spec `e2e/landing-demo.spec.js` przepisany (4 testy: start/scroll→Finanse/klik-kropki→Rezerwacja/mobile) + zrzuty. Zaufany zestaw: **34/34**. Lint 0, build OK. Zweryfikowane wizualnie (desktop Pulpit, scroll→Finanse, mobile).
+- ⏸ Czeka: commit + deploy hosting na słowo właściciela. Dług (kosmetyka): martwe reguły CSS `.wp4-preview`/`.wp4-graphpaper` po starej sekcji.
+
 ### X2 — interaktywne demo panelu na landingu (scroll-demo)
 - 🔍 Diagnoza: „demo nie działa" = link „Otwórz panel demo →" szedł do /login (obietnica bez pokrycia).
 - ✅ Sekcja #panel przebudowana (skill impeccable, rejestr brand — identity-preservation wp4): 4 kroki po lewej + przyklejony mockup okna panelu po prawej; widoki Pulpit/Kalendarz/Finanse/Przewodnik przełączane środkiem viewportu (IntersectionObserver, pas −42%) lub klikiem; kroki to przyciski (aria-current), podpis „RYS. 2 … widok: X" z aria-live; prefers-reduced-motion = podmiana bez animacji. Mobile: mockup sticky NAD krokami (tło papieru — bez prześwitów; RYS. ukryty, semantyka w aria-label), nawigacja mockupu pozioma.

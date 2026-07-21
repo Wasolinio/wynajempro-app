@@ -108,6 +108,7 @@ Pozycja nr 2 z listy właściciela. **Po co:** mniej powtarzalnych pytań, łatw
 ### X2. Interaktywne demo panelu na landingu
 Pozycja nr 3: obecne demo nie działa; pomysł — mockup w stylu „apple scroll" (scrollowanie podświetla funkcje). **Po co:** pokazanie produktu bez rejestracji = wyższa konwersja. **Gotowe, gdy:** działające demo na landingu, zweryfikowane na mobile. **Agent:** `designer` + `dev`, przekaz `marketing`. ✅ kod 2026-07-17 (czeka na deploy)
 - Diagnoza „demo nie działa": link „Otwórz panel demo →" prowadził do /login. Nowa sekcja #panel: 4 kroki + przyklejony mockup okna panelu (Pulpit/Kalendarz/Finanse/Przewodnik) przełączany scrollem (IntersectionObserver) lub klikiem; dostępność (przyciski, aria-current, aria-live, reduced-motion); mobile: sticky mockup z tłem, pozioma nawigacja. Uczciwe CTA „Załóż darmowe konto — 14 dni testów". Stały spec `e2e/landing-demo.spec.js` (4 testy + zrzuty) — zaufany zestaw 34/34. Zweryfikowane wizualnie (desktop/finanse/mobile).
+- **v2 (2026-07-17, import z Claude Design „Wynajem Landing Scroll.dc.html")**: pełny apple-scroll — sticky 520vh, szyna postępu + 5 etap (Pulpit/Kalendarz/Obiekty/Rezerwacja/Finanse), okno przeglądarki z pełnym mockupem panelu, ruchomy highlight, winScale. `LandingScrollDemo.jsx` (wierny port silnika support.js); zastąpił v1. e2e przepisany, 34/34.
 
 ### X3. Przewodnik gościa — dokończenie
 Pozycja nr 4, **częściowo zrobiona**: restyl v2 + naprawa odkrywania danych dostępowych ✅ (`76a3059`). Zostaje: możliwość dodania 2 plików (regulamin + przewodnik). **Agent:** `dev`. 🔄
