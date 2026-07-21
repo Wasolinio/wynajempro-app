@@ -1,178 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { blogPosts } from '../../data/blogPosts';
-
-/* ── Interaktywne demo panelu (X2) ──
-   Scroll-demo w duchu rysunku technicznego: kroki po lewej, przyklejony
-   mockup panelu po prawej. Przewijanie (IntersectionObserver) lub klik
-   w krok przełącza widok; prefers-reduced-motion = podmiana bez animacji. */
-const DEMO_STEPS = [
-  {
-    key: 'pulpit', label: 'Pulpit', title: 'Poranny raport w pięć sekund',
-    body: 'Otwierasz aplikację przy kawie i wiesz, co dziś się dzieje: kto się melduje, kto wyjeżdża, co czeka na sprzątanie.',
-  },
-  {
-    key: 'calendar', label: 'Kalendarz', title: 'Wszystkie portale w jednym kalendarzu',
-    body: 'Booking, Airbnb i rezerwacje własne spinają się automatycznie — koniec podwójnych rezerwacji i przepisywania dat.',
-  },
-  {
-    key: 'finance', label: 'Finanse', title: 'Zysk netto, nie tylko przychód',
-    body: 'Prowizje portali, podatek i koszty stałe policzone za Ciebie. Widzisz, ile naprawdę zostaje w kieszeni.',
-  },
-  {
-    key: 'guide', label: 'Przewodnik gościa', short: 'Przewodnik', title: 'Goście sami znajdują Wi-Fi i kod do drzwi',
-    body: 'Cyfrowy przewodnik odsłania dane dostępowe po akceptacji regulaminu. Mniej telefonów „jak dojechać?".',
-  },
-];
-
-function PanelDemo() {
-  const [active, setActive] = useState(0);
-  const stepRefs = useRef([]);
-
-  useEffect(() => {
-    // środkowy pas viewportu decyduje, który krok „gra" — klasyczny apple-scroll
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const idx = Number(entry.target.dataset.step);
-        if (!Number.isNaN(idx)) setActive(idx);
-      });
-    }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
-    stepRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div className="wp4-demo">
-      <ol className="wp4-demo__steps">
-        {DEMO_STEPS.map((s, i) => (
-          <li key={s.key} data-step={i} ref={(el) => { stepRefs.current[i] = el; }}>
-            <button
-              type="button"
-              className={`wp4-demo__step${active === i ? ' wp4-demo__step--active' : ''}`}
-              onClick={() => setActive(i)}
-              aria-current={active === i ? 'true' : undefined}
-            >
-              <span className="wp4-label">{String(i + 1).padStart(2, '0')} · {s.label}</span>
-              <span className="wp4-demo__step-title">{s.title}</span>
-              <span className="wp4-demo__step-body">{s.body}</span>
-            </button>
-          </li>
-        ))}
-        <li className="wp4-demo__cta">
-          <Link to="/login" className="wp4-link wp4-link--strong">
-            Załóż darmowe konto — 14 dni testów →
-          </Link>
-        </li>
-      </ol>
-
-      <div className="wp4-demo__stage">
-        <div className="wp4-demo__window" role="img"
-          aria-label={`Podgląd panelu WynajemPRO — widok: ${DEMO_STEPS[active].label}`}>
-          <div className="wp4-demo__chrome">
-            <span className="wp4-demo__dots"><i /><i /><i /></span>
-            <span className="wp4-label wp4-label--faint">panel.wynajempro.pl</span>
-          </div>
-          <div className="wp4-demo__app">
-            <div className="wp4-demo__side">
-              {DEMO_STEPS.map((s, i) => (
-                <span key={s.key} className={`wp4-demo__nav${active === i ? ' wp4-demo__nav--active' : ''}`}>
-                  {String(i + 1).padStart(2, '0')} {s.short || s.label}
-                </span>
-              ))}
-            </div>
-            <div className="wp4-demo__views" data-view={DEMO_STEPS[active].key}>
-
-              <div className="wp4-demo__view" data-active={active === 0 || undefined}>
-                <div className="wp4-demo__stats">
-                  <div className="wp4-demo__stat">
-                    <span className="wp4-label wp4-label--faint">Przyjazdy dziś</span>
-                    <span className="wp4-demo__num">2</span>
-                  </div>
-                  <div className="wp4-demo__stat">
-                    <span className="wp4-label wp4-label--faint">Do posprzątania</span>
-                    <span className="wp4-demo__num">1</span>
-                  </div>
-                </div>
-                <div className="wp4-demo__row">
-                  <span className="wp4-tag wp4-tag--green">MELDUNEK · 15:00</span>
-                  <span className="wp4-label wp4-label--faint">Domek Ruś 1</span>
-                </div>
-                <div className="wp4-demo__row">
-                  <span className="wp4-tag wp4-tag--booking">WYJAZD · 11:00</span>
-                  <span className="wp4-label wp4-label--faint">Apt. Elbląg</span>
-                </div>
-                <div className="wp4-demo__row">
-                  <span className="wp4-tag wp4-tag--amber">SPRZĄTANIE</span>
-                  <span className="wp4-label wp4-label--faint">w toku</span>
-                </div>
-              </div>
-
-              <div className="wp4-demo__view" data-active={active === 1 || undefined}>
-                <div className="wp4-demo__cal">
-                  {['P', 'W', 'Ś', 'C', 'P', 'S', 'N'].map((d, i) => (
-                    <span key={i} className="wp4-demo__dow">{d}</span>
-                  ))}
-                </div>
-                <div className="wp4-demo__week">
-                  <span className="wp4-demo__bar wp4-demo__bar--booking" style={{ gridColumn: '2 / span 3' }}>Booking</span>
-                </div>
-                <div className="wp4-demo__week">
-                  <span className="wp4-demo__bar wp4-demo__bar--airbnb" style={{ gridColumn: '1 / span 4' }}>Airbnb</span>
-                </div>
-                <div className="wp4-demo__week">
-                  <span className="wp4-demo__bar wp4-demo__bar--own" style={{ gridColumn: '4 / span 3' }}>Własna</span>
-                </div>
-                <p className="wp4-label wp4-label--faint" style={{ margin: '6px 0 0' }}>
-                  Sync iCal · ostatni: 06:00
-                </p>
-              </div>
-
-              <div className="wp4-demo__view" data-active={active === 2 || undefined}>
-                <span className="wp4-label wp4-label--faint">Zysk netto · lipiec</span>
-                <div className="wp4-demo__kpi">8 940 zł</div>
-                <div className="wp4-demo__hbar">
-                  <span className="wp4-label wp4-label--faint">Prowizje portali</span>
-                  <i style={{ width: '38%' }} />
-                </div>
-                <div className="wp4-demo__hbar">
-                  <span className="wp4-label wp4-label--faint">Koszty stałe</span>
-                  <i style={{ width: '22%', background: 'var(--amber)' }} />
-                </div>
-                <div className="wp4-demo__row" style={{ marginTop: 4 }}>
-                  <span className="wp4-label">Domek nad jeziorem</span>
-                  <span className="wp4-demo__mono wp4-num--green">+5 120 zł</span>
-                </div>
-                <div className="wp4-demo__row">
-                  <span className="wp4-label">Apartament Centrum</span>
-                  <span className="wp4-demo__mono wp4-num--green">+3 820 zł</span>
-                </div>
-              </div>
-
-              <div className="wp4-demo__view" data-active={active === 3 || undefined}>
-                <div className="wp4-demo__reveal">
-                  <span className="wp4-label wp4-label--faint">Sieć Wi-Fi</span>
-                  <span className="wp4-demo__mono">Domek_Goscie</span>
-                  <span className="wp4-label wp4-label--faint" style={{ marginTop: 10 }}>Kod do drzwi</span>
-                  <span className="wp4-demo__mono wp4-demo__mono--big">4 8 2 6 #</span>
-                </div>
-                <span className="wp4-tag wp4-tag--green" style={{ alignSelf: 'flex-start' }}>
-                  Odsłonięte po akceptacji regulaminu
-                </span>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        <p className="wp4-fig" aria-live="polite">
-          RYS. 2 — Panel WynajemPRO · widok: {DEMO_STEPS[active].label.toLowerCase()}
-        </p>
-      </div>
-    </div>
-  );
-}
+import LandingScrollDemo from './LandingScrollDemo';
 
 // Kategoria wpisu → kolor tagu zgodny z paletą marki
 const CATEGORY_TAG = {
@@ -552,22 +383,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ───────────────────────── Panel / interaktywne demo (X2) ───────────────────────── */}
-      <section className="wp4-section" id="panel">
-        <div className="wp4-container">
-          <div className="wp4-section__head">
-            <span className="wp4-label">Panel · 06</span>
-            <h2 className="wp4-h2">
-              Zobacz panel <em>w akcji</em>
-            </h2>
-            <p className="wp4-lead wp4-lead--narrow">
-              Przewiń albo klikaj kroki — podgląd po prawej przełącza widoki
-              dokładnie tak, jak zrobi to Twój panel.
-            </p>
-          </div>
-          <PanelDemo />
-        </div>
-      </section>
+      {/* Panel — apple-scroll demo panelu (X2 v2, projekt z Claude Design) */}
+      <LandingScrollDemo />
 
       {/* ───────────────────────── Jak to działa ───────────────────────── */}
       <section className="wp4-section wp4-section--alt" id="jak-to-dziala">
@@ -1047,76 +864,10 @@ const CSS = `
 .wp4-graphpaper__row{ display:flex; align-items:center; justify-content:space-between; gap:12px;
   background:var(--surface); border:1px solid var(--hairline); border-radius:3px; padding:12px 14px; }
 
-/* ── Interaktywne demo panelu (X2): kroki + przyklejony mockup ── */
-.wp4-demo{ display:grid; grid-template-columns:minmax(300px,5fr) 7fr; gap:56px; align-items:start; }
-.wp4-demo__steps{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-.wp4-demo__step{ display:block; width:100%; text-align:left; font-family:inherit; cursor:pointer;
-  background:transparent; border:1px solid transparent; border-radius:4px; padding:22px 22px 20px;
-  transition:background .2s ease, border-color .2s ease; }
-.wp4-demo__step:hover{ border-color:var(--hairline); background:var(--surface); }
-.wp4-demo__step--active{ background:var(--surface); border-color:var(--ink); }
-.wp4-demo__step:focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
-.wp4-demo__step .wp4-label{ display:block; margin-bottom:8px; }
-.wp4-demo__step--active .wp4-label{ color:var(--cynober); }
-.wp4-demo__step-title{ display:block; font-weight:700; font-size:19px; letter-spacing:-.015em;
-  color:var(--ink); margin-bottom:6px; }
-.wp4-demo__step-body{ display:block; font-size:14.5px; line-height:1.55; color:var(--muted); }
-.wp4-demo__cta{ padding:14px 22px 0; }
-
-.wp4-demo__stage{ position:sticky; top:96px; }
-.wp4-demo__window{ background:var(--surface); border:1px solid var(--ink); border-radius:4px; overflow:hidden; }
-.wp4-demo__chrome{ display:flex; align-items:center; gap:12px; padding:10px 14px;
-  border-bottom:1px solid var(--hairline); background:var(--paper); }
-.wp4-demo__dots{ display:inline-flex; gap:5px; }
-.wp4-demo__dots i{ width:8px; height:8px; border-radius:50%; border:1px solid var(--hairline); background:var(--inner); }
-.wp4-demo__app{ display:grid; grid-template-columns:150px 1fr; min-height:330px; }
-.wp4-demo__side{ background:var(--ink); padding:16px 0; display:flex; flex-direction:column; gap:2px; }
-.wp4-demo__nav{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.04em;
-  color:var(--ink-faint); padding:8px 16px; border-left:2px solid transparent; white-space:nowrap;
-  transition:color .2s ease, border-color .2s ease; }
-.wp4-demo__nav--active{ color:var(--ink-on); border-left-color:var(--cynober); }
-.wp4-demo__views{ position:relative; }
-.wp4-demo__view{ position:absolute; inset:0; padding:20px; display:flex; flex-direction:column; gap:10px;
-  opacity:0; transform:translateY(6px); transition:opacity .24s ease, transform .24s ease;
-  pointer-events:none; }
-.wp4-demo__view[data-active]{ opacity:1; transform:none; pointer-events:auto; position:relative; }
-.wp4-demo__stats{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:2px; }
-.wp4-demo__stat{ border:1px solid var(--hairline); border-radius:3px; padding:10px 12px;
-  background:var(--paper); display:flex; flex-direction:column; gap:2px; }
-.wp4-demo__num{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:22px; }
-.wp4-demo__row{ display:flex; align-items:center; justify-content:space-between; gap:12px;
-  border:1px solid var(--hairline); border-radius:3px; padding:10px 12px; background:var(--paper); }
-.wp4-demo__mono{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:14px; }
-.wp4-demo__mono--big{ font-size:22px; letter-spacing:.14em; }
-.wp4-demo__kpi{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:30px;
-  letter-spacing:-.01em; margin:2px 0 6px; }
-.wp4-demo__hbar{ display:flex; flex-direction:column; gap:5px; }
-.wp4-demo__hbar i{ display:block; height:8px; border-radius:2px; background:var(--cynober); }
-.wp4-demo__cal{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.wp4-demo__dow{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--faint);
-  text-align:center; padding-bottom:2px; }
-.wp4-demo__week{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; min-height:26px;
-  border-top:1px solid var(--inner); padding-top:6px; }
-.wp4-demo__bar{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:#fff;
-  border-radius:2px; padding:4px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.wp4-demo__bar--booking{ background:var(--granat); }
-.wp4-demo__bar--airbnb{ background:var(--cynober); }
-.wp4-demo__bar--own{ background:var(--green); }
-.wp4-demo__reveal{ border:1px solid var(--hairline); border-radius:3px; padding:16px;
-  background:var(--paper); display:flex; flex-direction:column; }
-@media (max-width:900px){
-  .wp4-demo{ grid-template-columns:1fr; gap:20px; }
-  /* sticky z tłem papieru — kroki przewijają się POD mockupem, bez prześwitów;
-     podpis RYS. schowany (semantykę niesie aria-label okna) */
-  .wp4-demo__stage{ order:-1; top:12px; z-index:2; background:var(--paper); padding-bottom:12px; }
-  .wp4-demo__stage .wp4-fig{ display:none; }
-  .wp4-demo__app{ grid-template-columns:1fr; min-height:0; }
-  .wp4-demo__side{ flex-direction:row; overflow-x:auto; padding:0; }
-  .wp4-demo__nav{ border-left:none; border-bottom:2px solid transparent; padding:10px 12px; }
-  .wp4-demo__nav--active{ border-bottom-color:var(--cynober); }
-}
+/* ── Panel — apple-scroll demo (X2 v2, import z Claude Design) ── */
+.wp4-sd button:focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 @media (prefers-reduced-motion: reduce){
-  .wp4-demo__view, .wp4-demo__step, .wp4-demo__nav{ transition:none; }
+  .wp4-sd *{ transition:none !important; }
 }
 
 /* ── Przewodnik gościa / telefon ── */
