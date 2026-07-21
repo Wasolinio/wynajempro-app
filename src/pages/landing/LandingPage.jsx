@@ -645,6 +645,7 @@ export default function LandingPage() {
             </div>
             <div className="wp4-footer__col">
               <span className="wp4-label">Zasoby</span>
+              <Link to="/pomoc">Centrum pomocy</Link>
               <Link to="/blog">Baza wiedzy</Link>
               <a href="#faq">FAQ</a>
               <a href="#panel">Demo panelu</a>
@@ -840,10 +841,7 @@ const CSS = `
 .wp4-feature:nth-last-child(-n+2){ border-bottom:none; }
 .wp4-feature__foot{ display:flex; align-items:center; gap:10px; margin-top:20px; flex-wrap:wrap; }
 
-/* ── Panel preview ── */
-.wp4-preview{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
-.wp4-preview__copy .wp4-label{ margin-bottom:16px; }
-.wp4-preview__copy .wp4-h2{ margin-bottom:20px; }
+/* ── Checklisty ── */
 .wp4-checklist{ list-style:none; margin:24px 0; padding:0; }
 .wp4-checklist li{ position:relative; padding-left:24px; margin-bottom:12px; color:var(--muted); font-size:16px; }
 .wp4-checklist li::before{
@@ -852,17 +850,6 @@ const CSS = `
 }
 .wp4-checklist--ink li{ color:var(--ink-on); }
 .wp4-checklist--ink li::before{ border-color:var(--paper); background:transparent; }
-
-.wp4-graphpaper{
-  background:var(--paper);
-  background-image:linear-gradient(var(--inner) 1px, transparent 1px),
-                   linear-gradient(90deg, var(--inner) 1px, transparent 1px);
-  background-size:20px 20px;
-  border:1px solid var(--hairline); border-radius:4px; padding:24px;
-  display:flex; flex-direction:column; gap:14px;
-}
-.wp4-graphpaper__row{ display:flex; align-items:center; justify-content:space-between; gap:12px;
-  background:var(--surface); border:1px solid var(--hairline); border-radius:3px; padding:12px 14px; }
 
 /* ── Panel — apple-scroll demo (X2 v2, import z Claude Design) ── */
 .wp4-sd button:focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
@@ -1017,7 +1004,7 @@ const CSS = `
 @media (max-width:900px){
   .wp4-container{ padding:0 24px; }
   .wp4-display{ font-size:46px; }
-  .wp4-hero__grid,.wp4-preview{ grid-template-columns:1fr; gap:40px; }
+  .wp4-hero__grid{ grid-template-columns:1fr; gap:40px; }
   .wp4-guide{ grid-template-columns:1fr; gap:40px; justify-items:center; }
   .wp4-guide__copy{ justify-self:start; }
   .wp4-values__grid{ grid-template-columns:1fr; gap:32px; }

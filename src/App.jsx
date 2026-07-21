@@ -26,6 +26,10 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+// Centrum pomocy (X1) — treść generowana z docs/support/*.md (npm run help:build).
+// Publiczne celowo: użytkownik odcięty ekranem blokady też musi trafić do instrukcji.
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
+const HelpArticlePage = lazy(() => import('./pages/HelpArticlePage'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ReviewPageView = lazy(() => import('./pages/ReviewPageView'));
 
@@ -123,6 +127,8 @@ export default function App() {
               <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/blog" element={<BlogListPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
+              <Route path="/pomoc" element={<HelpCenterPage />} />
+              <Route path="/pomoc/:slug" element={<HelpArticlePage />} />
               <Route path="/guide/:guideId" element={<GuestGuideView />} />
               <Route path="/opinie/:pageId" element={<ReviewPageView />} />
 

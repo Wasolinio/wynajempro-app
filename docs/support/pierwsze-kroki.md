@@ -25,30 +25,31 @@ Bez potwierdzenia adresu logowanie nie zadziała — zobaczysz komunikat, że ad
 
 ## Krok 2. Uzupełnij profil gospodarza
 
-Przy pierwszym wejściu do panelu pojawi się ekran „Dokończ konfigurację". Te dane podpowiadają się później w dokumentach (np. w generatorze umów) i w sekcji kontaktu widocznej dla gości w przewodniku.
+Przy pierwszym wejściu do panelu pojawi się ekran „Dokończ konfigurację". Te dane podpisują później Twoje raporty i mogą się pojawić w sekcji kontaktu w przewodniku gościa.
 
 1. Wpisz „Pełna nazwa podmiotu / Imię i nazwisko" — tak, jak chcesz się przedstawiać gościom.
-2. Wybierz identyfikator (NIP lub PESEL) i podaj numer — to pole jest opcjonalne.
+2. Wybierz „Identyfikator" (NIP lub PESEL) i uzupełnij „Nr NIP / PESEL (opcjonalnie)".
 3. Uzupełnij „Adres" i „Telefon".
-4. Kliknij „Zapisz i przejdź do aplikacji".
+4. Zdecyduj, czy zostawić zaznaczone pole „Pokazuj moją nazwę i telefon gościom na publicznej stronie przewodnika". Adres i NIP/PESEL zostają prywatne zawsze.
+5. Kliknij „Zapisz i przejdź do aplikacji".
 
-Profil możesz później zmienić w każdej chwili: kliknij swoje imię i nazwisko w lewym dolnym rogu panelu (na telefonie: „Więcej" → „Konto") i wybierz zakładkę „Profil gospodarza".
+Profil możesz później zmienić w każdej chwili: kliknij swoje imię i nazwisko w lewym dolnym rogu panelu (na telefonie: „Więcej" → „Konto") i wybierz zakładkę „Profil gospodarza". Tam ustawisz też osobny publiczny e-mail widoczny dla gości — szczegóły w artykule o koncie i subskrypcji.
 
 ## Krok 3. Rozejrzyj się po panelu
 
 Menu po lewej stronie prowadzi do wszystkich widoków:
 
-- „Pulpit" — dzisiejsze przyjazdy, wyjazdy, zadania i przychód miesiąca,
-- „Kalendarz" — rezerwacje wszystkich obiektów na osi miesiąca,
-- „Obiekty" — Twoje miejsca na wynajem z podstawowymi statystykami,
-- „Rezerwacje" — lista wszystkich wpisów z wyszukiwarką i filtrami,
-- „Finanse" — przychody, koszty i zysk netto,
-- „Analityka" — statystyki okresowe i porównania rok do roku,
-- „Przewodniki" — cyfrowe informatory dla gości,
-- „Generator umów" — umowy najmu tworzone z danych rezerwacji,
-- „Opinie" — strony z podziękowaniem i prośbą o opinię po pobycie.
+- 01 „Pulpit" — dzisiejsze przyjazdy, wyjazdy, zadania i przychód miesiąca,
+- 02 „Kalendarz" — rezerwacje wszystkich obiektów na osi miesiąca,
+- 03 „Obiekty" — Twoje miejsca na wynajem z podstawowymi statystykami,
+- 04 „Rezerwacje" — lista wszystkich wpisów z wyszukiwarką i filtrami,
+- 05 „Finanse" — przegląd, koszty i opłaty oraz raporty,
+- 06 „Przewodniki" — cyfrowe informatory dla gości,
+- 07 „Opinie" — strony z podziękowaniem i prośbą o opinię po pobycie.
 
-Na telefonie najważniejsze widoki są na dolnym pasku: „Pulpit", „Kalendarz", „Rezerwacje", „Finanse". Pozostałe pozycje, „Konto" i „Wyloguj" znajdziesz pod przyciskiem „Więcej".
+Pod menu widnieje status synchronizacji kalendarzy, a na samym dole Twoje imię i nazwisko (klik otwiera „Twoje konto") oraz przycisk wylogowania.
+
+Na telefonie najważniejsze widoki są na dolnym pasku: „Pulpit", „Kalendarz", „Rezerwacje", „Finanse". Pozostałe pozycje („Obiekty", „Przewodniki", „Opinie"), a także „Konto", „Wyloguj" i status synchronizacji znajdziesz pod przyciskiem „Więcej".
 
 ## Krok 4. Dodaj swoje obiekty
 
@@ -66,7 +67,7 @@ Do tej samej zakładki prowadzi też przycisk „Dodaj obiekt" w widoku „Obiek
 
 1. Kliknij przycisk „Rezerwacja" (z ikoną plusa) w prawym górnym rogu panelu.
 2. W formularzu „Nowy wpis" upewnij się, że wybrana jest zakładka „Rezerwacja".
-3. Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto".
+3. Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto". Możesz też podać „Liczba gości" — to pole nie jest wymagane.
 4. Kliknij „Zapisz wpis". Potwierdzeniem jest komunikat „Dodano pomyślnie!".
 
 Rezerwacja pojawi się w widokach „Rezerwacje", „Kalendarz" i w statystykach. Szczegółowy opis wszystkich pól znajdziesz w artykule o rezerwacjach, kosztach i zadaniach.
@@ -79,7 +80,7 @@ Jeśli korzystasz z Booking.com lub Airbnb, rezerwacje z portali możesz pobiera
 Nie. Rejestracja daje 14 dni pełnego dostępu bez karty. Decyzję o subskrypcji podejmujesz dopiero po okresie próbnym.
 
 **Co się stanie po 14 dniach testu?**
-Panel pokaże ekran aktywacji subskrypcji (29,99 zł miesięcznie). Twoje dane pozostają na koncie — po opłaceniu wracasz dokładnie tam, gdzie skończysz.
+Panel pokaże ekran „Koniec okresu próbnego" z możliwością aktywacji subskrypcji (29,99 zł miesięcznie). Dane konta przechowujemy jeszcze przez 90 dni od zakończenia okresu próbnego — jeśli wrócisz w tym czasie, zastaniesz wszystko na miejscu.
 
 **Zarejestrowałem się, ale mail z linkiem nie przyszedł. Co robić?**
 Sprawdź folder SPAM i poprawność wpisanego adresu. Na ekranie „Sprawdź swoją skrzynkę" możesz użyć „Wyślij link ponownie". Jeśli to nie pomoże, zajrzyj do artykułu o rozwiązywaniu problemów.

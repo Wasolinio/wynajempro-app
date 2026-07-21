@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "help:build": "node scripts/build-help-articles.mjs",
     "deploy": "npm run build && firebase deploy",
     "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",
     "test:e2e:ui": "cross-env VITE_USE_EMULATORS=true playwright test --ui",

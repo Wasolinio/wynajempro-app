@@ -50,7 +50,15 @@ Jeśli przewodnik nie ma regulaminu ani instrukcji PPOŻ, gość odblokowuje dan
 
 ## Kontakt do Ciebie w przewodniku
 
-Na dole przewodnika gość widzi sekcję „Kontakt z gospodarzem" — nazwę, telefon i e-mail z Twojego profilu gospodarza. Dane zmienisz, klikając swoje imię i nazwisko w lewym dolnym rogu panelu (zakładka „Profil gospodarza").
+Na dole przewodnika może pojawić się sekcja „Kontakt z gospodarzem" — z nazwą, telefonem i publicznym adresem e-mail. Publikujemy tylko te trzy dane i tylko wtedy, gdy w „Twoje konto" → „Profil gospodarza" masz włączony przełącznik „Pokazuj dane kontaktowe gościom w przewodniku".
+
+Ważne:
+
+- e-mail widoczny dla gości bierze się z osobnego pola „Publiczny e-mail (widoczny dla gości)" — adres, którym się logujesz, nie jest publikowany. Jeśli pole zostawisz puste, gość zobaczy tylko nazwę i telefon,
+- adres firmy oraz NIP/PESEL nigdy nie trafiają na stronę gościa,
+- po wyłączeniu przełącznika sekcja kontaktu znika z przewodnika.
+
+Dane zmienisz, klikając swoje imię i nazwisko w lewym dolnym rogu panelu (zakładka „Profil gospodarza") i zapisując przyciskiem „Zapisz profil".
 
 ## Udostępnianie: link i kod QR
 
@@ -74,3 +82,6 @@ Tak, i tak właśnie warto zrobić. Każdy przewodnik ma pole „Powiązany obie
 
 **Co widzi gość, który nie zaakceptuje regulaminu?**
 Całą treść przewodnika (dojazd, atrakcje, regulamin, PPOŻ) — ale bez hasła Wi-Fi i kodu do drzwi. Dane dostępowe odsłaniają się dopiero po potwierdzeniu.
+
+**Nie chcę podawać gościom swojego numeru. Da się to wyłączyć?**
+Tak. W „Twoje konto" → „Profil gospodarza" odznacz „Pokazuj dane kontaktowe gościom w przewodniku" i kliknij „Zapisz profil" — sekcja kontaktu przestanie się pokazywać.

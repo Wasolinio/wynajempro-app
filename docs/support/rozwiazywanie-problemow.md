@@ -18,14 +18,14 @@ Sprawdź po kolei:
 
 1. Czy link iCal jest wklejony we właściwym miejscu: „Ustawienia" (zębatka) → „Integracje" → sekcja tego obiektu, którego dotyczy ogłoszenie → pole „Link iCal Booking.com" lub „Link iCal Airbnb" — i czy kliknięto „Zapisz ustawienia".
 2. Czy to na pewno link eksportu z portalu (dla Booking.com zaczyna się od admin.booking.com/hotel/hoteladmin/ical.html, dla Airbnb od airbnb.pl/calendar/ical).
-3. Kliknij „Synchronizacja" w bocznym menu i poczekaj na komunikat. „Brak nowych rezerwacji do pobrania" oznacza, że połączenie działa, tylko nie ma nic nowego.
-4. Pamiętaj, że automatyczna synchronizacja działa raz na dobę — świeżą rezerwację z portalu zobaczysz po ręcznym kliknięciu „Synchronizacja" albo następnego ranka.
+3. Kliknij „Synchronizacja" w bocznym menu (na komputerze, nad Twoim imieniem i nazwiskiem) i poczekaj na komunikat. „Synchronizacja zakończona! Brak nowych rezerwacji do pobrania." oznacza, że połączenie działa, tylko nie ma nic nowego.
+4. Pamiętaj, że automatyczna synchronizacja działa raz na dobę, wcześnie rano — świeżą rezerwację z portalu zobaczysz po ręcznym kliknięciu „Synchronizacja" albo następnego dnia.
 5. Zaimportowana rezerwacja ma 0 zł i czasem nazwę „Reserved" — to normalne (portale nie przekazują kwot ani zawsze nazwisk w iCal). Szczegóły w artykule o synchronizacji.
 
 ## Link przewodnika lub strony opinii nie działa u gościa
 
 1. Otwórz link samodzielnie („Otwórz podgląd" w panelu). Jeśli działa u Ciebie, problem jest najpewniej po stronie wiadomości do gościa — długie linki potrafią się łamać w SMS-ach. Wyślij link ponownie, najlepiej przez komunikator lub mail, albo pokaż gościowi kod QR.
-2. Komunikat „Ten przewodnik nie istnieje lub został usunięty" lub „Nie znaleziono strony" oznacza, że strona została usunięta z panelu — stare linki przestają wtedy działać. Skopiuj aktualny link z widoku „Przewodniki" lub „Opinie".
+2. Komunikat „Ten przewodnik nie istnieje lub został usunięty." lub „Nie znaleziono strony" oznacza, że strona została usunięta z panelu — stare linki przestają wtedy działać. Skopiuj aktualny link z widoku „Przewodniki" lub „Opinie".
 3. Upewnij się, że gość otwiera pełny adres (bez uciętej końcówki).
 
 ## Jak korzystać z WynajemPRO na telefonie
@@ -33,7 +33,8 @@ Sprawdź po kolei:
 WynajemPRO działa w przeglądarce telefonu — nie ma osobnej aplikacji do zainstalowania ze sklepu. Zaloguj się na wynajempro.pl tak samo jak na komputerze.
 
 - Najważniejsze widoki są na dolnym pasku: „Pulpit", „Kalendarz", „Rezerwacje", „Finanse".
-- Pozostałe („Obiekty", „Analityka", „Przewodniki", „Generator umów", „Opinie"), a także „Konto", „Wyloguj" i status synchronizacji, znajdziesz pod przyciskiem „Więcej".
+- Pozostałe („Obiekty", „Przewodniki", „Opinie"), a także „Konto", „Wyloguj" i status synchronizacji, znajdziesz pod przyciskiem „Więcej".
+- Ręczne uruchomienie synchronizacji jest dostępne w bocznym menu na komputerze; na telefonie w arkuszu „Więcej" widać sam status połączeń.
 
 Wskazówka: stronę można dodać do ekranu głównego telefonu (w menu przeglądarki „Dodaj do ekranu głównego") — będzie się otwierać jak aplikacja.
 
@@ -49,7 +50,7 @@ Po płatności status konta odświeża się automatycznie, zwykle w ciągu chwil
 ## Nie mogę się zalogować
 
 - Komunikat „Nieprawidłowy e-mail lub hasło." — sprawdź literówki; hasło zresetujesz przyciskiem „Nie pamiętasz hasła?" na ekranie logowania.
-- Komunikat o niezweryfikowanym adresie — kliknij link z maila rejestracyjnego (patrz pierwsza sekcja tego artykułu).
+- Komunikat „Twój adres email nie został jeszcze zweryfikowany. Sprawdź swoją skrzynkę pocztową." — kliknij link z maila rejestracyjnego (patrz pierwsza sekcja tego artykułu).
 - Jeśli konto zakładano przez Google, użyj przycisku „Zaloguj się przez Google" zamiast pól e-mail i hasło.
 
 ## Jak się z nami skontaktować

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import LegalLayout from './LegalLayout';
 import { Mail, ShieldCheck, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -44,6 +45,12 @@ export default function ContactPage() {
           <p className="wpb-lead" style={{ margin: '0 0 22px' }}>
             Masz pytania dotyczące subskrypcji, zgłoszenie techniczne lub chcesz usunąć konto wraz z danymi?
             Napisz do nas bezpośrednio lub skorzystaj z formularza.
+          </p>
+
+          {/* Odesłanie do pomocy przed formularzem — część zgłoszeń rozwiązuje instrukcja (X1) */}
+          <p className="wpb-body" style={{ margin: '0 0 22px', color: 'var(--muted)' }}>
+            Zanim napiszesz, sprawdź <Link to="/pomoc" className="wpb-link">Centrum pomocy</Link> —
+            instrukcje krok po kroku odpowiadają na większość pytań od ręki.
           </p>
 
           <div className="wpb-card" style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>

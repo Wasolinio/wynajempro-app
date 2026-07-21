@@ -7,10 +7,10 @@ Krótkie, praktyczne instrukcje do wszystkich części systemu. Każdy artykuł 
 - [Pierwsze kroki w WynajemPRO](pierwsze-kroki.md) — zajrzyj tu zaraz po założeniu konta: rejestracja, profil gospodarza, pierwszy obiekt i pierwsza rezerwacja.
 - [Synchronizacja z Booking.com i Airbnb (iCal)](synchronizacja-ical.md) — gdy chcesz, żeby rezerwacje z portali same trafiały do panelu, a Twój kalendarz chronił Cię przed overbookingiem.
 - [Rezerwacje, koszty i zadania](rezerwacje-koszty-zadania.md) — gdy dodajesz lub edytujesz wpisy, oznaczasz płatności albo pilnujesz zadań przy pobycie.
-- [Finanse, podatki i raporty](finanse-i-raporty.md) — gdy chcesz wiedzieć, ile naprawdę zarabiasz, ustawić wyliczanie podatku i VAT albo porównać sezony w Analityce.
-- [Przewodnik gościa](przewodnik-goscia.md) — gdy tworzysz cyfrowy informator z Wi-Fi, kodem do drzwi i dojazdem oraz chcesz wiedzieć, jak chronione są dane dostępowe.
+- [Finanse, podatki i raporty](finanse-i-raporty.md) — gdy chcesz wiedzieć, ile naprawdę zarabiasz: przegląd okresowy, koszty zmienne i stałe, ustawienia podatków oraz raport rentowności do wydruku lub pliku CSV.
+- [Przewodnik gościa](przewodnik-goscia.md) — gdy tworzysz cyfrowy informator z Wi-Fi, kodem do drzwi i dojazdem, chcesz wiedzieć, jak chronione są dane dostępowe, i zdecydować, jakie dane kontaktowe widzi gość.
 - [Strona opinii — podziękowanie po pobycie](strona-opinii.md) — gdy chcesz zbierać więcej opinii na Google, Booking.com czy Airbnb jednym linkiem wysyłanym po pobycie.
-- [Konto i subskrypcja](konto-i-subskrypcja.md) — gdy szukasz ustawień profilu, informacji o cenie i okresie próbnym, faktur, anulowania subskrypcji lub usunięcia konta.
+- [Konto i subskrypcja](konto-i-subskrypcja.md) — gdy szukasz ustawień profilu, publicznego kontaktu, informacji o cenie i okresie próbnym, faktur, anulowania subskrypcji lub usunięcia konta.
 - [Rozwiązywanie problemów](rozwiazywanie-problemow.md) — gdy coś nie działa: brak maila weryfikacyjnego, brak rezerwacji z portalu, nieczynny link, ekran blokady mimo opłacenia — oraz jak się z nami skontaktować.
 
 ## Kontakt

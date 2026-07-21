@@ -16,7 +16,7 @@ Wszystko, co dzieje się w Twoim wynajmie, zapisujesz w panelu jako wpisy jedneg
 - „Źródło rezerwacji" — skąd przyszła (np. Booking.com, Airbnb, Strona www). Listę źródeł zmienisz w „Ustawieniach" w zakładce „Źródła".
 - „E-mail (opcjonalnie)" i „Telefon (opcjonalnie)" — kontakt do gościa; w szczegółach rezerwacji staną się klikalnymi łączami do połączenia i wiadomości.
 - „Prywatna notatka o gościu" — widoczna tylko dla Ciebie (np. ustalenia cenowe, preferencje).
-- „Data przyjazdu" i „Data wyjazdu".
+- „Data przyjazdu", „Data wyjazdu" i „Liczba gości" (pole nieobowiązkowe — jeśli je wypełnisz, liczba osób pojawi się w szczegółach rezerwacji).
 - Sekcja „Rozliczenia": „Przychód brutto" (cała kwota za pobyt), „Zaliczka (opcja)" (kwota zadatku, jeśli go pobierasz) i „Prowizja portalu" (ile potrąca portal).
 
 Podatek i VAT nie mają własnych pól — wyliczają się automatycznie z kwot i Twoich ustawień w zakładce „Podatki". Szczegóły znajdziesz w artykule o finansach i raportach.
@@ -26,24 +26,28 @@ Podatek i VAT nie mają własnych pól — wyliczają się automatycznie z kwot 
 - „Wybierz obiekt" — czego dotyczy wydatek.
 - „Kategoria kosztu" — np. Prąd, Woda, Sprzątanie, Naprawy. Własne kategorie dodasz w „Ustawieniach" w zakładce „Kategorie".
 - „Data" — dzień poniesienia kosztu.
-- „Szczegóły (np. nr faktury)" — opis, po którym później odnajdziesz wydatek.
+- „Szczegóły (np. nr faktury)" — opis, po którym później rozpoznasz wydatek.
 - „Kwota kosztu".
 
-Koszty pomniejszają zysk netto w widoku „Finanse".
+Tak zapisany koszt trafia do zakładki „Koszty i opłaty" w „Finansach": wchodzi do kafla „Koszty zmienne", do panelu „Na co poszły pieniądze" i do zestawienia „Ostatnie koszty". Wydatki powtarzalne (ubezpieczenie, abonament) lepiej dodać jako koszt stały — opisujemy to w artykule o finansach.
 
 ### Typ „Zadanie" — przypomnienie dla Ciebie
 
 - „Data przypomnienia" — kiedy zadanie ma się przypomnieć.
 - „Treść zadania" — np. „zawieźć klucze, sprawdzić żarówki".
 
-Zadania pojawiają się na „Pulpicie" w sekcji „Zadania na dziś" oraz w „Raporcie dnia" (ikona dzwonka w górnym pasku). Wykonane zadanie odhaczasz kółkiem przy wpisie.
+Zadanie pojawi się na „Pulpicie" w sekcji „Zadania na dziś" na tydzień przed terminem oraz w „Raporcie dnia" (ikona dzwonka w górnym pasku), gdy nadejdzie jego dzień. Wykonane zadanie odhaczasz kółkiem przy wpisie. Dopóki masz zadania na dziś, w prawym dolnym rogu panelu widnieje też mały panel „Zadania na dziś" z najpilniejszą pozycją — możesz go schować krzyżykiem.
 
-## Edycja i usuwanie wpisów
+## Widok „Rezerwacje" — przeglądanie i edycja
 
-1. Otwórz widok „Rezerwacje". Filtry nad tabelą przełączają listę: „Wszystkie", „Nadchodzące", „Archiwalne". Kolumnę „Termin" możesz sortować, a pole „Szukaj rezerwacji…" w górnym pasku przeszukuje wpisy po nazwisku, obiekcie, dacie, telefonie czy notatce.
-2. Kliknij wiersz rezerwacji, aby otworzyć jej szczegóły, albo od razu użyj ikon po prawej: ołówek („Edytuj") i kosz („Usuń").
-3. Po edycji kliknij „Zapisz wpis" — zobaczysz „Zaktualizowano pomyślnie!".
-4. Usunięcie wymaga potwierdzenia przyciskiem „Tak, usuń". Tej operacji nie da się cofnąć.
+1. Otwórz widok „Rezerwacje". Filtry nad tabelą przełączają listę: „Wszystkie", „Nadchodzące", „Archiwalne" (przy każdym widnieje licznik).
+2. Tabela ma kolumny: „Obiekt", „Gość", „Termin", „Źródło", „Przychód", „Status" i „Akcje". Klikając nagłówek „Termin", zmieniasz sortowanie — kolejno „Malejąco", „Rosnąco" i „Nadchodzące".
+3. Pole „Szukaj rezerwacji…" w górnym pasku przeszukuje rezerwacje po nazwisku, obiekcie, dacie, telefonie, e-mailu, źródle czy notatce.
+4. Kliknij wiersz, aby otworzyć szczegóły rezerwacji, albo od razu użyj ikon w kolumnie „Akcje": ołówek („Edytuj") i kosz („Usuń").
+5. Po edycji kliknij „Zapisz wpis" — zobaczysz „Zaktualizowano pomyślnie!".
+6. Usunięcie wymaga potwierdzenia przyciskiem „Tak, usuń". Tej operacji nie da się cofnąć.
+
+Lista pokazuje rezerwacje. Zakładka „Zadania" (obok „Archiwalne") zbiera wszystkie jednorazowe przypomnienia — z terminem, treścią, obiektem, odhaczaniem oraz edycją i usuwaniem. Wpisy typu „Koszty" znajdziesz w „Finansach" (zakładka „Koszty i opłaty").
 
 ## Oznaczanie opłacenia
 
@@ -52,19 +56,19 @@ W tabeli „Rezerwacje" kolumna „Status" zawiera kółko przy każdej rezerwac
 - kliknij je, aby oznaczyć rezerwację jako opłaconą (podpowiedź „Oznacz jako opłacone"),
 - ponowne kliknięcie cofa oznaczenie.
 
-Status widać też w szczegółach rezerwacji jako etykietę: „Opłacona", „Zaliczka wpłacona" albo „Do opłacenia". Kwota z pola „Zaliczka (opcja)" pojawia się w rozliczeniu rezerwacji oraz w generatorze umów.
+Status widać też w szczegółach rezerwacji jako etykietę: „Opłacona" albo „Do opłacenia". Kwota z pola „Zaliczka (opcja)" pojawia się osobnym wierszem w rozliczeniu rezerwacji.
 
 ## Szczegóły rezerwacji: rozliczenie i zadania
 
-Kliknięcie rezerwacji otwiera jej kartę z trzema sekcjami:
+Kliknięcie rezerwacji otwiera jej kartę. U góry masz ścieżkę powrotu („Rezerwacje") oraz przyciski „Edytuj" i „Usuń". Niżej:
 
-- Karta gościa — daty z dniami tygodnia, liczba nocy i średnia cena za noc.
+- Karta gościa — nazwa, obiekt, źródło, znacznik „iCal" przy rezerwacjach z synchronizacji i etykieta statusu płatności; pod spodem komórki „Przyjazd", „Wyjazd", „Pobyt" (liczba nocy i średnia cena za noc) oraz „Goście", jeśli podałeś liczbę osób.
 - „Kontakt i notatki" — telefon (klik = połączenie), e-mail (klik = wiadomość), Twoja prywatna notatka.
-- „Rozliczenie" — przychód, „Prowizja portalu", „Podatek", zaliczka i kwota „Do wypłaty".
+- „Rozliczenie" — przychód rozpisany na noce, „Prowizja portalu", „Podatek", zaliczka i kwota „Do wypłaty".
 
 Po prawej stronie znajduje się panel „Zadania i przypomnienia" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Domyślnie są to: „Wyślij wskazówki dojazdu" (3 dni przed przyjazdem), „Wyślij kod do drzwi" (1 dzień przed) i „Zleć sprzątanie" (w dniu przyjazdu). Zaległe zadania są wyróżnione.
 
-Te same zadania trafiają do „Raportu dnia" i na „Pulpit", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach" w zakładce „Powiadomienia": każdemu możesz ustawić treść, liczbę dni przed przyjazdem i ikonę, a przycisk „Dodaj przypomnienie" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji.
+Te same zadania trafiają do „Raportu dnia" i na „Pulpit", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach" w zakładce „Powiadomienia": każdemu ustawisz „Krótka nazwa", „Pełna treść", „Dni przed" i „Ikona", a przycisk „Dodaj przypomnienie" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia".
 
 ## Najczęstsze pytania
 
@@ -74,8 +78,11 @@ Zadanie z formularza („Nowy wpis" → „Zadanie") to jednorazowe przypomnieni
 **Dlaczego w formularzu nie ma pola na podatek?**
 Podatek i VAT wyliczają się same na podstawie kwot i ustawień z zakładki „Podatki". Dzięki temu nie musisz nic liczyć ręcznie przy każdej rezerwacji.
 
-**Usunąłem wpis przez pomyłkę. Da się go przywrócić?**
+**Usunąłem rezerwację przez pomyłkę. Da się ją przywrócić?**
 Nie — usunięcie jest nieodwracalne, dlatego prosimy o potwierdzenie przyciskiem „Tak, usuń". Wpis trzeba dodać ponownie.
 
+**Zapisałem wpis typu „Koszty" z błędną kwotą. Jak go poprawić?**
+Otwórz „Finanse" → zakładka „Koszty i opłaty" i zjedź do zestawienia „Ostatnie koszty". Przy każdym wpisie są przyciski edycji i usuwania. Jeśli szukanego kosztu nie widać na liście, kliknij „Pokaż wszystkie" — domyślnie pokazujemy osiem najnowszych.
+
 **Do czego służy pole „Zaliczka (opcja)"?**
-Zapisujesz w nim kwotę zadatku pobranego od gościa. Widnieje ona w rozliczeniu rezerwacji i w umowie z generatora umów, a reszta kwoty pozostaje do zapłaty przy pobycie.
+Zapisujesz w nim kwotę zadatku pobranego od gościa. Widnieje ona w rozliczeniu rezerwacji, a reszta kwoty pozostaje do zapłaty przy pobycie.

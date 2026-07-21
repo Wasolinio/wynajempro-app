@@ -76,7 +76,12 @@ export const BRAND_CSS = `
   letter-spacing:-.01em; color:var(--ink); margin:0 0 12px; }
 .wpb-prose h3{ font-weight:700; font-size:16px; color:var(--ink); margin:22px 0 8px; }
 .wpb-prose p{ margin:0 0 12px; }
+/* Preflight Tailwinda zeruje list-style globalnie, więc punktory i numery przywracamy
+   tutaj jawnie — bez tego instrukcje „krok po kroku" traciły numerację, a reguła
+   li::marker niżej nie miała czego kolorować. */
 .wpb-prose ul, .wpb-prose ol{ margin:0 0 12px; padding-left:22px; }
+.wpb-prose ul{ list-style:disc outside; }
+.wpb-prose ol{ list-style:decimal outside; }
 .wpb-prose li{ margin:0 0 7px; }
 .wpb-prose li::marker{ color:var(--cynober); }
 .wpb-prose strong{ color:var(--ink); font-weight:600; }
