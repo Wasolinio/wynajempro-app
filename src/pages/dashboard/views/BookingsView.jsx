@@ -36,9 +36,67 @@ export default function BookingsView({
             onClick={() => changeBookingFilter('upcoming')}>Nadchodzące<span className="wpd-seg__count">{counts.upcoming}</span></button>
           <button className={`wpd-seg__btn${bookingFilter === 'archived' ? ' wpd-seg__btn--active' : ''}`}
             onClick={() => changeBookingFilter('archived')}>Archiwalne<span className="wpd-seg__count">{counts.archived}</span></button>
+          <button className={`wpd-seg__btn${bookingFilter === 'tasks' ? ' wpd-seg__btn--active' : ''}`}
+            onClick={() => changeBookingFilter('tasks')}>Zadania<span className="wpd-seg__count">{counts.tasks ?? 0}</span></button>
         </div>
       </div>
 
+      {bookingFilter === 'tasks' ? (
+        <div style={{ overflowX: 'auto' }}>
+          <table className="wpd-table">
+            <thead>
+              <tr>
+                {/* bez przełącznika sortowania: zadania sortuje `utilitySortOrder`,
+                    więc `bookingSortOrder` z tego nagłówka byłby martwym przyciskiem */}
+                <th>Termin</th>
+                <th>Zadanie</th>
+                <th>Obiekt</th>
+                <th>Status</th>
+                <th className="wpd-num">Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedBookings.map((r) => {
+                const propName = typeof r.property === 'object' ? r.property?.name : r.property;
+                return (
+                  <tr key={r.id}>
+                    <td className="wpd-cell-num">{r.date || '—'}</td>
+                    <td className="wpd-cell-strong">{r.text || r.guest || '—'}</td>
+                    <td>
+                      {propName ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                          <span className="wpd-dot" style={{ background: propColor(propName) }} />
+                          {propName}
+                        </span>
+                      ) : <span style={{ color: 'var(--faint)' }}>—</span>}
+                    </td>
+                    <td>
+                      <button
+                        className={`wpd-check ${r.isCompleted ? 'wpd-check--on' : 'wpd-check--off'}`}
+                        title={r.isCompleted ? 'Zrobione' : 'Oznacz jako zrobione'}
+                        onClick={() => toggleStatus(r.id, 'isCompleted')}
+                      >{r.isCompleted ? <CheckCircle /> : <XCircle style={{ opacity: 0 }} />}</button>
+                    </td>
+                    <td className="wpd-num">
+                      <span style={{ display: 'inline-flex', gap: 6, justifyContent: 'flex-end' }}>
+                        <button className="wpd-iconbtn" title="Edytuj" onClick={() => openEditModal(r)}><Edit /></button>
+                        <button className="wpd-iconbtn wpd-btn--danger" title="Usuń" onClick={() => handleDeleteClick(r.id)}><Trash2 /></button>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {paginatedBookings.length === 0 && (
+            <div className="wpd-empty">
+              <div className="wpd-empty__icon"><CheckCircle /></div>
+              <p>Brak zadań. Dodasz je przyciskiem „+ Rezerwacja" — zakładka „Zadanie".</p>
+            </div>
+          )}
+        </div>
+      ) : (
       <div style={{ overflowX: 'auto' }}>
         <table className="wpd-table">
           <thead>
@@ -106,6 +164,7 @@ export default function BookingsView({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

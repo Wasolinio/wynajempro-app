@@ -56,11 +56,17 @@ function CostBar({ name, dot, Icon, amount, pct, color, shown, delay }) {
   Model: rezerwacje niosą income/commission/utilities/tax/vat; wpis 'utility' trzyma
   kwotę w polu utilities pod kategorią; koszty stałe żyją w settings/recurringCosts.
 */
-export default function CostsView({ rentals, properties, user, categories = [], recurringCosts = [], selectedYear }) {
+export default function CostsView({
+  rentals, properties, user, categories = [], recurringCosts = [], selectedYear,
+  openEditModal, handleDeleteClick,
+}) {
   const [scope, setScope] = useState('year'); // 'month' | 'year' | 'all'
   const [propFilter, setPropFilter] = useState('all');
   const [editingCost, setEditingCost] = useState(null); // obiekt kosztu | 'new' | null
   const [confirmId, setConfirmId] = useState(null);
+  // „Ostatnie koszty" pokazują 8 wpisów; bez rozwinięcia starszego kosztu nie dało się
+  // poprawić ani skasować ([[Known-Issues]] #10 — jedyna ścieżka edycji wpisów 'utility').
+  const [showAllCosts, setShowAllCosts] = useState(false);
 
   const data = useMemo(() => {
     const now = new Date();
@@ -128,7 +134,8 @@ export default function CostsView({ rentals, properties, user, categories = [], 
         const cat = r.category || 'Inne koszty';
         addCat(`cat:${cat}`, cat, null, amount);
         addPropCost(pName, amount);
-        entries.push({ id: r.id, date: r.date, category: cat, detail: r.guest || '—', property: pName, amount });
+        // `entry` niesie oryginalny wpis — bez niego nie da się otworzyć go do edycji
+        entries.push({ id: r.id, date: r.date, category: cat, detail: r.guest || '—', property: pName, amount, entry: r });
       }
     });
 
@@ -183,7 +190,7 @@ export default function CostsView({ rentals, properties, user, categories = [], 
     return {
       income, total, variable, fixed, profit, margin,
       categoriesRows, portalRows, profitByProp, fixedRows,
-      recent: entries.slice(0, 8), recentCount: entries.length,
+      recent: entries.slice(0, 8), recentCount: entries.length, allEntries: entries,
       hasActivity: income > 0 || total > 0,
     };
   }, [rentals, properties, recurringCosts, selectedYear, scope, propFilter]);
@@ -341,19 +348,30 @@ export default function CostsView({ rentals, properties, user, categories = [], 
           {data.recent.length > 0 && (
             <div className={`wpd-section wpd-panel wpd-rise${shown ? ' is-in' : ''}`} style={{ transitionDelay: '120ms' }}>
               <div className="wpd-panel__head">
-                <h2 className="wpd-h2" style={{ fontSize: 15 }}>Ostatnie koszty</h2>
+                <h2 className="wpd-h2" style={{ fontSize: 15 }}>{showAllCosts ? 'Wszystkie koszty' : 'Ostatnie koszty'}</h2>
                 {data.recentCount > data.recent.length && (
-                  <span className="wpd-label" style={{ marginLeft: 'auto' }}>{data.recent.length} z {data.recentCount}</span>
+                  <>
+                    <span className="wpd-label" style={{ marginLeft: 'auto' }}>
+                      {showAllCosts ? data.recentCount : data.recent.length} z {data.recentCount}
+                    </span>
+                    <button className="wpd-btn wpd-btn--sm" onClick={() => setShowAllCosts((v) => !v)}>
+                      {showAllCosts ? 'Pokaż ostatnie' : 'Pokaż wszystkie'}
+                    </button>
+                  </>
                 )}
               </div>
               <div className="wpd-ctable">
-                {data.recent.map((e) => (
+                {(showAllCosts ? data.allEntries : data.recent).map((e) => (
                   <div className="wpd-ctable__row" key={e.id}>
                     <span className="wpd-ctable__date wpd-mono">{fmtDate(e.date)}</span>
                     <span className="wpd-ctable__cat">{React.createElement(categoryIcon(e.category), { style: { width: 12, height: 12, verticalAlign: '-2px', marginRight: 6, color: 'var(--faint)' } })}{e.category}</span>
                     <span className="wpd-ctable__detail" title={e.detail}>{e.detail}</span>
                     <span className="wpd-ctable__prop">{e.property || '—'}</span>
                     <span className="wpd-ctable__amt wpd-mono">{fmt(e.amount)} zł</span>
+                    <span className="wpd-ctable__act">
+                      <button className="wpd-iconbtn" title="Edytuj koszt" onClick={() => openEditModal?.(e.entry)}><Edit /></button>
+                      <button className="wpd-iconbtn wpd-iconbtn--del" title="Usuń koszt" onClick={() => handleDeleteClick?.(e.id)}><Trash2 /></button>
+                    </span>
                   </div>
                 ))}
               </div>

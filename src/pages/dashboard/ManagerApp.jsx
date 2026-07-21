@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
   Mail, Key, MessageSquare, Phone, CheckSquare,
-  MoreHorizontal, Star, User as UserIcon,
+  MoreHorizontal, Star, User as UserIcon, LifeBuoy,
 } from 'lucide-react';
 import { useDialogA11y } from './modals/useDialogA11y';
 import toast from 'react-hot-toast';
@@ -242,7 +242,12 @@ export default function ManagerApp() {
     };
   }, [displayedRentals, bookingSortOrder, utilitySortOrder]);
 
-  const displayedBookings = bookingFilter === 'all' ? allBookings : bookingFilter === 'upcoming' ? upcomingBookings : archivedBookings;
+  // Zakładka „Zadania" udostępnia wpisy `type: 'reminder'` — dotąd żyły wyłącznie
+  // w pływającym widgecie, więc nie dało się ich poprawić ani skasować (Known-Issues #10).
+  const displayedBookings = bookingFilter === 'all' ? allBookings
+    : bookingFilter === 'upcoming' ? upcomingBookings
+      : bookingFilter === 'tasks' ? remindersList
+        : archivedBookings;
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
@@ -467,12 +472,26 @@ export default function ManagerApp() {
   const userInitials = userName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
   const planLabel = accountStatus === 'active' ? 'Plan Gospodarz' : accountStatus === 'trialing' ? 'Okres próbny' : 'Plan Gospodarz';
 
-  // status synchronizacji w sidebarze
-  const syncRows = [
-    { name: 'Airbnb', on: Object.keys(syncLinks).some((k) => k.toLowerCase().includes('airbnb')) },
-    { name: 'Booking.com', on: Object.keys(syncLinks).some((k) => k.toLowerCase().includes('booking')) },
-    { name: 'Nocowanie', on: Object.keys(syncLinks).some((k) => k.toLowerCase().includes('nocowanie')) },
-  ];
+  // Status synchronizacji w sidebarze.
+  // UWAGA: kluczami `syncLinks` są NAZWY OBIEKTÓW, a portale siedzą w wartościach
+  // (SettingsModal zapisuje `{ [nazwaObiektu]: { booking, airbnb } }`). Wcześniej ten
+  // sygnalizator przeszukiwał klucze, więc przy poprawnie wpiętych linkach zawsze
+  // świecił „—" ([[Known-Issues]] #11). Booking i Airbnb pokazujemy zawsze — Ustawienia
+  // mają na nie pola; inne portale pojawiają się same, gdy pojawią się w danych.
+  const syncRows = (() => {
+    const connected = new Set();
+    Object.values(syncLinks).forEach((links) => {
+      Object.entries(links || {}).forEach(([portal, url]) => {
+        if (typeof url === 'string' && url.trim()) connected.add(portal.toLowerCase());
+      });
+    });
+    const known = [['booking', 'Booking.com'], ['airbnb', 'Airbnb']];
+    const extra = [...connected].filter((p) => !known.some(([key]) => key === p)).sort();
+    return [
+      ...known.map(([key, name]) => ({ name, on: connected.has(key) })),
+      ...extra.map((p) => ({ name: p.charAt(0).toUpperCase() + p.slice(1), on: true })),
+    ];
+  })();
 
   return (
     <div className="wpd">
@@ -522,7 +541,10 @@ export default function ManagerApp() {
                 <div className="wpd-user__plan">{planLabel}</div>
               </div>
             </button>
-            <button className="wpd-user__out" title="Wyloguj" onClick={handleLogout}><Power /></button>
+            {/* Pomoc (X1) — w nowej karcie, żeby nie wybijać gospodarza z panelu */}
+            <a className="wpd-user__out" href="/pomoc" target="_blank" rel="noopener noreferrer"
+              title="Centrum pomocy" aria-label="Centrum pomocy (otwiera się w nowej karcie)"><LifeBuoy /></a>
+            <button className="wpd-user__out" style={{ marginLeft: 6 }} title="Wyloguj" onClick={handleLogout}><Power /></button>
           </div>
         </aside>
 
@@ -572,7 +594,7 @@ export default function ManagerApp() {
                 <BookingsView
                   paginatedBookings={paginatedBookings} properties={properties}
                   bookingFilter={bookingFilter} changeBookingFilter={changeBookingFilter}
-                  counts={{ all: allBookings.length, upcoming: upcomingBookings.length, archived: archivedBookings.length }}
+                  counts={{ all: allBookings.length, upcoming: upcomingBookings.length, archived: archivedBookings.length, tasks: remindersList.length }}
                   bookingSortOrder={bookingSortOrder} changeBookingSortOrder={changeBookingSortOrder}
                   toggleStatus={toggleStatus} openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
                   onOpenDetail={openBookingDetail}
@@ -604,6 +626,7 @@ export default function ManagerApp() {
                 categories={categories} recurringCosts={recurringCosts}
                 selectedYear={selectedYear} setSelectedYear={setSelectedYear}
                 onOpenReport={() => setShowStatsModal(true)}
+                openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
               />
             )}
             {renderView === 'guides' && (
@@ -691,6 +714,12 @@ export default function ManagerApp() {
                 <UserIcon style={{ width: 17, height: 17 }} />
                 <span>Konto</span>
               </button>
+              <a className="wpd-nav__item" href="/pomoc" target="_blank" rel="noopener noreferrer"
+                onClick={() => setShowMobileMore(false)}>
+                <span className="wpd-nav__num">—</span>
+                <LifeBuoy style={{ width: 17, height: 17 }} />
+                <span>Pomoc</span>
+              </a>
               <button className="wpd-nav__item" onClick={handleLogout}>
                 <span className="wpd-nav__num">—</span>
                 <Power style={{ width: 17, height: 17 }} />

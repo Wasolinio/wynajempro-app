@@ -601,8 +601,9 @@ export const DASHBOARD_CSS = `
 /* Tabela ostatnich kosztów (Koszty i opłaty) — linie 1px, mono na kwotach, restacking na mobile */
 .wpd-ctable{ display:flex; flex-direction:column; padding:4px 0 6px; }
 .wpd-ctable__row{ display:grid; align-items:center; gap:14px; padding:11px 20px; border-top:1px solid var(--hairline);
-  grid-template-columns:84px minmax(110px,1fr) minmax(140px,1.6fr) minmax(90px,1fr) auto;
-  grid-template-areas:"date cat detail prop amt"; }
+  grid-template-columns:84px minmax(110px,1fr) minmax(140px,1.6fr) minmax(90px,1fr) auto auto;
+  grid-template-areas:"date cat detail prop amt act"; }
+.wpd-ctable__act{ grid-area:act; display:inline-flex; gap:6px; justify-content:flex-end; }
 .wpd-ctable__row:first-child{ border-top:none; }
 .wpd-ctable__date{ grid-area:date; color:var(--faint); font-size:12px; }
 .wpd-ctable__cat{ grid-area:cat; font-weight:600; font-size:13.5px; }
@@ -611,8 +612,9 @@ export const DASHBOARD_CSS = `
 .wpd-ctable__amt{ grid-area:amt; text-align:right; font-weight:600; font-size:13.5px; color:var(--cynober); white-space:nowrap; }
 @media (max-width:720px){
   .wpd-ctable__row{ grid-template-columns:1fr auto; column-gap:12px; row-gap:3px;
-    grid-template-areas:"cat amt" "detail amt" "date prop"; }
+    grid-template-areas:"cat amt" "detail amt" "date prop" "act act"; }
   .wpd-ctable__prop{ text-align:right; }
+  .wpd-ctable__act{ justify-content:flex-start; padding-top:4px; }
 }
 
 /* Zysk wg obiektu (X4 partia 2) — te same tokeny co wpd-ctable */

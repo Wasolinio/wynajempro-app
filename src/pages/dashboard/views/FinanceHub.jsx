@@ -17,7 +17,10 @@ const TABS = [
   { key: 'reports', label: 'Raporty', icon: FileBarChart },
 ];
 
-export default function FinanceHub({ rentals, properties, user, categories, recurringCosts, selectedYear, setSelectedYear, onOpenReport }) {
+export default function FinanceHub({
+  rentals, properties, user, categories, recurringCosts, selectedYear, setSelectedYear, onOpenReport,
+  openEditModal, handleDeleteClick,
+}) {
   const [tab, setTab] = useState('overview');
 
   return (
@@ -48,6 +51,7 @@ export default function FinanceHub({ rentals, properties, user, categories, recu
         <CostsView
           rentals={rentals} properties={properties} user={user}
           categories={categories} recurringCosts={recurringCosts} selectedYear={selectedYear}
+          openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
         />
       )}
 
