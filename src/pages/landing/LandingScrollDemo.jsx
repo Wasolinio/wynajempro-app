@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 /*
@@ -14,31 +14,26 @@ import { Link } from 'react-router-dom';
 const FEATURES = [
   {
     navIdx: '01', label: 'Pulpit', pageTitle: 'Pulpit', pageSub: 'CZWARTEK, 9 LIPCA 2026',
-    hl: { top: '-1%', left: '0%', width: '100%', height: '16%' },
     kicker: '01 / 05', tag: 'PULPIT', ta: 'Cały wynajem na ', tem: 'jednym', tb: ' ekranie.',
     body: 'Przychód, obłożenie i dzisiejsze przyjazdy witają Cię, zanim wystygnie kawa. Zero klikania po zakładkach.',
   },
   {
     navIdx: '02', label: 'Kalendarz', pageTitle: 'Kalendarz', pageSub: 'REZERWACJE WSZYSTKICH OBIEKTÓW',
-    hl: { top: '0%', left: '0%', width: '100%', height: '44%' },
     kicker: '02 / 05', tag: 'KALENDARZ', ta: 'Koniec z ', tem: 'podwójną', tb: ' rezerwacją.',
     body: 'Airbnb, Booking i rezerwacje bezpośrednie w jednym kalendarzu — synchronizacja pilnuje terminów za Ciebie.',
   },
   {
     navIdx: '03', label: 'Obiekty', pageTitle: 'Obiekty', pageSub: 'TWOJE MIEJSCA NA WYNAJEM',
-    hl: { top: '6%', left: '0%', width: '100%', height: '41%' },
     kicker: '03 / 05', tag: 'OBIEKTY', ta: 'Każdy obiekt pod ', tem: 'pełną', tb: ' kontrolą.',
     body: 'Ceny, obłożenie i najbliższe przyjazdy dla wszystkich miejsc — obok siebie, gotowe do działania.',
   },
   {
     navIdx: '04', label: 'Rezerwacje', pageTitle: 'Rezerwacja #A-2048', pageSub: 'MARCELI DOBOSZ · 9–12 LIPCA',
-    hl: { top: '4%', left: '61.5%', width: '38.5%', height: '43%' },
     kicker: '04 / 05', tag: 'REZERWACJA', ta: 'Gość obsłużony, ', tem: 'zanim', tb: ' zapyta.',
     body: 'Dane pobytu, przewodnik i kod do skrytki w jednym miejscu. Automatyczne wiadomości robią resztę.',
   },
   {
     navIdx: '05', label: 'Finanse', pageTitle: 'Finanse', pageSub: 'PRZYCHODY, KOSZTY I WYPŁATY',
-    hl: { top: '22%', left: '0%', width: '60.5%', height: '38%' },
     kicker: '05 / 05', tag: 'FINANSE', ta: 'Wiesz co do ', tem: 'złotówki', tb: '.',
     body: 'Przychód, prowizje i zysk netto liczą się same. Gotowy raport eksportujesz do PDF jednym kliknięciem.',
   },
@@ -47,7 +42,7 @@ const FEATURES = [
 // ── Statyczny markup 5 ekranów mockupu (wierny z projektu; bez wiązań {{ }}) ──
 const SCREEN_HTML = [
   /* 0 · PULPIT */ `
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); border:1px solid #DDD5C3; border-radius:5px; background:#FBFAF6;">
+    <div data-hl style="display:grid; grid-template-columns:repeat(4,1fr); border:1px solid #DDD5C3; border-radius:5px; background:#FBFAF6;">
       <div style="padding:16px; border-right:1px solid #EFE9DA;"><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A0987F; margin-bottom:9px;">Przychód · lipiec</div><div style="font-size:26px; font-weight:800; letter-spacing:-0.02em;">14 280 zł</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#2F6B53; margin-top:5px;">▲ 12% VS CZERWIEC</div></div>
       <div style="padding:16px; border-right:1px solid #EFE9DA;"><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A0987F; margin-bottom:9px;">Obłożenie</div><div style="font-size:26px; font-weight:800; letter-spacing:-0.02em;">81%</div><div style="height:5px; background:#EFE9DA; border-radius:2px; margin-top:10px; overflow:hidden;"><div style="width:81%; height:100%; background:#D9492B;"></div></div></div>
       <div style="padding:16px; border-right:1px solid #EFE9DA;"><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A0987F; margin-bottom:9px;">Przyjazdy dziś</div><div style="font-size:26px; font-weight:800; letter-spacing:-0.02em;">2</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#9A917D; margin-top:5px;">+ 1 WYJAZD</div></div>
@@ -78,7 +73,7 @@ const SCREEN_HTML = [
     </div>`,
 
   /* 1 · KALENDARZ */ `
-    <div style="background:#FBFAF6; border:1px solid #DDD5C3; border-radius:5px; padding:18px;">
+    <div data-hl style="background:#FBFAF6; border:1px solid #DDD5C3; border-radius:5px; padding:18px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <div style="display:flex; align-items:center; gap:4px;"><span style="width:28px;height:28px;border-radius:3px;border:1px solid #DDD5C3;display:flex;align-items:center;justify-content:center;">‹</span><span style="width:28px;height:28px;border-radius:3px;border:1px solid #DDD5C3;display:flex;align-items:center;justify-content:center;">›</span></div>
@@ -129,7 +124,7 @@ const SCREEN_HTML = [
       <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#A0987F;">3 obiekty · wszystkie aktywne</div>
       <div style="padding:9px 15px; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:3px; font-weight:600; font-size:13px;">+ Dodaj obiekt</div>
     </div>
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+    <div data-hl style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
       ${['#D8CDB6|FOT. 01|MIESZKANIE 2-POK.|Apartament Centrum|ul. Floriańska 12, Kraków|320 zł|84%|Przyjazd: jutro',
          '#C6D2C7|FOT. 02|DOM · 3 SYPIALNIE|Domek nad jeziorem|Ruciane-Nida, Mazury|540 zł|76%|Przyjazd: pt, 11 lip',
          '#D9C9C2|FOT. 03|KAWALERKA|Studio Stare Miasto|ul. Piwna 4, Gdańsk|240 zł|81%|Przyjazd: dziś'].map((r) => {
@@ -176,7 +171,7 @@ const SCREEN_HTML = [
         </div>
       </div>
       <div style="display:flex; flex-direction:column; gap:14px;">
-        <div style="background:#17150F; border-radius:5px; padding:18px; color:#E4DDCE;">
+        <div data-hl style="background:#17150F; border-radius:5px; padding:18px; color:#E4DDCE;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;"><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#9A8E78;">Przewodnik dla gości</div><span style="font-family:'IBM Plex Mono',monospace; font-size:9px; background:#2F6B53; color:#fff; padding:3px 7px; border-radius:3px; letter-spacing:0.06em;">WYSŁANY</span></div>
           <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7A715C; margin-bottom:16px;">wynajempro.pl/g/centrum-md48</div>
           <div style="border:1px solid #3A352A; border-radius:3px; padding:14px; margin-bottom:11px;">
@@ -213,7 +208,7 @@ const SCREEN_HTML = [
       <div style="padding:16px; background:#FBFAF6;"><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A0987F;">Śr. cena / noc</div><div style="font-size:24px; font-weight:800; margin-top:6px;">348 zł</div></div>
     </div>
     <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:16px;">
-      <div style="background:#FBFAF6; border:1px solid #DDD5C3; border-radius:5px; padding:18px;">
+      <div data-hl style="background:#FBFAF6; border:1px solid #DDD5C3; border-radius:5px; padding:18px;">
         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A0987F; margin-bottom:18px;">Przychód miesięczny · 2026</div>
         <div style="display:flex; align-items:flex-end; gap:9px; height:150px;">
           <div style="flex:1; height:32%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:40%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:55%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:62%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:78%; background:#D9492B; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:92%; background:#D9492B; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:60%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:50%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:44%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:38%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:30%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div><div style="flex:1; height:25%; background:#E0D8C6; border-radius:2px 2px 0 0;"></div>
@@ -235,10 +230,15 @@ const NAV = [
   { idx: '05', label: 'Finanse', on: 4 },
 ];
 
+const HL_PAD = 6; // oddech ramki highlightu wokół treści (px w układzie okna 1160)
+
 export default function LandingScrollDemo() {
   const containerRef = useRef(null);
   const slotRef = useRef(null);
+  const boxRef = useRef(null);       // pudełko treści (inset:20) — układ odniesienia highlightu
+  const hlRef = useRef(null);        // ramka highlightu — pozycjonowana imperatywnie z pomiaru DOM
   const tickRef = useRef(false);
+  const indexRef = useRef(0);
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [winScale, setWinScale] = useState(0.78);
@@ -294,6 +294,35 @@ export default function LandingScrollDemo() {
     const target = (i + 0.5) / FEATURES.length;
     window.scrollTo({ top: window.scrollY + rect.top + target * total, behavior: 'smooth' });
   }, [compact]);
+
+  // Highlight liczony z REALNEGO elementu ([data-hl] aktywnego ekranu), nie z ręcznych %.
+  // offset* są w nieskalowanych px układu okna (1160), więc ramka trzyma się treści w każdej skali.
+  // Pozycjonowanie imperatywne (bez stanu) — nakładka liczona z DOM, zero re-renderów przy pomiarze.
+  const measureHL = useCallback((i) => {
+    const box = boxRef.current;
+    const hl = hlRef.current;
+    if (!box || !hl) return;
+    const t = box.querySelector(`[data-screen="${i}"] [data-hl]`);
+    if (!t) { hl.style.opacity = '0'; return; }
+    hl.style.top = `${t.offsetTop - HL_PAD}px`;
+    hl.style.left = `${t.offsetLeft - HL_PAD}px`;
+    hl.style.width = `${t.offsetWidth + HL_PAD * 2}px`;
+    hl.style.height = `${t.offsetHeight + HL_PAD * 2}px`;
+    hl.style.opacity = '1';
+  }, []);
+
+  // pomiar po każdej zmianie ekranu (przed malowaniem — bez migotania); ref trzyma aktualny indeks dla handlerów
+  useLayoutEffect(() => { indexRef.current = index; measureHL(index); }, [index, measureHL]);
+
+  // ponowny pomiar, gdy fonty domierzą układ lub zmieni się rozmiar okna
+  useEffect(() => {
+    const remeasure = () => measureHL(indexRef.current);
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(remeasure).catch(() => {});
+    }
+    window.addEventListener('resize', remeasure);
+    return () => window.removeEventListener('resize', remeasure);
+  }, [measureHL]);
 
   const active = FEATURES[index];
   const compactScale = Math.min(slotW / 1160, 0.92); // skala okna na mobile (szerokość slotu)
@@ -443,14 +472,14 @@ export default function LandingScrollDemo() {
                 </div>
 
                 <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 20 }}>
-                    {/* highlight */}
-                    <div style={{ position: 'absolute', zIndex: 6, border: '2px solid #D9492B', borderRadius: 6, background: 'rgba(217,73,43,0.05)', boxShadow: '0 0 0 4px rgba(217,73,43,0.12), 0 16px 40px rgba(217,73,43,0.2)', pointerEvents: 'none', top: active.hl.top, left: active.hl.left, width: active.hl.width, height: active.hl.height, opacity: 1, transition: 'top .6s cubic-bezier(.22,1,.36,1), left .6s cubic-bezier(.22,1,.36,1), width .6s cubic-bezier(.22,1,.36,1), height .6s cubic-bezier(.22,1,.36,1)' }} />
+                  <div ref={boxRef} style={{ position: 'absolute', inset: 20 }}>
+                    {/* highlight — geometria mierzona z [data-hl] aktywnego ekranu (measureHL, imperatywnie) */}
+                    <div ref={hlRef} style={{ position: 'absolute', zIndex: 6, border: '2px solid #D9492B', borderRadius: 6, background: 'rgba(217,73,43,0.05)', boxShadow: '0 0 0 4px rgba(217,73,43,0.12), 0 16px 40px rgba(217,73,43,0.2)', pointerEvents: 'none', top: 0, left: 0, width: 0, height: 0, opacity: 0, transition: 'top .6s cubic-bezier(.22,1,.36,1), left .6s cubic-bezier(.22,1,.36,1), width .6s cubic-bezier(.22,1,.36,1), height .6s cubic-bezier(.22,1,.36,1), opacity .3s ease' }} />
                     {/* 5 ekranów (cross-fade) */}
                     {SCREEN_HTML.map((html, i) => {
                       const on = i === index;
                       return (
-                        <div key={i} style={{ position: 'absolute', inset: 0, display: i === 0 ? 'flex' : 'block',
+                        <div key={i} data-screen={i} style={{ position: 'absolute', inset: 0, display: i === 0 ? 'flex' : 'block',
                           flexDirection: i === 0 ? 'column' : undefined, gap: i === 0 ? 14 : undefined,
                           opacity: on ? 1 : 0, transform: on ? 'translateY(0) scale(1)' : 'translateY(14px) scale(0.985)',
                           pointerEvents: on ? 'auto' : 'none', transition: 'opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1)' }}
