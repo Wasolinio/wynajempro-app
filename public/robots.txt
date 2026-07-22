@@ -1,5 +1,17 @@
 User-agent: *
 Allow: /
+
+# Panel za logowaniem — zero wartości w wyszukiwarce
 Disallow: /dashboard
 
-Sitemap: https://moje-domki-6c77d.web.app/sitemap.xml
+# Ekrany procesu logowania — bez wartości SEO, w SPA dziedziczą meta strony głównej
+Disallow: /login
+Disallow: /reset-password
+Disallow: /auth
+
+# Strony prywatne per obiekt/gość, udostępniane linkiem przez gospodarza
+# (hasło WiFi, kod do drzwi, treści konkretnego pobytu). Nie mają prawa trafić do indeksu.
+Disallow: /guide
+Disallow: /opinie
+
+Sitemap: https://wynajempro.com/sitemap.xml

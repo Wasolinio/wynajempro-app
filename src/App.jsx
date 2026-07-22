@@ -8,6 +8,7 @@ import { auth, analytics, initAnalytics } from './firebase';
 import { WynajemProvider } from './context/WynajemContext';
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 import ConsentNotice from './components/ConsentNotice';
+import SeoTags from './components/SeoTags';
 
 /*
   ── ROUTING APLIKACJI ──
@@ -115,6 +116,7 @@ export default function App() {
       <GlobalErrorBoundary>
         <BrowserRouter>
           <AnalyticsTracker />
+          <SeoTags />
           <Suspense fallback={<Loader />}>
             <Routes>
               {/* ── Publiczne ── */}
