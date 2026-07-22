@@ -383,6 +383,11 @@ export default function GuideBuilder({ user, properties }) {
                     <button type="button" className="wpd-btn wpd-btn--sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success('Skopiowano link'); }}><Copy /></button>
                   </div>
                   <a className="wpd-btn" style={{ width: '100%', marginTop: 10 }} href={publicUrl} target="_blank" rel="noreferrer"><LinkIcon /> Otwórz podgląd</a>
+                  <p style={{ color: 'var(--muted)', fontSize: 13, lineHeight: 1.55, margin: '12px 0 0' }}>
+                    Każdy, kto zna ten link, może otworzyć przewodnik, a po zaakceptowaniu regulaminu
+                    zobaczyć też hasło Wi-Fi i kod do drzwi. Wysyłaj go tylko gościom i nie publikuj
+                    go w ogłoszeniach.
+                  </p>
                 </div>
               )}
             </div>

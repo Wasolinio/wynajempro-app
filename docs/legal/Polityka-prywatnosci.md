@@ -10,6 +10,13 @@
 > mechanizmie usuwania z `functions/index.js`, pełny katalog praw + prawo skargi do PUODO,
 > dwuwarstwowość danych (konto gospodarza vs dane gości), źródło danych, cookies zgodne
 > ze stanem faktycznym (Analytics ładowany dopiero po zgodzie — potwierdzone w `firebase.js`).
+>
+> **Aktualizacja 2026-07-22 (legal, ocena X9 — `Ocena-linki-guide-opinie.md`, decyzja
+> właściciela):** uzupełniono opis mechanizmu „dostępu po linku" w sekcji 4, rozbito wiersz
+> profilu gospodarza w sekcji 2 na stan po naprawie N5 (`hostProfile` niepubliczny,
+> `publicContact` publiczny — spójnie z propozycją B1.1 z `Uwagi-N5-dla-prawnika.md`)
+> oraz dodano zasady analityki na stronach publicznych w sekcji 9. Zmiany oznaczone
+> znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
 
 ---
 
@@ -39,7 +46,8 @@ Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail, np. rodo@w
 | Adres e-mail, identyfikator (UID), hasło (w formie zabezpieczonej przez Firebase Auth), fakt weryfikacji e-mail | Założenie i utrzymanie Konta, logowanie, świadczenie usługi | art. 6 ust. 1 lit. b (wykonanie umowy) | Przez czas trwania Konta + okres karencji po usunięciu/wygaśnięciu (patrz sekcja 6) |
 | Dane rozliczeniowe / identyfikatory Stripe (`stripeCustomerId`, `stripeSubscriptionId`, status subskrypcji) | Obsługa płatności i subskrypcji | art. 6 ust. 1 lit. b (umowa); w zakresie dokumentacji rozliczeniowej — art. 6 ust. 1 lit. c (obowiązek prawny, przepisy podatkowe) | Zgodnie z przepisami podatkowo-rachunkowymi [DO UZUPEŁNIENIA/POTWIERDZENIA: np. 5 lat dla dokumentów księgowych] |
 | Dane biznesowe Gospodarza: nazwy obiektów, ceny, wpisy w kalendarzu (rezerwacje, koszty, zadania), ustawienia podatkowe | Świadczenie funkcji zarządzania wynajmem | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + karencja |
-| Profil gospodarza (`hostProfile`): imię/nazwa, **adres i telefon** — publikowane w przewodniku dla gości, jeśli Gospodarz je uzupełni | Prezentacja kontaktu gościom w przewodniku (na życzenie Gospodarza) | art. 6 ust. 1 lit. b / lit. a (dobrowolne podanie) | Przez czas trwania Konta; publiczna widoczność do momentu usunięcia/depublikacji przewodnika |
+| **[UZUPEŁNIENIE 2026-07-22]** Profil gospodarza (`hostProfile`): imię/nazwa, typ identyfikatora, NIP albo PESEL, adres, telefon, e-mail — **niepubliczny**, dostępny wyłącznie dla Użytkownika | Dane do dokumentów i rozliczeń w ramach usługi | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + karencja |
+| **[UZUPEŁNIENIE 2026-07-22]** Kontakt publiczny gospodarza (`publicContact`): nazwa, telefon, e-mail — wyświetlane w sekcji „Kontakt z gospodarzem" publicznego przewodnika dla gości | Prezentacja kontaktu gościom w przewodniku; **odbiorcy: każda osoba dysponująca linkiem przewodnika** (dokument czytelny publicznie — patrz sekcja 4) | art. 6 ust. 1 lit. b (element usługi konfigurowanej przez Gospodarza) — *wybór podstawy do potwierdzenia przez prawnika; alternatywa: zgoda (lit. a) — patrz `Uwagi-N5-dla-prawnika.md`, C.4* | Przez czas trwania Konta; publiczna widoczność do usunięcia przewodnika lub wyłączenia kontaktu publicznego |
 | Dane techniczne: adres IP, logi, identyfikatory sesji, dane z zabezpieczeń (App Check / reCAPTCHA) | Bezpieczeństwo, zapobieganie nadużyciom, diagnostyka | art. 6 ust. 1 lit. f (uzasadniony interes — bezpieczeństwo usługi) | [DO UZUPEŁNIENIA: okres retencji logów — zależny od konfiguracji Firebase; do ustalenia] |
 | Dane analityczne (Google/Firebase Analytics) | Analiza ruchu i optymalizacja | art. 6 ust. 1 lit. a (zgoda z bannera cookie) | Do wycofania zgody / zgodnie z ustawieniami Analytics [DO UZUPEŁNIENIA: okres retencji GA] |
 | Zapisy do newslettera (adres e-mail, źródło) — jeśli Użytkownik się zapisze | Marketing własny / informacje o usłudze | art. 6 ust. 1 lit. a (zgoda) | Do wycofania zgody |
@@ -56,6 +64,8 @@ Gospodarz może wprowadzać do Aplikacji dane osób trzecich (Gości/Najemców):
 - dane rezerwacji (obiekt, daty, kwoty; ewentualne dane kontaktowe wpisane przez Gospodarza),
 - **podpisy elektroniczne** gości akceptujących regulamin przewodnika (rekord z datą akceptacji, opcjonalnie imię i podpis, migawka zaakceptowanego regulaminu) — zapisywane w `guides/{id}/signatures/{uid}`,
 - **dane dostępowe** (PIN do drzwi, hasło WiFi) — przechowywane odrębnie w `guides/{id}/secrets/data`, ujawniane gościowi dopiero po elektronicznej akceptacji.
+
+**[UZUPEŁNIENIE 2026-07-22] Mechanizm udostępniania przewodnika („dostęp po linku").** Przewodnik dla gości oraz strona z prośbą o opinię są publikowane pod unikalnym, trudnym do odgadnięcia adresem internetowym (linkiem), który Gospodarz przekazuje gościom. Strony te są dostępne bez logowania — **treść przewodnika (w tym publiczny kontakt Gospodarza) może odczytać każda osoba dysponująca linkiem**, a dane dostępowe (kod do drzwi, hasło WiFi) są ujawniane po elektronicznej akceptacji regulaminu obiektu przez osobę, która otworzyła link, bez weryfikacji jej tożsamości. O tym, komu udostępnić link, decyduje Gospodarz jako administrator danych zawartych w przewodniku. Strona z prośbą o opinię nie zawiera danych osobowych gościa. Publiczne strony przewodników są wyłączone z indeksowania przez wyszukiwarki i nie można ich wyszukać ani wylistować — dostęp wymaga znajomości pełnego adresu.
 
 W zakresie tych danych **administratorem jest Gospodarz**. Operator przetwarza je wyłącznie na polecenie Gospodarza, na zasadach Umowy powierzenia (DPA). Osoby, których dane dotyczą (Goście), swoje prawa realizują wobec Gospodarza jako administratora. Operator wspiera Gospodarza w realizacji tych praw zgodnie z DPA.
 
@@ -109,6 +119,8 @@ WynajemPRO wykorzystuje:
 - **Cookies i mechanizmy niezbędne** (Firebase Auth, sesja logowania) oraz **Local Storage / IndexedDB** — do działania aplikacji, utrzymania sesji i podręcznej pamięci (m.in. tryb offline, zapamiętanie sesji akceptacji przez gościa). Podstawa: niezbędność do świadczenia usługi (art. 173 ust. 3 Prawa telekomunikacyjnego / niezbędny charakter).
 - **Cookies/technologie analityczne (Google/Firebase Analytics)** — uruchamiane **wyłącznie po wyrażeniu zgody** w bannerze cookie. Podstawa: zgoda (art. 6 ust. 1 lit. a RODO w zw. z art. 173 Prawa telekomunikacyjnego).
 
+**[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Uwaga wdrożeniowa — nie publikować bez spełnienia: zdanie o maskowaniu odpowiada decyzji właściciela z 2026-07-22; wdrożenie przez `dev` w `AnalyticsTracker` (`src/App.jsx`) jest warunkiem publikacji tego fragmentu — do tego czasu identyfikator trafia do narzędzia analitycznego. Patrz `Ocena-linki-guide-opinie.md`, ustalenie nr 1.)*
+
 **Stan faktyczny (zweryfikowany w kodzie `firebase.js`):** Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody.
 
 > **⚠️ Rekomendacja do weryfikacji (nie bloker treści Polityki, ale istotne dla spójności):**
@@ -132,4 +144,4 @@ Politykę możemy aktualizować. O istotnych zmianach poinformujemy [DO UZUPEŁN
 
 ---
 
-*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `ConsentNotice.jsx`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `ConsentNotice.jsx`; uzupełnienia 2026-07-22 — dodatkowo `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt` — patrz `Ocena-linki-guide-opinie.md`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*

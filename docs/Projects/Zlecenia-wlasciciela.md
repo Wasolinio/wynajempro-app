@@ -11,10 +11,16 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
-### 1. Google Search Console — nowa usługa + zgłoszenie sitemapy ⏸
-Kanonizacja X9 jest live (deploy 2026-07-22). Teraz w [GSC](https://search.google.com/search-console):
-dodać usługę (property) `wynajempro.com` (weryfikacja domeny przez DNS lub prefiksu przez plik/tag)
-i zgłosić `https://wynajempro.com/sitemap.xml`. To przyspieszy przepięcie indeksu na domenę kanoniczną.
+### 1. ✅ Google Search Console — WYKONANE 2026-07-22
+Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzenie właściciela).
+Po drodze dwie pułapki na przyszłość: zgłoszony omyłkowo URL strony głównej = błąd „mapa w formacie
+HTML"; w usłudze **domenowej** trzeba podać PEŁNY adres mapy (pole nie dokleja prefiksu).
+
+### 1b. Deploy hostingu — pakiet legal (maskowanie GA + ostrzeżenie + X-Robots-Tag) ⏸
+Kod wdrożony i zweryfikowany (2026-07-22, commit — patrz [[Activity-Log]]), czeka na Twoje słowo:
+`firebase deploy --only hosting:app`. Do tego czasu na produkcji token linku wciąż płynie do GA.
+Po deployu: sygnał dla `legal`, żeby dopisać X-Robots-Tag i maskowanie GA do katalogu środków w DPA §6
+(celowo wstrzymane — DPA nie deklaruje środków niewdrożonych).
 
 ### 2. ✅ Przekierowanie 301 firebase → wynajempro.com — WDROŻONE 2026-07-22
 Wykonane w całości (site `wynajempro` + redirector + DNS TXT + przepięcie domeny),
@@ -28,16 +34,13 @@ i bez tego (rezerwowane `/__/*` nie podlega przekierowaniom).
 
 ## Decyzje czekające
 
-### 4. Decyzje po raporcie `legal`: strony `/guide` i `/opinie` ⏸ (raport gotowy 2026-07-22)
-Raport: [[Ocena-linki-guide-opinie]] (docs/legal/). Werdykt: model „nieodgadywalny link"
-obronny jako fundament, ale **4 blokery przed launchem** (m.in. NOWE ustalenie: pełny token
-linku `/guide/{id}` wycieka do Google Analytics — jedyna bariera dostępu kopiowana do systemu
-Google). Twoje decyzje:
-1. Zgoda na maskowanie ID w GA (`/guide/[id]`) — koszt: brak rozróżnienia odsłon per przewodnik.
-2. „Wygeneruj nowy link" w GuideBuilderze: przed czy po launchu (rekomendacja `legal`: po).
-3. Akceptacja brzmienia ostrzeżenia przy „Udostępnij gościom" (projekt w raporcie, sekcja 4a).
-4. Czy warstwa opcjonalna (data ważności linku / PIN pobytu) wchodzi na roadmapę (rekomendacja: Later).
-5. Zgoda na uzupełnienie projektów N4 (Polityka/Regulamin/DPA) o opis mechanizmu linku przed wysyłką do prawnika.
+### 4. ✅ Decyzje po raporcie `legal` — PODJĘTE I ZREALIZOWANE 2026-07-22
+Właściciel: „realizuj wg rekomendacji". Wykonanie: (1) maskowanie ID w GA — wdrożone (`dev`);
+(2) „Wygeneruj nowy link" — po launchu → [[Backlog]]; (3) ostrzeżenie w GuideBuilderze — wdrożone
+w brzmieniu z raportu; (4) wygasanie/PIN — Later → [[Backlog]]; (5) projekty N4 uzupełnione (`legal`).
+Szczegóły: [[Activity-Log]] 2026-07-22. **Pozostały bloker legal przed launchem: N5 C.1**
+(kaskada czyszczenia przewodników przy purge) — osobne zadanie `dev` + `code-reviewer`,
+zleć, gdy będziesz gotów (to zmiana w logice USUWANIA danych — wymaga trybu F2: review przed deployem).
 
 ### 5. Rozjazd domen w fallbackach Stripe
 `functions/index.js:154,410` — fallbackowe URL-e na `wynajempro.pl` (nie `.com`).

@@ -27,8 +27,8 @@ export const CANONICAL_ORIGIN = 'https://wynajempro.com';
     gospodarza (hasło WiFi, kod do drzwi, treści dla konkretnego pobytu). Nie mają
     prawa trafić do wyszukiwarki.
   • /dashboard — panel za logowaniem.
-  Lustrzana reguła po stronie serwera: nagłówek X-Robots-Tag w firebase.json —
-  działa niezależnie od tego, czy bot wykona JavaScript.
+  Lustrzana reguła po stronie serwera dla /guide/** i /opinie/**: nagłówek X-Robots-Tag
+  w firebase.json — działa niezależnie od tego, czy bot wykona JavaScript.
 */
 const NOINDEX_PREFIXES = ['/login', '/reset-password', '/auth', '/guide', '/opinie', '/dashboard'];
 

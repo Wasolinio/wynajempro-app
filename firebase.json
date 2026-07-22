@@ -45,6 +45,24 @@
           ]
         },
         {
+          "source": "/guide/**",
+          "headers": [
+            {
+              "key": "X-Robots-Tag",
+              "value": "noindex, nofollow"
+            }
+          ]
+        },
+        {
+          "source": "/opinie/**",
+          "headers": [
+            {
+              "key": "X-Robots-Tag",
+              "value": "noindex, nofollow"
+            }
+          ]
+        },
+        {
           "source": "sw.js",
           "headers": [
             {

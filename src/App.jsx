@@ -55,14 +55,23 @@ const Loader = () => (
   </div>
 );
 
-// Śledzenie odsłon w Google Analytics (po zgodzie na cookies)
+// Śledzenie odsłon w Google Analytics (po zgodzie na cookies).
+// Trasy gościa (/guide/:id, /opinie/:id): identyfikator w adresie jest jedyną barierą
+// dostępu do strony, więc przed wysyłką do GA maskujemy go i odcinamy query string —
+// w analityce zostaje zbiorcze /guide/[id] i /opinie/[id] (RODO art. 32, decyzja 2026-07-22).
+const trackedPagePath = (location) => {
+  const guest = location.pathname.match(/^\/(guide|opinie)\//);
+  if (guest) return `/${guest[1]}/[id]`;
+  return location.pathname + location.search;
+};
+
 const AnalyticsTracker = () => {
   const location = useLocation();
   useEffect(() => {
     try {
       const currentAnalytics = analytics || initAnalytics();
       if (currentAnalytics) {
-        logEvent(currentAnalytics, 'page_view', { page_path: location.pathname + location.search });
+        logEvent(currentAnalytics, 'page_view', { page_path: trackedPagePath(location) });
       }
     } catch (err) {
       console.warn('Analytics blocked by client:', err);

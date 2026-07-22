@@ -9,6 +9,11 @@
 > **Data projektu:** 2026-07-04 · **Weryfikacja podstaw prawnych:** 2026-07-04
 > Placeholdery `[DO UZUPEŁNIENIA: …]` = dane, których agent NIE zmyśla (zakaz konfabulacji,
 > Team-Playbook zasada 8). Uzupełnia właściciel / prawnik przed publikacją.
+>
+> **Aktualizacja 2026-07-22 (legal, ocena X9 — `Ocena-linki-guide-opinie.md`, decyzja
+> właściciela):** dodano §4 ust. 3 — charakter „dostępu po linku" do przewodnika gościa
+> i strony opinii oraz odpowiedzialność Gospodarza za dystrybucję linku. Zmiana oznaczona
+> znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
 
 ---
 
@@ -53,6 +58,7 @@
    - prowadzenie prostych rozliczeń podatkowych i eksportów księgowych,
    - generowanie projektów umów najmu — **[KOREKTA 2026-07-16 · legal] funkcja OBECNIE NIEDOSTĘPNA; zostanie udostępniona po weryfikacji wzorców umów przez prawnika.** Po jej włączeniu obowiązywać będzie disclaimer: **Generator umów udostępnia WZORCE robocze; nie stanowią one porady prawnej i przed użyciem wymagają samodzielnej weryfikacji przez Użytkownika, w razie potrzeby z pomocą prawnika. Operator nie odpowiada za skutki prawne zastosowania wygenerowanych wzorców.** *(KOREKTA 2026-07-16: generator ukryty z nawigacji panelu decyzją właściciela (X16) — funkcja nie jest dziś oferowana, więc Regulamin nie deklaruje jej jako aktywnej. Disclaimer wysokiego ryzyka ZACHOWANY — wraca razem z funkcją. Ostateczne brzmienie do potwierdzenia z prawnikiem. Kontekst i wariantowe rozwiązania: `Uwagi-N5-dla-prawnika.md`, aktualizacja na początku dokumentu.)*
 2. Zakres funkcjonalny może się zmieniać wraz z rozwojem Aplikacji; zmiany istotnie ograniczające funkcjonalność płatną są komunikowane zgodnie z §10.
+3. **[UZUPEŁNIENIE 2026-07-22 · legal] Dostęp do przewodnika i strony opinii („dostęp po linku").** Przewodnik dla gości oraz strona z prośbą o opinię są publikowane pod unikalnym, trudnym do odgadnięcia adresem internetowym (linkiem) i są dostępne **bez logowania dla każdej osoby dysponującej linkiem**; dane dostępowe (np. kod do drzwi, hasło WiFi) są ujawniane po elektronicznej akceptacji regulaminu obiektu przez osobę otwierającą link, bez weryfikacji jej tożsamości. **Gospodarz samodzielnie decyduje, komu udostępnia link, i odpowiada za jego dystrybucję; Operator nie kontroluje dalszego przekazywania linku przez osoby, którym Gospodarz go udostępnił.** Gospodarz powinien przekazywać link wyłącznie swoim gościom, nie publikować go (np. w ogłoszeniach) oraz aktualizować dane dostępowe w przewodniku po każdej zmianie kodów w obiekcie. *(Uwaga spójności: ostrzeżenie o tej samej treści w edytorze przewodnika wdraża `dev` — decyzja właściciela 2026-07-22, brzmienie w `Ocena-linki-guide-opinie.md`, sekcja 4a. Zakres odpowiedzialności Operatora za ten kanał — do oceny prawnika w powiązaniu z §12.)*
 
 ## §5. Okres próbny (Trial)
 

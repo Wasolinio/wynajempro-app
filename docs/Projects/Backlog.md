@@ -16,6 +16,8 @@
 - **Oceny/opinie gości** (zbierane w aplikacji) — po co: informacja zwrotna dla gospodarza; do przemyślenia, czy nie kolidują z opiniami na portalach (patrz: „przewodnik opinii" wyżej — kierowanie NA portale zamiast konkurowania z nimi).
 - **Zaawansowany kalendarz dostępności** (blokowanie zakresów przeciągnięciem, akcje hurtowe) — po co: szybsze zarządzanie sezonem.
 - **Dziennik dostępu do przewodnika** (kto i kiedy otworzył, audyt sekretów) — po co: bezpieczeństwo i spokój gospodarza; uwaga RODO → `legal`.
+- **„Wygeneruj nowy link" przewodnika** (rekomendacja `legal` 2026-07-22, decyzja właściciela: po launchu) — po co: unieważnienie starego linku po sezonie/gościu (nowy ID dokumentu z przeniesieniem treści) — tania rotacja jedynej bariery dostępu; w komplecie artykuł pomocy o rotacji kodu do drzwi między pobytami.
+- **Wygasanie linku przewodnika / PIN pobytu** (warstwa (c) raportu `legal`, decyzja właściciela 2026-07-22: Later, na żądanie rynku) — po co: twardszy model dostępu, jeśli klienci o to poproszą; świadomie odłożone — łamie prostotę produktu, ryzyko rezydualne po wdrożonych środkach ocenione jako akceptowalne.
 - **Konta zespołowe** (współzarządcy, role) — po co: więksi klienci; post-MVP.
 - **Tryb ciemny** — po co: komfort; niski koszt dzięki systemowi `.wpd`.
 - **Wielojęzyczność (EN/DE)** — po co: goście zagraniczni w przewodnikach to naturalny pierwszy krok (przewodnik przed panelem!).
@@ -32,6 +34,8 @@
 - **Retencja przy soft-delete kont** (finding 🟢 audytu N5, 2026-07-10) — po co: `cleanupUserData` (konta `canceled` po karencji) czyści rentals/settings/checkout_sessions, ale zostawia `guides`, `secrets/data`, pliki Storage i podpisy gości (imię + obraz podpisu = dane osobowe) — kasuje je dopiero pełne `deleteUserAccount`; wsad do części `legal` N5 (retencja/RODO).
 
 - **Legacy przewodniki z enumerowalnym id** (audyt N5) — po co: stare id z `Date.now()` da się zgadywać; po migracji sekretów (audit-guides-n5 --fix) ekspozycja ogranicza się do treści publicznej, ale warto zachęcić do odtworzenia tych przewodników (nowy link/QR = decyzja gospodarza).
+
+- **Fallback `Math.random()` w generatorach ID przewodnika/strony opinii** (poz. 9 raportu `legal` 2026-07-22; `GuideBuilder.jsx:62`, `ReviewBuilder.jsx:78`) — po co: fallback nie jest kryptograficzny; usunąć (twardy wymóg `crypto.randomUUID`) — łatwe, a domyka higienę „nieodgadywalnego linku".
 
 - **Domknięcie allowlisty guides** (po migracji) — po co: usunięcie `wifiNetwork/wifiPassword/doorPin` z `isValidGuestGuide` po potwierdzonym czystym audycie produkcji zamyka 🔴2 na poziomie reguł całkowicie.
 

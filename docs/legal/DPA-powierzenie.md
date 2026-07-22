@@ -10,6 +10,12 @@
 > **Model akceptacji (do decyzji właściciela + prawnik):** rekomendowane zawarcie DPA jako
 > integralnej części Regulaminu akceptowanej przy rejestracji (art. 28 ust. 9 RODO dopuszcza
 > formę elektroniczną). Alternatywnie — osobny dokument akceptowany w panelu.
+>
+> **Aktualizacja 2026-07-22 (legal, ocena X9 — `Ocena-linki-guide-opinie.md`, decyzja
+> właściciela):** dodano §2 ust. 5 — charakterystyka udostępniania „po linku" (publikacja
+> treści przewodnika pod nieodgadywalnym URL bez uwierzytelnienia) oraz uzupełniono katalog
+> środków w §6 o środki ograniczające ryzyko tego modelu. Zmiany oznaczone znacznikiem
+> `[UZUPEŁNIENIE 2026-07-22]`.
 
 ---
 
@@ -32,6 +38,7 @@ Pojęcia „dane osobowe", „przetwarzanie", „administrator", „podmiot prze
 2. **Cel przetwarzania:** umożliwienie Administratorowi zarządzania wynajmem, w tym prowadzenia rezerwacji, publikowania przewodników dla gości oraz udostępniania gościom danych dostępowych po elektronicznej akceptacji regulaminu.
 3. **Charakter przetwarzania:** przechowywanie, utrwalanie, organizowanie, udostępnianie (gościom — na polecenie Administratora), usuwanie — w ramach infrastruktury Aplikacji.
 4. Procesor przetwarza dane wyłącznie na udokumentowane polecenie Administratora, którym jest niniejsza Umowa oraz korzystanie z funkcji Aplikacji zgodnie z jej przeznaczeniem i Regulaminem.
+5. **[UZUPEŁNIENIE 2026-07-22] Charakterystyka udostępniania („dostęp po linku"):** publikowanie przewodnika dla gości polega na udostępnieniu jego treści pod unikalnym, trudnym do odgadnięcia adresem URL, **dostępnym bez uwierzytelnienia dla każdej osoby dysponującej linkiem**; dane dostępowe (kod do drzwi, hasło WiFi) są ujawniane po elektronicznej akceptacji regulaminu obiektu przez osobę otwierającą link, bez weryfikacji jej tożsamości. Administrator, korzystając z funkcji przewodnika, akceptuje ten kanał udostępniania jako element usługi oraz **samodzielnie decyduje, komu przekazuje link, i odpowiada za jego dystrybucję**; Procesor nie kontroluje dalszego przekazywania linku przez osoby, którym Administrator go udostępnił. Środki ograniczające ryzyko tego modelu opisano w §6. *(Do oceny prawnika: czy ten ustęp wystarczająco realizuje wymóg opisania charakteru przetwarzania z art. 28 ust. 3 zd. 1 RODO i czy potrzebne jest dodatkowe, wyraźne oświadczenie Administratora o akceptacji kanału.)*
 
 ## §3. Kategorie osób i kategorie danych
 
@@ -69,10 +76,21 @@ Procesor zobowiązuje się:
 
 Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szczególności (odzwierciedlają rzeczywistą architekturę Aplikacji):
 - kontrolę dostępu opartą na regułach bazy danych (Firestore Security Rules) ograniczających dostęp do danych do właściciela konta i — w przypadku sekretów — ujawnianie ich gościowi dopiero po zapisaniu autoryzowanego podpisu,
-- **oddzielne przechowywanie danych dostępowych** (PIN/WiFi) w wydzielonej kolekcji z warunkowym dostępem,
+- **oddzielne przechowywanie danych dostępowych** (PIN/WiFi) w wydzielonej kolekcji (subkolekcja `secrets`) z warunkowym dostępem — dane dostępowe nie są zapisywane w publicznie czytelnym dokumencie przewodnika,
 - szyfrowanie transmisji (HTTPS/TLS),
 - zabezpieczenia przed automatycznymi nadużyciami (App Check / reCAPTCHA),
-- korzystanie z certyfikowanej infrastruktury chmurowej (Google Cloud / Firebase).
+- korzystanie z certyfikowanej infrastruktury chmurowej (Google Cloud / Firebase),
+- **[UZUPEŁNIENIE 2026-07-22] środki ograniczające ryzyko modelu „dostępu po linku" (§2 ust. 5):** identyfikatory przewodników o wysokiej entropii, generowane kryptograficznie (UUID); rozdzielenie publicznego odczytu pojedynczego dokumentu od listowania kolekcji (listowanie wyłącznie dla właściciela — wyklucza masowe pozyskanie linków); walidacja schematu zapisów wraz z zakazem dodawania danych dostępowych do dokumentu publicznego; wyłączenie stron przewodników i stron opinii z indeksowania przez wyszukiwarki (`robots.txt`, metatag `noindex, nofollow`); polityka `Referrer-Policy: strict-origin-when-cross-origin` oraz atrybuty `noreferrer` na łączach wychodzących, zapobiegające wyciekowi pełnego adresu linku do witryn zewnętrznych.
+
+> **[UZUPEŁNIENIE 2026-07-22] Uwaga spójności deklaracji ze stanem faktycznym (rozliczalność,
+> art. 5 ust. 2):** środki wymienione w punkcie „dostęp po linku" zweryfikowano w kodzie
+> 2026-07-22 (`firestore.rules`, `GuideBuilder.jsx`, `firebase.json`, `SeoTags.jsx`,
+> `public/robots.txt` — szczegóły w `Ocena-linki-guide-opinie.md`). **Dwa środki dodatkowe są
+> na dziś dopiero ZAPLANOWANE** (decyzje właściciela z 2026-07-22, wdraża `dev`): nagłówek
+> `X-Robots-Tag` po stronie serwera oraz maskowanie identyfikatora przewodnika w danych
+> analitycznych. Celowo NIE zostały wpisane do katalogu powyżej — przed publikacją DPA
+> zweryfikować ich wdrożenie i wtedy ewentualnie dopisać; nie deklarować środków, których kod
+> nie egzekwuje.
 
 > **⚠️ Do weryfikacji przez `code-reviewer` w ramach N5 i przez prawnika:** deklarowane środki
 > muszą odpowiadać stanowi faktycznemu na produkcji. W szczególności bloker **N3** (walidacja
@@ -80,6 +98,10 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 > e-mail i sprawdzanie subskrypcji zaślepione — patrz `firestore.rules`). **DPA nie powinno
 > deklarować środków, których kod nie egzekwuje** — przed publikacją N1–N3 muszą być wdrożone,
 > albo opis środków dostosowany do stanu faktycznego.
+> *(Dopisek 2026-07-22: ramka powyżej jest w części NIEAKTUALNA — N1–N3 wdrożono na produkcję
+> 2026-07-09/10, patrz `Uwagi-N5-dla-prawnika.md` sekcja A.1 i B2.1; walidacja schematu działa,
+> co potwierdza stan `firestore.rules` z 2026-07-22. Ramka pozostawiona do formalnego
+> przeredagowania przy przeglądzie prawnika — zgodnie z kierunkiem B2.1.)*
 
 ## §7. Podpowierzenie (subprocesorzy) — art. 28 ust. 2 i 4 RODO
 
@@ -118,4 +140,4 @@ Odpowiedzialność Stron reguluje RODO (art. 82) oraz [DO UZUPEŁNIENIA: ewentua
 
 ---
 
-*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Uzupełnienia 2026-07-22 na podstawie oceny X9 (`Ocena-linki-guide-opinie.md`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
