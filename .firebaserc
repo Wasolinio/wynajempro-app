@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "moje-domki-6c77d"
-  }
+  },
+  "targets": {
+    "moje-domki-6c77d": {
+      "hosting": {
+        "app": [
+          "wynajempro"
+        ],
+        "redirect": [
+          "moje-domki-6c77d"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

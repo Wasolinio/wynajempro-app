@@ -30,8 +30,10 @@ Wspólna metodologia (obowiązuje wszystkich, także głównego Claude'a): `docs
 - `firestore.rules` / `storage.rules` (upload 10 MB) / `functions/index.js`
 
 ## Ostatni status
-Wersja produkcyjna V2 wdrożona (Firebase Hosting: moje-domki-6c77d) i wypchnięta na GitHub.
-Branch: main.
+Wersja produkcyjna V2 wdrożona i wypchnięta na GitHub. Branch: main.
+Hosting multi-site (od 2026-07-22): aplikacja na site **`wynajempro`** (domena kanoniczna
+`wynajempro.com`), stary site `moje-domki-6c77d` = redirector 301.
+**Deploy aplikacji: `firebase deploy --only hosting:app`.**
 
 ## Zadania w trakcie
 Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowania (Now/Next/Later).

@@ -16,17 +16,13 @@ Kanonizacja X9 jest live (deploy 2026-07-22). Teraz w [GSC](https://search.googl
 dodać usługę (property) `wynajempro.com` (weryfikacja domeny przez DNS lub prefiksu przez plik/tag)
 i zgłosić `https://wynajempro.com/sitemap.xml`. To przyspieszy przepięcie indeksu na domenę kanoniczną.
 
-### 2. Przekierowanie 301 firebase → wynajempro.com (multi-site) ⏸
-Nie da się zrobić edycją `firebase.json` (redirects nie filtrują po hoście → pętla).
-Wymaga operacji w konsoli — pełna procedura: [[Activity-Log]] 2026-07-22, skrót:
-1. `firebase hosting:sites:create wynajempro-app`
-2. Konsola Firebase → Hosting: przepiąć custom domenę `wynajempro.com` na nowy site
-3. Stary site `moje-domki-6c77d` zostaje redirectorem: `/:rest*` → 301 na `https://wynajempro.com/:rest`
-4. `firebase target:apply` × 2, `firebase.json` jako tablica `hosting`, deploy obu site'ów
-5. Przy okazji: w szablonach e-mail Auth (konsola) ustawić action URL na domenę kanoniczną
-   (reserved `/__/*` ma priorytet nad redirectami, więc auth bezpieczny — to tylko eliminacja przeskoku)
-
-Do tego czasu stan „canonical + sitemap + robots" jest bezpieczny sam w sobie.
+### 2. ✅ Przekierowanie 301 firebase → wynajempro.com — WDROŻONE 2026-07-22
+Wykonane w całości (site `wynajempro` + redirector + DNS TXT + przepięcie domeny),
+zweryfikowane end-to-end — szczegóły: [[Activity-Log]] 2026-07-22.
+**Od teraz deploy aplikacji: `firebase deploy --only hosting:app`.**
+Opcjonalna kosmetyka na kiedyś: action URL w szablonach e-mail Auth (konsola
+Firebase → Authentication → Templates) na domenę kanoniczną — auth działa poprawnie
+i bez tego (rezerwowane `/__/*` nie podlega przekierowaniom).
 
 ---
 
