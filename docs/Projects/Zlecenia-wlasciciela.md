@@ -16,11 +16,11 @@ Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzen
 Po drodze dwie pułapki na przyszłość: zgłoszony omyłkowo URL strony głównej = błąd „mapa w formacie
 HTML"; w usłudze **domenowej** trzeba podać PEŁNY adres mapy (pole nie dokleja prefiksu).
 
-### 1b. Deploy hostingu — pakiet legal (maskowanie GA + ostrzeżenie + X-Robots-Tag) ⏸
-Kod wdrożony i zweryfikowany (2026-07-22, commit — patrz [[Activity-Log]]), czeka na Twoje słowo:
-`firebase deploy --only hosting:app`. Do tego czasu na produkcji token linku wciąż płynie do GA.
-Po deployu: sygnał dla `legal`, żeby dopisać X-Robots-Tag i maskowanie GA do katalogu środków w DPA §6
-(celowo wstrzymane — DPA nie deklaruje środków niewdrożonych).
+### 1b. ✅ Deploy pakietu legal + N5 C.1 — WYKONANE 2026-07-22
+Hosting (maskowanie GA + ostrzeżenie + X-Robots-Tag) i functions (kaskada purge N5 C.1,
+przegląd F2: BEZPIECZNA, 0 blokerów) na produkcji, zweryfikowane. DPA §6 domknięte przez `legal`.
+**Ostatni bloker legal przed launchem zamknięty.** Zostaje #32 (klient Stripe w cyklicznym
+purge — e-mail w Stripe; zleć przed launchem).
 
 ### 2. ✅ Przekierowanie 301 firebase → wynajempro.com — WDROŻONE 2026-07-22
 Wykonane w całości (site `wynajempro` + redirector + DNS TXT + przepięcie domeny),

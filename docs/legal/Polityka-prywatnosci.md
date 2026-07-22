@@ -16,7 +16,9 @@
 > profilu gospodarza w sekcji 2 na stan po naprawie N5 (`hostProfile` niepubliczny,
 > `publicContact` publiczny — spójnie z propozycją B1.1 z `Uwagi-N5-dla-prawnika.md`)
 > oraz dodano zasady analityki na stronach publicznych w sekcji 9. Zmiany oznaczone
-> znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
+> znacznikiem `[UZUPEŁNIENIE 2026-07-22]`. Po deployu pakietu na produkcję (2026-07-22,
+> commit `e850136`) zdjęto adnotację wdrożeniową przy zdaniu o maskowaniu identyfikatora
+> w analityce — maskowanie zweryfikowane w kodzie.
 
 ---
 
@@ -119,7 +121,7 @@ WynajemPRO wykorzystuje:
 - **Cookies i mechanizmy niezbędne** (Firebase Auth, sesja logowania) oraz **Local Storage / IndexedDB** — do działania aplikacji, utrzymania sesji i podręcznej pamięci (m.in. tryb offline, zapamiętanie sesji akceptacji przez gościa). Podstawa: niezbędność do świadczenia usługi (art. 173 ust. 3 Prawa telekomunikacyjnego / niezbędny charakter).
 - **Cookies/technologie analityczne (Google/Firebase Analytics)** — uruchamiane **wyłącznie po wyrażeniu zgody** w bannerze cookie. Podstawa: zgoda (art. 6 ust. 1 lit. a RODO w zw. z art. 173 Prawa telekomunikacyjnego).
 
-**[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Uwaga wdrożeniowa — nie publikować bez spełnienia: zdanie o maskowaniu odpowiada decyzji właściciela z 2026-07-22; wdrożenie przez `dev` w `AnalyticsTracker` (`src/App.jsx`) jest warunkiem publikacji tego fragmentu — do tego czasu identyfikator trafia do narzędzia analitycznego. Patrz `Ocena-linki-guide-opinie.md`, ustalenie nr 1.)*
+**[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Stan faktyczny zweryfikowany w kodzie 2026-07-22: maskowanie wdrożone w `src/App.jsx` — funkcja `trackedPagePath` zamienia ścieżki `/guide/…` i `/opinie/…` na zbiorcze `/guide/[id]` / `/opinie/[id]` i odcina parametry adresu przed wysyłką zdarzenia `page_view`; wdrożone na produkcji — deploy 2026-07-22, commit `e850136`. Wcześniejsza adnotacja wstrzymująca publikację tego fragmentu do czasu wdrożenia — warunek spełniony, adnotacja zdjęta.)*
 
 **Stan faktyczny (zweryfikowany w kodzie `firebase.js`):** Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody.
 

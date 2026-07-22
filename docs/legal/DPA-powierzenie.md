@@ -14,8 +14,10 @@
 > **Aktualizacja 2026-07-22 (legal, ocena X9 — `Ocena-linki-guide-opinie.md`, decyzja
 > właściciela):** dodano §2 ust. 5 — charakterystyka udostępniania „po linku" (publikacja
 > treści przewodnika pod nieodgadywalnym URL bez uwierzytelnienia) oraz uzupełniono katalog
-> środków w §6 o środki ograniczające ryzyko tego modelu. Zmiany oznaczone znacznikiem
-> `[UZUPEŁNIENIE 2026-07-22]`.
+> środków w §6 o środki ograniczające ryzyko tego modelu. Po wdrożeniu pakietu na produkcję
+> (deploy hostingu 2026-07-22, commit `e850136`) katalog §6 uzupełniono dodatkowo o nagłówek
+> `X-Robots-Tag` i maskowanie identyfikatora strony w analityce — oba środki zweryfikowane
+> w kodzie. Zmiany oznaczone znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
 
 ---
 
@@ -80,17 +82,18 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 - szyfrowanie transmisji (HTTPS/TLS),
 - zabezpieczenia przed automatycznymi nadużyciami (App Check / reCAPTCHA),
 - korzystanie z certyfikowanej infrastruktury chmurowej (Google Cloud / Firebase),
-- **[UZUPEŁNIENIE 2026-07-22] środki ograniczające ryzyko modelu „dostępu po linku" (§2 ust. 5):** identyfikatory przewodników o wysokiej entropii, generowane kryptograficznie (UUID); rozdzielenie publicznego odczytu pojedynczego dokumentu od listowania kolekcji (listowanie wyłącznie dla właściciela — wyklucza masowe pozyskanie linków); walidacja schematu zapisów wraz z zakazem dodawania danych dostępowych do dokumentu publicznego; wyłączenie stron przewodników i stron opinii z indeksowania przez wyszukiwarki (`robots.txt`, metatag `noindex, nofollow`); polityka `Referrer-Policy: strict-origin-when-cross-origin` oraz atrybuty `noreferrer` na łączach wychodzących, zapobiegające wyciekowi pełnego adresu linku do witryn zewnętrznych.
+- **[UZUPEŁNIENIE 2026-07-22] środki ograniczające ryzyko modelu „dostępu po linku" (§2 ust. 5):** identyfikatory przewodników o wysokiej entropii, generowane kryptograficznie (UUID); rozdzielenie publicznego odczytu pojedynczego dokumentu od listowania kolekcji (listowanie wyłącznie dla właściciela — wyklucza masowe pozyskanie linków); walidacja schematu zapisów wraz z zakazem dodawania danych dostępowych do dokumentu publicznego; wyłączenie stron przewodników i stron opinii z indeksowania przez wyszukiwarki (`robots.txt`, metatag `noindex, nofollow` oraz **serwerowy nagłówek `X-Robots-Tag: noindex, nofollow`** dla tras `/guide/**` i `/opinie/**` — skuteczny niezależnie od tego, czy robot wykonuje JavaScript); polityka `Referrer-Policy: strict-origin-when-cross-origin` oraz atrybuty `noreferrer` na łączach wychodzących, zapobiegające wyciekowi pełnego adresu linku do witryn zewnętrznych; **maskowanie identyfikatora strony w danych analitycznych** — do narzędzia analitycznego trafia wyłącznie zbiorcza ścieżka (`/guide/[id]`, `/opinie/[id]`), bez identyfikatora będącego elementem linku i bez parametrów adresu.
 
-> **[UZUPEŁNIENIE 2026-07-22] Uwaga spójności deklaracji ze stanem faktycznym (rozliczalność,
-> art. 5 ust. 2):** środki wymienione w punkcie „dostęp po linku" zweryfikowano w kodzie
-> 2026-07-22 (`firestore.rules`, `GuideBuilder.jsx`, `firebase.json`, `SeoTags.jsx`,
-> `public/robots.txt` — szczegóły w `Ocena-linki-guide-opinie.md`). **Dwa środki dodatkowe są
-> na dziś dopiero ZAPLANOWANE** (decyzje właściciela z 2026-07-22, wdraża `dev`): nagłówek
-> `X-Robots-Tag` po stronie serwera oraz maskowanie identyfikatora przewodnika w danych
-> analitycznych. Celowo NIE zostały wpisane do katalogu powyżej — przed publikacją DPA
-> zweryfikować ich wdrożenie i wtedy ewentualnie dopisać; nie deklarować środków, których kod
-> nie egzekwuje.
+> **[UZUPEŁNIENIE 2026-07-22 — po wdrożeniu] Weryfikacja spójności deklaracji ze stanem
+> faktycznym (rozliczalność, art. 5 ust. 2):** wszystkie środki wymienione w punkcie „dostęp
+> po linku" — w tym nagłówek `X-Robots-Tag` i maskowanie identyfikatora w analityce —
+> zweryfikowano w kodzie 2026-07-22 (`firebase.json`, sekcje nagłówków dla `/guide/**`
+> i `/opinie/**`; `src/App.jsx`, funkcja `trackedPagePath`; pozostałe: `firestore.rules`,
+> `GuideBuilder.jsx`, `SeoTags.jsx`, `public/robots.txt` — szczegóły w
+> `Ocena-linki-guide-opinie.md`). Wdrożenie na produkcję: deploy hostingu 2026-07-22,
+> commit `e850136` (potwierdzenie właściciela; nagłówek `x-robots-tag` zweryfikowany na
+> `wynajempro.com`). Wcześniejsza wersja tej ramki wstrzymywała wpisanie obu środków do
+> katalogu do czasu wdrożenia — warunek spełniony, ramka zaktualizowana.
 
 > **⚠️ Do weryfikacji przez `code-reviewer` w ramach N5 i przez prawnika:** deklarowane środki
 > muszą odpowiadać stanowi faktycznemu na produkcji. W szczególności bloker **N3** (walidacja
@@ -140,4 +143,4 @@ Odpowiedzialność Stron reguluje RODO (art. 82) oraz [DO UZUPEŁNIENIA: ewentua
 
 ---
 
-*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Uzupełnienia 2026-07-22 na podstawie oceny X9 (`Ocena-linki-guide-opinie.md`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Uzupełnienia 2026-07-22 na podstawie oceny X9 (`Ocena-linki-guide-opinie.md`); środki §6 dla modelu „po linku" zweryfikowane w kodzie po deployu (commit `e850136`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
