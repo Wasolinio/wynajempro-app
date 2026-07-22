@@ -151,8 +151,8 @@ exports.createCheckoutSession = onCall(
             quantity: 1,
           },
         ],
-        success_url: request.data.successUrl || "https://wynajempro.pl/dashboard",
-        cancel_url: request.data.cancelUrl || "https://wynajempro.pl/dashboard",
+        success_url: request.data.successUrl || "https://wynajempro.com/dashboard",
+        cancel_url: request.data.cancelUrl || "https://wynajempro.com/dashboard",
         metadata: {
           firebaseUID: uid,
         },
@@ -303,13 +303,31 @@ exports.stripeWebhook = onRequest(
           deletionDate.setDate(deletionDate.getDate() + 30);
 
           if (uid) {
+            // #32 guard: purge kont kasuje klienta Stripe, co może wywołać to
+            // zdarzenie już PO usunięciu dokumentu users. `update()` na
+            // nieistniejącym dokumencie niczego nie tworzy (brak wskrzeszenia),
+            // ale rzuca NOT_FOUND → 500 → Stripe ponawiałby dostawę dniami.
+            // Konto już usunięte = potwierdzamy zdarzenie i nic nie robimy.
+            const userRef = db.collection("users").doc(uid);
+            const userSnap = await userRef.get();
+            if (!userSnap.exists) {
+              console.log(`ℹ️ customer.subscription.deleted dla ${uid} — konto już usunięte, pomijam.`);
+              break;
+            }
             console.log(`❌ Subskrypcja anulowana dla użytkownika: ${uid}. Planowane usunięcie danych: ${deletionDate.toISOString()}`);
-            await db.collection("users").doc(uid).update({
+            await userRef.update({
               status: "canceled",
               canceledAt: Timestamp.now(),
               scheduledDeletionAt: Timestamp.fromDate(deletionDate),
             });
-            await getAuth().setCustomUserClaims(uid, { stripeStatus: 'canceled' });
+            try {
+              await getAuth().setCustomUserClaims(uid, { stripeStatus: 'canceled' });
+            } catch (claimsErr) {
+              // Okno wyścigu z purge: login Auth kasowany PRZED dokumentem —
+              // brak użytkownika nie jest błędem dostawy zdarzenia.
+              if (claimsErr.code !== "auth/user-not-found") throw claimsErr;
+              console.log(`ℹ️ Claims pominięte dla ${uid} — login Auth już usunięty.`);
+            }
           } else {
             // Fallback: szukaj po stripeSubscriptionId
             const snapshot = await db
@@ -407,7 +425,7 @@ exports.createBillingPortalSession = onCall(
       // Tworzymy sesję Billing Portal
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: userData.stripeCustomerId,
-        return_url: request.data.returnUrl || "https://wynajempro.pl/dashboard",
+        return_url: request.data.returnUrl || "https://wynajempro.com/dashboard",
       });
 
       return { url: portalSession.url };
@@ -446,13 +464,23 @@ const TRIAL_RETENTION_DAYS = 90;
 // odczyt dokumentu + double-check kwalifikacji (stillEligible) — zamyka okno
 // wyścigu z webhookiem Stripe (płatność między zapytaniem a purge ustawia
 // 'active'); jakakolwiek wątpliwość → warn-skip, BEZ usunięcia.
-async function purgeAccountCompletely(docSnap, label, stillEligible) {
+// #32 (art. 17): kasujemy też klienta Stripe (e-mail = dane osobowe). Krok
+// wykonywany NA SAMYM KOŃCU, tuż przed dokumentem users: (1) awaria Stripe
+// propaguje → dokument-tropiciel zostaje → kolejny przebieg dokończy,
+// (2) zdarzenie `customer.subscription.deleted` wywołane kasacją klienta
+// trafia (niemal zawsze) już PO skasowaniu dokumentu → guard w webhooku
+// ignoruje je, zamiast przestawiać status i wypychać konto z kwalifikacji.
+// `stripeCustomerId` czytamy ze świeżego odczytu SPRZED cleanupUserData
+// (cleanup i tak nie kasuje tego pola — retry po częściowej awarii wciąż
+// go widzi); `resource_missing` = klient już nie istnieje = sukces.
+async function purgeAccountCompletely(docSnap, label, stillEligible, stripe) {
   const uid = docSnap.id;
   const freshSnap = await docSnap.ref.get();
   if (!freshSnap.exists || !stillEligible(freshSnap.data())) {
     console.warn(`⚠️ Pominięto ${uid} (${label}) — świeży odczyt nie potwierdza kwalifikacji do usunięcia.`);
     return;
   }
+  const stripeCustomerId = freshSnap.data().stripeCustomerId;
   console.log(`🧹 Rozpoczynanie trwałego usuwania konta (${label}): ${uid}`);
   const guidesDeleted = await deleteUserGuides(uid);
   await cleanupUserData(uid);
@@ -460,6 +488,19 @@ async function purgeAccountCompletely(docSnap, label, stillEligible) {
     await getAuth().deleteUser(uid);
   } catch (authErr) {
     if (authErr.code !== "auth/user-not-found") throw authErr;
+  }
+  if (stripeCustomerId) {
+    try {
+      await stripe.customers.del(stripeCustomerId);
+      console.log(`✅ Klient Stripe ${stripeCustomerId} usunięty (${uid}).`);
+    } catch (stripeErr) {
+      if (stripeErr?.code === "resource_missing" || stripeErr?.statusCode === 404) {
+        console.log(`ℹ️ Klient Stripe ${stripeCustomerId} już nie istnieje (${uid}) — kontynuuję.`);
+      } else {
+        // NIE połykamy: dokument users zostaje, jutrzejszy przebieg ponowi.
+        throw stripeErr;
+      }
+    }
   }
   await docSnap.ref.delete();
   console.log(`✅ Konto ${uid} trwale usunięte (${label}; przewodników: ${guidesDeleted}).`);
@@ -470,9 +511,12 @@ exports.deleteExpiredAccountsData = onSchedule(
     schedule: "every day 02:00",
     timeZone: "Europe/Warsaw",
     maxInstances: 1,
+    // #32: purge kasuje też klienta Stripe (pełny art. 17)
+    secrets: [stripeSecretKey],
   },
   async (event) => {
     const now = new Date();
+    const stripe = require("stripe")(stripeSecretKey.value());
     console.log(`🧹 Uruchomiono cykliczne czyszczenie bazy danych: ${now.toISOString()}`);
 
     // 1) Konta anulowane po 30-dniowej karencji (scheduledDeletionAt z webhooka).
@@ -491,7 +535,7 @@ exports.deleteExpiredAccountsData = onSchedule(
         .get();
       console.log(`🧹 Konta canceled po karencji: ${canceledSnap.size}`);
       await Promise.allSettled(canceledSnap.docs.map(async (docSnap) => {
-        try { await purgeAccountCompletely(docSnap, "canceled po karencji", canceledStillEligible); }
+        try { await purgeAccountCompletely(docSnap, "canceled po karencji", canceledStillEligible, stripe); }
         catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
       }));
     } catch (error) {
@@ -519,7 +563,7 @@ exports.deleteExpiredAccountsData = onSchedule(
           console.warn(`⚠️ Pominięto ${docSnap.id} — dane dokumentu nie potwierdzają kwalifikacji do usunięcia.`);
           return;
         }
-        try { await purgeAccountCompletely(docSnap, `porzucony trial ${TRIAL_RETENTION_DAYS} dni`, trialStillEligible); }
+        try { await purgeAccountCompletely(docSnap, `porzucony trial ${TRIAL_RETENTION_DAYS} dni`, trialStillEligible, stripe); }
         catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
       }));
     } catch (error) {
