@@ -148,7 +148,11 @@ Pozycja nr 8, **częściowo zrobiona**: przebudowa szczegółów rezerwacji (zad
 Przeniesione ze starego Milestone 2: literówki, gramatyka, spójność tonu na landingu, w panelu i szablonach przewodników. **Agent:** `marketing` (ton) + `designer` (UI copy). ⬜
 
 ### X9. Fundament SEO
-**Po co:** SPA na Firebase Hosting — najpierw trzeba ustalić, co w ogóle widzi Google. **Gotowe, gdy:** audyt indeksowalności (initial HTML, sitemap, robots, meta/OG, canonical) + wdrożone poprawki warstwy SEO + plan treści. **Agent:** `seo`. ⬜
+**Po co:** SPA na Firebase Hosting — najpierw trzeba ustalić, co w ogóle widzi Google. **Gotowe, gdy:** audyt indeksowalności (initial HTML, sitemap, robots, meta/OG, canonical) + wdrożone poprawki warstwy SEO + plan treści. **Agent:** `seo`. 🔄
+- ✅ **Część 1 — kanonizacja domeny (2026-07-21, decyzje właściciela):** kanoniczna = `wynajempro.com` (bez www). Sitemap (14 adresów), robots (`Sitemap:` + `Disallow` dla login/reset/auth/guide/opinie), OG w `index.html` i nowy `SeoTags.jsx` (canonical + og:url per trasa, `noindex` na trasach wyłączonych) — wszystko na domenie kanonicznej. Weryfikacja: lint+build 0, canonical potwierdzony runtime na 8 trasach. Szczegóły i pułapki: [[Activity-Log]] 2026-07-21. **⏸ czeka na commit** (4 pliki w drzewie roboczym — muszą wejść razem, `SeoTags` już w HEAD po X1, ale bez montażu jest martwy).
+- ⬜ **301 firebase→kanoniczna:** niewykonalne edycją `firebase.json` (redirects nie filtrują po hoście → pętla); wymaga multi-site + przepięcia domeny w konsoli — **operacja właściciela**, procedura w [[Activity-Log]].
+- ⬜ Zostaje: audyt indeksowalności SPA (pusty initial HTML — decyzja prerender/SSG/SSR), title+description per podstrona (rozbudowa `SeoTags`), JSON-LD, wpisy bloga w sitemapie, plan treści (`docs/seo/`).
+- ⚖️ Do `legal`: `/guide` i `/opinie` — model „publiczne po nieodgadywalnym linku" przy treściach z sekretami (WiFi, kod do drzwi).
 
 ### X10. Rozszerzenie testów e2e kluczowych przepływów
 Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywróconą weryfikacją), rezerwacje, przewodnik + sekrety, paywall/Stripe. **Agent:** `dev` + `code-reviewer`. ⬜
