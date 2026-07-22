@@ -32,6 +32,24 @@ i bez tego (rezerwowane `/__/*` nie podlega przekierowaniom).
 
 ---
 
+### 6. Przed/na spotkaniu z prawnikiem (2026-07-22) 🔄
+Pakiet gotowy: **`docs/legal/Raport-dla-prawnika-2026-07-22.md`** (zacznij od niego — ma spis
+wszystkich plików i 15 pytań w priorytetach). Do wzięcia: Regulamin, Polityka, DPA,
+Bezpieczeństwo-kont-i-danych, Ocena-linki-guide-opinie, Checklista, Uwagi-N5.
+
+**Dwie rzeczy do sprawdzenia PRZED spotkaniem (tylko Ty masz dostęp):**
+1. **Konsola Firebase → App Check**: czy egzekwowanie jest WŁĄCZONE dla Firestore/Storage/Functions.
+   Z kodu widać tylko inicjalizację po stronie aplikacji. Od tego zależy, czy deklaracja
+   o ochronie przed automatycznymi nadużyciami w Polityce i DPA §6 jest prawdziwa.
+2. **Kopie zapasowe Firestore**: czy skonfigurowany jest harmonogram eksportu lub odtwarzanie
+   do punktu w czasie (PITR). W repozytorium nie ma tego śladu, a redundancja Google
+   **nie chroni przed omyłkowym skasowaniem danych przez aplikację**.
+
+Do uzupełnienia w dokumentach (miejsca oznaczone `[DO UZUPEŁNIENIA]`): dane rejestrowe firmy,
+adresy kontaktowe, wersja i data dokumentów, warunki oferty „founding members".
+
+---
+
 ## Decyzje czekające
 
 ### 4. ✅ Decyzje po raporcie `legal` — PODJĘTE I ZREALIZOWANE 2026-07-22
@@ -47,14 +65,9 @@ Poprawione przy okazji #32 (`ece7f73`): checkout/portal → `wynajempro.com`.
 `UID:...@wynajempro.pl` w exportIcal celowo zostaje (identyfikator iCal, nie URL —
 zmiana zdublowałaby rezerwacje w portalach).
 
-### 5b. Deploy functions — #32 (Stripe w purge + guard webhooka) ⏸
-Kod zacommitowany (`ece7f73`), przegląd F2: **BEZPIECZNA, 0 blokerów**. Klasyfikator
-uprawnień sesji zablokował mi `firebase deploy --only functions` — wykonaj:
-```
-firebase deploy --only functions
-```
-Sekret `STRIPE_SECRET_KEY` już istnieje (deploy tylko dopina go do 5. funkcji).
-Po deployu warto zerknąć w logi nocnego przebiegu (02:00) — zalecenie reviewera.
+### 5b. ✅ Deploy functions #32 — WYKONANY przez właściciela 2026-07-22
+Potwierdzone słowem właściciela („deploy przeszedł"). **Cała lista legal przed launchem
+zamknięta.** Zostaje (zalecenie reviewera): zerknąć w logi nocnego przebiegu purge (02:00).
 
 ### 6. X7 — szczegóły rezerwacji: co dodać w kolejnym kroku?
 Z roadmapy: przebudowa zrobiona (`ce2b80f`), rozszerzenie **czeka na Twoją decyzję** o zakresie.

@@ -14,6 +14,14 @@
 > właściciela):** dodano §4 ust. 3 — charakter „dostępu po linku" do przewodnika gościa
 > i strony opinii oraz odpowiedzialność Gospodarza za dystrybucję linku. Zmiana oznaczona
 > znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
+>
+> **PRZEGLĄD 2026-07-22 (przed spotkaniem z prawnikiem, na zlecenie właściciela):** pełna
+> rewizja aktualności względem stanu kodu i produkcji z 2026-07-22. Wpisano domenę kanoniczną
+> (`wynajempro.com`), potwierdzono wdrożenie weryfikacji e-mail i paywalla (wcześniej opisywane
+> jako „stan docelowy" / blokery N1–N2 — obecnie działają na produkcji), zastąpiono nieokreśloną
+> „karencję" faktycznymi okresami (30 dni po anulowaniu, 90 dni po okresie próbnym),
+> doprecyzowano natychmiastowość usunięcia Konta na żądanie i pełny zakres usuwania danych
+> oraz skorygowano zapis o danych kart płatniczych. Zmiany oznaczone `[PRZEGLĄD 2026-07-22]`.
 
 ---
 
@@ -24,7 +32,7 @@
 ## §1. Definicje
 
 1. **Usługodawca / Operator** — [DO UZUPEŁNIENIA: pełna firma / nazwa, forma prawna (np. działalność gospodarcza, sp. z o.o.), adres siedziby, NIP, REGON, ewentualnie KRS i kapitał zakładowy]. Kontakt: [DO UZUPEŁNIENIA: adres e-mail kontaktowy, np. kontakt@wynajempro.pl].
-2. **Aplikacja / Serwis** — aplikacja internetowa **WynajemPRO** dostępna pod adresem [DO UZUPEŁNIENIA: domena produkcyjna, np. https://wynajempro.pl], służąca do zarządzania wynajmem nieruchomości.
+2. **Aplikacja / Serwis** — aplikacja internetowa **WynajemPRO** dostępna pod adresem **https://wynajempro.com**, służąca do zarządzania wynajmem nieruchomości. **[PRZEGLĄD 2026-07-22]** *(Stan faktyczny: od 2026-07-22 `wynajempro.com` jest jedynym adresem kanonicznym serwisu; dotychczasowy adres techniczny w domenie dostawcy hostingu przekierowuje trwale (301) na adres kanoniczny. Uwaga dla prawnika/właściciela: adres e-mail podawany w §1 ust. 1 jest obecnie w domenie `.pl` — do ujednolicenia z domeną serwisu przed publikacją.)*
 3. **Użytkownik / Gospodarz** — osoba fizyczna posiadająca pełną zdolność do czynności prawnych, osoba prawna lub jednostka organizacyjna, która założyła Konto i korzysta z Aplikacji w celu zarządzania własnym wynajmem.
 4. **Konsument** — Użytkownik będący osobą fizyczną, dokonujący z Operatorem czynności prawnej niezwiązanej bezpośrednio z jego działalnością gospodarczą lub zawodową (art. 22¹ Kodeksu cywilnego).
 5. **Przedsiębiorca na prawach konsumenta** — osoba fizyczna zawierająca umowę bezpośrednio związaną z jej działalnością gospodarczą, gdy z treści umowy wynika, że nie ma ona dla niej charakteru zawodowego (art. 7aa ustawy o prawach konsumenta oraz art. 385⁵, 556⁴, 556⁵, 5564 KC). *(Kwestia istotna dla WynajemPRO — większość gospodarzy prowadzi działalność, ale usługa może nie mieć dla nich charakteru zawodowego. Zakres ochrony wymaga potwierdzenia prawnika — patrz checklista.)*
@@ -45,7 +53,7 @@
 
 1. Rejestracja następuje przez podanie adresu e-mail i ustanowienie hasła albo przez logowanie kontem Google (Google OAuth).
 2. Konto może założyć wyłącznie osoba pełnoletnia posiadająca pełną zdolność do czynności prawnych albo podmiot działający przez należycie umocowaną osobę.
-3. Przy rejestracji adresem e-mail wymagane jest **potwierdzenie adresu** (weryfikacja e-mail) przed uzyskaniem dostępu do panelu. *(Uwaga wdrożeniowa dla `dev`: mechanizm weryfikacji e-mail to bloker N1 roadmapy — Regulamin zakłada jego działanie na produkcji.)*
+3. Przy rejestracji adresem e-mail wymagane jest **potwierdzenie adresu** (weryfikacja e-mail) przed uzyskaniem dostępu do panelu. Konta zakładane przez logowanie Google nie wymagają odrębnego potwierdzenia — adres jest weryfikowany przez dostawcę logowania. **[PRZEGLĄD 2026-07-22]** *(Stan faktyczny zweryfikowany w kodzie: wymóg działa i jest egzekwowany trójwarstwowo — przy rejestracji konto jest natychmiast wylogowywane do czasu potwierdzenia (`LoginPanel.jsx`), logowanie niepotwierdzonego konta jest blokowane, a dostęp do panelu i do danych jest odcięty także po stronie serwera regułami bazy (`firestore.rules` — warunek `email_verified`). Wcześniejsza adnotacja opisująca to jako niewdrożony bloker N1 była nieaktualna.)*
 4. Użytkownik zobowiązuje się podawać dane prawdziwe i aktualne oraz chronić dane dostępowe do Konta przed dostępem osób trzecich.
 5. Zawarcie umowy o świadczenie usług drogą elektroniczną następuje z chwilą utworzenia Konta (uruchomienia okresu próbnego).
 
@@ -63,13 +71,13 @@
 ## §5. Okres próbny (Trial)
 
 1. Po rejestracji Użytkownik otrzymuje **14-dniowy bezpłatny okres próbny** z dostępem do pełnej funkcjonalności.
-2. Okres próbny nie wymaga podania danych karty płatniczej i nie przekształca się automatycznie w płatną Subskrypcję — po jego upływie dostęp do funkcji płatnych wymaga wykupienia Subskrypcji. *(To odzwierciedla stan docelowy: paywall po trialu — bloker N2. Jeśli model miałby się zmienić na trial z automatycznym pobraniem, zapisy §5–§6 wymagają istotnej przebudowy i dodatkowych obowiązków informacyjnych — decyzja właściciela + prawnik.)*
-3. Po zakończeniu okresu próbnego bez wykupienia Subskrypcji dane Użytkownika są przechowywane przez okres karencji, a następnie mogą zostać usunięte zgodnie z §11 i Polityką Prywatności.
+2. Okres próbny nie wymaga podania danych karty płatniczej i nie przekształca się automatycznie w płatną Subskrypcję — po jego upływie dostęp do funkcji płatnych wymaga wykupienia Subskrypcji. **[PRZEGLĄD 2026-07-22]** *(Stan faktyczny: mechanizm jest wdrożony i egzekwowany po stronie serwera — po wygaśnięciu okresu próbnego bez opłaty reguły bazy odmawiają dostępu do danych, niezależnie od interfejsu. Wcześniejsza adnotacja opisująca to jako „stan docelowy / bloker N2" była nieaktualna. Jeśli model miałby się zmienić na trial z automatycznym pobraniem, zapisy §5–§6 wymagają istotnej przebudowy i dodatkowych obowiązków informacyjnych — decyzja właściciela + prawnik.)*
+3. **[PRZEGLĄD 2026-07-22]** Po zakończeniu okresu próbnego bez wykupienia Subskrypcji dane Konta są przechowywane jeszcze przez **90 dni** od zakończenia okresu próbnego, a następnie trwale usuwane (§11 i Polityka Prywatności). Wykupienie Subskrypcji w tym czasie zachowuje dane.
 
 ## §6. Subskrypcja, płatności i ceny
 
 1. Cena Subskrypcji wynosi **29,99 zł brutto miesięcznie** [DO UZUPEŁNIENIA/POTWIERDZENIA: czy kwota jest brutto z VAT; stawka VAT lub podstawa zwolnienia; ewentualny cennik roczny founding members]. *(Cennik zatwierdzony przez właściciela 2026-07-04: jedna cena 29,99 zł/mc + founding members. Kwestia VAT wymaga potwierdzenia — patrz checklista.)*
-2. Płatności obsługuje Operator płatności (Stripe) w modelu subskrypcji z **automatycznym odnawianiem**. Operator nie przechowuje pełnych danych kart płatniczych.
+2. Płatności obsługuje Operator płatności (Stripe) w modelu subskrypcji z **automatycznym odnawianiem**. **[PRZEGLĄD 2026-07-22]** Dane karty płatniczej są podawane wyłącznie na stronie płatności Operatora płatności — **nie są przekazywane do Aplikacji ani w niej przechowywane w żadnym zakresie**; Aplikacja przechowuje jedynie identyfikatory rozliczeniowe i status subskrypcji. *(Poprzednie brzmienie — „nie przechowuje pełnych danych kart" — sugerowało przechowywanie danych częściowych, co nie odpowiada stanowi faktycznemu: proces płatności odbywa się przez przekierowanie do Stripe Checkout, a zarządzanie płatnościami przez Portal Klienta Stripe.)*
 3. Opłata pobierana jest z góry za każdy cykl rozliczeniowy (miesięczny lub roczny, zależnie od wybranego planu).
 4. **Automatyczne odnawianie i rezygnacja:** Subskrypcja odnawia się automatycznie na kolejny cykl, chyba że Użytkownik anuluje ją przed końcem bieżącego cyklu. Anulowanie następuje samodzielnie przez panel rozliczeniowy (Stripe Customer Portal) dostępny w ustawieniach Konta. Po anulowaniu dostęp do funkcji płatnych trwa do końca opłaconego cyklu.
 5. **Founding members:** [DO UZUPEŁNIENIA: warunki oferty dla uczestników bety — kto się kwalifikuje, wysokość i typ rabatu (rabat roczny), okres obowiązywania, data zakończenia naboru]. **Jeśli oferta jest komunikowana jako obniżka ceny, przy jej prezentacji należy podać najniższą cenę z 30 dni przed obniżką (obowiązek z tzw. dyrektywy Omnibus — patrz checklista).** *(Sposób komunikacji rabatu ma znaczenie prawne — do ustalenia z prawnikiem/marketingiem.)*
@@ -108,9 +116,10 @@
 
 ## §11. Rozwiązanie umowy i usunięcie Konta
 
-1. Użytkownik może w każdej chwili rozwiązać umowę, usuwając Konto z poziomu ustawień Aplikacji. Usunięcie Konta skutkuje usunięciem danych Użytkownika oraz danych powierzonych (przewodniki, sekrety, podpisy gości) — na zasadach opisanych w Polityce Prywatności i DPA, z uwzględnieniem okresu karencji.
-2. Operator może rozwiązać umowę lub zawiesić dostęp w przypadku istotnego naruszenia Regulaminu przez Użytkownika (m.in. korzystanie z Aplikacji niezgodnie z prawem, publikowanie treści bezprawnych w przewodnikach), po uprzednim wezwaniu, chyba że naruszenie ma charakter rażący.
-3. Po rozwiązaniu umowy dane są usuwane zgodnie z §11 ust. 1; procedury techniczne usuwania danych opisano w Polityce Prywatności.
+1. **[PRZEGLĄD 2026-07-22]** Użytkownik może w każdej chwili rozwiązać umowę, usuwając Konto samodzielnie z poziomu Aplikacji (Konto → Usunięcie konta). Operacja wymaga ponownego potwierdzenia tożsamości (hasłem albo ponownym logowaniem Google) i jest **nieodwracalna oraz wykonywana niezwłocznie, bez okresu karencji**. Usunięcie obejmuje: przewodniki wraz z danymi dostępowymi, zapisami akceptacji gości i plikami, dane biznesowe (rezerwacje, koszty, zadania, ustawienia), rekord klienta u Operatora płatności, profil oraz konto uwierzytelniające.
+2. **[PRZEGLĄD 2026-07-22]** Jeżeli umowa wygasa bez usunięcia Konta przez Użytkownika, dane są przechowywane przez okres: **30 dni** od anulowania Subskrypcji albo **90 dni** od zakończenia bezpłatnego okresu próbnego bez wykupienia Subskrypcji — po czym są trwale usuwane w takim samym zakresie jak w ust. 1. Opłacenie Subskrypcji w tym okresie zachowuje dane.
+3. Operator może rozwiązać umowę lub zawiesić dostęp w przypadku istotnego naruszenia Regulaminu przez Użytkownika (m.in. korzystanie z Aplikacji niezgodnie z prawem, publikowanie treści bezprawnych w przewodnikach), po uprzednim wezwaniu, chyba że naruszenie ma charakter rażący.
+4. Szczegółowe zasady i podstawy przetwarzania oraz usuwania danych opisano w Polityce Prywatności, a w zakresie danych Gości — w DPA. *(Do oceny prawnika: czy natychmiastowe, nieodwracalne usunięcie na żądanie — bez „kosza"/okresu wycofania — jest właściwie zakomunikowane Użytkownikowi przed wykonaniem operacji; ostrzeżenie o nieodwracalności jest prezentowane w Aplikacji przed potwierdzeniem.)*
 
 ## §12. Odpowiedzialność
 

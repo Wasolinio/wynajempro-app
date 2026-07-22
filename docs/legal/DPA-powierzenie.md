@@ -18,6 +18,14 @@
 > (deploy hostingu 2026-07-22, commit `e850136`) katalog §6 uzupełniono dodatkowo o nagłówek
 > `X-Robots-Tag` i maskowanie identyfikatora strony w analityce — oba środki zweryfikowane
 > w kodzie. Zmiany oznaczone znacznikiem `[UZUPEŁNIENIE 2026-07-22]`.
+>
+> **PRZEGLĄD 2026-07-22 (przed spotkaniem z prawnikiem, na zlecenie właściciela):** rewizja
+> aktualności całego dokumentu. Przeredagowano nieaktualną ramkę bramki rozliczalności przy §6
+> (blokery N1–N3 wdrożone na produkcję 2026-07-09/10 — dotychczasowa treść opisywała je jako
+> zaślepione), uzupełniono §9 o faktyczne okresy retencji i pełny zakres usuwania danych wraz
+> z opisem odporności procesu na awarie, doprecyzowano §3 (obecny przepływ akceptacji nie zbiera
+> imienia ani podpisu gościa). Zmiany oznaczone `[PRZEGLĄD 2026-07-22]`. Szczegółowy,
+> zweryfikowany katalog zabezpieczeń — `Bezpieczenstwo-kont-i-danych.md`.
 
 ---
 
@@ -50,7 +58,7 @@ Pojęcia „dane osobowe", „przetwarzanie", „administrator", „podmiot prze
 
 **Kategorie danych** (ustalone na podstawie faktycznego modelu danych Aplikacji — Agent-Process-Map, `GuestGuideView.jsx`, `firestore.rules`):
 - dane rezerwacji: nazwa obiektu, daty pobytu, kwoty oraz ewentualne dane identyfikacyjne/kontaktowe gościa wpisane przez Administratora,
-- **dane akceptacji regulaminu (podpisy):** data akceptacji, opcjonalnie imię/nazwa gościa oraz zapis podpisu, migawka zaakceptowanej treści regulaminu — przechowywane w `guides/{id}/signatures`,
+- **dane akceptacji regulaminu:** **[PRZEGLĄD 2026-07-22]** data akceptacji, identyfikator anonimowej sesji przeglądarki gościa oraz migawka zaakceptowanej treści regulaminu — przechowywane w `guides/{id}/signatures`. **Obecny przepływ nie zbiera imienia gościa ani odręcznego podpisu**; starsze zapisy (z wcześniejszej wersji funkcji) mogą je zawierać. *(Do oceny prawnika: czy identyfikator anonimowej sesji stanowi dane osobowe w rozumieniu art. 4 pkt 1 — w ocenie roboczej jest to dana spseudonimizowana, pozwalająca powiązać akceptację z urządzeniem, nie z tożsamością osoby.)*
 - **dane dostępowe udostępniane gościom:** kod do drzwi (PIN), hasło WiFi — przechowywane w `guides/{id}/secrets/data` (dane wrażliwe operacyjnie; nie są „szczególnymi kategoriami" w rozumieniu art. 9 RODO, ale wymagają podwyższonej ochrony).
 
 > **Uwaga:** Aplikacja nie jest przeznaczona do przetwarzania szczególnych kategorii danych
@@ -95,16 +103,21 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 > `wynajempro.com`). Wcześniejsza wersja tej ramki wstrzymywała wpisanie obu środków do
 > katalogu do czasu wdrożenia — warunek spełniony, ramka zaktualizowana.
 
-> **⚠️ Do weryfikacji przez `code-reviewer` w ramach N5 i przez prawnika:** deklarowane środki
-> muszą odpowiadać stanowi faktycznemu na produkcji. W szczególności bloker **N3** (walidacja
-> schematu w regułach) jest dziś WYŁĄCZONY (`isValidRental/Guide` zwracają `true`, weryfikacja
-> e-mail i sprawdzanie subskrypcji zaślepione — patrz `firestore.rules`). **DPA nie powinno
-> deklarować środków, których kod nie egzekwuje** — przed publikacją N1–N3 muszą być wdrożone,
-> albo opis środków dostosowany do stanu faktycznego.
-> *(Dopisek 2026-07-22: ramka powyżej jest w części NIEAKTUALNA — N1–N3 wdrożono na produkcję
-> 2026-07-09/10, patrz `Uwagi-N5-dla-prawnika.md` sekcja A.1 i B2.1; walidacja schematu działa,
-> co potwierdza stan `firestore.rules` z 2026-07-22. Ramka pozostawiona do formalnego
-> przeredagowania przy przeglądzie prawnika — zgodnie z kierunkiem B2.1.)*
+> **[PRZEGLĄD 2026-07-22] Bramka rozliczalności — status: SPEŁNIONA.** Zasada obowiązująca
+> ten dokument brzmi: *DPA nie deklaruje środków, których kod nie egzekwuje* (rozliczalność,
+> art. 5 ust. 2 RODO). Wcześniejsza wersja tej ramki wstrzymywała publikację, ponieważ w chwili
+> jej pisania (2026-07-04) walidacja schematu, wymóg weryfikacji e-mail i sprawdzanie
+> subskrypcji były w regułach zaślepione. **Ten stan już nie obowiązuje:** wszystkie trzy
+> mechanizmy zostały wdrożone i wydane na produkcję 2026-07-09/10 (weryfikacja e-mail —
+> warunek `email_verified` w `isOwnerAndVerified`; egzekwowanie subskrypcji — `hasActiveSubscription`
+> z szybką ścieżką na oświadczeniu tokenu i zapasowym sprawdzeniem dokumentu; walidacja schematu —
+> allowlisty pól i limity w `isValidRental`, `isValidGuide`, `isValidSettings`), a ich obecność
+> potwierdzono ponownie w stanie `firestore.rules` z 2026-07-22. Środki dla modelu „dostępu po
+> linku" zweryfikowano i wydano tego samego dnia (ramka wyżej). **Katalog §6 odpowiada zatem
+> stanowi faktycznemu produkcji na dzień 2026-07-22** — z zastrzeżeniem, że egzekwowanie
+> zabezpieczenia przed automatycznymi nadużyciami (App Check) jest konfigurowane po stronie
+> konsoli dostawcy i wymaga potwierdzenia przez właściciela (patrz `Bezpieczenstwo-kont-i-danych.md`,
+> sekcja „Ograniczenia weryfikacji").
 
 ## §7. Podpowierzenie (subprocesorzy) — art. 28 ust. 2 i 4 RODO
 
@@ -124,8 +137,12 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 ## §9. Usunięcie / zwrot danych po zakończeniu
 
 1. Po zakończeniu świadczenia usług Procesor, zależnie od decyzji Administratora, usuwa lub zwraca dane powierzone oraz usuwa istniejące kopie, chyba że prawo nakazuje przechowywanie.
-2. **Mechanizm faktyczny (do odzwierciedlenia i potwierdzenia):** usunięcie Konta uruchamia usunięcie przewodników, plików (Storage) i danych z nimi związanych (`deleteUserAccount`); konta wygasłe są usuwane po okresie karencji (`deleteExpiredAccountsData`). Okres karencji: [DO UZUPEŁNIENIA: wartość z `functions/index.js` — do zweryfikowania w kodzie].
-3. Administrator może samodzielnie usuwać poszczególne przewodniki, sekrety i podpisy z poziomu Aplikacji.
+2. **[PRZEGLĄD 2026-07-22] Mechanizm faktyczny (zweryfikowany w kodzie `functions/index.js`):**
+   - **Usunięcie Konta przez Administratora** (samodzielnie w Aplikacji) uruchamia niezwłoczne, nieodwracalne usunięcie: przewodników wraz z subkolekcją danych dostępowych i zapisami akceptacji gości, powiązanych plików w magazynie plików, danych biznesowych, rekordu klienta u operatora płatności oraz konta uwierzytelniającego i dokumentu profilu. **Bez okresu karencji.**
+   - **Konta wygasłe** są usuwane w tym samym pełnym zakresie przez proces cykliczny (`deleteExpiredAccountsData`, uruchamiany codziennie) po upływie: **30 dni** od anulowania Subskrypcji albo **90 dni** od zakończenia bezpłatnego okresu próbnego bez wykupienia Subskrypcji.
+   - **Odporność procesu usuwania (stan na 2026-07-22):** kasowanie następuje w kolejności od danych najbardziej wrażliwych (dane dostępowe, zapisy akceptacji, pliki) do dokumentu konta, który usuwany jest jako ostatni. Niepowodzenie któregokolwiek kroku przerywa operację i pozostawia dokument konta jako znacznik, dzięki czemu kolejny przebieg procesu ponawia i dokańcza usuwanie; proces jest w pełni idempotentny. Rozwiązanie to wyklucza sytuację, w której publicznie dostępne treści przewodnika przetrwałyby usunięcie konta. *(Wdrożone i wydane na produkcję 2026-07-22 — zamknięcie ustalenia C.1 z `Uwagi-N5-dla-prawnika.md` oraz ustalenia dotyczącego rekordu klienta u operatora płatności w procesie cyklicznym.)*
+3. Administrator może samodzielnie usuwać poszczególne przewodniki, dane dostępowe i zapisy akceptacji z poziomu Aplikacji.
+4. **[PRZEGLĄD 2026-07-22]** Zwrot danych przed usunięciem: Aplikacja udostępnia eksport danych rozliczeniowych (CSV) oraz eksport kalendarza (iCal). *(Do oceny prawnika: czy zakres tych eksportów jest wystarczający dla realizacji „zwrotu danych" z art. 28 ust. 3 lit. g oraz prawa do przenoszenia danych z art. 20 RODO — dziś nie obejmuje on treści przewodników ani zapisów akceptacji gości.)*
 
 ## §10. Zgłaszanie naruszeń
 

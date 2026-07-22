@@ -19,6 +19,15 @@
 > znacznikiem `[UZUPEŁNIENIE 2026-07-22]`. Po deployu pakietu na produkcję (2026-07-22,
 > commit `e850136`) zdjęto adnotację wdrożeniową przy zdaniu o maskowaniu identyfikatora
 > w analityce — maskowanie zweryfikowane w kodzie.
+>
+> **PRZEGLĄD 2026-07-22 (legal, na zlecenie właściciela — przed spotkaniem z prawnikiem):**
+> pełna rewizja aktualności względem stanu kodu z 2026-07-22. Wpisano faktyczne okresy
+> retencji (30 dni po anulowaniu subskrypcji, 90 dni dla porzuconych okresów próbnych — F2),
+> pełny zakres usuwania danych (w tym rekord klienta Stripe — #32, kaskada przewodników —
+> C.1), samodzielne usunięcie konta dla obu metod logowania (F6), doprecyzowano kontakt
+> publiczny (odrębny publiczny e-mail, przełącznik widoczności — F4), dodano wiersz
+> formularza kontaktowego, skorygowano sekcję o dobrowolności podania danych i zakres
+> zapisu akceptacji gościa. Zmiany oznaczone znacznikiem `[PRZEGLĄD 2026-07-22]`.
 
 ---
 
@@ -30,7 +39,7 @@
 
 Administratorem danych osobowych Użytkowników (Gospodarzy) w zakresie ich kont jest [DO UZUPEŁNIENIA: pełna firma, forma prawna, adres, NIP], dalej „Operator" / „my".
 
-Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail, np. rodo@wynajempro.pl] oraz adres korespondencyjny [DO UZUPEŁNIENIA].
+Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail; publiczny adres na stronie /kontakt to obecnie kontakt@wynajempro.pl — spójność z domeną kanoniczną wynajempro.com do decyzji właściciela] oraz adres korespondencyjny [DO UZUPEŁNIENIA].
 
 **Inspektor Ochrony Danych (IOD):** [DO UZUPEŁNIENIA: czy powołano IOD — jeśli tak, podać dane kontaktowe; jeśli nie, usunąć sekcję. Uwaga: dla podmiotu tej skali IOD zwykle nie jest obowiązkowy (art. 37 RODO), ale to ocena prawnika — patrz checklista.]
 
@@ -45,11 +54,12 @@ Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail, np. rodo@w
 
 | Kategoria danych | Cel | Podstawa prawna (RODO) | Okres przechowywania |
 |---|---|---|---|
-| Adres e-mail, identyfikator (UID), hasło (w formie zabezpieczonej przez Firebase Auth), fakt weryfikacji e-mail | Założenie i utrzymanie Konta, logowanie, świadczenie usługi | art. 6 ust. 1 lit. b (wykonanie umowy) | Przez czas trwania Konta + okres karencji po usunięciu/wygaśnięciu (patrz sekcja 6) |
+| Adres e-mail, identyfikator (UID), hasło (w formie zabezpieczonej przez Firebase Auth), fakt weryfikacji e-mail | Założenie i utrzymanie Konta, logowanie, świadczenie usługi | art. 6 ust. 1 lit. b (wykonanie umowy) | Przez czas trwania Konta + okres retencji po usunięciu/wygaśnięciu (patrz sekcja 6) |
 | Dane rozliczeniowe / identyfikatory Stripe (`stripeCustomerId`, `stripeSubscriptionId`, status subskrypcji) | Obsługa płatności i subskrypcji | art. 6 ust. 1 lit. b (umowa); w zakresie dokumentacji rozliczeniowej — art. 6 ust. 1 lit. c (obowiązek prawny, przepisy podatkowe) | Zgodnie z przepisami podatkowo-rachunkowymi [DO UZUPEŁNIENIA/POTWIERDZENIA: np. 5 lat dla dokumentów księgowych] |
-| Dane biznesowe Gospodarza: nazwy obiektów, ceny, wpisy w kalendarzu (rezerwacje, koszty, zadania), ustawienia podatkowe | Świadczenie funkcji zarządzania wynajmem | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + karencja |
-| **[UZUPEŁNIENIE 2026-07-22]** Profil gospodarza (`hostProfile`): imię/nazwa, typ identyfikatora, NIP albo PESEL, adres, telefon, e-mail — **niepubliczny**, dostępny wyłącznie dla Użytkownika | Dane do dokumentów i rozliczeń w ramach usługi | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + karencja |
-| **[UZUPEŁNIENIE 2026-07-22]** Kontakt publiczny gospodarza (`publicContact`): nazwa, telefon, e-mail — wyświetlane w sekcji „Kontakt z gospodarzem" publicznego przewodnika dla gości | Prezentacja kontaktu gościom w przewodniku; **odbiorcy: każda osoba dysponująca linkiem przewodnika** (dokument czytelny publicznie — patrz sekcja 4) | art. 6 ust. 1 lit. b (element usługi konfigurowanej przez Gospodarza) — *wybór podstawy do potwierdzenia przez prawnika; alternatywa: zgoda (lit. a) — patrz `Uwagi-N5-dla-prawnika.md`, C.4* | Przez czas trwania Konta; publiczna widoczność do usunięcia przewodnika lub wyłączenia kontaktu publicznego |
+| Dane biznesowe Gospodarza: nazwy obiektów, ceny, wpisy w kalendarzu (rezerwacje, koszty, zadania), ustawienia podatkowe | Świadczenie funkcji zarządzania wynajmem | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + okres retencji (sekcja 6) |
+| **[UZUPEŁNIENIE 2026-07-22]** Profil gospodarza (`hostProfile`): imię/nazwa, typ identyfikatora, NIP albo PESEL (opcjonalnie), adres, telefon, e-mail logowania, publiczny e-mail — **niepubliczny**, dostępny wyłącznie dla Użytkownika | Dane do dokumentów i rozliczeń w ramach usługi | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + okres retencji (sekcja 6) |
+| **[UZUPEŁNIENIE 2026-07-22, doprecyzowanie PRZEGLĄD 2026-07-22]** Kontakt publiczny gospodarza (`publicContact`): nazwa, telefon oraz **publiczny adres e-mail wskazany odrębnie przez Gospodarza** (adres logowania nie jest publikowany) — wyświetlane w sekcji „Kontakt z gospodarzem" publicznego przewodnika dla gości; **publikację można w każdej chwili wyłączyć przełącznikiem** w profilu (wówczas sekcja kontaktu nie pojawia się w przewodniku) | Prezentacja kontaktu gościom w przewodniku; **odbiorcy: każda osoba dysponująca linkiem przewodnika** (dokument czytelny publicznie — patrz sekcja 4) | art. 6 ust. 1 lit. b (element usługi konfigurowanej przez Gospodarza) — *wybór podstawy do potwierdzenia przez prawnika; alternatywa: zgoda (lit. a) — patrz `Uwagi-N5-dla-prawnika.md`, C.4* | Przez czas trwania Konta; publiczna widoczność do usunięcia przewodnika lub wyłączenia kontaktu publicznego |
+| **[PRZEGLĄD 2026-07-22]** Formularz kontaktowy (`contact_messages`): adres e-mail, treść wiadomości, data, źródło | Obsługa zapytań i zgłoszeń kierowanych do Operatora (także przez osoby niebędące Użytkownikami) | art. 6 ust. 1 lit. f (uzasadniony interes — odpowiedź na zgłoszenie osoby, która sama się zwraca) albo lit. b, gdy dotyczy umowy — *wybór podstawy do decyzji prawnika* | [DO DECYZJI właściciela + prawnik: propozycja kierunkowa 12 miesięcy od zakończenia korespondencji; wg stanowiska UODO okres musi być konkretny] |
 | Dane techniczne: adres IP, logi, identyfikatory sesji, dane z zabezpieczeń (App Check / reCAPTCHA) | Bezpieczeństwo, zapobieganie nadużyciom, diagnostyka | art. 6 ust. 1 lit. f (uzasadniony interes — bezpieczeństwo usługi) | [DO UZUPEŁNIENIA: okres retencji logów — zależny od konfiguracji Firebase; do ustalenia] |
 | Dane analityczne (Google/Firebase Analytics) | Analiza ruchu i optymalizacja | art. 6 ust. 1 lit. a (zgoda z bannera cookie) | Do wycofania zgody / zgodnie z ustawieniami Analytics [DO UZUPEŁNIENIA: okres retencji GA] |
 | Zapisy do newslettera (adres e-mail, źródło) — jeśli Użytkownik się zapisze | Marketing własny / informacje o usłudze | art. 6 ust. 1 lit. a (zgoda) | Do wycofania zgody |
@@ -64,7 +74,7 @@ Dane Gospodarza pochodzą bezpośrednio od Użytkownika (rejestracja, korzystani
 
 Gospodarz może wprowadzać do Aplikacji dane osób trzecich (Gości/Najemców):
 - dane rezerwacji (obiekt, daty, kwoty; ewentualne dane kontaktowe wpisane przez Gospodarza),
-- **podpisy elektroniczne** gości akceptujących regulamin przewodnika (rekord z datą akceptacji, opcjonalnie imię i podpis, migawka zaakceptowanego regulaminu) — zapisywane w `guides/{id}/signatures/{uid}`,
+- **zapisy akceptacji regulaminu przez gości** — **[PRZEGLĄD 2026-07-22]** rekord z datą akceptacji, identyfikatorem anonimowej sesji i migawką zaakceptowanej treści; **obecny przepływ nie zbiera imienia ani odręcznego podpisu gościa**, jednak starsze zapisy mogą je zawierać (historyczna wersja funkcji) — zapisywane w `guides/{id}/signatures/{uid}`,
 - **dane dostępowe** (PIN do drzwi, hasło WiFi) — przechowywane odrębnie w `guides/{id}/secrets/data`, ujawniane gościowi dopiero po elektronicznej akceptacji.
 
 **[UZUPEŁNIENIE 2026-07-22] Mechanizm udostępniania przewodnika („dostęp po linku").** Przewodnik dla gości oraz strona z prośbą o opinię są publikowane pod unikalnym, trudnym do odgadnięcia adresem internetowym (linkiem), który Gospodarz przekazuje gościom. Strony te są dostępne bez logowania — **treść przewodnika (w tym publiczny kontakt Gospodarza) może odczytać każda osoba dysponująca linkiem**, a dane dostępowe (kod do drzwi, hasło WiFi) są ujawniane po elektronicznej akceptacji regulaminu obiektu przez osobę, która otworzyła link, bez weryfikacji jej tożsamości. O tym, komu udostępnić link, decyduje Gospodarz jako administrator danych zawartych w przewodniku. Strona z prośbą o opinię nie zawiera danych osobowych gościa. Publiczne strony przewodników są wyłączone z indeksowania przez wyszukiwarki i nie można ich wyszukać ani wylistować — dostęp wymaga znajomości pełnego adresu.
@@ -87,11 +97,13 @@ Operator korzysta z subprocesorów na podstawie umów powierzenia zapewniającyc
 
 ## 6. Okres przechowywania i usuwanie danych
 
-Dane przechowujemy przez czas trwania Konta oraz — po jego usunięciu lub wygaśnięciu — przez okres karencji, po którym są trwale usuwane. Mechanizm usuwania odzwierciedla faktyczne działanie Aplikacji:
+**[PRZEGLĄD 2026-07-22 — okresy i zakres wpisane z faktycznego mechanizmu w `functions/index.js` (stan kodu 2026-07-22).]**
 
-- **Usunięcie Konta na żądanie Użytkownika** uruchamia proces (`deleteUserAccount`), który usuwa: dokument profilu Użytkownika, wszystkie utworzone przez niego przewodniki wraz z plikami (Storage) oraz konto uwierzytelniające.
-- **Konta wygasłe** (po zakończeniu trialu bez subskrypcji lub po anulowaniu) są oznaczane datą planowanego usunięcia i po upływie okresu karencji ich dane są automatycznie usuwane (`deleteExpiredAccountsData`).
-- Okres karencji wynosi [DO UZUPEŁNIENIA/POTWIERDZENIA: dokładna liczba dni z `functions/index.js` — do zweryfikowania w kodzie przez `dev`/`legal` przed publikacją; nie wpisuję zmyślonej wartości].
+Dane przechowujemy przez czas trwania Konta oraz — po jego usunięciu lub wygaśnięciu — przez określony niżej okres retencji, po którym są trwale i automatycznie usuwane:
+
+- **Usunięcie Konta na żądanie Użytkownika** (samodzielnie z poziomu Aplikacji — patrz sekcja 7) uruchamia proces (`deleteUserAccount`), który trwale usuwa: wszystkie przewodniki wraz z danymi dostępowymi, zapisami akceptacji gości i plikami (Storage), dane biznesowe (rezerwacje, ustawienia, sesje płatności), rekord klienta u Operatora płatności (Stripe), dokument profilu Użytkownika oraz konto uwierzytelniające. Usunięcie następuje niezwłocznie, bez okresu karencji.
+- **Po anulowaniu Subskrypcji** dane są przechowywane jeszcze przez **30 dni** od anulowania (możliwość powrotu), a następnie trwale usuwane w takim samym pełnym zakresie jak wyżej (proces cykliczny `deleteExpiredAccountsData`; ponowne opłacenie w okresie karencji przerywa usuwanie).
+- **Po zakończeniu bezpłatnego okresu próbnego bez wykupienia Subskrypcji** dane konta są przechowywane jeszcze przez **90 dni** od końca okresu próbnego, a następnie trwale usuwane w pełnym zakresie jak wyżej.
 - Dane wymagane przepisami prawa (np. dokumentacja rozliczeniowa) mogą być przechowywane dłużej, w zakresie i przez okres wynikający z tych przepisów.
 
 ## 7. Prawa osób, których dane dotyczą
@@ -105,7 +117,7 @@ Przysługuje Państwu prawo do:
 - **sprzeciwu** wobec przetwarzania opartego na uzasadnionym interesie (art. 21),
 - **wycofania zgody** w dowolnym momencie, bez wpływu na zgodność przetwarzania sprzed wycofania (dot. Analytics, newslettera).
 
-Realizacja praw: [DO UZUPEŁNIENIA: kanał — e-mail rodo@…, funkcje w panelu].
+**[PRZEGLĄD 2026-07-22]** Konto można usunąć **samodzielnie z poziomu Aplikacji** (Konto → Usunięcie konta) — zarówno przy logowaniu hasłem (potwierdzenie hasłem), jak i przy logowaniu kontem Google (ponowne potwierdzenie logowania Google). Pozostałe żądania: [DO UZUPEŁNIENIA: kanał — e-mail; publiczny adres na /kontakt to obecnie kontakt@wynajempro.pl].
 
 **Prawo skargi:** Przysługuje Państwu prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa; uodo.gov.pl).
 
@@ -113,7 +125,7 @@ Realizacja praw: [DO UZUPEŁNIENIA: kanał — e-mail rodo@…, funkcje w panelu
 
 ## 8. Dobrowolność podania danych
 
-Podanie adresu e-mail (lub użycie konta Google) jest niezbędne do założenia Konta i korzystania z Aplikacji — bez tego usługa nie może być świadczona. Podanie danych profilu gospodarza (adres, telefon) oraz zapis do newslettera są dobrowolne.
+**[PRZEGLĄD 2026-07-22 — dostosowano do faktycznego przepływu konfiguracji konta (`CompleteProfileScreen.jsx`).]** Podanie adresu e-mail (lub użycie konta Google) jest niezbędne do założenia Konta. Przy pierwszej konfiguracji konta wymagane jest podanie nazwy (imienia i nazwiska lub nazwy podmiotu), adresu i telefonu — dane te służą funkcjom dokumentowo-rozliczeniowym Aplikacji i pozostają prywatne; podanie NIP/PESEL jest opcjonalne. **Publikacja kontaktu gościom w przewodniku jest opcjonalna** (przełącznik; publiczny e-mail ustawiany odrębnie). Zapis do newslettera jest dobrowolny. *(Do oceny prawnika: proporcjonalność wymogu adresu i telefonu na starcie względem zasady minimalizacji — art. 5 ust. 1 lit. c; funkcja generatora dokumentów jest obecnie wyłączona.)*
 
 ## 9. Pliki cookies i technologie pamięci lokalnej
 
@@ -121,7 +133,7 @@ WynajemPRO wykorzystuje:
 - **Cookies i mechanizmy niezbędne** (Firebase Auth, sesja logowania) oraz **Local Storage / IndexedDB** — do działania aplikacji, utrzymania sesji i podręcznej pamięci (m.in. tryb offline, zapamiętanie sesji akceptacji przez gościa). Podstawa: niezbędność do świadczenia usługi (art. 173 ust. 3 Prawa telekomunikacyjnego / niezbędny charakter).
 - **Cookies/technologie analityczne (Google/Firebase Analytics)** — uruchamiane **wyłącznie po wyrażeniu zgody** w bannerze cookie. Podstawa: zgoda (art. 6 ust. 1 lit. a RODO w zw. z art. 173 Prawa telekomunikacyjnego).
 
-**[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Stan faktyczny zweryfikowany w kodzie 2026-07-22: maskowanie wdrożone w `src/App.jsx` — funkcja `trackedPagePath` zamienia ścieżki `/guide/…` i `/opinie/…` na zbiorcze `/guide/[id]` / `/opinie/[id]` i odcina parametry adresu przed wysyłką zdarzenia `page_view`; wdrożone na produkcji — deploy 2026-07-22, commit `e850136`. Wcześniejsza adnotacja wstrzymująca publikację tego fragmentu do czasu wdrożenia — warunek spełniony, adnotacja zdjęta.)*
+**[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Stan faktyczny zweryfikowany w kodzie 2026-07-22: maskowanie wdrożone w `src/App.jsx` — funkcja `trackedPagePath` zamienia ścieżki `/guide/…` i `/opinie/…` na zbiorcze `/guide/[id]` / `/opinie/[id]` i odcina parametry adresu przed wysyłką zdarzenia `page_view`; wdrożone na produkcji — deploy 2026-07-22, commit `e850136`.)*
 
 **Stan faktyczny (zweryfikowany w kodzie `firebase.js`):** Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody.
 
@@ -131,10 +143,12 @@ WynajemPRO wykorzystuje:
 > by wycofanie zgody było równie łatwe jak jej udzielenie. **Zadanie dla `dev` po akceptacji:**
 > dodać mechanizm zarządzania zgodą (np. link „Ustawienia cookies" wywołujący ponownie banner
 > i czyszczący flagę). Ta uwaga należy do checklisty, nie do treści publikowanej Polityki.
+> *(PRZEGLĄD 2026-07-22: stan bez zmian — mechanizm wycofania zgody nadal niewdrożony;
+> pozycja pozostaje otwarta.)*
 
 ## 10. Bezpieczeństwo
 
-Stosujemy środki techniczne i organizacyjne odpowiednie do ryzyka, m.in.: reguły dostępu na poziomie bazy danych (Firestore Security Rules) ograniczające dostęp do danych do właściciela konta, oddzielne przechowywanie danych wrażliwych (kody/hasła gości w odrębnej, chronionej kolekcji ujawnianej dopiero po akceptacji gościa), zabezpieczenia przed automatycznymi nadużyciami (App Check / reCAPTCHA), szyfrowanie transmisji (HTTPS).
+Stosujemy środki techniczne i organizacyjne odpowiednie do ryzyka, m.in.: reguły dostępu na poziomie bazy danych (Firestore Security Rules) ograniczające dostęp do danych do właściciela konta, wymóg zweryfikowanego adresu e-mail dla operacji na danych, oddzielne przechowywanie danych wrażliwych (kody/hasła gości w odrębnej, chronionej kolekcji ujawnianej dopiero po akceptacji gościa), walidację schematu zapisywanych danych, zabezpieczenia przed automatycznymi nadużyciami (App Check / reCAPTCHA), szyfrowanie transmisji (HTTPS). Szczegółowy katalog środków dla danych powierzonych zawiera DPA (§6).
 
 ## 11. Zmiany Polityki
 
@@ -146,4 +160,4 @@ Politykę możemy aktualizować. O istotnych zmianach poinformujemy [DO UZUPEŁN
 
 ---
 
-*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `ConsentNotice.jsx`; uzupełnienia 2026-07-22 — dodatkowo `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt` — patrz `Ocena-linki-guide-opinie.md`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `AccountModal.jsx`, `CompleteProfileScreen.jsx`, `ContactPage.jsx`, `ConsentNotice.jsx`, `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt`). Pełny przegląd aktualności: 2026-07-22. Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`; ocena modelu „dostępu po linku" — `Ocena-linki-guide-opinie.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
