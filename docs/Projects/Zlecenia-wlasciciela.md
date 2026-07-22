@@ -42,10 +42,19 @@ Szczegóły: [[Activity-Log]] 2026-07-22. **Pozostały bloker legal przed launch
 (kaskada czyszczenia przewodników przy purge) — osobne zadanie `dev` + `code-reviewer`,
 zleć, gdy będziesz gotów (to zmiana w logice USUWANIA danych — wymaga trybu F2: review przed deployem).
 
-### 5. Rozjazd domen w fallbackach Stripe
-`functions/index.js:154,410` — fallbackowe URL-e na `wynajempro.pl` (nie `.com`).
-Martwe w praktyce (nadpisywane originem frontu), ale do wyprostowania przy najbliższym
-dotknięciu functions. Decyzja: poprawić przy okazji czy osobnym zadaniem.
+### 5. ✅ Rozjazd domen w fallbackach Stripe — WYPROSTOWANE 2026-07-22
+Poprawione przy okazji #32 (`ece7f73`): checkout/portal → `wynajempro.com`.
+`UID:...@wynajempro.pl` w exportIcal celowo zostaje (identyfikator iCal, nie URL —
+zmiana zdublowałaby rezerwacje w portalach).
+
+### 5b. Deploy functions — #32 (Stripe w purge + guard webhooka) ⏸
+Kod zacommitowany (`ece7f73`), przegląd F2: **BEZPIECZNA, 0 blokerów**. Klasyfikator
+uprawnień sesji zablokował mi `firebase deploy --only functions` — wykonaj:
+```
+firebase deploy --only functions
+```
+Sekret `STRIPE_SECRET_KEY` już istnieje (deploy tylko dopina go do 5. funkcji).
+Po deployu warto zerknąć w logi nocnego przebiegu (02:00) — zalecenie reviewera.
 
 ### 6. X7 — szczegóły rezerwacji: co dodać w kolejnym kroku?
 Z roadmapy: przebudowa zrobiona (`ce2b80f`), rozszerzenie **czeka na Twoją decyzję** o zakresie.
