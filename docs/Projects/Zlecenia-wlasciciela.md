@@ -11,12 +11,10 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
-### 1. Deploy hostingu — kanonizacja X9 ⏸
-Kod zacommitowany (`8bda769`, 2026-07-22): sitemap + robots + OG + canonical per trasa na `wynajempro.com`.
-**Deploy = Twoja decyzja** (wystarczy `--only hosting`). Bez deployu produkcja nadal serwuje
-sitemapę z domeną firebase.
-**Po deployu warto od razu:** Google Search Console — dodać usługę (property) `wynajempro.com`
-i zgłosić `https://wynajempro.com/sitemap.xml`.
+### 1. Google Search Console — nowa usługa + zgłoszenie sitemapy ⏸
+Kanonizacja X9 jest live (deploy 2026-07-22). Teraz w [GSC](https://search.google.com/search-console):
+dodać usługę (property) `wynajempro.com` (weryfikacja domeny przez DNS lub prefiksu przez plik/tag)
+i zgłosić `https://wynajempro.com/sitemap.xml`. To przyspieszy przepięcie indeksu na domenę kanoniczną.
 
 ### 2. Przekierowanie 301 firebase → wynajempro.com (multi-site) ⏸
 Nie da się zrobić edycją `firebase.json` (redirects nie filtrują po hoście → pętla).
@@ -30,17 +28,20 @@ Wymaga operacji w konsoli — pełna procedura: [[Activity-Log]] 2026-07-22, skr
 
 Do tego czasu stan „canonical + sitemap + robots" jest bezpieczny sam w sobie.
 
-### 3. Push na GitHub ⏸
-Lokalne commity `8bda769` + `e133e2f` (+ ten rejestr) nie są wypchnięte. Powiedz słowo.
-
 ---
 
 ## Decyzje czekające
 
-### 4. Wnioski z raportu `legal`: strony `/guide` i `/opinie` 🔄
-Analiza RODO modelu „publiczne po nieodgadywalnym linku" (przewodnik zawiera hasła WiFi
-i kody do drzwi) — agent pracuje (zlecone 2026-07-22). Po raporcie: decyzje o środkach
-(np. wygasanie linku, PIN) będą Twoje.
+### 4. Decyzje po raporcie `legal`: strony `/guide` i `/opinie` ⏸ (raport gotowy 2026-07-22)
+Raport: [[Ocena-linki-guide-opinie]] (docs/legal/). Werdykt: model „nieodgadywalny link"
+obronny jako fundament, ale **4 blokery przed launchem** (m.in. NOWE ustalenie: pełny token
+linku `/guide/{id}` wycieka do Google Analytics — jedyna bariera dostępu kopiowana do systemu
+Google). Twoje decyzje:
+1. Zgoda na maskowanie ID w GA (`/guide/[id]`) — koszt: brak rozróżnienia odsłon per przewodnik.
+2. „Wygeneruj nowy link" w GuideBuilderze: przed czy po launchu (rekomendacja `legal`: po).
+3. Akceptacja brzmienia ostrzeżenia przy „Udostępnij gościom" (projekt w raporcie, sekcja 4a).
+4. Czy warstwa opcjonalna (data ważności linku / PIN pobytu) wchodzi na roadmapę (rekomendacja: Later).
+5. Zgoda na uzupełnienie projektów N4 (Polityka/Regulamin/DPA) o opis mechanizmu linku przed wysyłką do prawnika.
 
 ### 5. Rozjazd domen w fallbackach Stripe
 `functions/index.js:154,410` — fallbackowe URL-e na `wynajempro.pl` (nie `.com`).
