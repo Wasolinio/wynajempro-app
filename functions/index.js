@@ -64,20 +64,20 @@ async function cleanupUserData(uid) {
 }
 
 // =============================================================================
-// HELPER: Usuwanie JEDNEGO przewodnika w całości — pliki Storage + subkolekcje
-// secrets (PIN/WiFi) i signatures (podpisy gości = dane osobowe) + dokument.
+// HELPER: Usuwanie JEDNEGO przewodnika w całości — subkolekcje secrets (PIN/WiFi)
+// i signatures (podpisy gości = dane osobowe), pliki Storage, dokument.
 // Wspólne dla: usuwania konta, cyklicznego czyszczenia i ręcznego kasowania
 // przewodnika (audyt N5: dane gości nie mogą zostawać osierocone).
+// Kolejność i obsługa błędów (C.1): od danych najwrażliwszych; dokument główny
+// NA KOŃCU, bo jest jedynym „tropicielem" subkolekcji i plików — błąd Storage
+// NIE jest połykany (skasowanie dokumentu mimo żywych plików osierociłoby
+// publicznie czytelne pliki bez szansy na dokończenie w kolejnym przebiegu).
 // =============================================================================
 async function deleteGuideCompletely(guideRef, bucket) {
   const guideId = guideRef.id;
-  try {
-    await bucket.deleteFiles({ prefix: `guides/${guideId}/` });
-  } catch (storageErr) {
-    console.warn(`⚠️ Błąd usuwania plików Storage dla przewodnika ${guideId}:`, storageErr.message);
-  }
   await deleteSubcollection(guideRef, "secrets");
   await deleteSubcollection(guideRef, "signatures");
+  await bucket.deleteFiles({ prefix: `guides/${guideId}/` });
   await guideRef.delete();
 }
 
@@ -436,14 +436,26 @@ exports.createBillingPortalSession = onCall(
 const TRIAL_RETENTION_DAYS = 90;
 
 // Pełne, trwałe usunięcie konta (wspólne: canceled po karencji i porzucony trial):
-// dane biznesowe → przewodniki z danymi gości → login Auth PRZED dokumentem
-// (guard user-not-found; odwrotna kolejność zostawiałaby osierocony login,
-// a self-heal w useFirebaseData wskrzesiłby trial — finding 🟡A z re-review F1).
-async function purgeAccountCompletely(docSnap, label) {
+// przewodniki z danymi gości (najbardziej wrażliwe publicznie) → dane biznesowe
+// → login Auth PRZED dokumentem (guard user-not-found; odwrotna kolejność
+// zostawiałaby osierocony login, a self-heal w useFirebaseData wskrzesiłby
+// trial — finding 🟡A z re-review F1). Dokument users/{uid} NA KOŃCU — dopóki
+// istnieje, konto kwalifikuje się do ponownego przebiegu, więc częściowa
+// awaria zawsze zostaje dokończona (idempotencja).
+// Fail-safe (residual 🟢C z re-review F2): przed nieodwracalną kasacją ŚWIEŻY
+// odczyt dokumentu + double-check kwalifikacji (stillEligible) — zamyka okno
+// wyścigu z webhookiem Stripe (płatność między zapytaniem a purge ustawia
+// 'active'); jakakolwiek wątpliwość → warn-skip, BEZ usunięcia.
+async function purgeAccountCompletely(docSnap, label, stillEligible) {
   const uid = docSnap.id;
+  const freshSnap = await docSnap.ref.get();
+  if (!freshSnap.exists || !stillEligible(freshSnap.data())) {
+    console.warn(`⚠️ Pominięto ${uid} (${label}) — świeży odczyt nie potwierdza kwalifikacji do usunięcia.`);
+    return;
+  }
   console.log(`🧹 Rozpoczynanie trwałego usuwania konta (${label}): ${uid}`);
-  await cleanupUserData(uid);
   const guidesDeleted = await deleteUserGuides(uid);
+  await cleanupUserData(uid);
   try {
     await getAuth().deleteUser(uid);
   } catch (authErr) {
@@ -463,7 +475,14 @@ exports.deleteExpiredAccountsData = onSchedule(
     const now = new Date();
     console.log(`🧹 Uruchomiono cykliczne czyszczenie bazy danych: ${now.toISOString()}`);
 
-    // 1) Konta anulowane po 30-dniowej karencji (scheduledDeletionAt z webhooka)
+    // 1) Konta anulowane po 30-dniowej karencji (scheduledDeletionAt z webhooka).
+    // Kwalifikacja (sprawdzana ponownie na świeżym odczycie w purge): status
+    // wciąż 'canceled' i scheduledDeletionAt to Timestamp z przeszłości —
+    // płatność w międzyczasie (webhook ustawia 'active' i kasuje
+    // scheduledDeletionAt) wyklucza konto z kasacji; legacy stringi poza.
+    const canceledStillEligible = (d) => d.status === "canceled"
+      && d.scheduledDeletionAt && typeof d.scheduledDeletionAt.toDate === "function"
+      && d.scheduledDeletionAt.toDate() <= now;
     try {
       const canceledSnap = await db
         .collection("users")
@@ -472,7 +491,7 @@ exports.deleteExpiredAccountsData = onSchedule(
         .get();
       console.log(`🧹 Konta canceled po karencji: ${canceledSnap.size}`);
       await Promise.allSettled(canceledSnap.docs.map(async (docSnap) => {
-        try { await purgeAccountCompletely(docSnap, "canceled po karencji"); }
+        try { await purgeAccountCompletely(docSnap, "canceled po karencji", canceledStillEligible); }
         catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
       }));
     } catch (error) {
@@ -486,6 +505,9 @@ exports.deleteExpiredAccountsData = onSchedule(
     try {
       const trialCutoff = new Date(now);
       trialCutoff.setDate(trialCutoff.getDate() - TRIAL_RETENTION_DAYS);
+      const trialStillEligible = (d) => d.status === "trialing"
+        && d.trialEndsAt && typeof d.trialEndsAt.toDate === "function"
+        && d.trialEndsAt.toDate() <= trialCutoff;
       const abandonedSnap = await db
         .collection("users")
         .where("status", "==", "trialing")
@@ -493,15 +515,11 @@ exports.deleteExpiredAccountsData = onSchedule(
         .get();
       console.log(`🧹 Porzucone triale (koniec > ${TRIAL_RETENTION_DAYS} dni temu): ${abandonedSnap.size}`);
       await Promise.allSettled(abandonedSnap.docs.map(async (docSnap) => {
-        const d = docSnap.data();
-        const qualifies = d.status === "trialing"
-          && d.trialEndsAt && typeof d.trialEndsAt.toDate === "function"
-          && d.trialEndsAt.toDate() <= trialCutoff;
-        if (!qualifies) {
+        if (!trialStillEligible(docSnap.data())) {
           console.warn(`⚠️ Pominięto ${docSnap.id} — dane dokumentu nie potwierdzają kwalifikacji do usunięcia.`);
           return;
         }
-        try { await purgeAccountCompletely(docSnap, `porzucony trial ${TRIAL_RETENTION_DAYS} dni`); }
+        try { await purgeAccountCompletely(docSnap, `porzucony trial ${TRIAL_RETENTION_DAYS} dni`, trialStillEligible); }
         catch (err) { console.error(`❌ Błąd usuwania konta ${docSnap.id}:`, err); }
       }));
     } catch (error) {
@@ -1037,12 +1055,14 @@ exports.deleteUserAccount = onCall(
         }
       }
 
-      // 2. Wyczyść dane biznesowe użytkownika
-      await cleanupUserData(uid);
-
-      // 3. Usuń przewodniki użytkownika (pliki Storage + sekrety + podpisy gości)
+      // 2. Usuń przewodniki użytkownika (sekrety + podpisy gości + pliki Storage)
+      //    — najpierw dane najbardziej wrażliwe publicznie, potem biznesowe
+      //    (parytet kolejności 1:1 z purgeAccountCompletely, C.1)
       const guidesDeleted = await deleteUserGuides(uid);
       console.log(`✅ Usunięto ${guidesDeleted} przewodników użytkownika ${uid}.`);
+
+      // 3. Wyczyść dane biznesowe użytkownika
+      await cleanupUserData(uid);
 
       // 4. Usuń login Auth PRZED dokumentem (finding N5 🟡A, lustro fixu F1): przy
       // otwartej aplikacji skasowanie dokumentu przed Auth wyzwalało self-heal
