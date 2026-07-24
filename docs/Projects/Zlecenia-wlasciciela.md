@@ -72,6 +72,17 @@ zamknięta.** Zostaje (zalecenie reviewera): zerknąć w logi nocnego przebiegu 
 ### 6. X7 — szczegóły rezerwacji: co dodać w kolejnym kroku?
 Z roadmapy: przebudowa zrobiona (`ce2b80f`), rozszerzenie **czeka na Twoją decyzję** o zakresie.
 
+### 8. Braki bezpieczeństwa §9 do domknięcia w konsoli (przed launchem) — nowe 2026-07-23
+Z oceny 3 dokumentów dla prawnika (`docs/legal/Bezpieczenstwo-kont-i-danych.md` §9).
+Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
+1. **App Check — egzekwowanie**: potwierdź, że jest WŁĄCZONE dla Firestore / Storage / Functions
+   (konsola Firebase → App Check). Z kodu widać tylko inicjalizację reCAPTCHA v3. Od tego zależy
+   prawdziwość deklaracji w Polityce i DPA §6. (= N6.4; dublet informacyjny z sekcji #6 pkt 1.)
+2. **Kopie zapasowe Firestore**: włącz PITR lub harmonogram eksportu do bucketu — redundancja Google
+   **nie chroni przed omyłkowym skasowaniem danych przez aplikację**. (= N6.3; sekcja #6 pkt 2.)
+3. **Polityka haseł** (jeśli zdecydujesz podnieść): min. długość / złożoność w konsoli Firebase
+   Authentication. Decyzja: [[Roadmap]] „Otwarte decyzje właściciela" pkt 5.
+
 ### 7. Blokery przed launchem (z [[Roadmap]])
 Weryfikacja e-mail, sprawdzanie subskrypcji, walidacja schematu (reguły + front)
 — zadania dla `dev`, ale start i kolejność to Twoja decyzja priorytetowa.

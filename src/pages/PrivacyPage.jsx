@@ -60,6 +60,20 @@ export default function PrivacyPage() {
           <li><strong>Cookies niezbędne (Auth)</strong>: Cookies wykorzystywane do utrzymywania stabilnej sesji bezpiecznego logowania (Firebase).</li>
           <li><strong>Cookies analityczne (Google Analytics)</strong>: Wykorzystywane za pośrednictwem Firebase Analytics do analizy ruchu (odsłony, rejestracje) w celach statystycznych i optymalizacyjnych. Ze względu na ich charakter, <strong>wymagają one Twojej aktywnej zgody</strong>, o którą prosimy w dedykowanym pasku (Cookie Banner) przy pierwszym wejściu na stronę.</li>
         </ul>
+        <p>
+          Zgodę na cookies analityczne możesz w każdej chwili zmienić lub wycofać — równie łatwo,
+          jak jej udzielić. Wycofanie nie wpływa na zgodność z prawem przetwarzania sprzed wycofania
+          (RODO art. 7 ust. 3).
+        </p>
+        <p>
+          <button
+            type="button"
+            className="wpb-btn"
+            onClick={() => window.dispatchEvent(new Event('wpc:open'))}
+          >
+            Zmień lub wycofaj zgodę na cookies
+          </button>
+        </p>
       </section>
     </LegalLayout>
   );

@@ -39,4 +39,4 @@ Hosting multi-site (od 2026-07-22): aplikacja na site **`wynajempro`** (domena k
 Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowania (Now/Next/Later).
 - [ ] Dopieszczanie UI końcowej wersji
 - [x] ~~Blokery techniczne przed launchem: weryfikacja e-mail (N1), sprawdzanie subskrypcji (N2), walidacja schematu (N3)~~ — **wszystkie wdrożone i wydane 2026-07-09/10**; wpis wisiał nieaktualny do 2026-07-22 (weryfikacja przy pakiecie dla prawnika).
-- [ ] **Przed launchem zostaje:** akceptacja dokumentów przez prawnika (N4 — pakiet przekazany 2026-07-22, `docs/legal/Raport-dla-prawnika-2026-07-22.md`); braki z `docs/legal/Bezpieczenstwo-kont-i-danych.md` §9 (potwierdzić egzekwowanie App Check w konsoli, kopie zapasowe, wycofanie zgody cookies)
+- [ ] **Przed launchem zostaje:** akceptacja dokumentów przez prawnika (N4 — pakiet przekazany 2026-07-22, `docs/legal/Raport-dla-prawnika-2026-07-22.md`); braki z `docs/legal/Bezpieczenstwo-kont-i-danych.md` §9 (potwierdzić egzekwowanie App Check w konsoli, kopie zapasowe, wycofanie zgody cookies) — **rozpisane jako N6 w `docs/Projects/Roadmap.md`** (2026-07-23)

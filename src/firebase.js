@@ -4,7 +4,7 @@ import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
-import { getAnalytics } from 'firebase/analytics';
+import { getAnalytics, setAnalyticsCollectionEnabled } from 'firebase/analytics';
 
 // Konfiguracja pobierana bezpiecznie ze zmiennych środowiskowych (.env.local)
 const firebaseConfig = {
@@ -55,17 +55,65 @@ if (isEmulator) {
   connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
-// Inicjalizacja Google Analytics TYLKO po akceptacji cookies
+// ─── Google Analytics (model opt-in, zgodny z RODO) ───
+// GA inicjalizowane TYLKO gdy zgoda zapisana w localStorage('cookie_consent') === 'true'.
+// Zgodę można wycofać w każdej chwili (RODO art. 7 ust. 3) — patrz disableAnalytics().
+const measurementId = firebaseConfig.measurementId;
+
 let analytics = null;
 if (typeof window !== 'undefined' && localStorage.getItem('cookie_consent') === 'true') {
   analytics = getAnalytics(app);
 }
 
+// Leniwa inicjalizacja po udzieleniu zgody. Bez zgody NIE tworzy instancji GA —
+// dzięki temu zdarzenia (np. logowanie w LoginPanel) nie lecą do GA przed akceptacją.
 export const initAnalytics = () => {
-  if (!analytics && typeof window !== 'undefined') {
+  if (typeof window === 'undefined') return analytics;
+  if (localStorage.getItem('cookie_consent') !== 'true') return analytics;
+  if (!analytics) {
     analytics = getAnalytics(app);
   }
   return analytics;
+};
+
+// Kasuje ciasteczka GA (_ga, _ga_*, _gid, _gat) ze wszystkich pasujących domen.
+const clearGaCookies = () => {
+  if (typeof document === 'undefined') return;
+  const host = window.location.hostname;
+  const domains = ['', `; domain=${host}`, `; domain=.${host}`];
+  const parts = host.split('.');
+  if (parts.length > 2) domains.push(`; domain=.${parts.slice(-2).join('.')}`);
+  document.cookie.split(';').forEach((entry) => {
+    const name = entry.split('=')[0].trim();
+    if (name === '_ga' || name === '_gid' || name === '_gat' || name.startsWith('_ga_')) {
+      domains.forEach((d) => {
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT${d}`;
+      });
+    }
+  });
+};
+
+// Włączenie zbierania danych po (ponownym) udzieleniu zgody. Symetryczne do disableAnalytics().
+export const enableAnalytics = () => {
+  if (typeof window === 'undefined') return null;
+  if (measurementId) window[`ga-disable-${measurementId}`] = false;
+  const instance = initAnalytics();
+  try {
+    if (instance) setAnalyticsCollectionEnabled(instance, true);
+  } catch { /* brak instancji — nic do włączenia */ }
+  return instance;
+};
+
+// Wycofanie zgody (RODO art. 7 ust. 3): zatrzymuje zbieranie danych w czasie rzeczywistym,
+// bez przeładowania strony. Ustawia standardową flagę opt-out gtag.js (blokuje wysyłkę hitów
+// dla measurementId), wyłącza kolekcję po stronie Firebase i kasuje istniejące ciasteczka _ga*.
+export const disableAnalytics = () => {
+  if (typeof window === 'undefined') return;
+  if (measurementId) window[`ga-disable-${measurementId}`] = true;
+  try {
+    if (analytics) setAnalyticsCollectionEnabled(analytics, false);
+  } catch { /* brak instancji — nic nie zbieramy */ }
+  clearGaCookies();
 };
 
 export { auth, db, functions, appCheck, storage, analytics };

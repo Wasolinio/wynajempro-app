@@ -655,6 +655,9 @@ export default function LandingPage() {
               <Link to="/kontakt">Kontakt</Link>
               <Link to="/regulamin">Regulamin</Link>
               <Link to="/prywatnosc">Prywatność</Link>
+              <button type="button" onClick={() => window.dispatchEvent(new Event('wpc:open'))}>
+                Ustawienia cookies
+              </button>
             </div>
           </div>
           <div className="wp4-footer__bottom">
@@ -991,8 +994,9 @@ const CSS = `
 .wp4-footer__about{ margin-top:16px; max-width:34ch; font-size:15px; }
 .wp4-footer__col{ display:flex; flex-direction:column; gap:12px; }
 .wp4-footer__col .wp4-label{ margin-bottom:4px; }
-.wp4-footer__col a{ font-size:15px; color:var(--muted); text-decoration:none; }
-.wp4-footer__col a:hover{ color:var(--ink); }
+.wp4-footer__col a, .wp4-footer__col button{ font-size:15px; color:var(--muted); text-decoration:none; }
+.wp4-footer__col a:hover, .wp4-footer__col button:hover{ color:var(--ink); }
+.wp4-footer__col button{ padding:0; border:0; background:none; font-family:inherit; text-align:left; cursor:pointer; }
 .wp4-footer__bottom{ display:flex; align-items:center; justify-content:space-between; gap:16px;
   margin-top:48px; padding-top:24px; border-top:1px solid var(--hairline); flex-wrap:wrap; }
 

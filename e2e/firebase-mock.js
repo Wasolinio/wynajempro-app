@@ -332,6 +332,7 @@ export async function setupFirebaseMocks(page, options = {}) {
       body: `
         export const getAnalytics = () => ({});
         export const logEvent = () => {};
+        export const setAnalyticsCollectionEnabled = () => {};
       `
     });
   });

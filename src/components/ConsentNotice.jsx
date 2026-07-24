@@ -1,23 +1,54 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Cookie, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { enableAnalytics, disableAnalytics } from '../firebase';
 
 /*
   Baner zgody na cookies — identyfikacja WynajemPRO v2.
   Renderowany na poziomie <App/> (poza zakresem .wp4/.wpd), więc ma własny,
-  samowystarczalny namespace `.wpc` z tokenami marki. Logika bez zmian:
-  zgoda zapisywana w localStorage('cookie_consent'); X zamyka bez zgody.
+  samowystarczalny namespace `.wpc` z tokenami marki.
+
+  Model opt-in: zgoda w localStorage('cookie_consent') === 'true' → włącza Google Analytics.
+  Wycofanie (RODO art. 7 ust. 3): usuwa flagę i realnie zatrzymuje zbieranie danych
+  (disableAnalytics). Panel można otworzyć ponownie w każdej chwili zdarzeniem `wpc:open`
+  (link „Ustawienia cookies" w stopce landingu i na stronie Polityki Prywatności) — dzięki
+  temu wycofanie zgody jest równie łatwe jak jej udzielenie.
 */
 export default function CookieBanner({ onAccept }) {
+  const [hasConsent, setHasConsent] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('cookie_consent') === 'true',
+  );
+  // Przy pierwszej wizycie (brak zapisanej decyzji) baner pokazuje się sam.
   const [isVisible, setIsVisible] = useState(() => {
     if (typeof window === 'undefined') return false;
     return !localStorage.getItem('cookie_consent');
   });
 
+  // Otwarcie panelu z zewnątrz (link „Ustawienia cookies" w stopce / Polityce).
+  useEffect(() => {
+    const open = () => {
+      setHasConsent(localStorage.getItem('cookie_consent') === 'true');
+      setIsVisible(true);
+    };
+    window.addEventListener('wpc:open', open);
+    return () => window.removeEventListener('wpc:open', open);
+  }, []);
+
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'true');
+    setHasConsent(true);
     setIsVisible(false);
+    enableAnalytics();
     if (onAccept) onAccept();
+  };
+
+  // „Tylko niezbędne" (brak zgody) oraz „Wycofaj zgodę" — ta sama akcja: reset do stanu
+  // bez zgody i realne zatrzymanie zbierania danych przez GA.
+  const handleWithdraw = () => {
+    localStorage.removeItem('cookie_consent');
+    setHasConsent(false);
+    setIsVisible(false);
+    disableAnalytics();
   };
 
   if (!isVisible) return null;
@@ -32,15 +63,21 @@ export default function CookieBanner({ onAccept }) {
           <span className="wpc-label">Prywatność</span>
           <h3 className="wpc-title">Szanujemy Twoją prywatność</h3>
           <p className="wpc-text">
-            Używamy plików cookies, aby zapewnić najlepsze doświadczenia, analizować ruch na stronie
-            i dostosowywać komunikaty. Klikając „Akceptuję”, zgadzasz się na cookies (w tym Google Analytics).
-            Szczegóły w <Link to="/prywatnosc" className="wpc-link">Polityce Prywatności</Link>.
+            Używamy niezbędnych plików cookies do działania serwisu oraz — wyłącznie za Twoją zgodą —
+            cookies analitycznych (Google Analytics), aby analizować ruch na stronie i ulepszać usługę.
+            Klikając „Akceptuję”, zgadzasz się na cookies analityczne. Zgodę możesz wycofać w każdej
+            chwili — równie łatwo, jak jej udzielić. Szczegóły w <Link to="/prywatnosc" className="wpc-link">Polityce Prywatności</Link>.
           </p>
+          <span className={`wpc-status wpc-status--${hasConsent ? 'on' : 'off'}`}>
+            {hasConsent
+              ? 'Aktualny wybór: zgoda na cookies analityczne udzielona.'
+              : 'Aktualny wybór: tylko niezbędne cookies (brak zgody na analitykę).'}
+          </span>
         </div>
 
         <div className="wpc-actions">
-          <button type="button" className="wpc-btn wpc-btn--ghost" onClick={() => setIsVisible(false)}>
-            Tylko niezbędne
+          <button type="button" className="wpc-btn wpc-btn--ghost" onClick={handleWithdraw}>
+            {hasConsent ? 'Wycofaj zgodę' : 'Tylko niezbędne'}
           </button>
           <button type="button" className="wpc-btn wpc-btn--primary" onClick={handleAccept}>
             Akceptuję
@@ -60,7 +97,7 @@ const CSS = `
 
 .wpc{
   --paper:#F3EFE5; --surface:#FBFAF6; --ink:#17150F;
-  --cynober:#D9492B; --cynober-hover:#C23E22;
+  --cynober:#D9492B; --cynober-hover:#C23E22; --green:#2F6B53;
   --hairline:#DDD5C3; --muted:#524C3F; --label:#746C54;
   position:fixed; left:0; right:0; bottom:0; z-index:90; padding:18px;
   font-family:'Schibsted Grotesk', system-ui, sans-serif;
@@ -88,6 +125,10 @@ const CSS = `
 }
 .wpc-title{ font-weight:700; font-size:16px; letter-spacing:-.01em; color:var(--ink); margin:3px 0 5px; }
 .wpc-text{ font-size:13.5px; line-height:1.55; color:var(--muted); margin:0; max-width:64ch; }
+.wpc-status{ display:inline-block; margin-top:8px; font-family:'IBM Plex Mono', monospace;
+  font-size:11px; letter-spacing:.02em; }
+.wpc-status--on{ color:var(--green); }
+.wpc-status--off{ color:var(--label); }
 .wpc-link{
   color:var(--cynober); font-weight:600; text-decoration:none;
   border-bottom:1px solid transparent; transition:border-color .15s;

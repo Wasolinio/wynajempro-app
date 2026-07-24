@@ -37,6 +37,10 @@
 
 - **Fallback `Math.random()` w generatorach ID przewodnika/strony opinii** (poz. 9 raportu `legal` 2026-07-22; `GuideBuilder.jsx:62`, `ReviewBuilder.jsx:78`) — po co: fallback nie jest kryptograficzny; usunąć (twardy wymóg `crypto.randomUUID`) — łatwe, a domyka higienę „nieodgadywalnego linku".
 
+- **Notka dla gościa przy akceptacji regulaminu** (N5 C.8 🟢 — `docs/legal/Uwagi-N5-dla-prawnika.md` sekcja C.8; poz. 8 raportu `legal` 2026-07-22) — po co: gość klikający „Odkryj dane dostępowe" nie widzi, że zapis akceptacji trafia do bazy i kto jest administratorem; krótka notka przy przycisku domyka obowiązek informacyjny gospodarza (art. 28 ust. 3 lit. e). Front-only, `GuestGuideView.jsx`.
+
+- **Zakaz danych osobowych gości w treściach publicznych** (poz. 10 raportu `legal` 2026-07-22) — po co: gospodarz może wkleić dane osobowe w pola wolnego tekstu (`checkInInfo`, `message` strony opinii) widoczne po linku; zdanie w DPA/pomocy + ewentualne ostrzeżenie w edytorze (art. 5 ust. 1 lit. c). Agent: `legal` (brzmienie) + `support`/`dev` (umiejscowienie).
+
 - **Domknięcie allowlisty guides** (po migracji) — po co: usunięcie `wifiNetwork/wifiPassword/doorPin` z `isValidGuestGuide` po potwierdzonym czystym audycie produkcji zamyka 🔴2 na poziomie reguł całkowicie.
 
 - **Sanityzacja `propertyId` w Content-Disposition eksportu iCal** (finding 🟢 audytu N5) — po co: CRLF w nazwie obiektu = wyjątek 500; kosmetyka defense-in-depth.

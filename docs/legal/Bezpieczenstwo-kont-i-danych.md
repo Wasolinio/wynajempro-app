@@ -4,6 +4,9 @@
 > (bezpieczeństwo przetwarzania) oraz podkład do opisu środków technicznych w Polityce
 > Prywatności i DPA §6.
 > **Stan na:** 2026-07-22 (stan produkcji po wydaniach z tego dnia).
+> **[AKTUALIZACJA 2026-07-24]:** zmieniono wyłącznie wiersz „Wycofanie zgody na cookies" w
+> sekcji 9 — mechanizm (N6.1) jest zaimplementowany w kodzie, ale **nie jest jeszcze na
+> produkcji**; stan produkcji z 2026-07-22 pozostaje w mocy do czasu deployu.
 > **Metoda:** każdy fakt zweryfikowany bezpośrednio w kodzie źródłowym lub w konfiguracji —
 > przy każdym punkcie wskazano plik. Sekcja 9 zawiera **uczciwą listę ograniczeń i braków**;
 > dokument celowo nie jest materiałem marketingowym.
@@ -118,7 +121,7 @@ Ta sekcja istnieje po to, by prawnik oceniał stan rzeczywisty, a nie wyidealizo
 | **Egzekwowanie App Check** | Mechanizm jest zainicjowany w aplikacji (reCAPTCHA v3), ale **samo egzekwowanie po stronie usług konfiguruje się w konsoli dostawcy** — nie da się tego potwierdzić z kodu. Wymaga sprawdzenia przez właściciela w konsoli Firebase. | **Do pilnego potwierdzenia** — od tego zależy, czy deklaracja o ochronie przed nadużyciami jest prawdziwa |
 | **Kopie zapasowe** | W repozytorium brak konfiguracji kopii zapasowych bazy (harmonogram eksportu / odtwarzanie do punktu w czasie). Dane leżą na infrastrukturze Google z jej wbudowaną redundancją, ale **redundancja nie chroni przed omyłkowym skasowaniem danych przez aplikację**. | **Średnia–wysoka; rekomendowane do wdrożenia przed launchem** |
 | **Rejestrowanie i alarmowanie** | Brak wydzielonego monitoringu bezpieczeństwa i alertów; dostępne są standardowe dzienniki platformy | Średnia |
-| **Wycofanie zgody na cookies** | Banner pozwala wyrazić zgodę, ale **brak mechanizmu jej łatwego wycofania** (wymóg równej łatwości — art. 7 ust. 3 RODO) | **Do wdrożenia — pozycja otwarta w Polityce, sekcja 9** |
+| **[AKTUALIZACJA 2026-07-24] Wycofanie zgody na cookies** | Mechanizm równie łatwego wycofania/zmiany zgody (art. 7 ust. 3 RODO) **zaimplementowano w kodzie (N6.1)**: link „Ustawienia cookies" w stopce oraz przycisk na stronie Polityki ponownie otwierają banner (accept/withdraw symetryczne, z linią statusu aktualnego wyboru), a wycofanie realnie zatrzymuje Analytics (flaga opt-out `ga-disable-<measurementId>`, `setAnalyticsCollectionEnabled(false)`) i kasuje pliki cookies `_ga*` — `src/firebase.js`, `src/components/ConsentNotice.jsx`. **Kod jest w gałęzi roboczej, jeszcze niewdrożony na produkcję** — do czasu deployu na produkcji nadal działa poprzedni banner bez opcji wycofania. | **W trakcie: kod gotowy, oczekuje na deploy.** Po wdrożeniu na produkcję wiersz schodzi z listy braków (por. `Polityka-prywatnosci.md` §9). |
 | **Ostrzeżenie przy usuwaniu konta** | Komunikat wymienia węższy zakres („konto, subskrypcja, nieruchomości, historia rezerwacji") niż faktyczna kasacja (obejmuje też przewodniki, dane gości i pliki) | Niska, ale łatwa do poprawienia — rzetelność informacji |
 | **Osierocone pliki z przeszłości** | Pliki przewodników usuniętych przed wdrożeniem kaskady mogą pozostawać dostępne pod starymi adresami; nowe przypadki są już wykluczone | Niska–średnia; wymaga jednorazowego czyszczenia |
 | **Model „dostępu po linku"** | Świadomie przyjęty; pełna analiza i przyjęte środki — `Ocena-linki-guide-opinie.md` | Przyjęte ryzyko po wdrożeniu środków |
@@ -142,4 +145,6 @@ Uczciwość materiału wymaga wskazania, czego **nie dało się potwierdzić z k
 *Dokument przygotowany na podstawie bezpośredniej weryfikacji kodu produkcyjnego 2026-07-22
 (`src/firebase.js`, `src/App.jsx`, `src/pages/landing/LoginPanel.jsx`, `src/pages/dashboard/modals/AccountModal.jsx`,
 `firestore.rules`, `storage.rules`, `firebase.json`, `functions/index.js`, `.gitignore`).
+Aktualizacja 2026-07-24 dotyczy wyłącznie wiersza „Wycofanie zgody na cookies" (mechanizm N6.1
+w kodzie, przed deployem — `src/firebase.js`, `src/components/ConsentNotice.jsx`).
 Nie stanowi opinii prawnej ani deklaracji zgodności — służy jako podkład do oceny przez prawnika.*

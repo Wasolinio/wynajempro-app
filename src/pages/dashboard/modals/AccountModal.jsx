@@ -179,7 +179,7 @@ function AccountModal(props) {
             <>
               <div className="wpd-note wpd-note--danger" style={{ marginBottom: 14 }}>
                 <h4><AlertTriangle /> Strefa zagrożenia: trwałe usuwanie konta</h4>
-                Usunięcie konta bezpowrotnie kasuje konto, subskrypcję, nieruchomości i historię rezerwacji.
+                Usunięcie konta jest nieodwracalne i następuje bez okresu karencji. Bezpowrotnie kasujemy przewodniki wraz z danymi dostępowymi gości (kody, WiFi) i podpisami akceptacji regulaminu, pliki, dane biznesowe (obiekty, rezerwacje, koszty, zadania), subskrypcję i rekord klienta Stripe, profil oraz konto logowania.
               </div>
               <div className="wpd-panel" style={{ padding: 18 }}>
                 <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 14px', lineHeight: 1.6 }}>
