@@ -109,9 +109,23 @@ export default function ReviewPageView() {
           )}
           <p className="wpb-meta" style={{ marginTop: 16, textAlign: 'center' }}>To zajmie około minuty.</p>
         </div>
-        {/* kredyt spójny z przewodnikiem gościa (GuestGuideView) — zwykły tekst,
-            bez linku: jedynym zadaniem strony jest klik w portal opinii */}
-        <p className="wpb-meta" style={{ margin: 0 }}>Stworzono za pomocą WynajemPRO</p>
+        {/* Kredyt spójny z przewodnikiem gościa (GuestGuideView) — bez linku do produktu:
+            jedynym zadaniem strony jest klik w portal opinii. Jedyna akcja obok kredytu to
+            wyjście z udzielonej zgody na cookies (RODO art. 7 ust. 3) — baner ConsentNotice
+            renderuje się także tutaj, więc gość musi mieć stąd drogę powrotną. */}
+        <p className="wpb-meta" style={{ margin: 0, textAlign: 'center' }}>
+          Stworzono za pomocą WynajemPRO{' '}
+          <span className="wpb-meta__more">
+            <span aria-hidden="true">· </span>
+            <button
+              type="button"
+              className="wpb-meta__btn"
+              onClick={() => window.dispatchEvent(new Event('wpc:open'))}
+            >
+              Ustawienia cookies
+            </button>
+          </span>
+        </p>
       </div>
     </div>
   );

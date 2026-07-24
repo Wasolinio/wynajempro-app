@@ -58,6 +58,53 @@ test('Wejście z Polityki Prywatności otwiera panel wycofania', async ({ page }
   expect(await page.evaluate(gaDisabled)).toBe(true);
 });
 
+/*
+  Strony gościa (/guide/:id, /opinie/:id) renderują baner globalnie (App.jsx), więc gość
+  może tam zgodę WYRAZIĆ — musi też móc ją stamtąd wycofać. Wejście „Ustawienia cookies"
+  siedzi przy kredycie „Stworzono za pomocą WynajemPRO".
+*/
+const guideDoc = {
+  ownerId: 'owner-uid-cookie',
+  name: 'Informator — Domek Leśny',
+  propertyId: 'Domek Leśny',
+  hasSensitiveData: false,
+  checkInInfo: 'Klucze odbierz w recepcji.',
+  houseRules: 'Prosimy o utrzymanie porządku.',
+  attractions: [],
+};
+
+const reviewDoc = {
+  type: 'review',
+  ownerId: 'owner-uid-cookie',
+  title: 'Dziękujemy za pobyt',
+  message: 'Będziemy wdzięczni za kilka słów opinii.',
+  links: [{ label: 'Google', url: 'https://g.page/r/testxyz' }],
+};
+
+for (const [nazwa, path, dbData] of [
+  ['przewodnik gościa', '/guide/guide_cookie_test', { 'guides/guide_cookie_test': guideDoc }],
+  ['strona opinii', '/opinie/review_cookie_test', { 'guides/review_cookie_test': reviewDoc }],
+]) {
+  test(`Strona gościa (${nazwa}): wejście przy kredycie otwiera panel i wycofuje zgodę`, async ({ page }) => {
+    // Gość ze zgodą udzieloną wcześniej — baner nie pokazuje się sam.
+    await setupFirebaseMocks(page, { consentCookies: true, dbData });
+    await page.goto(path);
+
+    await expect(page.getByText('Stworzono za pomocą WynajemPRO')).toBeVisible();
+    await expect(page.locator('.wpc-bar')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Ustawienia cookies' }).click();
+    const bar = page.locator('.wpc-bar');
+    await expect(bar).toBeVisible();
+    await expect(page.locator('.wpc-status')).toContainText('zgoda na cookies analityczne udzielona');
+
+    await bar.getByRole('button', { name: 'Wycofaj zgodę', exact: true }).click();
+    await expect(page.locator('.wpc-bar')).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem('cookie_consent'))).toBeNull();
+    expect(await page.evaluate(gaDisabled)).toBe(true);
+  });
+}
+
 test('Pierwsza wizyta: baner sam się pokazuje, zgoda ustawia flagę', async ({ page }) => {
   // Brak zapisanej decyzji — baner opt-in widoczny od razu.
   await setupFirebaseMocks(page, { consentCookies: false });

@@ -386,7 +386,22 @@ export default function GuestGuideView() {
           </div>
         )}
 
-        <p className="wpb-meta" style={{ textAlign: 'center', marginTop: 8 }}>Stworzono za pomocą WynajemPRO</p>
+        {/* Baner zgody na cookies (ConsentNotice) renderuje się także na stronach gościa,
+            więc gość musi mieć stąd wyjście z udzielonej zgody — równie łatwe jak jej
+            udzielenie (RODO art. 7 ust. 3). Ten sam mechanizm co w stopce landingu. */}
+        <p className="wpb-meta" style={{ textAlign: 'center', marginTop: 8 }}>
+          Stworzono za pomocą WynajemPRO{' '}
+          <span className="wpb-meta__more">
+            <span aria-hidden="true">· </span>
+            <button
+              type="button"
+              className="wpb-meta__btn"
+              onClick={() => window.dispatchEvent(new Event('wpc:open'))}
+            >
+              Ustawienia cookies
+            </button>
+          </span>
+        </p>
 
         <style>{`@media (max-width:560px){ .wpb-reveal{ grid-template-columns:1fr !important; } }`}</style>
       </div>

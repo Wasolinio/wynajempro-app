@@ -63,6 +63,15 @@ export const BRAND_CSS = `
 .wpb-mono{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; }
 .wpb-lead{ font-size:18px; line-height:1.6; color:var(--muted); margin:14px 0 0; }
 .wpb-meta{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--faint); margin:12px 0 0; }
+/* Akcja o wadze wizualnej mikro-etykiety — używane przy kredycie na stronach gościa
+   („Ustawienia cookies"). Semantycznie <button>, wyglądem część .wpb-meta.
+   .wpb-meta__more trzyma separator razem z akcją, żeby przy zawijaniu (mobile)
+   „·" nie zostawało samo na końcu wiersza. */
+.wpb-meta__more{ white-space:nowrap; }
+.wpb-meta__btn{ padding:0; border:0; background:none; font:inherit; color:inherit; cursor:pointer;
+  text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--hairline);
+  transition:color .15s, text-decoration-color .15s; }
+.wpb-meta__btn:hover{ color:var(--ink); text-decoration-color:var(--ink); }
 .wpb-accent{ color:var(--cynober); }
 
 /* ── Karty / panele ── */
