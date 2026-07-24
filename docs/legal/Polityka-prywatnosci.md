@@ -31,13 +31,16 @@
 >
 > **[UZUPEŁNIENIE 2026-07-24 (legal, N6.1)]:** w sekcji 9 dodano opis mechanizmu **wycofania /
 > zmiany zgody na cookies** (art. 7 ust. 3 RODO) i zaktualizowano wcześniejszą uwagę o jego
-> braku. Mechanizm jest zaimplementowany w kodzie (`src/firebase.js`,
-> `src/components/ConsentNotice.jsx`), ale **jeszcze niewdrożony na produkcję** — opis oznaczono
-> jako stan docelowy do czasu deployu. Osobno odnotowano dla prawnika **nieaktualność podstawy
+> braku. Mechanizm został **wdrożony na produkcję 2026-07-24** (commit `495aace`, site
+> `wynajempro` / `wynajempro.com`; przepływ przeklikany end-to-end na produkcji), więc opis
+> w sekcji 9 jest opisem **stanu obowiązującego**, a nie stanu docelowego — kod:
+> `src/firebase.js`, `src/components/ConsentNotice.jsx`, `src/pages/PrivacyPage.jsx`,
+> `src/pages/landing/LandingPage.jsx`. Osobno odnotowano dla prawnika **nieaktualność podstawy
 > prawnej cookies**: cytowane „Prawo telekomunikacyjne (art. 173)" zostało zastąpione **Prawem
 > komunikacji elektronicznej** (cookies — art. 399 PKE; definicja zgody odsyłająca do RODO —
 > art. 402 PKE), obowiązującym od 10 listopada 2024 r. Korekta pełnej podstawy należy do
-> prawnika-człowieka (N4) — treści merytorycznej sekcji 9 nie zmieniano.
+> prawnika-człowieka (N4) — treści merytorycznej sekcji 9 nie zmieniano. Cały dokument
+> pozostaje **PROJEKTEM** oczekującym na weryfikację prawnika (N4).
 
 ---
 
@@ -154,16 +157,17 @@ WynajemPRO wykorzystuje:
 
 **Stan faktyczny (zweryfikowany w kodzie `firebase.js`):** Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody. **Jedyne przetwarzanie uruchamiane po zgodzie to analiza ruchu (Google/Firebase Analytics) — Aplikacja nie personalizuje na tej podstawie treści ani komunikatów i nie stosuje cookies reklamowych.**
 
-**[UZUPEŁNIENIE 2026-07-24 — wchodzi w życie z wdrożeniem N6.1; do czasu deployu opisuje stan docelowy, nie stan live.] Wycofanie i zmiana zgody.** Zgodę na cookies analityczne można w każdej chwili **zmienić lub wycofać — równie łatwo, jak jej udzielić** (art. 7 ust. 3 RODO). Służą do tego dwa równorzędne wejścia: link **„Ustawienia cookies"** w stopce serwisu oraz przycisk **„Zmień lub wycofaj zgodę na cookies"** na tej stronie — oba ponownie otwierają banner zgody (bez przeładowania strony), z symetrycznym wyborem „Akceptuję" / „Wycofaj zgodę" oraz informacją o aktualnym stanie wyboru. Wycofanie zgody **realnie zatrzymuje** działanie Google/Firebase Analytics (ustawienie standardowej flagi opt-out dla identyfikatora pomiaru, wyłączenie zbierania danych po stronie Firebase oraz usunięcie istniejących plików cookies `_ga*`) — nie ogranicza się do ukrycia bannera. Wycofanie zgody **nie wpływa na zgodność z prawem** przetwarzania, którego dokonano na podstawie zgody przed jej wycofaniem. Ponieważ jedyną kategorią cookies niewymagającą niezbędności jest analityka, wybór ma charakter binarny (zgoda / tylko niezbędne) i nie wymaga dodatkowej granulacji.
+**[UZUPEŁNIENIE 2026-07-24] Wycofanie i zmiana zgody.** Zgodę na cookies analityczne można w każdej chwili **zmienić lub wycofać — równie łatwo, jak jej udzielić** (art. 7 ust. 3 RODO). Służą do tego dwa równorzędne wejścia: link **„Ustawienia cookies"** w stopce serwisu oraz przycisk **„Zmień lub wycofaj zgodę na cookies"** na tej stronie — oba ponownie otwierają banner zgody (bez przeładowania strony), z symetrycznym wyborem „Akceptuję" / „Wycofaj zgodę" oraz informacją o aktualnym stanie wyboru. Wycofanie zgody **realnie zatrzymuje** działanie Google/Firebase Analytics (ustawienie standardowej flagi opt-out dla identyfikatora pomiaru, wyłączenie zbierania danych po stronie Firebase oraz usunięcie istniejących plików cookies `_ga*`) — nie ogranicza się do ukrycia bannera. Wycofanie zgody **nie wpływa na zgodność z prawem** przetwarzania, którego dokonano na podstawie zgody przed jej wycofaniem. Ponieważ jedyną kategorią cookies niewymagającą niezbędności jest analityka, wybór ma charakter binarny (zgoda / tylko niezbędne) i nie wymaga dodatkowej granulacji.
 
-> **Status wdrożenia (aktualizacja 2026-07-24):** Wcześniejszą uwagę o braku łatwego
-> wycofania/zmiany zgody (wymóg równej łatwości — art. 7 ust. 3 RODO) **zaadresowano w kodzie
-> w ramach zadania N6.1** (`src/firebase.js`, `src/components/ConsentNotice.jsx`). **Mechanizm
-> oczekuje na wdrożenie na produkcję** — do czasu deployu na produkcji nadal działa poprzedni
-> banner bez opcji wycofania, dlatego akapit `[UZUPEŁNIENIE 2026-07-24]` powyżej opisuje stan
-> docelowy, a nie stan live. Po deployu ta pozycja schodzi z listy braków (por.
-> `Bezpieczenstwo-kont-i-danych.md` §9). *(Historycznie: PRZEGLĄD 2026-07-22 — mechanizm był
-> jeszcze niewdrożony; uwaga otwarta. Zamknięta w warstwie kodu 2026-07-24, pozostaje deploy.)*
+> **[UZUPEŁNIENIE 2026-07-24 — pozycja domknięta]** Wcześniejsza uwaga o braku łatwego
+> wycofania i zmiany zgody (wymóg równej łatwości — art. 7 ust. 3 RODO) jest **zamknięta**:
+> mechanizm opisany wyżej **działa na produkcji od 2026-07-24** (zadanie N6.1, commit
+> `495aace`; przepływ zgoda → ponowne otwarcie panelu → wycofanie wraz z usunięciem plików
+> cookies `_ga*` przeklikany na produkcji). Akapit powyżej opisuje zatem **stan obowiązujący**,
+> a nie stan docelowy. Pozycja zeszła z listy braków w `Bezpieczenstwo-kont-i-danych.md`
+> (sekcja 9.1). Otwarta pozostaje wyłącznie kwestia **aktualizacji podstawy prawnej cookies**
+> (Prawo telekomunikacyjne → Prawo komunikacji elektronicznej) — do rozstrzygnięcia przez
+> prawnika w ramach N4.
 
 ## 10. Bezpieczeństwo
 
@@ -179,4 +183,4 @@ Politykę możemy aktualizować. O istotnych zmianach poinformujemy [DO UZUPEŁN
 
 ---
 
-*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `AccountModal.jsx`, `CompleteProfileScreen.jsx`, `ContactPage.jsx`, `ConsentNotice.jsx`, `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt`). Pełny przegląd aktualności: 2026-07-22; uzupełnienie o mechanizm wycofania zgody: 2026-07-24. Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`; ocena modelu „dostępu po linku" — `Ocena-linki-guide-opinie.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `AccountModal.jsx`, `CompleteProfileScreen.jsx`, `ContactPage.jsx`, `ConsentNotice.jsx`, `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt`). Pełny przegląd aktualności: 2026-07-22; mechanizm wycofania zgody na cookies opisany 2026-07-24 jako stan obowiązujący — wdrożony na produkcję 2026-07-24 (commit `495aace`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`; ocena modelu „dostępu po linku" — `Ocena-linki-guide-opinie.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*

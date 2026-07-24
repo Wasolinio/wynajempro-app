@@ -3,10 +3,14 @@
 > **Przeznaczenie:** materiał informacyjny dla prawnika oceniającego zgodność z art. 32 RODO
 > (bezpieczeństwo przetwarzania) oraz podkład do opisu środków technicznych w Polityce
 > Prywatności i DPA §6.
-> **Stan na:** 2026-07-22 (stan produkcji po wydaniach z tego dnia).
-> **[AKTUALIZACJA 2026-07-24]:** zmieniono wyłącznie wiersz „Wycofanie zgody na cookies" w
-> sekcji 9 — mechanizm (N6.1) jest zaimplementowany w kodzie, ale **nie jest jeszcze na
-> produkcji**; stan produkcji z 2026-07-22 pozostaje w mocy do czasu deployu.
+> **Stan na:** 2026-07-24 (baza: stan produkcji z 2026-07-22 + wydanie z 2026-07-24).
+> **[AKTUALIZACJA 2026-07-24]:** wydanie produkcyjne (deploy `hosting:app`, commit `495aace`,
+> site `wynajempro` / domena `wynajempro.com`) domknęło **dwie** pozycje z sekcji 9:
+> **wycofanie zgody na cookies** (N6.1 — przepływ przeklikany end-to-end na produkcji) oraz
+> **zakres ostrzeżenia przy usuwaniu konta** (N6.2 — potwierdzone w kodzie, buildzie i testach;
+> komunikat jest za logowaniem, więc nie był oglądany na produkcji). Obie pozycje przeniesiono
+> z tabeli braków do wykazu pozycji domkniętych (sekcja 9.1). Pozostałe pozycje listy braków
+> **pozostają otwarte**; reszta dokumentu opisuje stan produkcji z 2026-07-22.
 > **Metoda:** każdy fakt zweryfikowany bezpośrednio w kodzie źródłowym lub w konfiguracji —
 > przy każdym punkcie wskazano plik. Sekcja 9 zawiera **uczciwą listę ograniczeń i braków**;
 > dokument celowo nie jest materiałem marketingowym.
@@ -113,6 +117,8 @@ przez dostawcę logowania.
 ## 9. Ograniczenia, braki i przyjęte ryzyka (świadomie ujawnione)
 
 Ta sekcja istnieje po to, by prawnik oceniał stan rzeczywisty, a nie wyidealizowany.
+Tabela poniżej zawiera **wyłącznie pozycje otwarte**. Pozycje domknięte (wdrożone na produkcję)
+przeniesiono do sekcji 9.1 — nie znikają z dokumentu, ale nie udają braków.
 
 | Obszar | Stan | Waga (ocena robocza) |
 |---|---|---|
@@ -121,11 +127,21 @@ Ta sekcja istnieje po to, by prawnik oceniał stan rzeczywisty, a nie wyidealizo
 | **Egzekwowanie App Check** | Mechanizm jest zainicjowany w aplikacji (reCAPTCHA v3), ale **samo egzekwowanie po stronie usług konfiguruje się w konsoli dostawcy** — nie da się tego potwierdzić z kodu. Wymaga sprawdzenia przez właściciela w konsoli Firebase. | **Do pilnego potwierdzenia** — od tego zależy, czy deklaracja o ochronie przed nadużyciami jest prawdziwa |
 | **Kopie zapasowe** | W repozytorium brak konfiguracji kopii zapasowych bazy (harmonogram eksportu / odtwarzanie do punktu w czasie). Dane leżą na infrastrukturze Google z jej wbudowaną redundancją, ale **redundancja nie chroni przed omyłkowym skasowaniem danych przez aplikację**. | **Średnia–wysoka; rekomendowane do wdrożenia przed launchem** |
 | **Rejestrowanie i alarmowanie** | Brak wydzielonego monitoringu bezpieczeństwa i alertów; dostępne są standardowe dzienniki platformy | Średnia |
-| **[AKTUALIZACJA 2026-07-24] Wycofanie zgody na cookies** | Mechanizm równie łatwego wycofania/zmiany zgody (art. 7 ust. 3 RODO) **zaimplementowano w kodzie (N6.1)**: link „Ustawienia cookies" w stopce oraz przycisk na stronie Polityki ponownie otwierają banner (accept/withdraw symetryczne, z linią statusu aktualnego wyboru), a wycofanie realnie zatrzymuje Analytics (flaga opt-out `ga-disable-<measurementId>`, `setAnalyticsCollectionEnabled(false)`) i kasuje pliki cookies `_ga*` — `src/firebase.js`, `src/components/ConsentNotice.jsx`. **Kod jest w gałęzi roboczej, jeszcze niewdrożony na produkcję** — do czasu deployu na produkcji nadal działa poprzedni banner bez opcji wycofania. | **W trakcie: kod gotowy, oczekuje na deploy.** Po wdrożeniu na produkcję wiersz schodzi z listy braków (por. `Polityka-prywatnosci.md` §9). |
-| **Ostrzeżenie przy usuwaniu konta** | Komunikat wymienia węższy zakres („konto, subskrypcja, nieruchomości, historia rezerwacji") niż faktyczna kasacja (obejmuje też przewodniki, dane gości i pliki) | Niska, ale łatwa do poprawienia — rzetelność informacji |
 | **Osierocone pliki z przeszłości** | Pliki przewodników usuniętych przed wdrożeniem kaskady mogą pozostawać dostępne pod starymi adresami; nowe przypadki są już wykluczone | Niska–średnia; wymaga jednorazowego czyszczenia |
 | **Model „dostępu po linku"** | Świadomie przyjęty; pełna analiza i przyjęte środki — `Ocena-linki-guide-opinie.md` | Przyjęte ryzyko po wdrożeniu środków |
 | **Weryfikacja adresów przy synchronizacji kalendarzy** | Zabezpieczenie przed wywołaniem adresów wewnętrznych działa na poziomie nazwy hosta; nie rozwiązuje nazw do adresów IP | Niska (treść odpowiedzi nie wraca do wywołującego) |
+
+### 9.1 Pozycje domknięte — wdrożone na produkcję (nie są już brakami)
+
+Sekcja prowadzona po to, by żadna wcześniej ujawniona pozycja nie zniknęła z dokumentu bez śladu.
+Wspólny dowód wdrożenia: deploy `firebase deploy --only hosting:app` z **2026-07-24**,
+commit `495aace`, site `wynajempro` (domena `wynajempro.com`); przed wdrożeniem lint bez uwag,
+poprawny build i testy end-to-end 49/49.
+
+| Obszar (dawna pozycja listy braków) | Stan po wdrożeniu | Dowód i zastrzeżenia |
+|---|---|---|
+| **Wycofanie zgody na cookies** (N6.1) | Mechanizm równie łatwego wycofania i zmiany zgody (art. 7 ust. 3 RODO) **działa na produkcji**. Dwa równorzędne wejścia: link „Ustawienia cookies" w stopce serwisu oraz przycisk „Zmień lub wycofaj zgodę na cookies" na stronie Polityki Prywatności — oba ponownie otwierają banner z symetrycznym wyborem „Akceptuję" / „Wycofaj zgodę" i linią statusu aktualnego wyboru. Wycofanie **realnie zatrzymuje** Analytics: ustawienie flagi opt-out `ga-disable-<measurementId>`, wyłączenie zbierania po stronie Firebase i skasowanie istniejących plików cookies `_ga*`. Ponadto bez zapisanej zgody nie powstaje instancja Analytics — zdarzenia logowania i rejestracji nie trafiają do GA przed akceptacją (model opt-in bez luk). | Pełny przepływ przeklikany **na produkcji 2026-07-24**: akceptacja → utworzenie plików cookies `_ga`; ponowne otwarcie panelu z obu wejść; wycofanie → flaga opt-out ustawiona, pliki cookies `_ga*` faktycznie usunięte. Testy `e2e/cookie-consent.spec.js` 3/3. Kod: `src/firebase.js`, `src/components/ConsentNotice.jsx`, `src/pages/PrivacyPage.jsx`, `src/pages/landing/LandingPage.jsx`. Por. `Polityka-prywatnosci.md` §9. **Uwaga:** domknięcie dotyczy wyłącznie mechanizmu — ocena **podstawy prawnej cookies** (nieaktualne odwołanie do Prawa telekomunikacyjnego zamiast Prawa komunikacji elektronicznej) pozostaje otwarta dla prawnika, patrz `Polityka-prywatnosci.md` §9. |
+| **Ostrzeżenie przy usuwaniu konta** (N6.2) | Komunikat przed usunięciem konta wymienia **pełny faktyczny zakres kasacji**: przewodniki wraz z danymi dostępowymi gości (kody, WiFi) i podpisami akceptacji regulaminu, pliki, dane biznesowe (obiekty, rezerwacje, koszty, zadania), subskrypcję i rekord klienta Stripe, profil oraz konto logowania — z zastrzeżeniem, że operacja jest nieodwracalna i następuje bez okresu karencji. Zakres jest spójny z sekcją 8 (poprzednio komunikat wymieniał zakres węższy niż faktyczna kasacja). | Kod: `src/pages/dashboard/modals/AccountModal.jsx` (wydanie 2026-07-24). **Zastrzeżenie co do sposobu weryfikacji:** potwierdzone w kodzie, buildzie i testach; komunikat jest dostępny wyłącznie po zalogowaniu, więc **nie był oglądany na produkcji** — smoke test właściciela jeszcze się nie odbył. |
 
 ## 10. Ograniczenia samej weryfikacji
 
@@ -145,6 +161,8 @@ Uczciwość materiału wymaga wskazania, czego **nie dało się potwierdzić z k
 *Dokument przygotowany na podstawie bezpośredniej weryfikacji kodu produkcyjnego 2026-07-22
 (`src/firebase.js`, `src/App.jsx`, `src/pages/landing/LoginPanel.jsx`, `src/pages/dashboard/modals/AccountModal.jsx`,
 `firestore.rules`, `storage.rules`, `firebase.json`, `functions/index.js`, `.gitignore`).
-Aktualizacja 2026-07-24 dotyczy wyłącznie wiersza „Wycofanie zgody na cookies" (mechanizm N6.1
-w kodzie, przed deployem — `src/firebase.js`, `src/components/ConsentNotice.jsx`).
+Aktualizacja 2026-07-24: wydanie produkcyjne (commit `495aace`) domknęło dwie pozycje sekcji 9 —
+wycofanie zgody na cookies (N6.1) oraz zakres ostrzeżenia przy usuwaniu konta (N6.2); przeniesiono
+je do sekcji 9.1. Pozostałe pozycje listy braków — w tym egzekwowanie App Check, kopie zapasowe
+i osierocone pliki z przeszłości — **pozostają otwarte**.
 Nie stanowi opinii prawnej ani deklaracji zgodności — służy jako podkład do oceny przez prawnika.*

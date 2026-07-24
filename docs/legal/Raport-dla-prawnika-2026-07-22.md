@@ -1,12 +1,42 @@
 # WynajemPRO — raport dla prawnika
 
 **Data:** 2026-07-22 · **Przygotowanie:** zespół WynajemPRO (materiał roboczy)
+**Errata:** 2026-07-24 — zmiany po przekazaniu pakietu, opisane w sekcji „Errata" poniżej.
 **Cel:** przekazanie kompletu dokumentów do oceny prawnej przed uruchomieniem sprzedaży.
 
 > **Charakter materiału:** wszystkie dokumenty w tym pakiecie są **projektami**. Nie zostały
 > opublikowane, nie obowiązują żadnego użytkownika i nie przyjęto dotąd żadnej płatności od
 > klienta. Opisy funkcji aplikacji zostały zweryfikowane bezpośrednio w kodzie produkcyjnym —
 > tam, gdzie czegoś nie dało się potwierdzić, jest to wyraźnie zaznaczone zamiast domysłu.
+
+---
+
+## Errata — co zmieniło się po przekazaniu pakietu (stan na 2026-07-24)
+
+> **Po co ta sekcja.** Pakiet przekazano 2026-07-22. Poniżej zebrano **wyłącznie to, co zmieniło
+> się po tej dacie**, żeby lektura pierwotnego tekstu nie wprowadzała w błąd. **Numeracji sekcji
+> i pytań nie zmieniono**, a pierwotnych sformułowań nie usunięto — miejsca, które straciły
+> aktualność, mają w tekście odesłanie tutaj. Errata nie zdejmuje żadnego pytania z sekcji 4.
+
+| # | Czego dotyczy | Było (stan przekazany 2026-07-22) | Jest (2026-07-24) | Dowód / gdzie opisane |
+|---|---|---|---|---|
+| **E1** | **Wycofanie zgody na cookies** — sekcja 5, punkt trzeci | „banner pozwala zgodę wyrazić, ale nie ma jeszcze mechanizmu jej łatwego wycofania. Wiemy o tym; pozycja jest otwarta i zostanie wdrożona." | Mechanizm wycofania i zmiany zgody **działa na produkcji od 2026-07-24**. Dwa równorzędne wejścia: link „Ustawienia cookies" w stopce serwisu oraz przycisk „Zmień lub wycofaj zgodę na cookies" na stronie Polityki Prywatności; oba otwierają ponownie banner z symetrycznym wyborem „Akceptuję" / „Wycofaj zgodę". Wycofanie **realnie zatrzymuje** analitykę (flaga opt-out dla identyfikatora pomiaru, wyłączenie zbierania po stronie Firebase, usunięcie plików cookies `_ga*`), a nie tylko chowa banner. | Wydanie produkcyjne 2026-07-24 (deploy `hosting:app`, commit `495aace`, domena `wynajempro.com`); przepływ akceptacja → wycofanie przeklikany end-to-end na produkcji. Opis: `Bezpieczenstwo-kont-i-danych.md` §9.1 oraz `Polityka-prywatnosci.md` §9. **Zastrzeżenie zakresu → E2** |
+| **E2** | **Zasięg mechanizmu z E1** (kwestia nierozpoznana w pakiecie z 2026-07-22) | — | Na **stronach gościa** (`/guide/…`, `/opinie/…`) **nie ma dziś na produkcji wejścia do panelu zgód** — strony te nie mają stopki serwisu. Poprawka jest przygotowana w kodzie, ale **nie została wdrożona** (termin wdrożenia to odrębna decyzja właściciela). Do czasu wdrożenia deklaracja „równie łatwego wycofania" odpowiada stanowi faktycznemu dla serwisu i strony Polityki, a **nie** dla stron gościa — choć to właśnie tam analityka uruchamia się wobec osób niebędących naszymi użytkownikami. | Ustalenie własne 2026-07-24. Kontekst: `Polityka-prywatnosci.md` §9 (analityka na stronach publicznych), `Ocena-linki-guide-opinie.md` poz. 5 |
+| **E3** | **Ostrzeżenie przed usunięciem konta** — dotyczy pytania **13** w sekcji 4.2 | Komunikat wyświetlany przed usunięciem konta wymieniał **węższy zakres** niż faktycznie wykonywana kasacja | Komunikat wymienia **pełny faktyczny zakres**: przewodniki wraz z danymi dostępowymi gości i zapisami akceptacji regulaminu, pliki, dane biznesowe, subskrypcję i rekord klienta Stripe, profil oraz konto logowania — ze wskazaniem nieodwracalności i braku okresu karencji. Zakres jest spójny z opisem usuwania danych w dokumencie nr 4. | Kod: `src/pages/dashboard/modals/AccountModal.jsx`, wydanie 2026-07-24 (commit `495aace`). **Zastrzeżenie co do sposobu weryfikacji:** potwierdzone w kodzie, buildzie i testach; komunikat jest dostępny wyłącznie po zalogowaniu, więc **nie był oglądany na produkcji**. Pytanie 13 **pozostaje otwarte** — prosimy oceniać nowe brzmienie |
+| **E4** | **Podstawa prawna cookies** cytowana w dokumentach | Dokumenty (m.in. Polityka §9, checklista) powołują „Prawo telekomunikacyjne (art. 173)" | Odnotowaliśmy, że ta podstawa jest **nieaktualna**: ustawa z 12.07.2024 — **Prawo komunikacji elektronicznej** (Dz.U. 2024 poz. 1221) weszła w życie **10.11.2024** i zastąpiła Prawo telekomunikacyjne; przechowywanie informacji w urządzeniu końcowym (cookies) reguluje **art. 399 PKE**. **Brzmień merytorycznych nie zmienialiśmy** — model opt-in i zgoda w rozumieniu RODO pozostają bez zmian. **Korekta samej podstawy to prośba do Państwa.** | Notki dodane w `Polityka-prywatnosci.md` §9 i `Checklista-zgodnosci.md` (sekcje A, B, C). Weryfikacja źródeł 2026-07-24 (ISAP / Dziennik Ustaw, komunikat Ministerstwa Cyfryzacji). **Uwaga:** wskazywanego przepisu o definicji zgody (art. 402 PKE) **nie potwierdziliśmy w tekście urzędowym** — prosimy o weryfikację numeracji |
+| **E5** | **Stan dokumentów pakietu** — tabela w sekcji 2 | Wszystkie pozycje opisane jako „zaktualizowany 2026-07-22" | Po przekazaniu zmieniły się trzy dokumenty: **nr 2** `Polityka-prywatnosci.md` (§9 — opis wycofania zgody + notka o podstawie prawnej), **nr 4** `Bezpieczenstwo-kont-i-danych.md` (nowa sekcja 9.1 „pozycje domknięte", dwie pozycje zeszły z listy braków), **nr 6** `Checklista-zgodnosci.md` (zamknięcie pozycji „wycofanie zgody cookie", oznaczenie podstawy prawnej). Dokumenty **1, 3, 5 i 7 — bez zmian**. | Wersje z 2026-07-24 w katalogu `docs/legal/` |
+
+**Czego errata NIE zmienia:**
+
+- Wszystkie dokumenty pozostają **projektami** — nieopublikowanymi, nieobowiązującymi nikogo;
+  nadal nie przyjęto żadnej płatności od klienta.
+- **Wszystkie pytania z sekcji 4.1 i 4.2 pozostają otwarte** (pytanie 13 — patrz E3).
+- **Pozostałe braki z dokumentu nr 4 są otwarte**: potwierdzenie egzekwowania App Check w konsoli
+  dostawcy, konfiguracja kopii zapasowych, osierocone pliki z przeszłości, brak 2FA, polityka
+  haseł od 6 znaków, brak wydzielonego monitoringu bezpieczeństwa. **Pytanie z sekcji 4.1 pkt 5
+  jest w pełni aktualne** — zmieniła się tylko struktura listy (pozycje domknięte przeniesiono
+  do sekcji 9.1 tamtego dokumentu, żeby nie udawały braków).
+- Generator umów najmu **pozostaje funkcją wyłączoną** (sekcja 5, punkt pierwszy).
 
 ---
 
@@ -41,6 +71,9 @@ WiFi, ujawniane gościowi po elektronicznej akceptacji regulaminu obiektu. Oznac
 
 Dokumenty 1–3 są przeznaczone do publikacji po akceptacji. Dokumenty 4–7 to materiał
 kontekstowy — pokazują, na jakiej podstawie sformułowano treści i jakie ryzyka rozpoznano.
+
+> **[ERRATA 2026-07-24]** Kolumna „Stan" opisuje dzień przekazania pakietu. Po 2026-07-22
+> zmieniły się dokumenty **nr 2, 4 i 6** — zakres zmian w erracie, pozycja **E5**.
 
 ---
 
@@ -111,7 +144,9 @@ Kilka zapisów było celowo wstrzymanych do czasu faktycznego wdrożenia.
 12. **Obowiązek informacyjny przy promocji „founding members"** — czy i jak stosować wymóg
     podania najniższej ceny z 30 dni (dyrektywa Omnibus).
 13. **Nieodwracalne usunięcie konta bez „kosza"** — czy sposób ostrzeżenia użytkownika przed
-    operacją jest wystarczający.
+    operacją jest wystarczający. **[ERRATA 2026-07-24]** Brzmienie ostrzeżenia zostało po
+    przekazaniu pakietu rozszerzone o pełny faktyczny zakres kasacji — pytanie pozostaje otwarte,
+    ale prosimy oceniać **nowe** brzmienie (errata, pozycja **E3**).
 14. **Czy potrzebny jest Inspektor Ochrony Danych** przy tej skali działalności (nasza ocena
     robocza: nie, art. 37 RODO — prosimy o potwierdzenie).
 15. **Aktualny stan obowiązków informacyjnych o pozasądowym rozwiązywaniu sporów** (unijna
@@ -135,8 +170,15 @@ Dla porządku — czego aplikacja **dziś nie robi**, mimo że dokumenty mogą o
   udostępnianie wzorców nie rodzi odpowiedzialności Operatora.
 - **Automatyczna wysyłka wiadomości do gości** — nieobecna; wszystkie linki gospodarz przekazuje
   ręcznie.
-- **Wycofanie zgody na cookies** — banner pozwala zgodę wyrazić, ale nie ma jeszcze mechanizmu jej
-  łatwego wycofania. Wiemy o tym; pozycja jest otwarta i zostanie wdrożona.
+- **Wycofanie zgody na cookies** — *treść przekazana 2026-07-22, dziś nieaktualna:* „banner
+  pozwala zgodę wyrazić, ale nie ma jeszcze mechanizmu jej łatwego wycofania. Wiemy o tym;
+  pozycja jest otwarta i zostanie wdrożona."
+  **[ERRATA 2026-07-24]** Mechanizm wycofania i zmiany zgody **działa na produkcji od
+  2026-07-24** — opis i dowód w erracie, pozycja **E1**, oraz w `Bezpieczenstwo-kont-i-danych.md`
+  §9.1 i `Polityka-prywatnosci.md` §9. W tej sekcji pozostaje natomiast **węższe, wciąż aktualne
+  zastrzeżenie**: na **stronach gościa** (`/guide/…`, `/opinie/…`) **nie ma dziś na produkcji
+  wejścia do panelu zgód** — poprawka jest przygotowana w kodzie, przed wdrożeniem
+  (errata, pozycja **E2**).
 
 ---
 
@@ -147,7 +189,12 @@ Prosimy o: (a) rozstrzygnięcie punktów z sekcji 4.1, (b) korektę brzmień w d
 potrzebują Państwo dostępu do dodatkowych materiałów technicznych — możemy przygotować dowolny
 wycinek konfiguracji lub kodu.
 
+Dodatkowo — po erracie z 2026-07-24 — prosimy o (e) wskazanie **właściwej podstawy prawnej
+cookies** do wpisania w dokumentach po zastąpieniu Prawa telekomunikacyjnego przez Prawo
+komunikacji elektronicznej (errata, pozycja **E4**).
+
 ---
 
 *Materiał roboczy zespołu WynajemPRO. Opisy stanu aplikacji zweryfikowane w kodzie produkcyjnym
-2026-07-22. Nie stanowi opinii prawnej ani deklaracji zgodności.*
+2026-07-22; errata na początku dokumentu opisuje zmiany po wydaniu produkcyjnym z 2026-07-24
+(commit `495aace`). Nie stanowi opinii prawnej ani deklaracji zgodności.*
