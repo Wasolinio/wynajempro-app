@@ -13,6 +13,12 @@
 > jako **nieaktualną** i przekazano do rozstrzygnięcia prawnikowi w ramach N4 (PKE od 2024-11-10)
 > — samej podstawy **nie przepisano**. Podstawy prawne poza tym jednym wyjątkiem pozostają
 > zweryfikowane na 2026-07-04 i wymagają odświeżenia przy najbliższym przeglądzie.
+>
+> **[AKTUALIZACJA 2026-07-25 · legal]** Do sekcji A dopisano wiersz o **rozbiciu liczby gości**
+> w rezerwacji (dorośli / dzieci / zwierzęta) — nowa kategoria danych gości w dokumentach
+> `Polityka-prywatnosci.md` §4 i `DPA-powierzenie.md` §3. **Zmiana nie tworzy nowej luki**
+> (ekspozycja danych bez zmian), dlatego **nie dodano pozycji do tabeli B**; funkcja jest
+> w kodzie i **przed wdrożeniem na produkcję**.
 
 ---
 
@@ -31,6 +37,7 @@ Ustalone bezpośrednio w repozytorium, nie z deklaracji:
 | **Analytics ładowany DOPIERO po zgodzie** (`cookie_consent==='true'`) — model opt-in | `src/firebase.js:58-68` |
 | Banner cookie zapisuje zgodę w `localStorage`; brak łatwego wycofania/granularności — **[STATUS 2026-07-24 · legal] część „brak łatwego wycofania" jest nieaktualna**: wycofanie i zmiana zgody wdrożone na produkcję 2026-07-24 (patrz sekcja B). Bez zmian pozostaje brak granularności — wybór jest binarny (analityka albo tylko niezbędne), bo analityka jest jedyną kategorią nie-niezbędną | `src/components/ConsentNotice.jsx`; po 2026-07-24 także `src/firebase.js`, `src/pages/PrivacyPage.jsx`, `src/pages/landing/LandingPage.jsx` |
 | **N1/N2/N3 zaślepione w regułach**: weryfikacja e-mail, subskrypcja, walidacja schematu zwracają `true`/są zakomentowane | `firestore.rules:9-63` |
+| **[DODANE 2026-07-25 · legal — w kodzie, przed wdrożeniem na produkcję]** Rezerwacja zyskuje **rozbicie składu osobowego pobytu**: `adults`, `children`, `pets` (pola opcjonalne, wyłącznie liczby; `guests` zostaje sumą dorosłych i dzieci). **Ekspozycja bez zmian:** odczyt `rentals` wyłącznie za `isOwnerAndVerified` + `hasActiveSubscription` (zero ścieżek odczytu publicznego), pola nieczytane przez przewodnik gościa i stronę opinii, nieobecne w publicznym eksporcie iCal (emitowane są tylko identyfikator, daty i stała nazwa „Rezerwacja z WynajemPRO") i niewysyłane do analityki. Nowa jest **kategoria informacji** (skład osobowy, w tym liczba dzieci), nie sposób jej udostępniania — opis wpisany do `Polityka-prywatnosci.md` §4 i `DPA-powierzenie.md` §3 | `firestore.rules` (allowlista i typy w `isValidRental`, reguły `match /users/{userId}/rentals/{docId}`), `functions/index.js` (eksport iCal), `functions/validate-schema-n3.cjs` (lustrzany tester), `src/pages/dashboard/modals/AddEditEntryModal.jsx`, `src/utils/guestCount.js` |
 
 ---
 
@@ -49,7 +56,7 @@ Ustalone bezpośrednio w repozytorium, nie z deklaracji:
 | **Omnibus przy founding members** | Rabat roczny dla bety; brak reguł prezentacji obniżki | Kara UOKiK do 10% obrotu za wadliwą prezentację obniżki | 🟡 ważne | Jeśli komunikować jako „obniżkę" — podać najniższą cenę z 30 dni; albo komunikować jako ofertę wprowadzającą, nie obniżkę | dyrektywa Omnibus / art. 4 ustawy o informowaniu o cenach |
 | **Faktury / VAT** | Brak informacji o fakturach i statusie VAT | Niepewność rozliczeń, obowiązki podatkowe | 🟡 ważne | Właściciel + księgowy: ustalić VAT i wystawianie faktur | przepisy podatkowe |
 | **hostProfile publiczny (adres/telefon)** | Adres i telefon gospodarza mogą być publiczne w przewodniku | Gospodarz powinien wiedzieć, że to publiczne | 🟢 porządkowe | Dodać w UI informację, że te pola są widoczne publicznie | zasada przejrzystości, art. 5 RODO |
-| **Rejestr czynności (RCP/RCPP)** | Brak wzmianki o rejestrach | Formalny obowiązek dokumentacyjny | 🟢 porządkowe | Przygotować rejestr czynności (administrator) i kategorii (procesor) | art. 30 RODO |
+| **Rejestr czynności (RCP/RCPP)** | Brak wzmianki o rejestrach | Formalny obowiązek dokumentacyjny | 🟢 porządkowe | Przygotować rejestr czynności (administrator) i kategorii (procesor) — przy sporządzaniu ująć także **skład osobowy pobytu** (sekcja A, wiersz z 2026-07-25) w kategoriach danych powierzonych | art. 30 RODO |
 
 ---
 
@@ -73,6 +80,15 @@ Zweryfikowane 2026-07-04. Preferowane źródła oficjalne. **Nie cytowano przepi
   > w tekście urzędowym** w tej sesji) przesądza prawnik-człowiek. Zmiana nie dotyka
   > merytoryki: model opt-in i zgoda w rozumieniu RODO pozostają. **Weryfikacja źródeł:
   > 2026-07-24.**
+- **[dodane 2026-07-25] Dane dzieci — dlaczego bez eskalacji przy rozbiciu liczby gości.**
+  Motyw 38 RODO wiąże szczególną ochronę danych dzieci przede wszystkim z **marketingiem,
+  profilowaniem i usługami oferowanymi bezpośrednio dziecku** (żadna z tych sytuacji nie zachodzi);
+  art. 8 RODO dotyczy zgody dziecka na usługi społeczeństwa informacyjnego oferowane
+  **bezpośrednio dziecku** — Aplikacja jest oferowana Gospodarzowi. **Ocena skutków (art. 35)
+  nie jest uruchamiana**: wykaz Prezesa UODO (komunikat z 17.06.2019, M.P. 2019 poz. 666) nie
+  wymienia danych dzieci wśród rodzajów operacji wymagających DPIA, a zasada kierunkowa zakłada
+  spełnienie **co najmniej dwóch** kryteriów z wykazu — tutaj nie jest spełnione żadne.
+  **Weryfikacja źródeł: 2026-07-25.** Pełne uzasadnienie: `DPA-powierzenie.md` §3.
 
 **Źródła (linki):**
 - [Ustawa o prawach konsumenta — tekst ujednolicony, ISAP (stan 2026-03-10)](https://isap.sejm.gov.pl/isap.nsf/download.xsp/WDU20140000827/U/D20140827Lj.pdf)
@@ -85,6 +101,9 @@ Zweryfikowane 2026-07-04. Preferowane źródła oficjalne. **Nie cytowano przepi
 - **[dodane 2026-07-24]** [Ustawa z 12.07.2024 — Prawo komunikacji elektronicznej, ISAP (Dz.U. 2024 poz. 1221)](https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20240001221)
 - **[dodane 2026-07-24]** [Przepisy wprowadzające ustawę — Prawo komunikacji elektronicznej, ISAP (Dz.U. 2024 poz. 1222)](https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20240001222)
 - **[dodane 2026-07-24]** [Ministerstwo Cyfryzacji — PKE obowiązuje od 10.11.2024](https://www.gov.pl/web/cyfryzacja/lepsza-ochrona-konsumentow-dzieki-przepisom-prawa-komunikacji-elektronicznej)
+- **[dodane 2026-07-25]** [Komunikat Prezesa UODO z 17.06.2019 — wykaz operacji wymagających DPIA, ISAP (M.P. 2019 poz. 666)](https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WMP20190000666)
+- **[dodane 2026-07-25]** [UODO — kiedy trzeba przeprowadzić ocenę skutków dla ochrony danych](https://uodo.gov.pl/pl/598/3617)
+- **[dodane 2026-07-25]** [Motyw 38 RODO — szczególna ochrona danych dzieci](https://gdpr-info.eu/recitals/no-38/) *(źródło pomocnicze; tekst wiążący — EUR-Lex, CELEX:32016R0679)*
 
 > **Niepewność nazwana:** w ISAP/Dzienniku Ustaw widnieją nowelizacje ze stycznia i marca 2026
 > (m.in. Dz.U. 2026 poz. 252 oraz ustawa z 23.01.2026). Ich treści NIE udało się zweryfikować
@@ -110,12 +129,12 @@ Zweryfikowane 2026-07-04. Preferowane źródła oficjalne. **Nie cytowano przepi
 
 1. **Sekcja odstąpienia (Regulamin §7)** — konstrukcja zgody na rozpoczęcie świadczenia i utraty prawa odstąpienia, dopasowana do faktycznego przepływu Stripe. Największe ryzyko sporne.
 2. **Status „przedsiębiorcy na prawach konsumenta"** dla gospodarzy — kluczowe, bo większość to działalność gospodarcza; przesądza zakres ochrony konsumenckiej.
-3. **DPA (całość)** — czy struktura art. 28 jest kompletna; zakres subprocesorów (czy Stripe jest subprocesorem danych powierzonych); tryb audytu w SaaS.
+3. **DPA (całość)** — czy struktura art. 28 jest kompletna; zakres subprocesorów (czy Stripe jest subprocesorem danych powierzonych); tryb audytu w SaaS. **[dodane 2026-07-25]** dodatkowo: czy katalog kategorii danych i osób w §3 jest prawidłowy po dopisaniu **składu osobowego pobytu** (dorośli/dzieci/zwierzęta) i czy „osoby małoletnie" powinny być wymienione wprost (nasza rekomendacja robocza: nie — uzasadnienie w §3).
 4. **Transfery poza EOG** — mechanizmy (SCC/DPF) dla Firebase i Stripe, po ustaleniu regionu.
 5. **Reżim reklamacji/zgodności usługi cyfrowej** (rozdz. 5b ustawy o prawach konsumenta) — terminy i skutki.
 6. **Klauzule ograniczające odpowiedzialność** (Regulamin §12) — pod kątem abuzywności.
 7. **Nowelizacje 2026** (patrz sekcja C) — czy zmieniają reżim usług cyfrowych/subskrypcji.
-8. **Generator umów najmu** — **[STATUS 2026-07-16 · legal] funkcja WYŁĄCZONA** (ukryta z nawigacji panelu decyzją właściciela — X16; kod widoku `ContractGeneratorView.jsx` pozostaje, ale wejście w UI usunięte, `ManagerApp.jsx` `NAV_ITEMS`; szczegóły w `Uwagi-N5-dla-prawnika.md`, aktualizacja na początku). Na dziś funkcja NIE jest oferowana użytkownikom, więc nie stanowi ryzyka produkcyjnego. Punkt pozostaje otwarty, ale przechodzi w tryb „przed ewentualnym ponownym włączeniem", a nie „przed launchem": finalizacja brzmienia disclaimera i ocena ryzyka, czy sama funkcja nie rodzi odpowiedzialności Operatora. Disclaimer wysokiego ryzyka zachowany w Regulaminie §4 ust. 1 (oznaczony jako „obecnie niedostępna") i wraca razem z funkcją.
+8. **Generator umów najmu** — **[STATUS 2026-07-16 · legal] funkcja WYŁĄCZONA** (ukryta z nawigacji panelu decyzją właściciela — X16; kod widoku `ContractGeneratorView.jsx` pozostaje, ale wejście w UI usunięte, `ManagerApp.jsx` `NAV_ITEMS`; szczegóły w `Uwagi-N5-dla-prawnika.md`, aktualizacja na początku). Na dziś funkcja NIE jest oferowana użytkownikom, więc nie stanowi ryzyka produkcyjnego. Punkt pozostaje otwarty, ale przechodzi w tryb „przed ewentualnym ponownym włączeniem", a nie „przed launchem": finalizacja brzmienia disclaimera i ocena ryzyka, czy sama funkcja nie rodzi odpowiedzialności Operatora.  Disclaimer wysokiego ryzyka zachowany w Regulaminie §4 ust. 1 (oznaczony jako „obecnie niedostępna") i wraca razem z funkcją.
 9. **Zgodność deklarowanych środków bezpieczeństwa z faktycznym stanem** po wdrożeniu N1–N3 (koordynacja z `code-reviewer`, bramka N5).
 10. **[dodane 2026-07-24] Podstawa prawna cookies po zmianie ustawy** — czym zastąpić odwołania do „art. 173 Prawa telekomunikacyjnego" w Polityce §9 i w tej checkliście (PKE, Dz.U. 2024 poz. 1221 — patrz sekcja C). Kwestia redakcyjna, ale dotyczy dokumentu publikowanego.
 
@@ -135,7 +154,9 @@ Dokumenty można opublikować, gdy łącznie:
 ---
 
 *Materiał roboczy `legal`. Podstawy prawne zweryfikowane u źródeł 2026-07-04; podstawa dotycząca
-cookies (PKE) — 2026-07-24. Aktualizacja 2026-07-24: zamknięto pozycję „Wycofanie zgody cookie"
-po wdrożeniu produkcyjnym (commit `495aace`) i oznaczono nieaktualne odwołanie do Prawa
-telekomunikacyjnego jako wsad do przeglądu prawnika. Ostateczna ocena zgodności należy
-do prawnika-człowieka.*
+cookies (PKE) — 2026-07-24; podstawy dotyczące danych dzieci (motyw 38 RODO, art. 8 RODO, wykaz
+DPIA Prezesa UODO) — 2026-07-25. Aktualizacja 2026-07-24: zamknięto pozycję „Wycofanie zgody
+cookie" po wdrożeniu produkcyjnym (commit `495aace`) i oznaczono nieaktualne odwołanie do Prawa
+telekomunikacyjnego jako wsad do przeglądu prawnika. Aktualizacja 2026-07-25: odnotowano rozbicie
+liczby gości w rezerwacji (sekcja A) — funkcja w kodzie, przed wdrożeniem na produkcję. Ostateczna
+ocena zgodności należy do prawnika-człowieka.*

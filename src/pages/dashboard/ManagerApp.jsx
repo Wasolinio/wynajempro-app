@@ -16,6 +16,7 @@ import {
   propColors, availableColors, defaultTaxSettings, defaultHostProfile, ITEMS_PER_PAGE,
 } from '../../utils/constants';
 import { calculateTaxes } from '../../utils/taxCalculator';
+import { toCount, guestsTotal } from '../../utils/guestCount';
 
 // Modale w stylu V4 (własne)
 import ProfitabilityReportModal from './modals/ProfitabilityReportModal';
@@ -145,6 +146,7 @@ export default function ManagerApp() {
   const getDefaultRentalState = useCallback(() => ({
     type: 'booking', source: sources.length > 0 ? sources[0] : '', property: properties.length > 0 ? properties[0].name : '',
     category: categories.length > 0 ? categories[0] : '', guest: '', email: '', phone: '', guestNote: '', text: '', guests: '',
+    adults: '', children: '', pets: '', // X14: rozbicie gości; `guests` wyliczane przy zapisie
     date: new Date().toISOString().split('T')[0], endDate: '', income: '', advancePayment: '', isAdvancePaid: false, commission: '',
     utilities: '', tax: '', vat: '', isPaid: false, isCompleted: false, completedTasks: {}, syncId: '',
   }), [sources, properties, categories]);
@@ -333,7 +335,15 @@ export default function ManagerApp() {
 
   const openEditModal = useCallback((r) => {
     setEditingId(r.id);
-    setNewRental({ ...r, email: r.email || '', phone: r.phone || '', text: r.text || '', guestNote: r.guestNote || '', advancePayment: r.advancePayment || '', commission: r.commission || '', tax: r.tax || '', vat: r.vat || '', utilities: r.utilities || '' });
+    // X14: rezerwacje sprzed rozbicia mają samo `guests`. Ponieważ `guests` jest teraz
+    // wyliczane (dorośli + dzieci), bez tej migracji otwarcie i zapis takiego wpisu
+    // wyzerowałoby liczbę osób. Przepisujemy więc `guests` na dorosłych.
+    const hasBreakdown = r.adults !== undefined || r.children !== undefined;
+    const legacyGuests = !hasBreakdown && r.guests !== undefined && r.guests !== '' ? r.guests : '';
+    setNewRental({
+      ...r, email: r.email || '', phone: r.phone || '', text: r.text || '', guestNote: r.guestNote || '', advancePayment: r.advancePayment || '', commission: r.commission || '', tax: r.tax || '', vat: r.vat || '', utilities: r.utilities || '',
+      adults: r.adults ?? legacyGuests, children: r.children ?? '', pets: r.pets ?? '',
+    });
     setShowAddModal(true);
   }, []);
 
@@ -352,11 +362,19 @@ export default function ManagerApp() {
     e.preventDefault();
     if (!user) return;
     const { id: _id, ...entry } = newRental;
-    ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', 'guests'].forEach((field) => {
+    // X14: `guests` jest polem WYLICZANYM — suma osób (dorośli + dzieci). Zwierzęta
+    // mają własne pole `pets` i do sumy nie wchodzą. Puste rozbicie → puste `guests`.
+    const totalGuests = guestsTotal(entry.adults, entry.children);
+    entry.guests = totalGuests === null ? '' : totalGuests;
+
+    const COUNT_FIELDS = ['guests', 'adults', 'children', 'pets']; // liczby osób/zwierząt: całkowite ≥ 0
+    ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', ...COUNT_FIELDS].forEach((field) => {
       if (entry[field] === '' || entry[field] === null || entry[field] === undefined) {
         // setDoc (create) nie przyjmuje sentinela deleteField() — SDK rzuca zanim
         // żądanie dotknie reguł; przy tworzeniu pomijamy pole, przy edycji kasujemy
         if (editingId) entry[field] = deleteField(); else delete entry[field];
+      } else if (COUNT_FIELDS.includes(field)) {
+        entry[field] = toCount(entry[field]) ?? 0;
       } else {
         const parsed = Number(String(entry[field]).replace(',', '.'));
         entry[field] = isNaN(parsed) ? 0 : parsed;

@@ -67,7 +67,7 @@ Do tej samej zakładki prowadzi też przycisk „Dodaj obiekt" w widoku „Obiek
 
 1. Kliknij przycisk „Rezerwacja" (z ikoną plusa) w prawym górnym rogu panelu.
 2. W formularzu „Nowy wpis" upewnij się, że wybrana jest zakładka „Rezerwacja".
-3. Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto". Możesz też podać „Liczba gości" — to pole nie jest wymagane.
+3. Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto". W sekcji „Goście" możesz podać „Dorośli", „Dzieci" i „Zwierzęta" — żadne z tych pól nie jest wymagane.
 4. Kliknij „Zapisz wpis". Potwierdzeniem jest komunikat „Dodano pomyślnie!".
 
 Rezerwacja pojawi się w widokach „Rezerwacje", „Kalendarz" i w statystykach. Szczegółowy opis wszystkich pól znajdziesz w artykule o rezerwacjach, kosztach i zadaniach.

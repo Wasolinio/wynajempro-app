@@ -100,8 +100,14 @@ test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kw
   // minimalny komplet: property/source/date są prefillowane; uzupełniamy resztę wymaganych
   await dialog.getByPlaceholder('np. Jan Kowalski').fill('Tester E2E');
   await dialog.locator('input[type="date"]').nth(1).fill('2026-08-15'); // wyjazd
-  await dialog.getByPlaceholder('np. 2').fill('3'); // liczba gości (X14)
+  await dialog.getByLabel('Dorośli').fill('2'); // X14: rozbicie liczby gości
+  await dialog.getByLabel('Dzieci').fill('2');
+  await dialog.getByLabel('Zwierzęta').fill('1');
   await dialog.getByPlaceholder('0,00').first().fill('1200'); // przychód
+
+  // podgląd sumy osób pod polami (zwierzęta poza sumą)
+  await expect(dialog.locator('.wpd-fhint')).toContainText('Łącznie osób: 4');
+
   await dialog.locator('button[type="submit"]').click();
 
   await expect(page.getByText('Dodano pomyślnie!')).toBeVisible();
@@ -115,9 +121,47 @@ test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kw
   expect(saved).toBeTruthy();
   expect(saved.guest).toBe('Tester E2E');
   expect(saved.income).toBe(1200);
-  expect(saved.guests).toBe(3); // X14: liczba gości zapisana jako liczba
-  for (const k of ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', 'guests']) {
+  // X14: rozbicie zapisane jako liczby, `guests` = dorośli + dzieci (bez zwierząt)
+  expect(saved.adults).toBe(2);
+  expect(saved.children).toBe(2);
+  expect(saved.pets).toBe(1);
+  expect(saved.guests).toBe(4);
+  for (const k of ['income', 'advancePayment', 'commission', 'tax', 'vat', 'utilities', 'guests', 'adults', 'children', 'pets']) {
     expect(saved[k] === undefined || typeof saved[k] === 'number').toBe(true);
+  }
+});
+
+test('Edycja starej rezerwacji (samo `guests`) nie gubi liczby osób (X14)', async ({ page }) => {
+  // Rekord sprzed rozbicia: ma `guests`, nie ma adults/children/pets
+  const legacyDb = {
+    ...activeDb,
+    'users/uid-test/rentals/legacy-1': {
+      type: 'booking', property: 'Apartament A', source: 'Booking.com', guest: 'Stary Gość',
+      date: '2026-08-01', endDate: '2026-08-05', income: 1000, guests: 3,
+    },
+  };
+  await setupFirebaseMocks(page, { user: mockUser, dbData: legacyDb });
+  await page.goto('/dashboard');
+
+  await page.locator('.wpd-nav__item', { hasText: 'Rezerwacje' }).click();
+  await page.locator('button[title="Edytuj"]').first().click();
+
+  const dialog = page.locator('[role="dialog"]');
+  await expect(dialog).toBeVisible();
+  // migracja przy wczytaniu: `guests` przepisane na dorosłych, suma bez zmian
+  await expect(dialog.getByLabel('Dorośli')).toHaveValue('3');
+  await expect(dialog.getByLabel('Dzieci')).toHaveValue('');
+  await expect(dialog.locator('.wpd-fhint')).toContainText('Łącznie osób: 3');
+
+  await dialog.locator('button[type="submit"]').click();
+  await expect(page.getByText('Zaktualizowano pomyślnie!')).toBeVisible();
+
+  const saved = await page.evaluate(() => (window.__mockDbData || {})['users/uid-test/rentals/legacy-1']);
+  expect(saved.guests).toBe(3); // liczba osób zachowana, nie wyzerowana
+  expect(saved.adults).toBe(3);
+  // niewypełnione pola przy edycji kasujemy sentinelem deleteField (mock: {_deleteField:true})
+  for (const k of ['children', 'pets']) {
+    expect(saved[k]).toEqual({ _deleteField: true });
   }
 });
 

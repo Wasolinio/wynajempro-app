@@ -129,7 +129,7 @@ export const helpArticles = [
         "items": [
           "Kliknij przycisk „Rezerwacja\" (z ikoną plusa) w prawym górnym rogu panelu.",
           "W formularzu „Nowy wpis\" upewnij się, że wybrana jest zakładka „Rezerwacja\".",
-          "Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto\". Możesz też podać „Liczba gości\" — to pole nie jest wymagane.",
+          "Wybierz obiekt, wpisz imię i nazwisko gościa, źródło rezerwacji, daty przyjazdu i wyjazdu oraz „Przychód brutto\". W sekcji „Goście\" możesz podać „Dorośli\", „Dzieci\" i „Zwierzęta\" — żadne z tych pól nie jest wymagane.",
           "Kliknij „Zapisz wpis\". Potwierdzeniem jest komunikat „Dodano pomyślnie!\"."
         ]
       },
@@ -288,7 +288,7 @@ export const helpArticles = [
           "Kwoty: zaimportowane rezerwacje mają przychód 0 zł. Uzupełnij go, edytując wpis (pole „Przychód brutto\" i „Prowizja portalu\") — wtedy statystyki finansowe będą kompletne.",
           "Dane kontaktowe gościa: e-mail i telefon musisz przepisać z panelu portalu, jeśli ich potrzebujesz.",
           "Anulacje: gdy gość odwoła rezerwację w portalu, wpis w WynajemPRO nie znika sam. Usuń go ręcznie (ikona kosza w widoku „Rezerwacje\").",
-          "Wiadomości i szczegóły pobytu (uwagi, liczba osób) — pozostają w portalu. Liczbę gości możesz dopisać ręcznie w polu „Liczba gości\" przy edycji rezerwacji."
+          "Wiadomości i szczegóły pobytu (uwagi, skład osobowy) — pozostają w portalu. Zaimportowana rezerwacja nie ma więc żadnych danych o gościach; uzupełnisz je ręcznie przy edycji wpisu, w sekcji „Goście\" (pola „Dorośli\", „Dzieci\" i „Zwierzęta\")."
         ]
       },
       {
@@ -329,6 +329,10 @@ export const helpArticles = [
           {
             "q": "Dlaczego zamiast nazwiska gościa widzę „Reserved\"?",
             "a": "Tak Airbnb opisuje rezerwacje w swoim kalendarzu iCal. Nazwisko możesz dopisać ręcznie, edytując wpis."
+          },
+          {
+            "q": "Przy rezerwacji z portalu nie widzę komórki „Goście\". Dlaczego?",
+            "a": "Bo iCal nie przenosi składu osobowego — z portalu przychodzi sam termin. Otwórz rezerwację, kliknij „Edytuj\" i wpisz liczby w sekcji „Goście\" („Dorośli\", „Dzieci\", „Zwierzęta\"). Po zapisaniu komórka „Goście\" pojawi się w szczegółach rezerwacji."
           },
           {
             "q": "Gość odwołał pobyt na Booking.com, a rezerwacja dalej widnieje w panelu. Czemu?",
@@ -374,9 +378,14 @@ export const helpArticles = [
           "„Źródło rezerwacji\" — skąd przyszła (np. Booking.com, Airbnb, Strona www). Listę źródeł zmienisz w „Ustawieniach\" w zakładce „Źródła\".",
           "„E-mail (opcjonalnie)\" i „Telefon (opcjonalnie)\" — kontakt do gościa; w szczegółach rezerwacji staną się klikalnymi łączami do połączenia i wiadomości.",
           "„Prywatna notatka o gościu\" — widoczna tylko dla Ciebie (np. ustalenia cenowe, preferencje).",
-          "„Data przyjazdu\", „Data wyjazdu\" i „Liczba gości\" (pole nieobowiązkowe — jeśli je wypełnisz, liczba osób pojawi się w szczegółach rezerwacji).",
+          "„Data przyjazdu\" i „Data wyjazdu\".",
+          "Sekcja „Goście\" — trzy nieobowiązkowe pola: „Dorośli\", „Dzieci\" i „Zwierzęta\". Liczba osób to suma dorosłych i dzieci; zwierzęta liczymy osobno i nie wchodzą do tej sumy.",
           "Sekcja „Rozliczenia\": „Przychód brutto\" (cała kwota za pobyt), „Zaliczka (opcja)\" (kwota zadatku, jeśli go pobierasz) i „Prowizja portalu\" (ile potrąca portal)."
         ]
+      },
+      {
+        "type": "p",
+        "content": "Pod polami sekcji „Goście\" panel podpowiada wynik: dopóki są puste, widnieje tam „Pola opcjonalne. Zwierzęta nie wliczają się do liczby osób.\", a po wpisaniu liczb — podsumowanie w rodzaju „Łącznie osób: 4 · zwierzęta liczone osobno\". Nic nie musisz sumować sam: rodzinę 2+2 z psem wpisujesz jako 2 dorosłych, 2 dzieci i 1 zwierzę."
       },
       {
         "type": "p",
@@ -464,10 +473,14 @@ export const helpArticles = [
       {
         "type": "list",
         "items": [
-          "Karta gościa — nazwa, obiekt, źródło, znacznik „iCal\" przy rezerwacjach z synchronizacji i etykieta statusu płatności; pod spodem komórki „Przyjazd\", „Wyjazd\", „Pobyt\" (liczba nocy i średnia cena za noc) oraz „Goście\", jeśli podałeś liczbę osób.",
+          "Karta gościa — nazwa, obiekt, źródło, znacznik „iCal\" przy rezerwacjach z synchronizacji i etykieta statusu płatności; pod spodem komórki „Przyjazd\", „Wyjazd\", „Pobyt\" (liczba nocy i średnia cena za noc) oraz „Goście\", jeśli uzupełniłeś którekolwiek z pól sekcji „Goście\".",
           "„Kontakt i notatki\" — telefon (klik = połączenie), e-mail (klik = wiadomość), Twoja prywatna notatka.",
           "„Rozliczenie\" — przychód rozpisany na noce, „Prowizja portalu\", „Podatek\", zaliczka i kwota „Do wypłaty\"."
         ]
+      },
+      {
+        "type": "p",
+        "content": "W komórce „Goście\" u góry stoi łączna liczba osób, a pod nią rozbicie — dla rodziny 2+2 z psem będzie to „4 osoby\" i „2 dorosłych · 2 dzieci · 1 zwierzę\". Starsze rezerwacje, przy których podałeś tylko liczbę osób, pokazują samo „4 osoby\"; rozbicie dopiszesz, otwierając wpis przyciskiem „Edytuj\". Rezerwacje z synchronizacji iCal nie mają ani liczby osób, ani rozbicia — portale nie przesyłają tych danych."
       },
       {
         "type": "p",
@@ -484,6 +497,14 @@ export const helpArticles = [
       {
         "type": "faq",
         "items": [
+          {
+            "q": "Gdzie zniknęło pole „Liczba gości\"?",
+            "a": "Zastąpiła je sekcja „Goście\" z trzema polami: „Dorośli\", „Dzieci\" i „Zwierzęta\". Liczba osób wylicza się teraz sama z dorosłych i dzieci — widzisz ją pod polami jako „Łącznie osób\". Zwierzęta liczymy osobno, bo nie są osobami. Przy starszej rezerwacji dotychczasowa liczba osób podstawia się w pole „Dorośli\", gdy otworzysz wpis do edycji; możesz ją tam rozdzielić na dorosłych i dzieci."
+          },
+          {
+            "q": "Czy pies wlicza się do liczby osób?",
+            "a": "Nie. Zwierzęta mają własne pole i własną pozycję w rozbiciu („1 zwierzę\"), ale nie powiększają liczby osób. Rodzina 2+2 z psem to nadal „4 osoby\"."
+          },
           {
             "q": "Czym różni się zadanie z formularza od zadania przy rezerwacji?",
             "a": "Zadanie z formularza („Nowy wpis\" → „Zadanie\") to jednorazowe przypomnienie z własną datą. Zadania przy rezerwacji powstają automatycznie z szablonów („Ustawienia\" → „Powiadomienia\") i liczą swój termin od daty przyjazdu gościa."

@@ -16,8 +16,11 @@ Wszystko, co dzieje się w Twoim wynajmie, zapisujesz w panelu jako wpisy jedneg
 - „Źródło rezerwacji" — skąd przyszła (np. Booking.com, Airbnb, Strona www). Listę źródeł zmienisz w „Ustawieniach" w zakładce „Źródła".
 - „E-mail (opcjonalnie)" i „Telefon (opcjonalnie)" — kontakt do gościa; w szczegółach rezerwacji staną się klikalnymi łączami do połączenia i wiadomości.
 - „Prywatna notatka o gościu" — widoczna tylko dla Ciebie (np. ustalenia cenowe, preferencje).
-- „Data przyjazdu", „Data wyjazdu" i „Liczba gości" (pole nieobowiązkowe — jeśli je wypełnisz, liczba osób pojawi się w szczegółach rezerwacji).
+- „Data przyjazdu" i „Data wyjazdu".
+- Sekcja „Goście" — trzy nieobowiązkowe pola: „Dorośli", „Dzieci" i „Zwierzęta". Liczba osób to suma dorosłych i dzieci; zwierzęta liczymy osobno i nie wchodzą do tej sumy.
 - Sekcja „Rozliczenia": „Przychód brutto" (cała kwota za pobyt), „Zaliczka (opcja)" (kwota zadatku, jeśli go pobierasz) i „Prowizja portalu" (ile potrąca portal).
+
+Pod polami sekcji „Goście" panel podpowiada wynik: dopóki są puste, widnieje tam „Pola opcjonalne. Zwierzęta nie wliczają się do liczby osób.", a po wpisaniu liczb — podsumowanie w rodzaju „Łącznie osób: 4 · zwierzęta liczone osobno". Nic nie musisz sumować sam: rodzinę 2+2 z psem wpisujesz jako 2 dorosłych, 2 dzieci i 1 zwierzę.
 
 Podatek i VAT nie mają własnych pól — wyliczają się automatycznie z kwot i Twoich ustawień w zakładce „Podatki". Szczegóły znajdziesz w artykule o finansach i raportach.
 
@@ -62,15 +65,23 @@ Status widać też w szczegółach rezerwacji jako etykietę: „Opłacona" albo
 
 Kliknięcie rezerwacji otwiera jej kartę. U góry masz ścieżkę powrotu („Rezerwacje") oraz przyciski „Edytuj" i „Usuń". Niżej:
 
-- Karta gościa — nazwa, obiekt, źródło, znacznik „iCal" przy rezerwacjach z synchronizacji i etykieta statusu płatności; pod spodem komórki „Przyjazd", „Wyjazd", „Pobyt" (liczba nocy i średnia cena za noc) oraz „Goście", jeśli podałeś liczbę osób.
+- Karta gościa — nazwa, obiekt, źródło, znacznik „iCal" przy rezerwacjach z synchronizacji i etykieta statusu płatności; pod spodem komórki „Przyjazd", „Wyjazd", „Pobyt" (liczba nocy i średnia cena za noc) oraz „Goście", jeśli uzupełniłeś którekolwiek z pól sekcji „Goście".
 - „Kontakt i notatki" — telefon (klik = połączenie), e-mail (klik = wiadomość), Twoja prywatna notatka.
 - „Rozliczenie" — przychód rozpisany na noce, „Prowizja portalu", „Podatek", zaliczka i kwota „Do wypłaty".
+
+W komórce „Goście" u góry stoi łączna liczba osób, a pod nią rozbicie — dla rodziny 2+2 z psem będzie to „4 osoby" i „2 dorosłych · 2 dzieci · 1 zwierzę". Starsze rezerwacje, przy których podałeś tylko liczbę osób, pokazują samo „4 osoby"; rozbicie dopiszesz, otwierając wpis przyciskiem „Edytuj". Rezerwacje z synchronizacji iCal nie mają ani liczby osób, ani rozbicia — portale nie przesyłają tych danych.
 
 Po prawej stronie znajduje się panel „Zadania i przypomnienia" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Domyślnie są to: „Wyślij wskazówki dojazdu" (3 dni przed przyjazdem), „Wyślij kod do drzwi" (1 dzień przed) i „Zleć sprzątanie" (w dniu przyjazdu). Zaległe zadania są wyróżnione.
 
 Te same zadania trafiają do „Raportu dnia" i na „Pulpit", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach" w zakładce „Powiadomienia": każdemu ustawisz „Krótka nazwa", „Pełna treść", „Dni przed" i „Ikona", a przycisk „Dodaj przypomnienie" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia".
 
 ## Najczęstsze pytania
+
+**Gdzie zniknęło pole „Liczba gości"?**
+Zastąpiła je sekcja „Goście" z trzema polami: „Dorośli", „Dzieci" i „Zwierzęta". Liczba osób wylicza się teraz sama z dorosłych i dzieci — widzisz ją pod polami jako „Łącznie osób". Zwierzęta liczymy osobno, bo nie są osobami. Przy starszej rezerwacji dotychczasowa liczba osób podstawia się w pole „Dorośli", gdy otworzysz wpis do edycji; możesz ją tam rozdzielić na dorosłych i dzieci.
+
+**Czy pies wlicza się do liczby osób?**
+Nie. Zwierzęta mają własne pole i własną pozycję w rozbiciu („1 zwierzę"), ale nie powiększają liczby osób. Rodzina 2+2 z psem to nadal „4 osoby".
 
 **Czym różni się zadanie z formularza od zadania przy rezerwacji?**
 Zadanie z formularza („Nowy wpis" → „Zadanie") to jednorazowe przypomnienie z własną datą. Zadania przy rezerwacji powstają automatycznie z szablonów („Ustawienia" → „Powiadomienia") i liczą swój termin od daty przyjazdu gościa.

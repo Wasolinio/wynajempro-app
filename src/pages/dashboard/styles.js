@@ -421,6 +421,10 @@ export const DASHBOARD_CSS = `
 .wpd-input--num{ font-family:'IBM Plex Mono', monospace; }
 .wpd-fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .wpd-fgrid--3{ grid-template-columns:1fr 1fr 1fr; }
+/* dyskretny podpis pod grupą pól (np. wyliczona suma osób w rezerwacji) */
+.wpd-fhint{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.05em;
+  color:var(--faint); margin:12px 0 0; }
+.wpd-fhint strong{ color:var(--ink); font-weight:600; }
 .wpd-fieldset{ background:var(--inner); border:1px solid var(--hairline); border-radius:4px; padding:16px; margin-top:4px; }
 .wpd-fieldset__title{ display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono', monospace;
   font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 14px; }

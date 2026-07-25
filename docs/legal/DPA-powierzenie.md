@@ -26,6 +26,19 @@
 > z opisem odporności procesu na awarie, doprecyzowano §3 (obecny przepływ akceptacji nie zbiera
 > imienia ani podpisu gościa). Zmiany oznaczone `[PRZEGLĄD 2026-07-22]`. Szczegółowy,
 > zweryfikowany katalog zabezpieczeń — `Bezpieczenstwo-kont-i-danych.md`.
+>
+> **[UZUPEŁNIENIE 2026-07-25 (legal, X14 — rozbicie liczby gości)]:** uzupełniono **§3**
+> (kategorie danych powierzonych) o **skład osobowy pobytu** — liczbę dorosłych, dzieci
+> i zwierząt w rezerwacji — wraz z oceną roboczą, dlaczego **nie** dopisujemy „osób małoletnich"
+> do kategorii osób, których dane dotyczą. **Funkcja jest w kodzie (gałąź robocza) i NIE została
+> wdrożona na produkcję** — wpis w §3 opisuje więc zakres powierzenia **po wdrożeniu**, a nie
+> stan dzisiejszy; termin i kolejność wdrożenia (reguły bazy przed frontem) to odrębna decyzja
+> właściciela. **Zmiana nie dotyka §6** — katalog środków bezpieczeństwa pozostaje bez zmian,
+> bo ekspozycja danych się nie zmienia (nowe pola leżą wyłącznie za bramką właściciela:
+> `isOwnerAndVerified` + `hasActiveSubscription`; brak ścieżki odczytu publicznego, brak w iCal,
+> brak w analityce — zweryfikowane w kodzie 2026-07-25). Równoległe uzupełnienie:
+> `Polityka-prywatnosci.md` §4. *(Adnotację datowano dniem faktycznej edycji dokumentu;
+> zlecenie posługiwało się datą 2026-07-24.)*
 
 ---
 
@@ -58,12 +71,41 @@ Pojęcia „dane osobowe", „przetwarzanie", „administrator", „podmiot prze
 
 **Kategorie danych** (ustalone na podstawie faktycznego modelu danych Aplikacji — Agent-Process-Map, `GuestGuideView.jsx`, `firestore.rules`):
 - dane rezerwacji: nazwa obiektu, daty pobytu, kwoty oraz ewentualne dane identyfikacyjne/kontaktowe gościa wpisane przez Administratora,
+- **[UZUPEŁNIENIE 2026-07-25 — funkcja w kodzie, przed wdrożeniem na produkcję]** **skład osobowy pobytu:** liczba dorosłych, liczba dzieci oraz liczba zwierząt towarzyszących — pola **opcjonalne**, uzupełniane wyłącznie z inicjatywy Administratora, przechowywane jako **wartości liczbowe** w dokumencie rezerwacji (`users/{uid}/rentals/{id}`; łączna liczba osób pozostaje sumą dorosłych i dzieci). Pola te **nie zawierają danych identyfikujących poszczególne osoby**, w tym dzieci (brak imienia, wieku, daty urodzenia) — przechowywana jest sama liczba. Nie są to dane szczególnych kategorii w rozumieniu art. 9 RODO. Dostęp: wyłącznie Administrator po zalogowaniu (reguły bazy: właściciel + zweryfikowany e-mail + aktywna subskrypcja); dane nie są publikowane w przewodniku dla gości ani na stronie opinii, nie występują w publicznym eksporcie kalendarza (iCal) i nie są przekazywane do narzędzi analitycznych,
 - **dane akceptacji regulaminu:** **[PRZEGLĄD 2026-07-22]** data akceptacji, identyfikator anonimowej sesji przeglądarki gościa oraz migawka zaakceptowanej treści regulaminu — przechowywane w `guides/{id}/signatures`. **Obecny przepływ nie zbiera imienia gościa ani odręcznego podpisu**; starsze zapisy (z wcześniejszej wersji funkcji) mogą je zawierać. *(Do oceny prawnika: czy identyfikator anonimowej sesji stanowi dane osobowe w rozumieniu art. 4 pkt 1 — w ocenie roboczej jest to dana spseudonimizowana, pozwalająca powiązać akceptację z urządzeniem, nie z tożsamością osoby.)*
 - **dane dostępowe udostępniane gościom:** kod do drzwi (PIN), hasło WiFi — przechowywane w `guides/{id}/secrets/data` (dane wrażliwe operacyjnie; nie są „szczególnymi kategoriami" w rozumieniu art. 9 RODO, ale wymagają podwyższonej ochrony).
 
 > **Uwaga:** Aplikacja nie jest przeznaczona do przetwarzania szczególnych kategorii danych
 > (art. 9 RODO). Administrator zobowiązuje się nie wprowadzać takich danych. *(Do potwierdzenia
 > przez prawnika, czy potrzebne dodatkowe zastrzeżenie umowne.)*
+
+> **[UZUPEŁNIENIE 2026-07-25 — ocena robocza] Liczba dzieci a katalog kategorii osób.**
+> Do katalogu **kategorii osób, których dane dotyczą, nie dopisujemy „osób małoletnich"**.
+> Uzasadnienie: pole liczbowe nie pozwala zidentyfikować ani wyodrębnić żadnego dziecka
+> (art. 4 pkt 1 RODO) — przechowywana jest wyłącznie liczba, bez imienia, wieku i daty
+> urodzenia. Osobą, której dane dotyczą, pozostaje **gość rezerwujący**, a informacja o składzie
+> pobytu jest daną **o nim** (opisuje okoliczności jego pobytu). Dane dzieci pojawiłyby się
+> w Aplikacji dopiero wtedy, gdyby Administrator wpisał je samodzielnie w polach opisowych
+> (nazwa gościa, notatka do rezerwacji) — ten przypadek pokrywa już drugi punkt katalogu
+> kategorii osób („inne osoby, których dane Administrator zdecyduje się wprowadzić do Aplikacji"),
+> a odpowiedzialność za taki wpis spoczywa na Administratorze.
+>
+> **Skala zmiany — bez eskalacji.** Motyw 38 RODO wiąże szczególną ochronę dzieci przede
+> wszystkim z **marketingiem, profilowaniem** oraz **usługami oferowanymi bezpośrednio dziecku** —
+> żadna z tych sytuacji tu nie zachodzi (usługa jest oferowana Administratorowi, dane nie są
+> profilowane ani wykorzystywane marketingowo). Art. 8 RODO (zgoda dziecka) dotyczy usług
+> społeczeństwa informacyjnego oferowanych bezpośrednio dziecku — nie ma zastosowania.
+> Zmiana **nie uruchamia obowiązku oceny skutków** (art. 35 RODO): wykaz Prezesa UODO z 17.06.2019
+> (M.P. 2019 poz. 666) nie wymienia danych dzieci wśród rodzajów operacji wymagających DPIA,
+> a zasada kierunkowa zakłada spełnienie **co najmniej dwóch** kryteriów z wykazu — tutaj nie
+> jest spełnione żadne (brak profilowania, danych szczególnych kategorii, dużej skali,
+> systematycznego monitorowania). Ewentualna ocena skutków po stronie Administratora zależy od
+> **jego** całego procesu, nie od tej funkcji; Procesor wspiera go zgodnie z §5 pkt 6.
+> *(Weryfikacja źródeł: motyw 38 RODO oraz wykaz Prezesa UODO — 2026-07-25.)*
+>
+> *(Do rozstrzygnięcia przez prawnika: czy mimo powyższego wymienić „osoby małoletnie" wprost
+> w kategoriach osób jako zapis ostrożnościowy. Koszt takiego zapisu jest niski, ale sugerowałby
+> szerszy zakres powierzenia niż faktyczny; nasza rekomendacja robocza — pozostawić jak wyżej.)*
 
 ## §4. Czas trwania
 
@@ -119,6 +161,15 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 > konsoli dostawcy i wymaga potwierdzenia przez właściciela (patrz `Bezpieczenstwo-kont-i-danych.md`,
 > sekcja „Ograniczenia weryfikacji").
 
+> **[UZUPEŁNIENIE 2026-07-25] Nowe pola rezerwacji a katalog §6 — bez zmian w środkach.**
+> Rozbicie liczby gości (§3) nie wymagało dopisania żadnego środka: nowe pola są objęte tymi
+> samymi mechanizmami co reszta dokumentu rezerwacji — izolacją danych konta (odczyt wyłącznie
+> dla zweryfikowanego właściciela z aktywną subskrypcją) oraz **walidacją schematu** (pola
+> `adults`, `children`, `pets` dodane do allowlisty `isValidRental` z wymogiem typu liczbowego,
+> wraz z lustrzanym testerem po stronie funkcji). Zgodnie z zasadą rozliczalności odnotowujemy,
+> że **zmiana ta jest w kodzie i nie została jeszcze wydana na produkcję** — do czasu wdrożenia
+> reguł opis z §3 wyprzedza stan faktyczny bazy.
+
 ## §7. Podpowierzenie (subprocesorzy) — art. 28 ust. 2 i 4 RODO
 
 1. Administrator udziela Procesorowi **ogólnej zgody** na korzystanie z subprocesorów niezbędnych do świadczenia usługi. Na dzień zawarcia Umowy są to:
@@ -142,7 +193,7 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
    - **Konta wygasłe** są usuwane w tym samym pełnym zakresie przez proces cykliczny (`deleteExpiredAccountsData`, uruchamiany codziennie) po upływie: **30 dni** od anulowania Subskrypcji albo **90 dni** od zakończenia bezpłatnego okresu próbnego bez wykupienia Subskrypcji.
    - **Odporność procesu usuwania (stan na 2026-07-22):** kasowanie następuje w kolejności od danych najbardziej wrażliwych (dane dostępowe, zapisy akceptacji, pliki) do dokumentu konta, który usuwany jest jako ostatni. Niepowodzenie któregokolwiek kroku przerywa operację i pozostawia dokument konta jako znacznik, dzięki czemu kolejny przebieg procesu ponawia i dokańcza usuwanie; proces jest w pełni idempotentny. Rozwiązanie to wyklucza sytuację, w której publicznie dostępne treści przewodnika przetrwałyby usunięcie konta. *(Wdrożone i wydane na produkcję 2026-07-22 — zamknięcie ustalenia C.1 z `Uwagi-N5-dla-prawnika.md` oraz ustalenia dotyczącego rekordu klienta u operatora płatności w procesie cyklicznym.)*
 3. Administrator może samodzielnie usuwać poszczególne przewodniki, dane dostępowe i zapisy akceptacji z poziomu Aplikacji.
-4. **[PRZEGLĄD 2026-07-22]** Zwrot danych przed usunięciem: Aplikacja udostępnia eksport danych rozliczeniowych (CSV) oraz eksport kalendarza (iCal). *(Do oceny prawnika: czy zakres tych eksportów jest wystarczający dla realizacji „zwrotu danych" z art. 28 ust. 3 lit. g oraz prawa do przenoszenia danych z art. 20 RODO — dziś nie obejmuje on treści przewodników ani zapisów akceptacji gości.)*
+4. **[PRZEGLĄD 2026-07-22]** Zwrot danych przed usunięciem: Aplikacja udostępnia eksport danych rozliczeniowych (CSV) oraz eksport kalendarza (iCal). *(Do oceny prawnika: czy zakres tych eksportów jest wystarczający dla realizacji „zwrotu danych" z art. 28 ust. 3 lit. g oraz prawa do przenoszenia danych z art. 20 RODO — dziś nie obejmuje on treści przewodników ani zapisów akceptacji gości.)* **[UZUPEŁNIENIE 2026-07-25]** Skład osobowy pobytu (§3) również nie jest objęty żadnym z tych eksportów — pozostaje wyłącznie w interfejsie Aplikacji.
 
 ## §10. Zgłaszanie naruszeń
 
@@ -160,4 +211,4 @@ Odpowiedzialność Stron reguluje RODO (art. 82) oraz [DO UZUPEŁNIENIA: ewentua
 
 ---
 
-*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Uzupełnienia 2026-07-22 na podstawie oceny X9 (`Ocena-linki-guide-opinie.md`); środki §6 dla modelu „po linku" zweryfikowane w kodzie po deployu (commit `e850136`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt oparty na faktycznym modelu danych Aplikacji (Agent-Process-Map, `firestore.rules`, `functions/index.js`, `GuestGuideView.jsx`) i strukturze art. 28 RODO. Uzupełnienia 2026-07-22 na podstawie oceny X9 (`Ocena-linki-guide-opinie.md`); środki §6 dla modelu „po linku" zweryfikowane w kodzie po deployu (commit `e850136`). Uzupełnienie §3 z 2026-07-25 (skład osobowy pobytu) oparte na kodzie gałęzi roboczej — funkcja przed wdrożeniem na produkcję. Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*

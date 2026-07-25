@@ -41,6 +41,22 @@
 > art. 402 PKE), obowiązującym od 10 listopada 2024 r. Korekta pełnej podstawy należy do
 > prawnika-człowieka (N4) — treści merytorycznej sekcji 9 nie zmieniano. Cały dokument
 > pozostaje **PROJEKTEM** oczekującym na weryfikację prawnika (N4).
+>
+> **[UZUPEŁNIENIE 2026-07-25 (legal, X14 — rozbicie liczby gości)]:** w sekcji 4 (dane Gości,
+> gdzie Operator jest **podmiotem przetwarzającym**) dopisano nową kategorię danych rezerwacji:
+> **skład osobowy pobytu** — liczba dorosłych, liczba dzieci, liczba zwierząt. **Funkcja jest
+> w kodzie (gałąź robocza) i NIE została wdrożona na produkcję** — kolejność i termin wdrożenia
+> (reguły bazy przed frontem) to odrębna decyzja właściciela; do tego czasu opis w sekcji 4 jest
+> **opisem stanu docelowego**, a nie stanu obowiązującego. **Role się nie zmieniają:** dane swoich
+> gości wprowadza Gospodarz jako **administrator**, Operator pozostaje **procesorem** (patrz
+> `DPA-powierzenie.md` §3, gdzie równolegle uzupełniono katalog kategorii danych powierzonych).
+> **Ekspozycja danych się nie zmienia** — zweryfikowano w kodzie 2026-07-25: pola leżą wyłącznie
+> za bramką właściciela (`firestore.rules`: `isOwnerAndVerified` + `hasActiveSubscription`, brak
+> jakiejkolwiek ścieżki odczytu publicznego), nie są odczytywane przez przewodnik gościa ani
+> stronę opinii, nie występują w publicznym eksporcie kalendarza (iCal — `functions/index.js`
+> emituje wyłącznie identyfikator, daty i stałą nazwę „Rezerwacja z WynajemPRO") i nie są
+> przekazywane do narzędzi analitycznych. *(Adnotację datowano dniem faktycznej edycji dokumentu;
+> zlecenie posługiwało się datą 2026-07-24.)*
 
 ---
 
@@ -87,12 +103,25 @@ Dane Gospodarza pochodzą bezpośrednio od Użytkownika (rejestracja, korzystani
 
 Gospodarz może wprowadzać do Aplikacji dane osób trzecich (Gości/Najemców):
 - dane rezerwacji (obiekt, daty, kwoty; ewentualne dane kontaktowe wpisane przez Gospodarza),
+- **[UZUPEŁNIENIE 2026-07-25 — funkcja w kodzie, przed wdrożeniem na produkcję]** **skład osobowy pobytu**: liczba dorosłych, liczba dzieci oraz liczba zwierząt towarzyszących. Są to pola **nieobowiązkowe**, wypełniane wyłącznie z inicjatywy Gospodarza (łączna liczba osób pozostaje sumą dorosłych i dzieci; zwierzęta nie są liczone jako osoby). W polach tych zapisywane są **wyłącznie liczby** — Aplikacja nie zbiera w nich imion, wieku, dat urodzenia ani innych danych identyfikujących poszczególne osoby, w tym dzieci. Dane te są widoczne **wyłącznie dla Gospodarza po zalogowaniu**: nie są publikowane w przewodniku dla gości ani na stronie z prośbą o opinię, nie są zawarte w publicznym eksporcie kalendarza (iCal) i nie są przekazywane do narzędzi analitycznych,
 - **zapisy akceptacji regulaminu przez gości** — **[PRZEGLĄD 2026-07-22]** rekord z datą akceptacji, identyfikatorem anonimowej sesji i migawką zaakceptowanej treści; **obecny przepływ nie zbiera imienia ani odręcznego podpisu gościa**, jednak starsze zapisy mogą je zawierać (historyczna wersja funkcji) — zapisywane w `guides/{id}/signatures/{uid}`,
 - **dane dostępowe** (PIN do drzwi, hasło WiFi) — przechowywane odrębnie w `guides/{id}/secrets/data`, ujawniane gościowi dopiero po elektronicznej akceptacji.
 
 **[UZUPEŁNIENIE 2026-07-22] Mechanizm udostępniania przewodnika („dostęp po linku").** Przewodnik dla gości oraz strona z prośbą o opinię są publikowane pod unikalnym, trudnym do odgadnięcia adresem internetowym (linkiem), który Gospodarz przekazuje gościom. Strony te są dostępne bez logowania — **treść przewodnika (w tym publiczny kontakt Gospodarza) może odczytać każda osoba dysponująca linkiem**, a dane dostępowe (kod do drzwi, hasło WiFi) są ujawniane po elektronicznej akceptacji regulaminu obiektu przez osobę, która otworzyła link, bez weryfikacji jej tożsamości. O tym, komu udostępnić link, decyduje Gospodarz jako administrator danych zawartych w przewodniku. Strona z prośbą o opinię nie zawiera danych osobowych gościa. Publiczne strony przewodników są wyłączone z indeksowania przez wyszukiwarki i nie można ich wyszukać ani wylistować — dostęp wymaga znajomości pełnego adresu.
 
 W zakresie tych danych **administratorem jest Gospodarz**. Operator przetwarza je wyłącznie na polecenie Gospodarza, na zasadach Umowy powierzenia (DPA). Osoby, których dane dotyczą (Goście), swoje prawa realizują wobec Gospodarza jako administratora. Operator wspiera Gospodarza w realizacji tych praw zgodnie z DPA.
+
+> **[UZUPEŁNIENIE 2026-07-25 — do przeglądu prawnika, N4] Skład osobowy pobytu: kwalifikacja
+> robocza.** Informacja o liczbie dorosłych, dzieci i zwierząt jest **daną zwykłą** dotyczącą
+> gościa rezerwującego (opisuje skład towarzyszący jego pobytowi). Nie należy do szczególnych
+> kategorii danych z art. 9 RODO i — w ocenie roboczej — nie czyni dziecka osobą zidentyfikowaną
+> ani możliwą do zidentyfikowania (art. 4 pkt 1 RODO), bo przechowywana jest wyłącznie liczba.
+> Art. 8 RODO (zgoda dziecka) nie ma tu zastosowania: dotyczy usług społeczeństwa informacyjnego
+> oferowanych **bezpośrednio dziecku**, a Aplikacja jest oferowana Gospodarzowi. Wybór podstawy
+> przetwarzania i obowiązek informacyjny wobec gościa (art. 13 RODO) spoczywają na **Gospodarzu**
+> jako administratorze — Operator ich za niego nie wykonuje. *(Do rozważenia przez prawnika:
+> czy warto, by Operator udostępniał Gospodarzom wzór informacji dla gości obejmujący także tę
+> kategorię danych. Szersza analiza — `DPA-powierzenie.md` §3.)*
 
 ## 5. Odbiorcy danych i podmioty przetwarzające (subprocesorzy)
 
@@ -183,4 +212,4 @@ Politykę możemy aktualizować. O istotnych zmianach poinformujemy [DO UZUPEŁN
 
 ---
 
-*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `AccountModal.jsx`, `CompleteProfileScreen.jsx`, `ContactPage.jsx`, `ConsentNotice.jsx`, `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt`). Pełny przegląd aktualności: 2026-07-22; mechanizm wycofania zgody na cookies opisany 2026-07-24 jako stan obowiązujący — wdrożony na produkcję 2026-07-24 (commit `495aace`). Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`; ocena modelu „dostępu po linku" — `Ocena-linki-guide-opinie.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*
+*Projekt przygotowany na podstawie stanu faktycznego zweryfikowanego w kodzie (`firebase.js`, `functions/index.js`, `firestore.rules`, `GuestGuideView.jsx`, `SettingsModal.jsx`, `AccountModal.jsx`, `CompleteProfileScreen.jsx`, `ContactPage.jsx`, `ConsentNotice.jsx`, `App.jsx`, `firebase.json`, `SeoTags.jsx`, `public/robots.txt`). Pełny przegląd aktualności: 2026-07-22; mechanizm wycofania zgody na cookies opisany 2026-07-24 jako stan obowiązujący — wdrożony na produkcję 2026-07-24 (commit `495aace`). Opis składu osobowego pobytu (sekcja 4) dodany 2026-07-25 na podstawie kodu gałęzi roboczej (`firestore.rules`, `src/pages/dashboard/ManagerApp.jsx`, `src/pages/dashboard/modals/AddEditEntryModal.jsx`, `src/utils/guestCount.js`, `functions/index.js`) — **funkcja przed wdrożeniem na produkcję**. Podstawy prawne i daty — patrz `Checklista-zgodnosci.md`; ocena modelu „dostępu po linku" — `Ocena-linki-guide-opinie.md`. Wymaga weryfikacji prawnika-człowieka przed publikacją.*

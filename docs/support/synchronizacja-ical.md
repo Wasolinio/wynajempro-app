@@ -60,7 +60,7 @@ Format iCal przenosi wyłącznie terminy. Z tego wynikają ograniczenia — po s
 - Kwoty: zaimportowane rezerwacje mają przychód 0 zł. Uzupełnij go, edytując wpis (pole „Przychód brutto" i „Prowizja portalu") — wtedy statystyki finansowe będą kompletne.
 - Dane kontaktowe gościa: e-mail i telefon musisz przepisać z panelu portalu, jeśli ich potrzebujesz.
 - Anulacje: gdy gość odwoła rezerwację w portalu, wpis w WynajemPRO nie znika sam. Usuń go ręcznie (ikona kosza w widoku „Rezerwacje").
-- Wiadomości i szczegóły pobytu (uwagi, liczba osób) — pozostają w portalu. Liczbę gości możesz dopisać ręcznie w polu „Liczba gości" przy edycji rezerwacji.
+- Wiadomości i szczegóły pobytu (uwagi, skład osobowy) — pozostają w portalu. Zaimportowana rezerwacja nie ma więc żadnych danych o gościach; uzupełnisz je ręcznie przy edycji wpisu, w sekcji „Goście" (pola „Dorośli", „Dzieci" i „Zwierzęta").
 
 ## Eksport: pokaż portalom swoje rezerwacje
 
@@ -82,6 +82,9 @@ Bo iCal nie przenosi cen — żaden system nie odczyta kwoty z tego formatu. Kli
 
 **Dlaczego zamiast nazwiska gościa widzę „Reserved"?**
 Tak Airbnb opisuje rezerwacje w swoim kalendarzu iCal. Nazwisko możesz dopisać ręcznie, edytując wpis.
+
+**Przy rezerwacji z portalu nie widzę komórki „Goście". Dlaczego?**
+Bo iCal nie przenosi składu osobowego — z portalu przychodzi sam termin. Otwórz rezerwację, kliknij „Edytuj" i wpisz liczby w sekcji „Goście" („Dorośli", „Dzieci", „Zwierzęta"). Po zapisaniu komórka „Goście" pojawi się w szczegółach rezerwacji.
 
 **Gość odwołał pobyt na Booking.com, a rezerwacja dalej widnieje w panelu. Czemu?**
 Synchronizacja tylko dodaje nowe terminy — nie usuwa istniejących wpisów. Odwołaną rezerwację usuń ręcznie ikoną kosza.

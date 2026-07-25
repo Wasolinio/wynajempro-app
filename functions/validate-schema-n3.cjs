@@ -27,7 +27,7 @@ const hasOnly = (d, allowed) => Object.keys(d).every((k) => allowed.includes(k))
 const RENTAL_KEYS = ['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
   'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
   'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-  'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests'];
+  'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets'];
 function whyInvalidRental(d) {
   if (!hasOnly(d, RENTAL_KEYS)) return `nieznane pola: ${Object.keys(d).filter((k) => !RENTAL_KEYS.includes(k)).join(',')}`;
   if (!['booking', 'utility', 'reminder'].includes(d.type ?? '')) return `type='${d.type}'`;
@@ -36,7 +36,7 @@ function whyInvalidRental(d) {
   for (const [k, m] of [['source', 300], ['property', 300], ['category', 300], ['guest', 300], ['email', 320], ['phone', 50], ['guestNote', 5000], ['text', 5000], ['syncId', 300], ['id', 100]]) {
     if (!optStr(d, k, m)) return `${k}: ${typeof d[k]}${isStr(d[k]) ? ` (długość ${d[k].length})` : ''}`;
   }
-  for (const k of ['income', 'advancePayment', 'commission', 'utilities', 'tax', 'vat', 'guests']) {
+  for (const k of ['income', 'advancePayment', 'commission', 'utilities', 'tax', 'vat', 'guests', 'adults', 'children', 'pets']) {
     if (!optNum(d, k)) return `${k}: ${typeof d[k]} (${JSON.stringify(d[k])})`;
   }
   for (const k of ['isAdvancePaid', 'isPaid', 'isCompleted', 'directionsSent', 'keycodeSent']) {

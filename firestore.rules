@@ -62,10 +62,12 @@ service cloud.firestore {
       // + aktualizacje zadań (WynajemContext: directionsSent/keycodeSent)
       // + 'id' legacy: stare wersje zapisywały id w dokumencie (test produkcji 2026-07-10:
       //   4 takie rezerwacje istnieją); obecny kod odcina id przy zapisie
+      // + X14: rozbicie liczby gości — 'adults'/'children'/'pets' (opcjonalne, liczby);
+      //   'guests' zostaje jako suma OSÓB (dorośli + dzieci) dla zgodności wstecz
       return data.keys().hasOnly(['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
               'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
               'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-              'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests'])
+              'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets'])
           && data.get('type', '') in ['booking', 'utility', 'reminder']
           && data.date is string && data.date.size() <= 30
           && optStr(data, 'endDate', 30)
@@ -77,6 +79,7 @@ service cloud.firestore {
           && optNum(data, 'income') && optNum(data, 'advancePayment')
           && optNum(data, 'commission') && optNum(data, 'utilities')
           && optNum(data, 'tax') && optNum(data, 'vat') && optNum(data, 'guests')
+          && optNum(data, 'adults') && optNum(data, 'children') && optNum(data, 'pets')
           && optBool(data, 'isAdvancePaid') && optBool(data, 'isPaid') && optBool(data, 'isCompleted')
           && optBool(data, 'directionsSent') && optBool(data, 'keycodeSent')
           && (!('completedTasks' in data) || data.completedTasks is map);

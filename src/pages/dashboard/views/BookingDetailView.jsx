@@ -45,6 +45,21 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
   const arrival = fmtFull(r.date);
   const departure = fmtFull(r.endDate);
 
+  // X14: rozbicie liczby gości. `guests` = suma osób (dorośli + dzieci); zwierzęta osobno.
+  // Stare rezerwacje mają samo `guests` — wtedy zostaje dotychczasowe „N osób".
+  const persons = Number(r.guests) || 0;
+  const adultsN = Number(r.adults) || 0;
+  const childrenN = Number(r.children) || 0;
+  const petsN = Number(r.pets) || 0;
+  // Liczbę i rzeczownik skleja spacja nierozdzielająca (\u00A0): wąska komórka łamie
+  // wiersz na separatorze, nigdy w środku pozycji („2 / dzieci").
+  const guestBreakdown = [
+    adultsN ? `${adultsN}\u00A0${plural(adultsN, ['dorosły', 'dorosłych', 'dorosłych'])}` : null,
+    childrenN ? `${childrenN}\u00A0${plural(childrenN, ['dziecko', 'dzieci', 'dzieci'])}` : null,
+    petsN ? `${petsN}\u00A0${plural(petsN, ['zwierzę', 'zwierzęta', 'zwierząt'])}` : null,
+  ].filter(Boolean).join(' · ');
+  const showGuests = persons > 0 || petsN > 0;
+
   const payTone = r.isPaid ? 'green' : advance > 0 && r.isAdvancePaid ? 'granat' : 'amber';
   const payLabel = r.isPaid ? 'Opłacona' : advance > 0 && r.isAdvancePaid ? 'Zaliczka wpłacona' : 'Do opłacenia';
   const telHref = r.phone ? `tel:${String(r.phone).replace(/[^\d+]/g, '')}` : null;
@@ -89,7 +104,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
               </span>
             </div>
-            <div className={`wpd-cells${r.guests ? ' wpd-cells--4' : ''}`}>
+            <div className={`wpd-cells${showGuests ? ' wpd-cells--4' : ''}`}>
               <div className="wpd-cell">
                 <div className="wpd-cell__label">Przyjazd</div>
                 <div className="wpd-cell__val" style={{ fontSize: 14.5 }}>{arrival ? arrival.date : '—'}</div>
@@ -107,12 +122,16 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 </div>
                 <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{fmt(rate)} zł / noc</div>
               </div>
-              {r.guests ? (
+              {showGuests ? (
                 <div className="wpd-cell">
                   <div className="wpd-cell__label">Goście</div>
                   <div className="wpd-cell__val" style={{ fontSize: 14.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <Users style={{ width: 14, height: 14, color: 'var(--faint)' }} /> {r.guests} {plural(r.guests, ['osoba', 'osoby', 'osób'])}
+                    <Users style={{ width: 14, height: 14, color: 'var(--faint)' }} />
+                    {persons > 0 ? ` ${persons} ${plural(persons, ['osoba', 'osoby', 'osób'])}` : ` ${guestBreakdown}`}
                   </div>
+                  {persons > 0 && guestBreakdown && (
+                    <div className="wpd-cell__label" style={{ marginTop: 4, marginBottom: 0, color: 'var(--faint)' }}>{guestBreakdown}</div>
+                  )}
                 </div>
               ) : null}
             </div>
