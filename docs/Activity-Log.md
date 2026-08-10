@@ -4,6 +4,54 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-10
+
+### Odmrożenie po 15 dniach przerwy — push + deploy zaległej pracy (blok A)
+- 🔍 **Stan zastany**: `main` **5 commitów przed `origin/main`** (praca z 24–25.07 nigdy nie wypchnięta na GitHub — 15 dni bez zdalnej kopii), a dwa commity z kodem produkcyjnym (`0660c1e`, `42472af`) nigdy nie trafiły na produkcję. Dziennik urywał się na 22.07, mimo że Roadmapa opisywała pracę do 25.07 — **plany i historia rozjechały się w drugą stronę niż zwykle** (tym razem to log był w tyle).
+- ✅ **Push**: `cf2b915..42472af` na `origin/main`.
+- ✅ **Kontrola przed deployem**: lint 0; `npm run help:build` **bez różnicy** wobec zacommitowanego `src/data/helpArticles.js` (generowana baza pomocy zgodna — sprawdzone, nie założone); build OK (PWA 32 wpisy).
+- ⚠️ **Odkrycie przy deployu reguł**: `firebase deploy --only firestore:rules` zwrócił „latest version already up to date, skipping upload" — **reguły X17 były już wydane na produkcji**, a front nigdy za nimi nie poszedł. Bezpieczna strona rozjazdu (reguły są nadzbiorem starych, więc nic nie mogło oblać walidacji), ale przez 16 dni backend przyjmował pola, których panel nie miał. Wniosek na przyszłość: „reguły przed hostingiem" chroni przed awarią tylko wtedy, gdy **druga połowa deployu naprawdę następuje** — półwdrożenie jest ciche.
+- ✅ **Deploy `hosting:app`** (39 plików, release OK). Weryfikacja live, nie na słowo CLI: `wynajempro.com` HTTP 200 i serwuje nowy `index-BwuxOfeE.js`; 301 ze starej domeny z zachowaniem ścieżki (`/pomoc`) działa; `x-robots-tag: noindex, nofollow` obecny na `/guide/*` i **nieobecny** na landingu; w serwowanym chunku `GuestGuideView` potwierdzone „Ustawienia cookies" + `wpc:open`, w `ManagerApp` pola „Dorośli/Dzieci/Zwierzęta".
+- ✅ **Domknięte tym deployem**: luka N6.1 u gości (art. 7 ust. 3 — goście `/guide` i `/opinie` mogli zgodę wyrazić, ale nie wycofać) oraz **X17** (rozbicie liczby gości).
+- ⏸ **Zostaje po stronie właściciela**: instrukcje krok po kroku w [[Projects/Instrukcje-wlasciciela]] (App Check, kopie zapasowe, N6.5, zaległe smoke testy, logi purge, ponaglenie prawnika).
+
+---
+
+## 2026-07-25
+
+### X17 — rozbicie liczby gości na dorosłych, dzieci i zwierzęta (zlecenie właściciela)
+- 🎯 Powód z życia: rodzina 2+2 z psem — dotąd dało się wpisać wyłącznie łączne „4".
+- ✅ **Model**: trzy nowe **opcjonalne** pola liczbowe `adults`/`children`/`pets`; `guests` **zostaje** jako pole wyliczane (dorośli + dzieci) — na nim stoją istniejące rezerwacje i widok szczegółów. Zwierzęta nie są osobami i do sumy nie wchodzą. Jedno źródło prawdy sumy: `src/utils/guestCount.js`, używane i przez podgląd w formularzu, i przez zapis — nie mogą się rozjechać.
+- ✅ **Zmiana schematu po obu stronach**: `firestore.rules` (`isValidRental`) **i** lustrzany tester `functions/validate-schema-n3.cjs`; parytet potwierdzony audytem (allowlisty 29 = 29 pól). Rozjazd tej pary to znany, powtarzalny błąd projektu (N3, X14).
+- ✅ **Pułapka utraty danych obsłużona**: stare rezerwacje mają samo `guests` bez rozbicia, więc przy wyliczanym `guests` zapis wyzerowałby liczbę osób — `openEditModal` migruje `guests` → `adults` przy wczytaniu; e2e asertuje formularz **i** dokument po zapisie.
+- ✅ **Baza wiedzy** (`support`): 3 artykuły + FAQ „Gdzie zniknęło pole »Liczba gości«?" i „Czy pies wlicza się do liczby osób?". Przy okazji zweryfikowane: rezerwacje z iCal nie mają ŻADNEJ liczby osób — `functions/index.js` tych pól nie zapisuje.
+- ✅ **RODO** (`legal`): skład osobowy pobytu dopisany do Polityki §4, DPA §3 i erraty E6. Ekspozycja bez zmian — pola wyłącznie za `isOwnerAndVerified` + subskrypcja, brak ścieżki publicznego odczytu. Dopisane do kategorii DANYCH, nie OSÓB (z samej liczby dziecka nikogo nie zidentyfikujemy) — do potwierdzenia przez prawnika.
+- ✅ **Przegląd `code-reviewer`**: diff bezpieczny, reguły bezpieczne (zmiana wyłącznie addytywna). Weryfikacja: lint 0, build OK, reguły `--dry-run`, e2e 39/39. Commit `42472af`. **Deploy nastąpił dopiero 2026-08-10.**
+
+---
+
+## 2026-07-24
+
+### N6.1 + N6.2 na produkcji + luka wykryta przy przeglądzie brzmień
+- ✅ **DEPLOY** `495aace` przez `--only hosting:app`. **Weryfikacja live na `wynajempro.com`**: akceptacja → `cookie_consent='true'`, `ga-disable-G-BZ0SJC201Z=false`, ciastka `_ga` utworzone; ponowne otwarcie z linku w stopce → baner z adaptacyjnym „Wycofaj zgodę"; wycofanie → flaga skasowana, `ga-disable=true`, **ciastka `_ga*` usunięte**. Oba wejścia (stopka landingu + strona Polityki) potwierdzone na żywo.
+- ✅ **Brzmienia (`legal`)**: 4/5 tekstów OK; z banera usunięto nieprawdziwe „dostosowywać komunikaty" — aplikacja nie personalizuje, po zgodzie działa wyłącznie GA. Poprawił `dev`, e2e 3/3.
+- ⚠️ **Luka wykryta przy tym przeglądzie** (`0660c1e`): baner renderuje się globalnie (`App.jsx:162`), więc gość na `/guide/:id` i `/opinie/:id` mógł zgodę **wyrazić**, ale te strony nie miały żadnego wejścia do jej wycofania — realna luka „równej łatwości" wobec akurat tej grupy, dla której Operator jest administratorem danych analitycznych. Naprawa: dyskretne „Ustawienia cookies" przy kredycie „Stworzono za pomocą WynajemPRO" (`GuestGuideView.jsx`, `ReviewPageView.jsx`, `.wpb-meta__btn`), ten sam mechanizm `wpc:open`. Lint 0, build OK, e2e 51/51. **Deploy nastąpił dopiero 2026-08-10.**
+- ✅ **N6.2**: komunikat w `AccountModal` przepisany na realny zakres kasacji (przewodniki, sekrety WiFi/PIN, podpisy akceptacji, pliki, dane biznesowe, rekord klienta Stripe, profil, konto logowania) + „nieodwracalne, bez karencji". Obiecywał wcześniej mniej, niż `deleteUserAccount` faktycznie kasuje.
+- ✅ **Dokumenty po deployu (`legal`, `d97e267`)**: §9 dokumentu bezpieczeństwa rozdzielone — tabela braków zawiera tylko pozycje OTWARTE, domknięte przeniesione do nowej **§9.1** z datami i dowodami; z Polityki zdjęte „oczekuje na deploy"; **errata E1–E5** w `Raport-dla-prawnika-2026-07-22.md` (pakiet był już u prawnika, więc pierwotne zdania zachowano jako cytat z datą, zamiast je przepisywać); pozycja „Wycofanie zgody cookie" zamknięta w Checkliście.
+- ⏸ **Reszta luki (do decyzji)**: ekrany błędu obu widoków gościa („Nie znaleziono strony") renderują panel **bez kredytu**, a baner tam działa — gość z wygasłym linkiem, który kliknie „Akceptuję", znów nie ma wyjścia. Skala mała (ślepa uliczka), fix ~1 linijka na widok.
+- ⏸ **Wsad do N4**: podstawa cookies „art. 173 Pr. tel." nieaktualna → **PKE art. 399/402** (od 2024-11-10); dotyczy Polityki, Checklisty i Oceny-linki — `legal` oznaczył w dokumentach.
+
+---
+
+## 2026-07-23
+
+### N6 — kod wycofania zgody, zakres ostrzeżenia, skrypt czyszczenia sierot
+- ✅ **N6.1 (`dev`)**: `src/firebase.js` — `disableAnalytics()` (`ga-disable-<ID>=true` + `setAnalyticsCollectionEnabled(false)` + kasowanie ciastek `_ga*`) / `enableAnalytics()`; `initAnalytics()` utwardzony tak, że **nie tworzy GA bez zapisanej zgody** — domyka bonusową lukę opt-in (zdarzenia z `LoginPanel` leciały do GA przed zgodą). Dwa wejścia „równie łatwo": link w stopce landingu + przycisk na stronie Polityki, oba przez zdarzenie `wpc:open` (bez przeładowania). Nowy `e2e/cookie-consent.spec.js`.
+- ✅ **N6.5 skrypt (`dev` + przegląd `code-reviewer` w trybie F2)**: `functions/cleanup-orphan-guide-files-n6.cjs` na wzorcu `audit-guides-n5.cjs`. Bezpieczny z domyślnych ustawień: **domyślnie DRY-RUN** (kasowanie tylko po `--fix`), gwarda wieku 30 dni, **nieznany wiek pliku ⇒ pominięcie** (fail-safe chroniący świeżo wgraną okładkę szkicu, którą `storage.rules` dopuszcza gałęzią `!exists`), paginacja, idempotencja. Przegląd: DRY-RUN bezpieczny, `--fix` bez blokerów logiki. Nie jest Cloud Function — uruchamiany ręcznie, deploy go nie dotyczy.
+- 📌 **N6.3 / N6.4 wyodrębnione jako pozycje konsolowe właściciela** (kopie zapasowe Firestore, egzekwowanie App Check) → [[Zlecenia-wlasciciela]] #8.
+
+---
+
 ## 2026-07-22
 
 ### Pakiet dla prawnika — aktualizacja dokumentów + nowy opis zabezpieczeń (zlecenie właściciela)
