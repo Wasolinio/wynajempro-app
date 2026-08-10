@@ -21,6 +21,14 @@ Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`,
 `marketing`, `support`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.
 Wspólna metodologia (obowiązuje wszystkich, także głównego Claude'a): `docs/Team-Playbook.md`.
 
+## Obsługa zgłoszeń (support)
+Zgłoszenia z `/kontakt` lądują w Firestore (`contact_messages`), a reguły zabraniają odczytu
+klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase MCP** (`.mcp.json`,
+5 narzędzi wyłącznie do odczytu; `--tools` usuwa kasowanie i deploy u źródła).
+Proces: **`docs/support/Proces-obslugi-zgloszen.md`**.
+⚠️ **Czytanie treści zgłoszeń (`email`, `message`) jest wstrzymane** do czasu dopisania
+Anthropic do subprocesorów w Polityce §5 — decyzja właściciela. Metadane wolno.
+
 ## Kluczowe pliki (produkcja)
 - `src/App.jsx` — routing (tylko trasy produkcyjne)
 - `src/pages/dashboard/ManagerApp.jsx` — panel zarządzania (powłoka)

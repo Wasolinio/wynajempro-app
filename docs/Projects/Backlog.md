@@ -10,6 +10,8 @@
 
 ## Funkcje
 
+- **Obsługa zgłoszeń — brakująca reszta po wpięciu Firebase MCP** (2026-08-10; odczyt zgłoszeń działa, opis procesu: `docs/support/Proces-obslugi-zgloszen.md`). Trzy braki, każdy osobno decydowalny: (1) **powiadomienie o nowym zgłoszeniu** — dziś nikt się nie dowiaduje, że coś przyszło; najtaniej Cloud Function na `onCreate` w `contact_messages` wysyłająca maila na adres Operatora; (2) **status zgłoszenia** — reguły dopuszczają 4 pola (`hasOnly`) i zabraniają `update`, więc nie da się oznaczyć „obsłużone"; wymaga rozszerzenia modelu + reguł + świadomej decyzji, kto może pisać (dziś nikt poza administracją); (3) **ślad odpowiedzi** — odpowiedzi wychodzą ręcznie ze skrzynki, poza jakimkolwiek rejestrem. **Po co:** przy dwóch zgłoszeniach to nieistotne, przy dwudziestu determinuje, czy support w ogóle działa. Sprzężone z nierozstrzygniętą retencją `contact_messages` (zadanie #31).
+
 - **Powiadomienia e-mail** (potwierdzenie rezerwacji, tygodniowe podsumowanie) — po co: użytkownik nie musi zaglądać do panelu, żeby być na bieżąco.
 - **Automatyczne wiadomości do gości** (link do przewodnika po rezerwacji, przypomnienie o zameldowaniu, prośba o opinię po wyjeździe) — po co: mniej ręcznej roboty gospodarza = główna obietnica produktu.
 - ~~**„Przewodnik opinii" — strona podziękowania z prośbą o opinię**~~ → **przeniesione do [[Projects/Roadmap]] jako X13** decyzją właściciela (2026-07-04, MVP: strona per obiekt, link ręczny). Tu zostają odłożone rozszerzenia: personalizacja per rezerwacja (dane osobowe pod publicznym linkiem → `legal`) i automatyczna wysyłka po wyjeździe (spina się z „automatycznymi wiadomościami do gości" powyżej).

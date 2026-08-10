@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "firebase": {
+      "command": "firebase",
+      "args": [
+        "mcp",
+        "--tools",
+        "firestore_query_collection,firestore_get_document,firestore_list_collections,firestore_list_documents,auth_get_users"
+      ]
+    }
+  }
+}
