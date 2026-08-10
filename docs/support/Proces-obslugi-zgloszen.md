@@ -1,8 +1,10 @@
 # Proces obsługi zgłoszeń (support) — z odczytem przez Firebase MCP
 
-> **Status:** infrastruktura gotowa 2026-08-10. **Czytanie treści zgłoszeń jest ZABLOKOWANE
-> do decyzji właściciela** — patrz sekcja „Bramka RODO". Do tego czasu proces opisuje stan
-> docelowy, a nie obowiązującą praktykę.
+> **Status:** infrastruktura gotowa 2026-08-10. **Bramka RODO zdjęta decyzją właściciela
+> (2026-08-10)** — Anthropic dopisany do subprocesorów w Polityce §5 i DPA §7, klauzula przy
+> formularzu uzupełniona, errata E7 dla prawnika wystawiona. Proces obowiązuje.
+> Zastrzeżenie: ocena prawnika jest **nadal oczekiwana** (E7 zadaje trzy pytania) — jeśli
+> odpowie inaczej, zakres trzeba będzie zawęzić.
 >
 > Ten plik opisuje **obsługę zgłoszeń**. Treści pomocy dla użytkowników są w pozostałych
 > plikach `docs/support/` i generują się do aplikacji przez `npm run help:build`.
@@ -31,30 +33,37 @@ proces** — i to jest właściwy model: zgłoszenia są danymi Operatora, nie d
 
 ---
 
-## 2. Bramka RODO — przeczytaj przed pierwszym użyciem 🔴
+## 2. Podstawa prawna i granice zakresu
 
-Odczyt zgłoszenia przez agenta oznacza, że **adres e-mail i treść wiadomości trafiają do
-Anthropic** (dostawcy modelu) jako do podmiotu przetwarzającego.
+Odczyt zgłoszenia lub danych konta oznacza, że dane trafiają do **Anthropic** jako do
+podmiotu przetwarzającego. Zostało to uregulowane 2026-08-10:
 
-Tymczasem [Polityka prywatności §5](../legal/Polityka-prywatnosci.md) wymienia dokładnie
-trzech subprocesorów: **Google Cloud/Firebase, Stripe, Google OAuth**. Anthropic nie jest
-na tej liście.
+| Gdzie | Co dopisano |
+|---|---|
+| [Polityka §5](../legal/Polityka-prywatnosci.md) | Anthropic w tabeli subprocesorów (rola, zakres, stopniowanie, transfer do potwierdzenia) |
+| [Polityka §2](../legal/Polityka-prywatnosci.md) | Wiersz `contact_messages` wskazuje odbiorcę |
+| [DPA §7](../legal/DPA-powierzenie.md) | Anthropic na liście subprocesorów **danych powierzonych**, z zawężeniem zakresu |
+| [ContactPage.jsx](../../src/pages/ContactPage.jsx) | Klauzula przy formularzu wymienia kategorię odbiorcy — art. 13 ust. 1 lit. e wymaga tego **przy zbieraniu**, sama Polityka nie wystarcza |
+| [Raport dla prawnika](../legal/Raport-dla-prawnika-2026-07-22.md) | Errata **E7** z trzema pytaniami do oceny |
 
-Ten projekt konsekwentnie odmawia deklarowania w dokumentach rzeczy niewdrożonych
-(patrz: X-Robots-Tag celowo niewpisany do DPA do czasu deployu). Ta sama dyscyplina działa
-w drugą stronę: **nie wolno przetwarzać kanałem, którego dokumenty nie deklarują.**
+### Granica, o której trzeba pamiętać przy każdym zgłoszeniu
 
-### Do rozstrzygnięcia przed pierwszym odczytem treści
+Dane w tej aplikacji dzielą się na dwie kategorie o **różnym reżimie prawnym**:
 
-1. **Decyzja właściciela:** czy zgłoszenia mają być obsługiwane z pomocą agenta?
-2. Jeśli tak → `legal` dopisuje Anthropic do tabeli subprocesorów §5 (rola: „wsparcie obsługi
-   zgłoszeń kierowanych do Operatora", uwaga o transferze poza EOG) **oraz** do erraty
-   pakietu dla prawnika, bo pakiet jest już u niego.
-3. Wiersz `contact_messages` w §2 Polityki dostaje wzmiankę o odbiorcy.
-4. Dopiero wtedy pierwszy realny odczyt.
+- **Dane Gospodarza** (konto, subskrypcja, ustawienia) — Operator jest **administratorem**.
+  Podstawa: Polityka §5.
+- **Dane Gości** (rezerwacje, zapisy akceptacji regulaminu, podpisy) — Operator jest
+  **procesorem**, administratorem jest Gospodarz. Podstawa: **DPA §7**, a Gospodarzowi
+  przysługuje prawo sprzeciwu wobec subprocesora.
 
-**Do tego czasu wolno:** listować kolekcje, liczyć zgłoszenia, czytać metadane (`createdAt`,
-`source`). **Nie wolno:** czytać `email` ani `message`.
+Dlatego diagnostyka w sekcji 4 jest **stopniowana**: zaczyna od danych Gospodarza i schodzi
+do danych Gości tylko wtedy, gdy zgłoszenie tego naprawdę wymaga. To nie jest formalność —
+to realizacja zasady minimalizacji (art. 5 ust. 1 lit. c) i jedyny powód, dla którego
+zakres wobec danych powierzonych dało się w DPA opisać jako warunkowy.
+
+> **Moment wprowadzenia miał znaczenie.** Kanał dodano przed launchem, gdy jedynym Gospodarzem
+> jest właściciel. Po launchu dodanie subprocesora uruchamia obowiązek powiadomienia każdego
+> Gospodarza i obsłużenia sprzeciwów (DPA §7 ust. 2).
 
 > Osobno, niezależnie od tej decyzji: **okres przechowywania `contact_messages` jest wciąż
 > nierozstrzygnięty** ([DO DECYZJI] w §2 Polityki, propozycja kierunkowa 12 miesięcy).
@@ -62,7 +71,7 @@ w drugą stronę: **nie wolno przetwarzać kanałem, którego dokumenty nie dekl
 
 ---
 
-## 3. Jak odczytać zgłoszenia (po odblokowaniu bramki)
+## 3. Jak odczytać zgłoszenia
 
 Serwer MCP jest skonfigurowany w [`.mcp.json`](../../.mcp.json) i wystaje **wyłącznie 5
 narzędzi odczytu** (`--tools` wyłącza auto-wykrywanie, więc `firestore_delete_document`,
@@ -92,11 +101,84 @@ obiektem zwraca mylące „Invalid resource field value in the request" — to b
 
 `auth_get_users` po adresie e-mail rozstrzyga, czy piszący ma konto — co zmienia odpowiedź
 (użytkownik z wygasłym trialem vs osoba z zewnątrz). **Uwaga:** to odczyt danych konta,
-więc podlega tej samej bramce z sekcji 2.
+więc obowiązuje stopniowanie zakresu z sekcji 2 i 4.
 
 ---
 
-## 4. Ścieżka obsługi pojedynczego zgłoszenia
+## 4. Diagnostyka konta po UID — „masz problem, oto identyfikator"
+
+**Tryb docelowy pracy:** właściciel podaje UID konta (albo adres e-mail — `auth_get_users`
+przyjmuje oba), a agent sam ustala, co się dzieje. Diagnostyka idzie **poziomami**: każdy
+kolejny sięga po dane wrażliwsze, więc wchodzi się na niego tylko wtedy, gdy poprzedni
+nie wyjaśnił sprawy.
+
+### Poziom 1 — konto i subskrypcja (zawsze zaczynaj tutaj)
+
+| Odczyt | Co daje |
+|---|---|
+| `auth_get_users` (UID lub e-mail) | czy konto istnieje, `emailVerified`, dostawca logowania (hasło vs Google), czy zablokowane, data utworzenia i ostatniego logowania |
+| `firestore_get_document` → `users/{uid}` | `status` / `accountStatus`, `trialEndsAt`, `stripeStatus`, `stripeCustomerId`, `scheduledDeletionAt` |
+
+**Rozstrzyga większość zgłoszeń — bez dotykania czyichkolwiek danych osobowych poza samym
+Gospodarzem:**
+
+- *„nie mogę wejść do panelu"* → `emailVerified: false` (weryfikacja e-mail działa
+  trójwarstwowo, więc to najczęstsza przyczyna) albo wygasły trial,
+- *„zapłaciłem, a dalej widzę paywall"* → rozjazd `status` z rzeczywistością w Stripe;
+  uwaga na dwa pola (`status` pisze webhook, `accountStatus` to dane historyczne),
+- *„trial mi się skończył za wcześnie"* → `trialEndsAt` zapisany jako **string zamiast
+  Timestampa** nie przedłuża trialu (reguły są fail-closed) — znany kształt błędu,
+- *„usunąłem konto, a ono dalej jest"* → `scheduledDeletionAt` i karencja 30 dni,
+- *„nie mogę usunąć konta"* → logowanie Google wymaga ponownego potwierdzenia przez popup;
+  jeśli przeglądarka go zablokuje, komunikat jest generyczny (znany dług).
+
+### Poziom 2 — konfiguracja konta (gdy poziom 1 nie wyjaśnia)
+
+`firestore_list_documents` na `users/{uid}/settings`, potem `firestore_get_document` na
+konkretnym dokumencie. Istniejące identyfikatory: `properties`, `syncLinks`, `sources`,
+`categories`, `tax`, `recurringCosts`, `reminders`, `hostProfile`, `publicContact`.
+
+- *„synchronizacja nie działa"* → `syncLinks`; **pamiętaj o kształcie danych**: kluczami są
+  NAZWY OBIEKTÓW, a portale siedzą w wartościach (`{ booking, airbnb }`). Pomylenie tego było
+  źródłem błędu #11,
+- *„podatki liczą się źle"* → `tax` + `sources` (źródło „Facebook" celowo zeruje podatek,
+  VAT i prowizję — to bywa brane za błąd),
+- *„goście widzą mój prywatny e-mail"* → `publicContact` i przełącznik `showPublicContact`;
+  stare konta mogą mieć zapisany adres logowania do czasu następnego zapisu profilu,
+- *„zysk netto różni się między zakładkami"* → to nie awaria konta, tylko znany dług:
+  „Przegląd" nie wlicza kosztów stałych, „Koszty i opłaty" i raport wliczają.
+
+⚠️ **`hostProfile` czytaj tylko wtedy, gdy zgłoszenie dotyczy profilu lub faktur** — pole
+`taxIdentifier` może zawierać PESEL (ustalenie audytu N5 🟡5).
+
+### Poziom 3 — dane powierzone (dane Gości) — tylko gdy zgłoszenie tego wymaga
+
+| Odczyt | Zawiera dane osobowe Gości |
+|---|---|
+| `firestore_query_collection` → `users/{uid}/rentals/` | imiona/nazwiska gości, kontakt, skład osobowy pobytu |
+| `firestore_query_collection` → `guides/` z filtrem `ownerId == {uid}` | treść przewodnika; sekrety są w podkolekcji `secrets/data` |
+| `guides/{id}/signatures/` | **imię gościa + obraz podpisu** |
+
+**Zasady tego poziomu:**
+1. Wejdź tu tylko wtedy, gdy problem naprawdę dotyczy konkretnej rezerwacji lub przewodnika.
+2. Czytaj **wąsko** — pojedynczy dokument, nie całą kolekcję, jeśli znasz identyfikator.
+3. **Nie czytaj `secrets/data`** (hasło WiFi, kod do drzwi), chyba że zgłoszenie dotyczy
+   wprost tego, że sekrety się nie wyświetlają. To dane dostępowe do czyjegoś mieszkania.
+4. Odnotuj w odpowiedzi, że sięgnięcie po dane Gości było potrzebne i dlaczego.
+
+### Czego agent NIE zrobi
+
+Kanał jest **wyłącznie do odczytu** — nie ma narzędzi zapisu, więc agent **nie naprawi konta
+w bazie**. Może: ustalić przyczynę, wskazać dokładne pole i wartość, przygotować treść
+odpowiedzi i zaproponować poprawkę w kodzie. Zmiana danych na produkcji zostaje operacją
+właściciela (konsola) albo osobnym, świadomie napisanym skryptem po przeglądzie.
+
+To ograniczenie jest celowe: diagnostyka support to najgorszy możliwy moment na przypadkowy
+zapis do bazy produkcyjnej.
+
+---
+
+## 5. Ścieżka obsługi pojedynczego zgłoszenia
 
 1. **Odczytaj** zgłoszenie (data, źródło, treść).
 2. **Sprawdź, czy odpowiedź już istnieje** w `docs/support/` — Centrum pomocy powstało po to,
@@ -108,14 +190,14 @@ więc podlega tej samej bramce z sekcji 2.
    - *pomysł* → [[Projects/Backlog]] z jednym zdaniem „po co".
 4. **Odpisz z własnej skrzynki** (`kontakt@wynajempro.pl`). Aplikacja nie ma kanału wysyłki —
    agent przygotowuje treść, wysyłasz Ty.
-5. **Odnotuj** — dopóki nie ma pola statusu (sekcja 5), rejestr obsłużonych zgłoszeń
+5. **Odnotuj** — dopóki nie ma pola statusu (sekcja 6), rejestr obsłużonych zgłoszeń
    prowadzimy w [[Activity-Log]] przy okazji zmian, które z nich wynikły.
 6. **Jeśli zgłoszenie zmieniło UI** → odśwież artykuły i uruchom `npm run help:build`.
    Artykuły cytują etykiety 1:1, więc starzeją się z każdym deployem (wniosek z X1).
 
 ---
 
-## 5. Czego ten proces jeszcze NIE ma
+## 6. Czego ten proces jeszcze NIE ma
 
 Firebase MCP rozwiązuje **odczyt**. Nie rozwiązuje reszty — te braki idą do
 [[Projects/Backlog]] i czekają na decyzję właściciela:
@@ -129,7 +211,7 @@ Firebase MCP rozwiązuje **odczyt**. Nie rozwiązuje reszty — te braki idą do
 
 ---
 
-## 6. Weryfikacja przed pierwszym prawdziwym użyciem ⚠️
+## 7. Weryfikacja przed pierwszym prawdziwym użyciem ⚠️
 
 Kontrola z 2026-08-10 wykazała, że w bazie istnieją kolekcje `artifacts`, `guides`, `users` —
 **kolekcji `contact_messages` NIE MA**. Firestore nie tworzy pustych kolekcji, więc znaczy to

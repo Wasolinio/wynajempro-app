@@ -175,7 +175,14 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 1. Administrator udziela Procesorowi **ogólnej zgody** na korzystanie z subprocesorów niezbędnych do świadczenia usługi. Na dzień zawarcia Umowy są to:
    - **Google / Firebase (Google Cloud EMEA Ltd. / Google Ireland Ltd.)** — infrastruktura (Auth, Firestore, Storage, Functions, hosting),
    - **Stripe (Stripe Payments Europe, Ltd. / Stripe, Inc.)** — w zakresie, w jakim dane rozliczeniowe mogą się wiązać z rezerwacjami [DO POTWIERDZENIA zakresu — Stripe dotyczy głównie relacji Operator↔Gospodarz, nie danych Gości; prawnik ustali, czy Stripe jest subprocesorem danych powierzonych],
-   - **Google (OAuth)** — w zakresie logowania.
+   - **Google (OAuth)** — w zakresie logowania,
+   - **[UZUPEŁNIENIE 2026-08-10] Anthropic** ([DO POTWIERDZENIA: podmiot kontraktujący] ) — **wsparcie obsługi zgłoszeń i diagnostyki kont**. Zakres wobec danych powierzonych jest **ograniczony i warunkowy**: kanał służy przede wszystkim danym Gospodarza (stan konta, subskrypcja, ustawienia), a **dane Gości (rezerwacje, zapisy akceptacji regulaminu) są odczytywane wyłącznie wtedy, gdy rozpatrzenie zgłoszenia Gospodarza tego wymaga** — zgodnie z zasadą minimalizacji (art. 5 ust. 1 lit. c). Kanał techniczny ma uprawnienia **wyłącznie do odczytu** (brak możliwości zapisu, modyfikacji i usunięcia danych — ograniczenie wymuszone konfiguracją, nie tylko procedurą). [DO POTWIERDZENIA przez prawnika: czy przy tak zawężonym zakresie Anthropic jest subprocesorem **danych powierzonych**, czy wyłącznie danych, wobec których Operator jest administratorem — analogiczne pytanie postawiono już przy Stripe.]
+
+   > **Uwaga o momencie wprowadzenia.** Kanał dodano **przed publicznym launchem**, gdy jedynym
+   > Gospodarzem jest właściciel serwisu. Ust. 2 poniżej daje Administratorowi prawo sprzeciwu
+   > wobec nowego subprocesora — wprowadzenie tego kanału po launchu wymagałoby powiadomienia
+   > każdego Gospodarza i obsłużenia sprzeciwów. Dziś ten koszt jest zerowy.
+
 2. Procesor **informuje Administratora o zamierzonych zmianach** dotyczących dodania lub zastąpienia subprocesorów, dając możliwość wyrażenia sprzeciwu. [DO UZUPEŁNIENIA: kanał i termin informowania, np. e-mail / aktualizacja listy subprocesorów z 14-dniowym wyprzedzeniem.]
 3. Procesor nakłada na subprocesorów obowiązki ochrony danych co najmniej równoważne obowiązkom z niniejszej Umowy (art. 28 ust. 4).
 4. **Transfery poza EOG:** [DO UZUPEŁNIENIA/POTWIERDZENIA: mechanizm legalizujący (SCC / EU-US DPF) dla każdego subprocesora przekazującego dane poza EOG — do zweryfikowania u źródła, nie wpisywać „z pamięci".]

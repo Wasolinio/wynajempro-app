@@ -93,9 +93,13 @@ export default function ContactPage() {
               {isSending ? 'Wysyłanie…' : <><Send /> Wyślij wiadomość</>}
             </button>
             {/* Klauzula informacyjna warstwy pierwszej (F5) — brzmienie od agenta legal.
-                „Operator serwisu WynajemPRO": pełny podmiot-administrator w Polityce. */}
+                „Operator serwisu WynajemPRO": pełny podmiot-administrator w Polityce.
+                2026-08-10: dopisana kategoria odbiorcy (dostawca modelu językowego wspierającego
+                obsługę zgłoszeń) — art. 13 ust. 1 lit. e wymaga informacji o odbiorcach JUŻ przy
+                zbieraniu, więc sama sekcja 5 Polityki tu nie wystarcza. Prośba o nieumieszczanie
+                zbędnych danych jest świadoma: pole jest swobodne (minimalizacja, art. 5 ust. 1 lit. c). */}
             <p className="wpb-body" style={{ fontSize: 12, color: 'var(--muted)', margin: '12px 0 0', lineHeight: 1.55 }}>
-              Administratorem danych z formularza (adres e-mail, treść wiadomości) jest operator serwisu WynajemPRO; przetwarzamy je, aby odpowiedzieć na Twoje zgłoszenie. Szczegóły i Twoje prawa opisuje <a href="/prywatnosc" className="wpb-link">Polityka prywatności</a>.
+              Administratorem danych z formularza (adres e-mail, treść wiadomości) jest operator serwisu WynajemPRO; przetwarzamy je, aby odpowiedzieć na Twoje zgłoszenie. W obsłudze zgłoszeń wspieramy się narzędziem opartym na modelu językowym — lista dostawców i zasady są w Polityce. Prosimy nie umieszczać w wiadomości danych, które nie są potrzebne do jej rozpatrzenia. Szczegóły i Twoje prawa opisuje <a href="/prywatnosc" className="wpb-link">Polityka prywatności</a>.
             </p>
           </form>
           {isSubmitted && (

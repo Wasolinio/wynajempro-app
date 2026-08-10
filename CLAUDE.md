@@ -26,8 +26,11 @@ Zgłoszenia z `/kontakt` lądują w Firestore (`contact_messages`), a reguły za
 klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase MCP** (`.mcp.json`,
 5 narzędzi wyłącznie do odczytu; `--tools` usuwa kasowanie i deploy u źródła).
 Proces: **`docs/support/Proces-obslugi-zgloszen.md`**.
-⚠️ **Czytanie treści zgłoszeń (`email`, `message`) jest wstrzymane** do czasu dopisania
-Anthropic do subprocesorów w Polityce §5 — decyzja właściciela. Metadane wolno.
+**Tryb pracy:** właściciel podaje UID (lub e-mail), agent diagnozuje. Zakres **stopniowany**:
+poziom 1 konto/subskrypcja → poziom 2 `settings/*` → poziom 3 dane Gości (rezerwacje, podpisy)
+tylko gdy zgłoszenie tego wymaga. `hostProfile` ma `taxIdentifier` (może być PESEL) —
+czytać wyłącznie przy zgłoszeniach o profil/faktury. Kanał jest **tylko do odczytu**:
+agent diagnozuje i proponuje, nie naprawia danych na produkcji.
 
 ## Kluczowe pliki (produkcja)
 - `src/App.jsx` — routing (tylko trasy produkcyjne)
