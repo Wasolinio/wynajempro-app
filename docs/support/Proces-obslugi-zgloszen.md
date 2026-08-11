@@ -84,9 +84,14 @@ Nie ma tu żadnego klucza serwisowego do wygenerowania ani przechowywania.
 ### Najnowsze zgłoszenia
 
 Narzędzie `firestore_query_collection`:
-- `collection_path`: `contact_messages/`
+- `collection_path`: `contact_messages` — **bez ukośnika na końcu**
+- `filters`: `[]` (wymagane, choć puste)
 - `order`: po `createdAt` malejąco
 - `limit`: np. 20
+
+⚠️ **Poprawka 2026-08-10:** wcześniej stało tu `contact_messages/`. Ukośnik powoduje twardy
+błąd `Collection id "contact_messages/" is invalid because it contains "/"`. Ukośnik jest
+potrzebny wyłącznie w ścieżkach zagnieżdżonych (`parentCollection/parentDocument/collectionName`).
 
 ### Lista kolekcji (kontrola, że w ogóle jest się do czego łączyć)
 
@@ -211,21 +216,26 @@ Firebase MCP rozwiązuje **odczyt**. Nie rozwiązuje reszty — te braki idą do
 
 ---
 
-## 7. Weryfikacja przed pierwszym prawdziwym użyciem ⚠️
+## 7. Weryfikacja przed pierwszym prawdziwym użyciem — ✅ ZAMKNIĘTA 2026-08-10
 
-Kontrola z 2026-08-10 wykazała, że w bazie istnieją kolekcje `artifacts`, `guides`, `users` —
-**kolekcji `contact_messages` NIE MA**. Firestore nie tworzy pustych kolekcji, więc znaczy to
-jedno z dwojga:
+**Rozstrzygnięte: kanał działa.** Wątpliwość brzmiała tak — w bazie były kolekcje `artifacts`,
+`guides`, `users`, ale **`contact_messages` nie istniała**, co mogło znaczyć albo (a) że nikt
+nie napisał, albo (b) że zapis cicho nie działa mimo komunikatu „Wiadomość została wysłana!"
+(nawrót Known-Issues #6).
 
-- **(a)** od naprawy formularza (2026-07-16) nikt nie napisał — możliwe, produkt jest przed launchem;
-- **(b)** zapis cicho nie działa na produkcji, a formularz mimo to pokazuje „Wiadomość została wysłana!".
+Tego samego dnia właściciel wysłał wiadomość przez formularz na produkcji. Kolekcja
+**pojawiła się**, dokument ma poprawny kształt (`email`, `message`, `source`, `createdAt`
+równe czasowi serwera). **Wariant (b) wykluczony — obowiązuje (a):** przez cztery tygodnie
+od naprawy formularza po prostu nikt nie pisał, co przed launchem jest normalne.
 
-Wariant (b) to dokładnie ten sam błąd, który już raz wystąpił (Known-Issues #6: formularz
-pokazywał sukces, treść przepadała) — i tym razem byłby jeszcze trudniejszy do zauważenia.
+Przy okazji odpadł jeden podejrzany: zapis przeszedł z nieatestowanej sesji, więc
+**egzekwowanie App Check jest wyłączone** dla Firestore. Uwaga — to nie znaczy, że App Check
+jest zdrowy: produkcja zwraca `403` przy wymianie tokenu i **włączenie egzekwowania w tym
+stanie odcięłoby aplikację** ([[Known-Issues]] #13).
 
-**Rozstrzygnięcie:** wyślij testową wiadomość przez formularz na `wynajempro.com/kontakt`,
-a potem sprawdź, czy kolekcja się pojawiła. Jeśli nie — podejrzany numer jeden to
-**egzekwowanie App Check** (zapis idzie z sesji anonimowej, nieatestowanej), co wiąże się
-bezpośrednio z zadaniem 1 w [[Projects/Instrukcje-wlasciciela]].
+> **Pierwsze zgłoszenie było błędem produktowym** („nie działa dodawanie rezerwacji"), którego
+> przyczyny nie udało się ustalić z poziomu odczytu — [[Known-Issues]] #12. To dobra ilustracja
+> granicy z sekcji 4: kanał pozwala **wykluczyć** (konto, reguły, schemat, deploy, dane), ale
+> nie pozwala **odtworzyć** błędu żyjącego w sesji przeglądarki gospodarza.
 
 **Related:** [[Projects/Instrukcje-wlasciciela]] · [[Known-Issues]] · [[Projects/Backlog]] · [[Projects/Roadmap]]

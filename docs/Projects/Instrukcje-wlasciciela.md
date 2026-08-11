@@ -38,21 +38,38 @@ nadużyciami w **Polityce prywatności i DPA §6 jest prawdziwe**. Prawnik pyta 
 5. Zapisz sobie (albo zrób zrzut) proporcje dla **Cloud Firestore**, **Cloud Storage**
    i **Cloud Functions**.
 
-### ⚠️ Zanim włączysz egzekwowanie — przeczytaj
+### 🛑 STOP — NIE WŁĄCZAJ EGZEKWOWANIA (ustalenie z 2026-08-10)
 
-Włączenie egzekwowania **odetnie** każdego klienta, który nie przechodzi atestacji.
-Jeśli w metrykach widzisz zauważalny ruch „niezweryfikowany", to najpierw trzeba ustalić,
-skąd pochodzi — inaczej wyłączysz aplikację żywym użytkownikom.
+**Produkcja NIE przechodzi dziś atestacji.** Sprawdzone na żywo na `wynajempro.com`
+10.08.2026 — konsola przeglądarki zwraca:
 
-Co wiemy z kodu i z historii projektu:
-- Produkcyjna domena `wynajempro.com` **przechodzi atestację** reCAPTCHA (potwierdzone przy X13).
-- **Lokalny `npm run dev` NIE przechodzi** — to znany, udokumentowany efekt ([[Known-Issues]] #3).
+```
+@firebase/app-check: AppCheck: 403 error. Attempts allowed again after 01d:00m:00s
+```
+
+Wymiana tokenu reCAPTCHA na token App Check jest odbijana, a SDK po 403 wchodzi
+w **dobowy throttle**. Dziś nic to nie psuje, bo egzekwowanie jest wyłączone — ale
+**włączenie go w tym stanie odetnie całą aplikację od Firestore**. To nie jest ryzyko
+teoretyczne, tylko przewidywalny skutek.
+
+⚠️ To **koryguje wcześniejszy zapis tej instrukcji**, który twierdził, że domena
+produkcyjna atestację przechodzi (na podstawie X13, sprzed zmiany domeny kanonicznej
+22.07). To zdanie jest nieaktualne.
+
+**Kolejność jest więc odwrotna niż pierwotnie zapisana:**
+1. Napraw 403 — sprawdź w konsoli reCAPTCHA listę dozwolonych domen (czy jest
+   `wynajempro.com`, a nie tylko stara `moje-domki-6c77d.web.app`) oraz w Firebase →
+   App Check, czy aplikacja webowa jest zarejestrowana z tym samym kluczem.
+2. Potwierdź, że 403 zniknął (konsola przeglądarki na produkcji, po dobie throttle
+   albo w oknie incognito).
+3. **Dopiero wtedy** patrz na metryki i rozważaj egzekwowanie.
+
+Reszta ustaleń bez zmian:
+- **Lokalny `npm run dev` NIE przechodzi** — znany efekt ([[Known-Issues]] #3).
   Po włączeniu egzekwowania lokalny dev bez tokenu debug przestanie się łączyć z Firebase.
 - Skrypty `functions/*.cjs` używają Admin SDK, który **omija App Check** — nie ucierpią.
 
-**Rekomendacja:** jeśli „niezweryfikowane" jest bliskie zeru → włącz egzekwowanie dla
-wszystkich trzech usług. Jeśli nie → **nie włączaj**, zrób zrzut metryk i daj mi znać;
-ustalimy źródło, zanim cokolwiek odetniemy.
+Szczegóły: [[Known-Issues]] #13.
 
 ### Gotowe, gdy
 Wiesz i potrafisz udokumentować, czy egzekwowanie jest **WŁĄCZONE** dla Firestore, Storage

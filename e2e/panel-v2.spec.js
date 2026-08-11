@@ -9,6 +9,15 @@ import { setupFirebaseMocks } from './firebase-mock';
   i sprawdza fundament + dostępność z partii 2 audytu UI (2026-07-03).
 */
 
+/*
+  Daty fixture'ów liczymy WZGLĘDEM DNIA URUCHOMIENIA, nigdy na sztywno.
+  Powód: lista rezerwacji domyślnie filtruje `upcoming` (ManagerApp: `endDate >= dziś`),
+  więc wpisana na sztywno rezerwacja 01–05.08.2026 po 10.08 wpadła do „Archiwum",
+  test przestał znajdować przycisk „Edytuj" i przestał czegokolwiek pilnować —
+  cicho, bo commit X17 zdał go jeszcze 25.07 („e2e 39/39") i nikt nie zaglądał.
+*/
+const isoInDays = (n) => new Date(Date.now() + n * 86400000).toISOString().split('T')[0];
+
 const mockUser = { uid: 'uid-test', email: 'test@example.com', displayName: 'Test User', emailVerified: true };
 // hostProfile jest niezbędny — bez entityName ManagerApp pokazuje CompleteProfileScreen zamiast panelu
 const activeDb = {
@@ -99,7 +108,7 @@ test('Dodanie rezerwacji zapisuje czysty dokument — bez sentineli i pustych kw
 
   // minimalny komplet: property/source/date są prefillowane; uzupełniamy resztę wymaganych
   await dialog.getByPlaceholder('np. Jan Kowalski').fill('Tester E2E');
-  await dialog.locator('input[type="date"]').nth(1).fill('2026-08-15'); // wyjazd
+  await dialog.locator('input[type="date"]').nth(1).fill(isoInDays(5)); // wyjazd
   await dialog.getByLabel('Dorośli').fill('2'); // X14: rozbicie liczby gości
   await dialog.getByLabel('Dzieci').fill('2');
   await dialog.getByLabel('Zwierzęta').fill('1');
@@ -137,7 +146,7 @@ test('Edycja starej rezerwacji (samo `guests`) nie gubi liczby osób (X14)', asy
     ...activeDb,
     'users/uid-test/rentals/legacy-1': {
       type: 'booking', property: 'Apartament A', source: 'Booking.com', guest: 'Stary Gość',
-      date: '2026-08-01', endDate: '2026-08-05', income: 1000, guests: 3,
+      date: isoInDays(2), endDate: isoInDays(6), income: 1000, guests: 3,
     },
   };
   await setupFirebaseMocks(page, { user: mockUser, dbData: legacyDb });

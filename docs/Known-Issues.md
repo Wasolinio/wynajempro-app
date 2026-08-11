@@ -91,6 +91,49 @@ To samo dotyczy `type === 'reminder'`: `remindersList` zasila tylko pływający 
 `ManagerApp.jsx:471-475` buduje `syncRows`, sprawdzając `Object.keys(syncLinks)` pod kątem słów „airbnb"/„booking"/„nocowanie". Tymczasem **kluczami `syncLinks` są NAZWY OBIEKTÓW**, a nazwy portali siedzą w wartościach: `SettingsModal.jsx:184,189` zapisuje `editingSyncLinks[p.name] = { booking, airbnb }`, `ManagerApp.jsx:399` utrwala to jako `{ links: editingSyncLinks }`, a `useFirebaseData.js:94` czyta z powrotem `data.links`.
 **Skutek:** przy poprawnie wklejonych linkach wszystkie trzy kanały świecą „—". Naprawa: sprawdzać wartości (`Object.values(syncLinks).some((v) => v?.booking)` itd.), nie klucze. Uwaga: „Nocowanie" nie ma w ogóle pola na link w Ustawieniach, choć widnieje w sygnalizatorze — do rozstrzygnięcia produktowego.
 
+### 12. „Nie działa dodawanie rezerwacji. Strona wywala błąd" — objaw wyjaśniony, PRZYCZYNA NIEUSTALONA
+**Severity**: 🔴 blokuje podstawową operację · **Status**: ⏳ OTWARTE (usunięto wzmacniacz objawu, źródło błędu nadal nieznane)
+**Źródło:** pierwsze prawdziwe zgłoszenie przez `/kontakt` (10.08.2026 13:45, konto właściciela). Przy okazji potwierdziło, że kanał zgłoszeń działa — wariant (b) z §7 [[support/Proces-obslugi-zgloszen]] (cichy zapis w próżnię) jest **wykluczony**.
+
+**Co usunięto (`index.html`):** globalny `window.onerror` + `window.onunhandledrejection`, które podmieniały `document.body` na czerwony ekran „Błąd JS!" ze stack tracem. Wszedł commitem `b4aeb4e` (29.06, „bypass email verification and add cleanup TODOs for **easier V4 testing**") i **przeżył na produkcji 6 tygodni**. Bypass weryfikacji z tego samego commita posprzątano przy N1 — tego handlera nie. Skutek: KAŻDY błąd JS, także w obcym skrypcie albo rozszerzeniu przeglądarki, kasował działającą stronę i pokazywał użytkownikowi stack trace. To jest „strona wywala błąd" ze zgłoszenia. Błędy renderu i tak łapie `src/GlobalErrorBoundary.jsx` (markowy ekran + czyszczenie cache PWA), więc handler nic nie wnosił poza szkodą.
+
+**Co sprawdzono i WYKLUCZONO jako przyczynę (10.08):**
+- konto: `emailVerified: true`, `status: 'active'` → `isOwnerAndVerified` + `hasActiveSubscription` przechodzą;
+- `firestore.rules`: allowlista `isValidRental` zawiera `adults`/`children`/`pets`, zmiana addytywna;
+- kod zapisu: e2e „Dodanie rezerwacji zapisuje czysty dokument" **przechodzi** (brak sentineli, brak `''` w polach liczbowych);
+- deploy: wszystkie 26 chunków odpowiadają 200, a `ManagerApp-Df2hXFSw.js` na produkcji jest **bajt w bajt** identyczny z lokalnym buildem i zawiera pola Dorośli/Dzieci/Zwierzęta;
+- dane: rezerwacja z pełnym rozbiciem (`adults:2, children:2, pets:1, guests:4`) **istnieje** w bazie od 25.07 — ścieżka zapisu na produkcji już raz zadziałała;
+- App Check: egzekwowanie jest wyłączone (dowód: zapis do `contact_messages` o 11:45 przeszedł), więc nie blokuje zapisu → patrz jednak #13.
+
+**Twarda przesłanka, że błąd jest realny:** w `users/{uid}/rentals` **nie powstał żaden dokument z 10.08** — ostatni jest z 25.07.
+
+**Czego brakuje do domknięcia:** treści wyjątku. Bez sesji zalogowanej na produkcji nie da się tego odtworzyć (kanał MCP jest wyłącznie do odczytu), a wszystko, co weryfikowalne statycznie i przez bazę, jest czyste. Po usunięciu handlera błąd nie skasuje już strony — trafi do konsoli przeglądarki, skąd trzeba go odczytać przy kolejnej próbie.
+
+---
+
+### 13. App Check zwraca 403 na produkcji — blokuje włączenie egzekwowania
+**Severity**: 🔴 blokuje zadanie 1 z [[Projects/Instrukcje-wlasciciela]] · **Status**: ⏳ OTWARTE
+**Objaw (zaobserwowany na żywo 10.08 na `wynajempro.com`):**
+```
+@firebase/app-check: AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle)
+```
+Klucz reCAPTCHA v3 jest poprawnie wbudowany w bundle (`src/firebase.js:31`, `VITE_RECAPTCHA_SITE_KEY`), ale wymiana tokenu na token App Check jest odbijana. Po 403 SDK wchodzi w **dobowy throttle** i przestaje próbować.
+
+**Dlaczego dziś nic nie psuje:** egzekwowanie App Check jest w konsoli **wyłączone**, więc Firestore przyjmuje żądania bez ważnego tokenu.
+
+**Dlaczego to jest pilne:** zadanie 1 w [[Projects/Instrukcje-wlasciciela]] to właśnie **włączenie egzekwowania**. Zrobione przy obecnym 403 **odetnie cały ruch aplikacji do Firestore** — dokładnie to, przed czym ostrzega notatka „odcięcie ruchu" w instrukcji. Kolejność jest odwrotna niż zapisana: najpierw naprawić 403, potwierdzić w konsoli, że token się wystawia, dopiero potem włączać egzekwowanie.
+
+**Podejrzany numer jeden:** zmiana domeny kanonicznej na `wynajempro.com` (22.07) — klucz reCAPTCHA i/lub rejestracja aplikacji w App Check mogą nadal wskazywać starą domenę `moje-domki-6c77d`. Do sprawdzenia w konsoli reCAPTCHA (lista dozwolonych domen) i Firebase → App Check (czy aplikacja webowa jest zarejestrowana z tym kluczem).
+
+---
+
+### 14. Test e2e migracji `guests`→`adults` zgnił po 6 dniach — bezgłośnie
+**Severity**: 🟡 fałszywe poczucie pokrycia · **Status**: ✅ NAPRAWIONE 2026-08-10
+**Problem:** `e2e/panel-v2.spec.js` „Edycja starej rezerwacji (samo `guests`)" miał fixture z datami wpisanymi na sztywno (`2026-08-01`–`2026-08-05`). Lista rezerwacji domyślnie filtruje `upcoming` (`ManagerApp.jsx:240`: `endDate >= dziś`), więc **10.08 fixture wpadł do „Archiwum"**, test przestał znajdować przycisk „Edytuj" i wywalał się na timeoucie.
+**Dlaczego to bolało:** to jedyny test pilnujący pułapki utraty danych z X17 — migracji `guests`→`adults`, bez której zapis starej rezerwacji **zeruje liczbę osób**. Commit X17 zdał go 25.07 („e2e 39/39") i od 31.07 test nie chronił już niczego, nie dając żadnego sygnału.
+**Naprawa:** daty fixture'ów liczone względem dnia uruchomienia (`isoInDays()`), z komentarzem zakazującym powrotu do dat na sztywno. Po poprawce `panel-v2.spec.js` przechodzi 7/7.
+**Wniosek ogólny:** deklaracja „e2e N/N" w commicie jest prawdziwa wyłącznie w dniu commita.
+
 ---
 
 ## Future Improvements (Not Bugs)
