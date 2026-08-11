@@ -4,6 +4,20 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-11
+
+### Znacznik zgłoszeń testowych w formularzu `/kontakt`
+- 🎯 **Powód**: zgłoszenie testowe z 10.08 było nieodróżnialne od prawdziwej awarii i uruchomiło pełną diagnostykę błędu, którego nie było ([[Known-Issues]] #12).
+- ✅ **Mechanizm**: `/kontakt?test=1` zapisuje `source: 'kontakt-test'` zamiast `'kontakt'`. Widoczny baner potwierdza tryb — bez niego nie wiadomo, czy parametr zadziałał, a cała wartość znacznika polega na pewności, że się zapisał.
+- ✅ **Zero zmian w `firestore.rules`**: reguły `contact_messages` dopuszczają dokładnie cztery klucze (`hasOnly`), a `source` jest wśród nich (opcjonalny string ≤50). Nowe pole wymagałoby zmiany reguł i osobnego deployu — świadomie ominięte, bo zmiana reguł to zawsze ryzyko po stronie bezpieczeństwa.
+- 🛡️ **Decyzja projektowa — parametr URL, NIE widoczny checkbox**: formularz jest klientowski. Checkbox „to jest test" zaśmiecałby go wszystkim i dałoby się go kliknąć przypadkiem — a wtedy **prawdziwe** zgłoszenie zostałoby oznaczone jako test i zignorowane. To gorszy błąd niż ten, który naprawiamy. Parametr wymaga świadomego działania i jest niewidoczny dla klientów.
+- ✅ **Fail-safe**: nierozpoznana wartość (`?test=xyz`) daje zwykły `kontakt`. Inaczej przypadkowy albo podrobiony link wyciszałby prawdziwe zgłoszenia.
+- ✅ **Regresja**: nowy `e2e/contact-form.spec.js` — 4 testy, celujące w POLE `source` w zapisanym dokumencie, nie w sam baner (baner to kosmetyka, wartość diagnostyczną ma to, co trafia do Firestore). 4/4.
+- 📌 **Strona odczytu**: proces supportu §3 dostał tabelę odsiewu — sprawdzenie `source` jest **pierwszym** krokiem odczytu. Sam znacznik bez tego nie zmienia niczego.
+- ⚖️ **Czego znacznik NIE zastępuje** (§7): agent pyta o potwierdzenie, zanim uruchomi pełną diagnostykę, jeśli zgłoszenie opisuje awarię bez żadnego śladu w danych. Nieobecność danych nie jest dowodem awarii.
+
+---
+
 ## 2026-08-10
 
 ### Pierwsze zgłoszenie z kanału `/kontakt` — TEST kanału, nie awaria

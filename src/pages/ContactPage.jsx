@@ -1,12 +1,37 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import LegalLayout from './LegalLayout';
-import { Mail, ShieldCheck, Send } from 'lucide-react';
+import { Mail, ShieldCheck, Send, FlaskConical } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
+/*
+  Tryb testowy formularza — `/kontakt?test=1`.
+
+  Po co: 10.08.2026 właściciel wysłał zgłoszenie testowe z wymyśloną treścią („nie działa
+  dodawanie rezerwacji"), żeby sprawdzić, czy kanał działa. Kanał nie miał czym odróżnić
+  testu od prawdziwej awarii, więc wypełniacz uruchomił pełną diagnostykę błędu, którego
+  nie było (Known-Issues #12).
+
+  Dlaczego przez parametr URL, a nie widoczny checkbox: formularz jest klientowski.
+  Checkbox „to jest test" zaśmieca go dla wszystkich i da się kliknąć przypadkiem —
+  a wtedy PRAWDZIWE zgłoszenie zostanie oznaczone jako test i zignorowane. To gorszy
+  błąd niż ten, który naprawiamy. Parametr jest niewidoczny dla klientów i wymaga
+  świadomego działania.
+
+  Dlaczego przez `source`, a nie nowe pole: `firestore.rules` dopuszczają w
+  `contact_messages` dokładnie cztery klucze (`hasOnly`), a `source` jest wśród nich —
+  opcjonalny string ≤50 znaków. Nowe pole wymagałoby zmiany reguł i ich deployu.
+  Zero zmian w regułach = zero ryzyka po stronie bezpieczeństwa.
+*/
+const TEST_SOURCE = 'kontakt-test';
+const NORMAL_SOURCE = 'kontakt';
+
 export default function ContactPage() {
+  const [searchParams] = useSearchParams();
+  const isTestMode = ['1', 'true'].includes((searchParams.get('test') || '').toLowerCase());
+
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -23,10 +48,10 @@ export default function ContactPage() {
         email: email.trim().slice(0, 320),
         message: message.trim().slice(0, 5000),
         createdAt: serverTimestamp(),
-        source: 'kontakt',
+        source: isTestMode ? TEST_SOURCE : NORMAL_SOURCE,
       });
       setIsSubmitted(true);
-      toast.success('Wiadomość została wysłana!');
+      toast.success(isTestMode ? `Wysłano jako TEST (source: ${TEST_SOURCE})` : 'Wiadomość została wysłana!');
       setEmail('');
       setMessage('');
     } catch (err) {
@@ -78,6 +103,18 @@ export default function ContactPage() {
           <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 17, margin: '0 0 20px' }}>
             <Mail style={{ width: 18, height: 18, color: 'var(--cynober)' }} /> Formularz kontaktowy
           </h3>
+          {/* Widoczne potwierdzenie trybu testowego — bez niego nie wiadomo, czy parametr
+              zadziałał, a cała wartość znacznika polega na pewności, że się zapisał. */}
+          {isTestMode && (
+            <p className="wpb-note wpb-note--info" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 18 }}>
+              <FlaskConical style={{ width: 16, height: 16, flexShrink: 0, marginTop: 2 }} />
+              <span>
+                <strong>Tryb testowy.</strong> Ta wiadomość zapisze się z oznaczeniem
+                {' '}<code>source: {TEST_SOURCE}</code> i nie zostanie potraktowana jak
+                prawdziwe zgłoszenie. Aby wysłać normalnie, otwórz <Link to="/kontakt" className="wpb-link">/kontakt</Link> bez parametru.
+              </span>
+            </p>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="wpb-field">
               <label className="wpb-flabel">Adres e-mail</label>

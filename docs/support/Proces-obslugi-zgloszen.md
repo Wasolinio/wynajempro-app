@@ -89,6 +89,23 @@ Narzędzie `firestore_query_collection`:
 - `order`: po `createdAt` malejąco
 - `limit`: np. 20
 
+### ⚠️ NAJPIERW sprawdź pole `source` — odsiew zgłoszeń testowych
+
+| `source` | Znaczenie | Co robisz |
+|---|---|---|
+| `kontakt` | zwykłe zgłoszenie z formularza | obsługujesz normalnie (sekcja 5) |
+| `kontakt-test` | **wysłane świadomie jako test kanału** | **NIE diagnozujesz**; potwierdzasz właścicielowi, że wiadomość dotarła, i tyle |
+
+Znacznik ustawia formularz otwarty jako `/kontakt?test=1` ([ContactPage.jsx](../../src/pages/ContactPage.jsx)).
+Tryb jest niewidoczny dla klientów — parametr wymaga świadomego działania, więc zwykły
+użytkownik nie oznaczy swojego prawdziwego zgłoszenia jako testu przez pomyłkę.
+Regresja: [`e2e/contact-form.spec.js`](../../e2e/contact-form.spec.js) (4 testy, w tym
+fail-safe: nierozpoznana wartość parametru daje zwykły `kontakt`).
+
+Powód istnienia znacznika: 10.08.2026 zgłoszenie testowe z wymyśloną treścią uruchomiło
+pełną diagnostykę awarii, której nie było ([[Known-Issues]] #12). **Filtrowanie po `source`
+jest pierwszym krokiem odczytu, nie ostatnim** — inaczej znacznik nie zmienia niczego.
+
 ⚠️ **Poprawka 2026-08-10:** wcześniej stało tu `contact_messages/`. Ukośnik powoduje twardy
 błąd `Collection id "contact_messages/" is invalid because it contains "/"`. Ukośnik jest
 potrzebny wyłącznie w ścieżkach zagnieżdżonych (`parentCollection/parentDocument/collectionName`).
@@ -238,13 +255,15 @@ stanie odcięłoby aplikację** ([[Known-Issues]] #13).
 > potraktował ją jak prawdziwe zgłoszenie i przeprowadził pełną diagnostykę. Wynik audytu:
 > ścieżka dodawania rezerwacji jest **zdrowa** ([[Known-Issues]] #12).
 >
-> **Wniosek dla tego procesu — brak z §6 „Brak statusu zgłoszenia" jest dotkliwszy, niż zakładano.**
-> Kanał nie ma pola typu ani statusu, więc **zgłoszenie testowe jest nieodróżnialne od prawdziwego**.
-> Do czasu, aż to się zmieni, obowiązują dwie zasady:
-> 1. **Wysyłając test — napisz w treści „TEST — proszę zignorować".** To jedyny dziś sposób.
-> 2. **Agent pyta o potwierdzenie, zanim uruchomi pełną diagnostykę**, jeśli zgłoszenie przyszło
->    z adresu właściciela i opisuje awarię bez żadnego śladu w danych (brak dokumentu, brak
->    nieudanego zapisu). Nieobecność danych **nie jest** dowodem awarii — może znaczyć,
->    że nikt nie próbował.
+> **Wniosek dla tego procesu — wdrożony 2026-08-11.** Kanał nie miał pola typu, więc zgłoszenie
+> testowe było nieodróżnialne od prawdziwego. Naprawione: **`/kontakt?test=1` zapisuje
+> `source: 'kontakt-test'`** (sekcja 3 — odsiew jest pierwszym krokiem odczytu). Obok tego
+> obowiązuje zasada, której żaden znacznik nie zastąpi:
+>
+> **Agent pyta o potwierdzenie, zanim uruchomi pełną diagnostykę**, jeśli zgłoszenie opisuje
+> awarię, po której **nie ma żadnego śladu w danych** (brak dokumentu, brak nieudanego zapisu).
+> Nieobecność danych **nie jest** dowodem awarii — równie dobrze znaczy, że nikt nie próbował.
+> To był właściwy błąd rozumowania z 10.08: brak rezerwacji z tego dnia potraktowano jako
+> poszlakę potwierdzającą, a był to brak próby.
 
 **Related:** [[Projects/Instrukcje-wlasciciela]] · [[Known-Issues]] · [[Projects/Backlog]] · [[Projects/Roadmap]]
