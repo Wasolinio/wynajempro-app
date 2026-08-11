@@ -6,7 +6,18 @@ Project timeline and key milestones.
 
 ## 2026-08-10
 
-### Pierwsze obsłużone zgłoszenie — „nie działa dodawanie rezerwacji" (kanał `/kontakt`)
+### Pierwsze zgłoszenie z kanału `/kontakt` — TEST kanału, nie awaria
+
+> ⚠️ **ERRATA 2026-08-11.** Właściciel potwierdził, że zgłoszenie z 10.08 **było testowe** —
+> wysłał je, żeby sprawdzić, czy kanał działa, a treść („nie działa dodawanie rezerwacji")
+> była wypełniaczem. **Awaria dodawania rezerwacji nigdy nie wystąpiła.** Poniższe punkty
+> zostają w pierwotnym brzmieniu (konwencja pliku), ale czytaj je z tą poprawką: diagnostyka
+> była pościgiem za nieistniejącym błędem. Co z tego przeżywa: kanał zgłoszeń działa (to było
+> testowane i wyszło pozytywnie), a trzy ustalenia uboczne — debugowy handler, App Check 403,
+> zgniły test — są realne i zweryfikowane niezależnie. Upada wyłącznie hipoteza o przyczynie
+> awarii, w tym „poszlaka" o braku dokumentu w `rentals` (to był brak próby, nie ślad błędu).
+> Szczegóły i wnioski: [[Known-Issues]] #12.
+
 - ✅ **Kanał zgłoszeń DZIAŁA**: w `contact_messages` jest wiadomość z 13:45 o poprawnym kształcie. To **rozstrzyga wątpliwość z §7** [[support/Proces-obslugi-zgloszen]] — wariant (b), czyli cichy zapis w próżnię przy komunikacie o sukcesie (nawrót Known-Issues #6), jest **wykluczony**. Kolekcji wcześniej nie było, bo po prostu nikt nie pisał.
 - 🔎 **Diagnostyka zgłoszenia — wszystko, co weryfikowalne, jest czyste**: konto (`emailVerified: true`, `status: 'active'` → obie bramki przechodzą); reguły (allowlista `isValidRental` ma `adults`/`children`/`pets`); kod zapisu (e2e „Dodanie rezerwacji" przechodzi — bez sentineli i pustych kwot); deploy (26/26 chunków HTTP 200, `ManagerApp-Df2hXFSw.js` **bajt w bajt** identyczny z lokalnym buildem); dane (rezerwacja z pełnym rozbiciem `2+2+1` istnieje w bazie od 25.07 — ścieżka zapisu na produkcji już raz zadziałała).
 - ⚠️ **Błąd jest jednak realny**: w `users/{uid}/rentals` **nie powstał żaden dokument z 10.08** — ostatni jest z 25.07. Zgłoszenie nie jest pomyłką użytkownika.

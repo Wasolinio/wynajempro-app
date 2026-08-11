@@ -233,9 +233,18 @@ Przy okazji odpadł jeden podejrzany: zapis przeszedł z nieatestowanej sesji, w
 jest zdrowy: produkcja zwraca `403` przy wymianie tokenu i **włączenie egzekwowania w tym
 stanie odcięłoby aplikację** ([[Known-Issues]] #13).
 
-> **Pierwsze zgłoszenie było błędem produktowym** („nie działa dodawanie rezerwacji"), którego
-> przyczyny nie udało się ustalić z poziomu odczytu — [[Known-Issues]] #12. To dobra ilustracja
-> granicy z sekcji 4: kanał pozwala **wykluczyć** (konto, reguły, schemat, deploy, dane), ale
-> nie pozwala **odtworzyć** błędu żyjącego w sesji przeglądarki gospodarza.
+> **Pierwsze zgłoszenie było TESTEM kanału, nie awarią.** Właściciel wysłał je, żeby sprawdzić,
+> czy formularz działa; treść („nie działa dodawanie rezerwacji") była wypełniaczem, a agent
+> potraktował ją jak prawdziwe zgłoszenie i przeprowadził pełną diagnostykę. Wynik audytu:
+> ścieżka dodawania rezerwacji jest **zdrowa** ([[Known-Issues]] #12).
+>
+> **Wniosek dla tego procesu — brak z §6 „Brak statusu zgłoszenia" jest dotkliwszy, niż zakładano.**
+> Kanał nie ma pola typu ani statusu, więc **zgłoszenie testowe jest nieodróżnialne od prawdziwego**.
+> Do czasu, aż to się zmieni, obowiązują dwie zasady:
+> 1. **Wysyłając test — napisz w treści „TEST — proszę zignorować".** To jedyny dziś sposób.
+> 2. **Agent pyta o potwierdzenie, zanim uruchomi pełną diagnostykę**, jeśli zgłoszenie przyszło
+>    z adresu właściciela i opisuje awarię bez żadnego śladu w danych (brak dokumentu, brak
+>    nieudanego zapisu). Nieobecność danych **nie jest** dowodem awarii — może znaczyć,
+>    że nikt nie próbował.
 
 **Related:** [[Projects/Instrukcje-wlasciciela]] · [[Known-Issues]] · [[Projects/Backlog]] · [[Projects/Roadmap]]

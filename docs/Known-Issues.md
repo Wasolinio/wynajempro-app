@@ -91,56 +91,70 @@ To samo dotyczy `type === 'reminder'`: `remindersList` zasila tylko pływający 
 `ManagerApp.jsx:471-475` buduje `syncRows`, sprawdzając `Object.keys(syncLinks)` pod kątem słów „airbnb"/„booking"/„nocowanie". Tymczasem **kluczami `syncLinks` są NAZWY OBIEKTÓW**, a nazwy portali siedzą w wartościach: `SettingsModal.jsx:184,189` zapisuje `editingSyncLinks[p.name] = { booking, airbnb }`, `ManagerApp.jsx:399` utrwala to jako `{ links: editingSyncLinks }`, a `useFirebaseData.js:94` czyta z powrotem `data.links`.
 **Skutek:** przy poprawnie wklejonych linkach wszystkie trzy kanały świecą „—". Naprawa: sprawdzać wartości (`Object.values(syncLinks).some((v) => v?.booking)` itd.), nie klucze. Uwaga: „Nocowanie" nie ma w ogóle pola na link w Ustawieniach, choć widnieje w sygnalizatorze — do rozstrzygnięcia produktowego.
 
-### 12. „Nie działa dodawanie rezerwacji. Strona wywala błąd" — objaw wyjaśniony, PRZYCZYNA NIEUSTALONA
-**Severity**: 🔴 blokuje podstawową operację · **Status**: ⏳ OTWARTE (usunięto wzmacniacz objawu, źródło błędu nadal nieznane)
-**Źródło:** pierwsze prawdziwe zgłoszenie przez `/kontakt` (10.08.2026 13:45, konto właściciela). Przy okazji potwierdziło, że kanał zgłoszeń działa — wariant (b) z §7 [[support/Proces-obslugi-zgloszen]] (cichy zapis w próżnię) jest **wykluczony**.
+### 12. Debugowy handler błędów kasował stronę na produkcji — ✅ NAPRAWIONE 2026-08-10/11
+**Severity**: 🟠 psuł UX każdego błędu i pokazywał użytkownikom stack trace · **Status**: ✅ NAPRAWIONE (commit `69f05c3`, wdrożone)
 
-**Co usunięto (`index.html`):** globalny `window.onerror` + `window.onunhandledrejection`, które podmieniały `document.body` na czerwony ekran „Błąd JS!" ze stack tracem. Wszedł commitem `b4aeb4e` (29.06, „bypass email verification and add cleanup TODOs for **easier V4 testing**") i **przeżył na produkcji 6 tygodni**. Bypass weryfikacji z tego samego commita posprzątano przy N1 — tego handlera nie. Skutek: KAŻDY błąd JS, także w obcym skrypcie albo rozszerzeniu przeglądarki, kasował działającą stronę i pokazywał użytkownikowi stack trace. To jest „strona wywala błąd" ze zgłoszenia. Błędy renderu i tak łapie `src/GlobalErrorBoundary.jsx` (markowy ekran + czyszczenie cache PWA), więc handler nic nie wnosił poza szkodą.
+> ⚠️ **ERRATA 2026-08-11 — ten wpis został przeklasyfikowany.** Pierwotnie brzmiał
+> „Nie działa dodawanie rezerwacji. Strona wywala błąd — PRZYCZYNA NIEUSTALONA" i miał
+> severity 🔴. **Zgłoszenie z 10.08 było testowe** — właściciel wysłał je, żeby sprawdzić,
+> czy kanał `/kontakt` w ogóle działa, a treść była wypełniaczem. **Awaria dodawania
+> rezerwacji nigdy nie wystąpiła i nie ma dla niej żadnych dowodów.** Zgodnie z konwencją
+> tego pliku pierwotnego sformułowania nie kasujemy — patrz „Czego to uczy" niżej.
 
-**Co sprawdzono i WYKLUCZONO jako przyczynę (10.08):**
+**Realny problem, który przy tym wyszedł i został naprawiony (`index.html`):** globalny
+`window.onerror` + `window.onunhandledrejection` podmieniały `document.body` na czerwony ekran
+„Błąd JS!" ze stack tracem. Wszedł commitem `b4aeb4e` (29.06, „bypass email verification and add
+cleanup TODOs for **easier V4 testing**") i **przeżył na produkcji 6 tygodni**. Bypass weryfikacji
+z tego samego commita posprzątano przy N1 — tego handlera nie. Skutek: KAŻDY błąd JS, także
+w obcym skrypcie albo rozszerzeniu przeglądarki, kasował działającą stronę. Błędy renderu i tak
+łapie `src/GlobalErrorBoundary.jsx` (markowy ekran + czyszczenie cache PWA), więc handler nie
+wnosił nic poza szkodą. Zweryfikowane po wdrożeniu na żywej produkcji: nieobsłużony `throw`
+i odrzucony promise → strona żyje, błędy trafiają do konsoli ze stack tracem.
+
+**Audyt ścieżki dodawania rezerwacji (przeprowadzony przy okazji — wynik: ZDROWA).**
+Robiony pod fałszywym założeniem, że jest awaria, ale ustalenia są prawdziwe i zostają
+jako potwierdzenie stanu produkcji na 10.08:
 - konto: `emailVerified: true`, `status: 'active'` → `isOwnerAndVerified` + `hasActiveSubscription` przechodzą;
 - `firestore.rules`: allowlista `isValidRental` zawiera `adults`/`children`/`pets`, zmiana addytywna;
-- kod zapisu: e2e „Dodanie rezerwacji zapisuje czysty dokument" **przechodzi** (brak sentineli, brak `''` w polach liczbowych);
-- deploy: wszystkie 26 chunków odpowiadają 200, a `ManagerApp-Df2hXFSw.js` na produkcji jest **bajt w bajt** identyczny z lokalnym buildem i zawiera pola Dorośli/Dzieci/Zwierzęta;
-- dane: rezerwacja z pełnym rozbiciem (`adults:2, children:2, pets:1, guests:4`) **istnieje** w bazie od 25.07 — ścieżka zapisu na produkcji już raz zadziałała;
-- App Check: egzekwowanie jest wyłączone (dowód: zapis do `contact_messages` o 11:45 przeszedł), więc nie blokuje zapisu → patrz jednak #13.
+- kod zapisu: e2e „Dodanie rezerwacji zapisuje czysty dokument" **przechodzi**;
+- deploy: 26/26 chunków HTTP 200, `ManagerApp-Df2hXFSw.js` **bajt w bajt** identyczny z lokalnym buildem;
+- dane: rezerwacja z rozbiciem (`adults:2, children:2, pets:1, guests:4`) istnieje w bazie od 25.07;
+- App Check: egzekwowanie wyłączone → nie blokuje zapisu (ale patrz #13).
 
-**Twarda przesłanka, że błąd jest realny:** w `users/{uid}/rentals` **nie powstał żaden dokument z 10.08** — ostatni jest z 25.07.
+**Czego to uczy — i dlaczego zostaje w rejestrze:**
+1. **„Brak dokumentu w `rentals` z 10.08" wziąłem za poszlakę potwierdzającą awarię.** To był
+   brak próby, nie ślad błędu. Nieobecność danych nie jest dowodem — o ile nie wiadomo, że
+   ktoś naprawdę próbował.
+2. **Zgłoszenie testowe jest nieodróżnialne od prawdziwego.** Kanał nie ma pola statusu ani
+   typu, więc nic nie odsiewa wypełniaczy — to zaostrza istniejący brak z §6
+   [[support/Proces-obslugi-zgloszen]] („Brak statusu zgłoszenia"). Przy testach warto pisać
+   wprost „TEST — proszę zignorować".
+3. Pościg za nieistniejącym błędem wyprodukował mimo to trzy realne ustalenia (#13, #14, #15) —
+   ale to szczęśliwy skutek uboczny, nie metoda.
 
-**Czego brakuje do domknięcia:** treści wyjątku. Bez sesji zalogowanej na produkcji nie da się tego odtworzyć (kanał MCP jest wyłącznie do odczytu), a wszystko, co weryfikowalne statycznie i przez bazę, jest czyste. Po usunięciu handlera błąd nie skasuje już strony — trafi do konsoli przeglądarki, skąd trzeba go odczytać przy kolejnej próbie.
+---
 
-#### 🔥 HIPOTEZA WIODĄCA (odkryta 10.08 przy weryfikacji deployu): nieświeży service worker
+### 15. Każdy deploy zostawia użytkowników na starej powłoce (service worker)
+**Severity**: 🟡 opóźnia dotarcie poprawek, mylące przy weryfikacji · **Status**: ⏳ OTWARTE (do decyzji)
+**Zaobserwowane 2026-08-10** przy weryfikacji wdrożenia `69f05c3`, niezależnie od zgłoszenia:
+`curl` dostawał już **czysty** `index.html`, a przeglądarka z aktywnym service workerem nadal
+serwowała **stary** — czerwony ekran z usuniętego handlera pojawił się na produkcji **po**
+deployu. Dopiero jedno przeładowanie podmieniło powłokę.
 
-Przy sprawdzaniu wdrożenia wyszło coś, czego `curl` nie widzi. **`curl` dostawał już czysty
-`index.html`, a przeglądarka z aktywnym service workerem nadal serwowała STARY** — czerwony
-ekran wystąpił na produkcji **po** deployu. Dopiero jedno przeładowanie podmieniło powłokę.
-To normalne zachowanie `registerType: 'autoUpdate'`, ale ma konsekwencję, która pasuje do
-zgłoszenia jak ulał:
+To poprawne zachowanie `registerType: 'autoUpdate'` (`vite.config.js:10`), nie awaria. Ale ma
+dwie konsekwencje:
+- **poprawka dociera do użytkownika dopiero przy kolejnym wejściu/przeładowaniu**, o czym nikt
+  go nie informuje;
+- **`curl` NIE weryfikuje deployu aplikacji PWA** — sprawdza serwer, nie to, co widzi użytkownik.
+  Weryfikacja live musi iść przez przeglądarkę. To najtrwalszy wniosek z tej sesji.
 
-Deploy bloku A poszedł **10:59**, zgłoszenie przyszło **11:45** — właściciel pracował w oknie,
-w którym jego przeglądarka trzymała **powłokę sprzed 16 dni**, a na serwerze leżały już chunki
-o nowych hashach. Gdy nowy SW przejmuje klienta i czyści stary precache, **leniwie ładowany
-chunk (`ManagerApp` przy wejściu do panelu) jest proszony o STARY hash** — którego nie ma już
-ani w cache, ani na serwerze. Dynamiczny `import()` odrzuca promise → `onunhandledrejection`
-→ **czerwony ekran**. Objaw jest wtedy dokładnie taki: „panel/dodawanie nie działa, strona
-wywala błąd", przy w pełni zdrowym kodzie, regułach, koncie i danych — czyli wszystkim, co
-wykluczyliśmy wyżej.
+**Do rozważenia:** `skipWaiting` + jawny komunikat „dostępna nowa wersja, odśwież", zamiast
+liczyć na to, że użytkownik sam trafi w moment przeładowania. Decyzja produktowa — nie ruszane.
 
-**Dlaczego to nie jest jeszcze dowód:** nie odtworzono tego na koncie właściciela (brak sesji).
-Ale jako jedyna hipoteza tłumaczy komplet faktów: zapis działał 25.07 z lokalnego deva, ten sam
-kod jest bajt w bajt na produkcji, a mimo to 10.08 nie powstał żaden dokument.
-
-**Co zrobić przy następnej próbie (kolejność ma znaczenie):**
-1. **Twarde przeładowanie** panelu (Cmd+Shift+R) albo przycisk „Odśwież aplikację" z ekranu
-   błędu — `GlobalErrorBoundary.onReset` wyrejestrowuje service workery i przeładowuje stronę,
-   czyli robi dokładnie to, czego trzeba.
-2. Dopiero potem spróbować dodać rezerwację.
-3. Jeśli błąd wróci — **odczytać go z konsoli** (już nie skasuje strony) i przesłać treść.
-
-**Do rozważenia osobno:** czy nie wymusić `skipWaiting` + jawnego komunikatu „dostępna nowa
-wersja, odśwież", zamiast liczyć na to, że użytkownik sam trafi w moment przeładowania.
-Dziś każdy deploy zostawia użytkowników na starej powłoce do następnego wejścia — a przy
-zmianie hashy chunków to jest okno na dokładnie ten błąd.
+> Wcześniejsza wersja tego wpisu wiązała nieświeży SW z rzekomą awarią dodawania rezerwacji
+> (404 leniwego chunku → odrzucony promise → czerwony ekran). **Ta hipoteza jest wycofana** —
+> tłumaczyła zdarzenie, które nigdy nie zaszło. Sam mechanizm nieświeżej powłoki jest realny
+> i zaobserwowany; jego rzekomy skutek nie.
 
 ---
 
