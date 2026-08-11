@@ -109,6 +109,39 @@ To samo dotyczy `type === 'reminder'`: `remindersList` zasila tylko pływający 
 
 **Czego brakuje do domknięcia:** treści wyjątku. Bez sesji zalogowanej na produkcji nie da się tego odtworzyć (kanał MCP jest wyłącznie do odczytu), a wszystko, co weryfikowalne statycznie i przez bazę, jest czyste. Po usunięciu handlera błąd nie skasuje już strony — trafi do konsoli przeglądarki, skąd trzeba go odczytać przy kolejnej próbie.
 
+#### 🔥 HIPOTEZA WIODĄCA (odkryta 10.08 przy weryfikacji deployu): nieświeży service worker
+
+Przy sprawdzaniu wdrożenia wyszło coś, czego `curl` nie widzi. **`curl` dostawał już czysty
+`index.html`, a przeglądarka z aktywnym service workerem nadal serwowała STARY** — czerwony
+ekran wystąpił na produkcji **po** deployu. Dopiero jedno przeładowanie podmieniło powłokę.
+To normalne zachowanie `registerType: 'autoUpdate'`, ale ma konsekwencję, która pasuje do
+zgłoszenia jak ulał:
+
+Deploy bloku A poszedł **10:59**, zgłoszenie przyszło **11:45** — właściciel pracował w oknie,
+w którym jego przeglądarka trzymała **powłokę sprzed 16 dni**, a na serwerze leżały już chunki
+o nowych hashach. Gdy nowy SW przejmuje klienta i czyści stary precache, **leniwie ładowany
+chunk (`ManagerApp` przy wejściu do panelu) jest proszony o STARY hash** — którego nie ma już
+ani w cache, ani na serwerze. Dynamiczny `import()` odrzuca promise → `onunhandledrejection`
+→ **czerwony ekran**. Objaw jest wtedy dokładnie taki: „panel/dodawanie nie działa, strona
+wywala błąd", przy w pełni zdrowym kodzie, regułach, koncie i danych — czyli wszystkim, co
+wykluczyliśmy wyżej.
+
+**Dlaczego to nie jest jeszcze dowód:** nie odtworzono tego na koncie właściciela (brak sesji).
+Ale jako jedyna hipoteza tłumaczy komplet faktów: zapis działał 25.07 z lokalnego deva, ten sam
+kod jest bajt w bajt na produkcji, a mimo to 10.08 nie powstał żaden dokument.
+
+**Co zrobić przy następnej próbie (kolejność ma znaczenie):**
+1. **Twarde przeładowanie** panelu (Cmd+Shift+R) albo przycisk „Odśwież aplikację" z ekranu
+   błędu — `GlobalErrorBoundary.onReset` wyrejestrowuje service workery i przeładowuje stronę,
+   czyli robi dokładnie to, czego trzeba.
+2. Dopiero potem spróbować dodać rezerwację.
+3. Jeśli błąd wróci — **odczytać go z konsoli** (już nie skasuje strony) i przesłać treść.
+
+**Do rozważenia osobno:** czy nie wymusić `skipWaiting` + jawnego komunikatu „dostępna nowa
+wersja, odśwież", zamiast liczyć na to, że użytkownik sam trafi w moment przeładowania.
+Dziś każdy deploy zostawia użytkowników na starej powłoce do następnego wejścia — a przy
+zmianie hashy chunków to jest okno na dokładnie ten błąd.
+
 ---
 
 ### 13. App Check zwraca 403 na produkcji — blokuje włączenie egzekwowania
