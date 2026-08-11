@@ -109,6 +109,26 @@ po domknięciu sekcji NOW.
 - **N6.4 Egzekwowanie App Check — potwierdzenie w konsoli** — ⏸ pilne (właściciel). Z kodu widać tylko inicjalizację reCAPTCHA v3; egzekwowanie po stronie Firestore/Storage/Functions ustawia się w konsoli — od tego zależy prawdziwość deklaracji w Polityce i DPA §6. → [[Zlecenia-wlasciciela]] #8 pkt 1.
 - **N6.5 Jednorazowe czyszczenie osieroconych plików z przeszłości** — 🔄 SKRYPT GOTOWY + ZRECENZOWANY (2026-07-23/24, `dev` + `code-reviewer` F2). `functions/cleanup-orphan-guide-files-n6.cjs` (wzorzec `audit-guides-n5.cjs`): listuje `guides/{id}/**` z paginacją, kasuje tylko pliki bez dokumentu-rodzica w Firestore. Bezpieczny z domyślnych ustawień: **domyślnie DRY-RUN** (kasowanie tylko po `--fix`), realny bucket `moje-domki-6c77d.firebasestorage.app`, gwarda wieku 30 dni, **nieznany wiek pliku ⇒ pominięcie** (fail-safe), DRY-RUN pokazuje, ile gwarda pominie. Przegląd F2: DRY-RUN bezpieczny, `--fix` bez blokerów logiki. Weryfikacja: `node --check` OK, eslint czysto. **Zostaje (właściciel):** przebieg DRY-RUN ze świeżym kluczem serwisowym → przegląd listy → `--fix`; po sprzątnięciu odhaczyć wiersz „Osierocone pliki z przeszłości" w §9 dokumentu bezpieczeństwa. Skrypt **zacommitowany 2026-07-24** (`495aace`) — nie jest Cloud Function, więc deploy go nie dotyczy; uruchamia się ręcznie. Sprzężone z Backlogiem „Osierocone pliki Storage przewodników" (mechanizm bieżący + porzucone szkice — osobny dług).
 
+### Kolejność pracy w tygodniu 2026-08-11 → 08-17 (ustalona 2026-08-11)
+
+Sekwencja, nie nowe decyzje — wszystkie pozycje żyją już wyżej albo w [[Known-Issues]].
+Rozpisane klik po kliku: [[Projects/Instrukcje-wlasciciela]] (tam też podział na dni).
+
+**Właściciel (od najpilniejszego):** ① prawnik N4 + dane rejestrowe do dokumentów →
+② kopie zapasowe Firestore (N6.3) → ③ logi nocnego purge → ④ smoke testy, z **4b
+(migracja `guests`→`adults`) jako najważniejszym** → ⑤ App Check: najpierw 403
+([[Known-Issues]] #13), dopiero potem egzekwowanie (N6.4) → ⑥ N6.5 → ⑦ polityka haseł.
+
+**Uzasadnienie kolejności:** prawnik idzie pierwszy, bo to jedyny bloker launchu **na cudzym
+zegarze** (pakiet u niego od 22.07); kopie i logi purge przed resztą, bo dotyczą
+**nieodwracalnej utraty danych** i kosztują po 5–10 minut; App Check spadł z pierwszego
+miejsca nie przez mniejszą wagę, tylko dlatego, że przez 403 nie domyka się jednym
+posiedzeniem.
+
+**Tor `dev` równolegle:** triage 52 zastanych awarii e2e (→ X10; suita jest dziś
+niewiarygodna) · domknięcie „reszty luki" N6.1 na ekranach błędu widoków gościa ·
+[[Known-Issues]] #15 (nieświeża powłoka po deployu) — czeka na decyzję właściciela.
+
 ---
 
 ## 🟡 NEXT — po odblokowaniu launchu (lub równolegle, gdy NOW czeka na prawnika)

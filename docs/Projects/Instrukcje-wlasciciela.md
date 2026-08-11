@@ -4,21 +4,62 @@
 > Ten plik mówi **JAK** — klik po kliku, komenda po komendzie.
 > Stan planowania nadal żyje w [[Projects/Roadmap]] (jedyne źródło prawdy).
 >
-> **Wersja:** 2026-08-10, po deployu bloku A (push + reguły + `hosting:app`).
-> Kolejność w pliku = kolejność wykonania. Zadania 1–3 są niezależne, można w dowolnej kolejności.
+> **Wersja:** 2026-08-11 — dopisany plan tygodnia 11–17.08 i kolejność wg pilności.
+> (Poprzednia: 2026-08-10, po deployu bloku A — push + reguły + `hosting:app`.)
+>
+> ⚠️ **Numery sekcji to identyfikatory, NIE kolejność.** Numeracja 1–7 zostaje nietknięta,
+> bo odwołują się do niej [[Known-Issues]] #13 i wpisy w [[Activity-Log]] — przenumerowanie
+> unieważniłoby tamte odesłania. Kolejność wykonania daje tabela niżej.
 
 ---
 
-## Zanim zaczniesz — co się właśnie zmieniło na produkcji (2026-08-10)
+## 🗓️ Plan tygodnia 11–17.08 — od najpilniejszego
 
-Wdrożone dziś: **X17** (rozbicie gości na dorosłych/dzieci/zwierzęta) i **poprawka RODO**
-(goście stron `/guide` i `/opinie` mogą wreszcie wycofać zgodę na cookies).
+| # | Zadanie | Sekcja | Czas | Dlaczego tak wysoko / nisko |
+|---|---|---|---|---|
+| ① | **Ponaglić prawnika + przysłać dane firmy** | sekcja **6** | ~5 min | Jedyny twardy bloker launchu i **jedyna pozycja, która nie ruszy się sama**. Pakiet leży u prawnika od 22.07. |
+| ② | **Kopie zapasowe Firestore (PITR)** | sekcja **2** | ~10 min | Dziś **zero** ścieżki odtworzenia danych, a co noc chodzi funkcja, która kasuje. Najtańsza rzecz o największej asymetrii. |
+| ③ | **Logi nocnego purge** | sekcja **5** | ~5 min | Funkcja kasująca dane chodzi od 22.07 **bez ani jednego spojrzenia w logi**. |
+| ④ | **Smoke testy 4a–4f** (4b najważniejszy) | sekcja **4** | ~20 min | X17 wszedł na produkcję **10.08**. Jeśli migracja `guests`→`adults` nie działa na realnych danych, zapis starej rezerwacji **cicho zeruje liczbę osób**. |
+| ⑤ | **App Check — najpierw napraw 403** | sekcja **1** | ~10 min | Ważne (prawnik pyta wprost), ale **nie da się domknąć jednym kliknięciem** — najpierw reCAPTCHA, potem doba throttle. Włączenie egzekwowania dziś odcięłoby aplikację. |
+| ⑥ | **N6.5 — czyszczenie sierot** | sekcja **3** | ~20 min | Dług z przeszłości, nie rośnie — nowe kasacje sprzątają po sobie. |
+| ⑦ | **Decyzja: polityka haseł** | sekcja **7** | ~5 min | Tanie, nie blokuje niczego. Potrzebne jedno zdanie. |
+
+**Dzień po dniu**
+
+| Dzień | Ty | Ja (nie czeka na Ciebie) |
+|---|---|---|
+| **wt 11.08** | ① prawnik + dane firmy · ② PITR · ③ logi purge | triage 52 zastanych awarii e2e |
+| **śr 12.08** | ④ smoke 4a + **4b** · ⑤ App Check (403) | triage · luka N6.1 na ekranach błędu |
+| **czw 13.08** | ④ smoke 4f · ⑥ N6.5 DRY-RUN | naprawy z triage'u |
+| **pt 14.08** | ⑥ N6.5 `--fix` · ④ smoke 4c–4e · ⑦ hasła | decyzja + wdrożenie #15 (nieświeża powłoka) |
+
+Po odesłaniu wyników **N6 zamyka się w całości**, `legal` aktualizuje §9 i erratę pakietu,
+a jedynym otwartym blokerem launchu zostaje **odpowiedź prawnika**.
+
+**Świadomie NIE w tym tygodniu:** X3, X6, X7 (czeka na Twoją decyzję o zakresie), X8,
+reszta X9 (indeksowalność SPA, JSON-LD), X11. Wszystko po launchu albo równolegle do niego.
+
+---
+
+## Zanim zaczniesz — co się zmieniło na produkcji 2026-08-10/11
+
+Wdrożone: **X17** (rozbicie gości na dorosłych/dzieci/zwierzęta), **poprawka RODO**
+(goście stron `/guide` i `/opinie` mogą wreszcie wycofać zgodę na cookies), **usunięcie
+debugowego handlera błędów** z `index.html` (kasował stronę przy każdym błędzie JS)
+oraz **znacznik zgłoszeń testowych** (`/kontakt?test=1`).
 Dlatego zadanie **4 (smoke testy)** dotyczy świeżego kodu — warto zrobić je w tym tygodniu,
 póki pamiętasz kontekst.
 
 ---
 
-# 1. App Check — potwierdź egzekwowanie ⏱️ ~10 min · 🔴 PILNE
+# 1. App Check — potwierdź egzekwowanie ⏱️ ~10 min · 🟠 · **kolejność ⑤**
+
+> **Zmiana oceny 2026-08-11.** Ta sekcja miała „🔴 PILNE" z czasów, gdy sądziliśmy, że
+> wystarczy wejść i włączyć. Po odkryciu 403 ([[Known-Issues]] #13) to **nie jest zadanie
+> na jedno posiedzenie** — trzeba naprawić reCAPTCHA, odczekać dobę throttle i dopiero
+> wtedy patrzeć na metryki. Waga bez zmian (prawnik pyta o to wprost), ale w kolejce
+> tygodnia schodzi za rzeczy, które domykasz w 5–10 minut.
 
 **Po co:** w kodzie widać tylko inicjalizację reCAPTCHA v3 po stronie aplikacji.
 Samo „App Check jest włączony" **nie znaczy, że jest egzekwowany** — egzekwowanie ustawia się
@@ -84,7 +125,7 @@ i tak czy inaczej domkniemy pytanie prawnika.
 
 ---
 
-# 2. Kopie zapasowe Firestore ⏱️ ~10 min · 🟠 przed launchem
+# 2. Kopie zapasowe Firestore ⏱️ ~10 min · 🔴 · **kolejność ②**
 
 **Po co:** redundancja Google chroni przed awarią ich dysku. **Nie chroni przed tym,
 że nasza aplikacja albo skrypt omyłkowo skasuje dane.** A my mamy w kodzie funkcje,
@@ -117,7 +158,12 @@ dla prawnika.
 
 ---
 
-# 3. N6.5 — jednorazowe czyszczenie osieroconych plików ⏱️ ~20 min · 🟡
+# 3. N6.5 — jednorazowe czyszczenie osieroconych plików ⏱️ ~20 min · 🟡 · **kolejność ⑥**
+
+> **Uwaga do kolejności:** PITR z sekcji 2 chroni **Firestore, nie Storage** — nie jest więc
+> siatką pod to zadanie. Zabezpieczeniem przy N6.5 jest DRY-RUN, Twój przegląd listy
+> i wbudowana gwarda wieku 30 dni. Sekcja 2 idzie wcześniej z własnych powodów, nie jako
+> warunek tej.
 
 **Po co:** pliki przewodników usuniętych **przed** wdrożeniem kaskady purge (N5 C.1) wciąż
 leżą w Storage i są **publicznie czytelne pod starymi adresami**. Nowe kasacje już sprzątają
@@ -170,7 +216,7 @@ Wtedy odhaczymy wiersz „Osierocone pliki z przeszłości" w §9 dokumentu bezp
 
 ---
 
-# 4. Smoke testy w aplikacji ⏱️ ~20 min · 🟠 świeży kod
+# 4. Smoke testy w aplikacji ⏱️ ~20 min · 🟠 świeży kod · **kolejność ④**
 
 Tego **nie da się sprawdzić z mojej strony** — wszystko jest za logowaniem.
 Rób na produkcji (`wynajempro.com`), na swoim koncie.
@@ -224,7 +270,12 @@ Rób na produkcji (`wynajempro.com`), na swoim koncie.
 
 ---
 
-# 5. Logi nocnego purge ⏱️ ~5 min · 🟢 zaległe zalecenie recenzenta
+# 5. Logi nocnego purge ⏱️ ~5 min · 🟠 · **kolejność ③**
+
+> **Zmiana oceny 2026-08-11:** było 🟢 („zaległe zalecenie recenzenta"). Podnoszę do 🟠 —
+> to jedyna funkcja w projekcie, która **samodzielnie kasuje dane klientów**, chodzi
+> co noc od 22.07 i nikt nigdy nie sprawdził, czy w ogóle się odpala. Pięć minut za
+> odpowiedź na pytanie „czy coś nam po cichu nie znika".
 
 **Po co:** po deployu #32 (22.07) recenzent zalecił zerknąć w logi nocnego przebiegu.
 Nigdy tego nie zrobiliśmy — a to funkcja, która **kasuje dane**.
@@ -238,9 +289,9 @@ Nigdy tego nie zrobiliśmy — a to funkcja, która **kasuje dane**.
 
 ---
 
-# 6. Prawnik (N4) ⏱️ ~5 min · 🔴 to jest bloker launchu
+# 6. Prawnik (N4) ⏱️ ~5 min · 🔴 bloker launchu · **kolejność ① — zacznij od tego**
 
-Pakiet trafił do prawnika **22.07 — 19 dni temu**. To jedyna pozycja na całej liście,
+Pakiet trafił do prawnika **22.07 — 20 dni temu** (stan na 11.08). To jedyna pozycja na całej liście,
 która **nie ruszy się sama**, a bez niej nie ma publicznego launchu.
 
 Warto ponaglić i zapytać o dwie rzeczy:
@@ -256,7 +307,7 @@ Jak mi je podasz, wpiszę je wszędzie tam, gdzie trzeba.
 
 ---
 
-# 7. Decyzja: polityka haseł ⏱️ ~5 min · 🟢 tanie
+# 7. Decyzja: polityka haseł ⏱️ ~5 min · 🟢 tanie · **kolejność ⑦**
 
 Dziś obowiązuje domyślne minimum Firebase: **6 znaków**, bez wymogu złożoności
 i bez sprawdzania haseł z wycieków. Dla aplikacji, w której gospodarz trzyma dane swoich
@@ -275,17 +326,36 @@ Decyzja trafi do „Otwartych decyzji" w [[Projects/Roadmap]] i do dokumentów `
 
 ---
 
-## Podsumowanie — lista do odhaczenia
+## Podsumowanie — lista do odhaczenia (w kolejności wykonania)
 
-- [ ] **1.** App Check — sprawdzone metryki, znany stan egzekwowania (🔴 pilne)
-- [ ] **2.** Kopie zapasowe — PITR lub harmonogram
-- [ ] **3.** N6.5 — DRY-RUN → przegląd listy → `--fix` → skasowany klucz
-- [ ] **4.** Smoke testy 4a–4f (**4b jest najważniejszy**)
-- [ ] **5.** Logi nocnego purge
-- [ ] **6.** Prawnik ponaglony + dane firmy do dokumentów (🔴 bloker launchu)
-- [ ] **7.** Decyzja o polityce haseł
+- [ ] ① **sekcja 6** — prawnik ponaglony + dane firmy przysłane (🔴 bloker launchu)
+- [ ] ② **sekcja 2** — kopie zapasowe: PITR lub harmonogram (🔴)
+- [ ] ③ **sekcja 5** — logi nocnego purge (🟠)
+- [ ] ④ **sekcja 4** — smoke testy 4a–4f (**4b jest najważniejszy**) (🟠)
+- [ ] ⑤ **sekcja 1** — App Check: najpierw 403, potem metryki (🟠)
+- [ ] ⑥ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
+- [ ] ⑦ **sekcja 7** — decyzja o polityce haseł (🟢)
 
 Po odesłaniu wyników zamykam N6 w całości, `legal` aktualizuje §9 i erratę pakietu,
 a jedynym otwartym blokerem launchu zostaje odpowiedź prawnika.
+
+---
+
+## Tor równoległy — po mojej stronie (nie czeka na Ciebie)
+
+Nie potrzebuję do tego konsoli ani Twojego konta. Pozycje żyją już w istniejących
+dokumentach — tu tylko ustawiam je w kolejce na ten tydzień:
+
+- **B1. Triage 52 zastanych awarii e2e** (🔴 dług) — pełny przebieg suity 10.08 dał
+  52 czerwone testy (`guest-guide`, `stripe`, `ui-scaling`, `links-buttons`), sprawdzone
+  na `git stash` jako niezależne od tamtych zmian. Suita jest dziś **niewiarygodna**, a to
+  jedyna siatka pod launch. Rozdzielić na: zgniłe pod v2 (→ [[Projects/Roadmap]] X10)
+  i realne regresje (→ naprawa od razu).
+- **B2. Domknięcie luki N6.1** (🟠) — ekrany błędu `/guide/:id` i `/opinie/:id` renderują się
+  bez kredytu, więc gość z wygasłym linkiem po kliknięciu „Akceptuję" nadal nie ma jak
+  wycofać zgody. Fix ~1 linijka na widok; opisane w [[Projects/Roadmap]] N6.1 jako „reszta luki".
+- **B3. Nieświeża powłoka po deployu** (🟡, [[Known-Issues]] #15) — **wymaga Twojej decyzji**:
+  czy wdrażamy `skipWaiting` + komunikat „dostępna nowa wersja, odśwież". Dziś każdy deploy
+  zostawia użytkownika na starej wersji do następnego przeładowania, bez żadnej informacji.
 
 **Related:** [[Zlecenia-wlasciciela]] · [[Projects/Roadmap]] · [[Known-Issues]] · [[Activity-Log]]
