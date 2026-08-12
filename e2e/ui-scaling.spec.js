@@ -82,13 +82,14 @@ test.describe('UI Scaling Tests', () => {
   });
 
   test('Test landing page layout elements are visible on mobile viewport (375x667)', async ({ page }) => {
+    await setupFirebaseMocks(page);
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     
     await expect(page.locator('text=Wynajem').first()).toBeVisible();
-    // Landing v2 NIE ma menu mobilnego: .wp4-nav jest ukrywana CSS-em i nic jej nie zastępuje.
-    // Na telefonie widoczne zostaje logo i CTA; nawigacja żyje dopiero w stopce.
+    // Poniżej 900px desktopowa nawigacja ustępuje miejsca przyciskowi menu
     await expect(page.locator('header .wp4-nav')).toBeHidden();
+    await expect(page.locator('.wp4-burger')).toBeVisible();
     await expect(page.locator('header .wp4-btn--primary')).toBeVisible();
   });
 
@@ -103,16 +104,42 @@ test.describe('UI Scaling Tests', () => {
   });
 
   test('Test mobile navigation menu hamburger toggle on mobile viewport', async ({ page }) => {
+    // Zgoda na cookies z mocka: baner .wpc-bar jest fixed przy dolnej krawędzi i na
+    // ekranie 667px zasłania połowę panelu, przechwytując kliki w jego pozycje.
+    await setupFirebaseMocks(page);
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     
-    // ŚWIADOMY STAN, NIE BŁĄD TESTU: landing v2 nie ma hamburgera ani menu mobilnego.
-    // Test pilnuje, że nawigacja jest ukryta i że nie pojawił się przycisk-widmo.
-    // Jeśli menu mobilne kiedyś powstanie, ten test trzeba przepisać na jego zachowanie.
-    await expect(page.locator('header .wp4-nav')).toBeHidden();
-    // Wejście do panelu musi zostać osiągalne mimo braku nawigacji. Poniżej 560px tekstowy
-    // link „Zaloguj się" też znika (.wp4-topbar__cta .wp4-link), więc jedyną drogą jest CTA.
-    await expect(page.locator('header .wp4-btn--primary')).toBeVisible();
+    const burger = page.locator('.wp4-burger');
+    const panel = page.locator('#wp4-mnav');
+
+    // Zamknięte na starcie
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).toHaveCount(0);
+
+    // Otwarcie: panel z kompletem sekcji + drogą do logowania (poniżej 560px tekstowy
+    // link „Zaloguj się" znika z topbaru, więc panel jest jedyną drogą)
+    await burger.click();
+    await expect(panel).toBeVisible();
+    await expect(burger).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel.locator('text=Cennik')).toBeVisible();
+    await expect(panel.locator('text=FAQ')).toBeVisible();
+    await expect(panel.locator('text=Zaloguj się')).toBeVisible();
+
+    // Strona nie może się rozpychać w poziomie przy otwartym panelu
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+    // Escape zamyka i oddaje fokus przyciskowi
+    await page.keyboard.press('Escape');
+    await expect(panel).toHaveCount(0);
+    await expect(burger).toBeFocused();
+
+    // Klik w pozycję menu zamyka panel
+    await burger.click();
+    const pozycjaCennik = panel.getByRole('link', { name: 'Cennik' });
+    await expect(pozycjaCennik).toBeVisible();
+    await pozycjaCennik.click();
+    await expect(panel).toHaveCount(0);
   });
 
   test('Test responsive bookings view: Desktop vs Mobile', async ({ page }) => {

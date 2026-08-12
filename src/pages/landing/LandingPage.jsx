@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { blogPosts } from '../../data/blogPosts';
@@ -72,6 +73,39 @@ export default function LandingPage() {
   const [note, setNote] = useState('');
   const [noteErr, setNoteErr] = useState(false);
 
+  /* ── Nawigacja mobilna (≤900px) ──────────────────────────────────────────
+     Poniżej 900px .wp4-nav znika i do 2026-08-12 nic jej nie zastępowało: z nagłówka
+     zostawało logo i CTA, a do Cennika czy FAQ trzeba było scrollować do stopki. */
+  const [menuOpen, setMenuOpen] = useState(false);
+  const burgerRef = useRef(null);
+  const menuRef = useRef(null);
+  const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    menuRef.current?.focus({ preventScroll: true });
+    const onKey = (e) => { if (e.key === 'Escape') { setMenuOpen(false); burgerRef.current?.focus(); } };
+    // Powyżej breakpointu panel nie ma prawa zostać otwarty. matchMedia zamiast nasłuchu
+    // `resize`: strzela dokładnie na przejściu progu i nie gubi się przy zmianie viewportu
+    // bez zdarzenia resize (złapane przy weryfikacji — panel zostawał otwarty na 1280px
+    // razem z kurtyną i zablokowanym przewijaniem tła).
+    const mq = window.matchMedia('(max-width: 900px)');
+    const onBreakpoint = () => { if (!mq.matches) setMenuOpen(false); };
+    // Blokada przewijania tła idzie KLASĄ, nie stylem inline: reguła żyje w tym samym
+    // media query co panel, więc powyżej 900px przestaje obowiązywać sama z siebie.
+    // Inline `overflow:hidden` potrafił zostać zamrożony na desktopie, gdy zmiana
+    // viewportu nie wygenerowała zdarzenia (złapane przy weryfikacji w przeglądarce).
+    document.body.classList.add('wp4-lock');
+    document.addEventListener('keydown', onKey);
+    mq.addEventListener('change', onBreakpoint);
+    onBreakpoint();                            // stan mógł się zmienić, zanim effect wystartował
+    return () => {
+      document.body.classList.remove('wp4-lock');
+      document.removeEventListener('keydown', onKey);
+      mq.removeEventListener('change', onBreakpoint);
+    };
+  }, [menuOpen]);
+
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
@@ -114,9 +148,43 @@ export default function LandingPage() {
           <div className="wp4-topbar__cta">
             <Link to="/login" className="wp4-link">Zaloguj się</Link>
             <Link to="/login" className="wp4-btn wp4-btn--primary wp4-btn--sm">Wypróbuj</Link>
+            <button ref={burgerRef} type="button" className="wp4-burger"
+              aria-label={menuOpen ? 'Zamknij menu' : 'Otwórz menu'}
+              aria-expanded={menuOpen} aria-controls="wp4-mnav"
+              onClick={() => setMenuOpen((v) => !v)}>
+              {menuOpen ? <X /> : <Menu />}
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <div className="wp4-mnav" id="wp4-mnav" ref={menuRef} tabIndex={-1}>
+            <nav className="wp4-mnav__list" aria-label="Nawigacja główna">
+              <a href="#funkcje" onClick={closeMenu}>Funkcje</a>
+              <a href="#jak-to-dziala" onClick={closeMenu}>Jak to działa</a>
+              <a href="#dla-kogo" onClick={closeMenu}>Dla kogo</a>
+              <a href="#cennik" onClick={closeMenu}>Cennik</a>
+              <a href="#faq" onClick={closeMenu}>FAQ</a>
+              <Link to="/blog" onClick={closeMenu}>Baza wiedzy</Link>
+              <Link to="/pomoc" onClick={closeMenu}>Centrum pomocy</Link>
+              <Link to="/kontakt" onClick={closeMenu}>Kontakt</Link>
+            </nav>
+            {/* Poniżej 560px tekstowy „Zaloguj się" znika z topbaru, więc panel jest
+                jedyną drogą do logowania na małych ekranach. */}
+            <div className="wp4-mnav__foot">
+              <Link to="/login" className="wp4-btn wp4-btn--ghost" onClick={closeMenu}>Zaloguj się</Link>
+              <Link to="/login" className="wp4-btn wp4-btn--primary" onClick={closeMenu}>Wypróbuj za darmo</Link>
+            </div>
+          </div>
+        )}
       </header>
+
+      {/* Kurtyna POZA <header>: .wp4-topbar ma backdrop-filter, który tworzy blok
+          zawierający dla position:fixed — wewnątrz nagłówka pozycjonowałaby się
+          względem niego, a nie względem okna. */}
+      {menuOpen && (
+        <button type="button" className="wp4-mnav__scrim" aria-label="Zamknij menu" onClick={closeMenu} />
+      )}
 
       {/* ───────────────────────── Hero ───────────────────────── */}
       <section className="wp4-hero">
@@ -799,6 +867,42 @@ const CSS = `
 .wp4-nav a:hover{ color:var(--ink); }
 .wp4-topbar__cta{ display:flex; align-items:center; gap:18px; }
 
+/* ── Nawigacja mobilna (≤900px) ──
+   Przycisk pokazuje się dokładnie tam, gdzie .wp4-nav znika. Panel rozwija się pod
+   topbarem (position:absolute względem sticky nagłówka), kurtyna leży pod nim. */
+.wp4-burger{
+  display:none; align-items:center; justify-content:center; flex:0 0 40px;
+  width:40px; height:40px; padding:0; background:transparent; color:var(--ink);
+  border:1px solid var(--hairline); border-radius:3px; cursor:pointer;
+  transition:background .15s, border-color .15s;
+}
+.wp4-burger:hover{ background:var(--inner); border-color:var(--ink); }
+.wp4-burger svg{ width:20px; height:20px; }
+.wp4-mnav{
+  position:absolute; left:0; right:0; top:100%; background:var(--surface);
+  border-bottom:1px solid var(--hairline); padding:6px 0 18px;
+  max-height:calc(100vh - 68px); overflow-y:auto; outline:none;
+  animation:wp4-mnav-in .16s ease-out;
+}
+@keyframes wp4-mnav-in{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.wp4-mnav__list{ display:flex; flex-direction:column; }
+.wp4-mnav__list a{
+  font-weight:500; font-size:16px; color:var(--ink); text-decoration:none;
+  padding:14px 24px; border-bottom:1px solid var(--hairline); transition:background .15s;
+}
+.wp4-mnav__list a:hover{ background:var(--inner); }
+.wp4-mnav__foot{ display:flex; flex-direction:column; gap:10px; padding:18px 24px 0; }
+.wp4-mnav__foot .wp4-btn{ width:100%; }
+.wp4-mnav__scrim{
+  position:fixed; inset:0; z-index:40; background:rgba(23,21,15,.28);
+  border:0; padding:0; cursor:pointer;
+}
+/* Pas bezpieczeństwa: nawet gdyby JS nie zdążył zamknąć panelu przy przejściu przez
+   breakpoint, na desktopie nie ma prawa nic wisieć nad treścią. */
+@media (min-width:901px){
+  .wp4-mnav, .wp4-mnav__scrim{ display:none; }
+}
+
 /* ── Hero ── */
 .wp4-hero{ padding:84px 0 64px; }
 .wp4-hero__grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:64px; align-items:center; }
@@ -858,6 +962,7 @@ const CSS = `
 .wp4-sd button:focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
 @media (prefers-reduced-motion: reduce){
   .wp4-sd *{ transition:none !important; }
+  .wp4-mnav{ animation:none; }
 }
 
 /* ── Przewodnik gościa / telefon ── */
@@ -1023,6 +1128,8 @@ const CSS = `
   .wp4-step:not(:first-child){ padding-left:0; }
   .wp4-footer__grid{ grid-template-columns:1fr 1fr; gap:32px; }
   .wp4-nav{ display:none; }
+  .wp4-burger{ display:inline-flex; }   /* pojawia się dokładnie tam, gdzie znika .wp4-nav */
+  body.wp4-lock{ overflow:hidden; }     /* blokada tła obowiązuje TYLKO poniżej breakpointu */
   .wp4-cta__title{ font-size:36px; }
 }
 @media (max-width:560px){
