@@ -295,8 +295,12 @@ export const DASHBOARD_CSS = `
 .wpd-objs__head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
 
 /* ── Segment / filtry ── */
+/* min-width:0 + overflow-x:auto, bo przyciski mają white-space:nowrap: cztery filtry
+   Rezerwacji dawały 437px i rozpychały CAŁĄ stronę w poziomie na telefonie (body.scrollWidth
+   474 przy ekranie 375). Jako element flex w .wpd-panel__head nie kurczył się poniżej treści
+   bez min-width:0. Ten sam idiom co .wpd-tabs — przewija się u siebie, strona stoi. */
 .wpd-seg{ display:inline-flex; gap:2px; background:var(--inner); border:1px solid var(--hairline);
-  border-radius:3px; padding:3px; }
+  border-radius:3px; padding:3px; min-width:0; max-width:100%; overflow-x:auto; }
 .wpd-seg__btn{ border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:13px;
   font-weight:500; color:var(--muted); padding:6px 14px; border-radius:2px;
   transition:background .14s, color .14s; white-space:nowrap; }
