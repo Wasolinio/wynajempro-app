@@ -64,7 +64,9 @@ test('verify iCal token generation, retrofitting, and link display', async ({ pa
   await page.locator('button:has-text("Nieruchomości")').click();
 
   // Add a new property
-  await page.fill('input[placeholder="Nazwa nowego obiektu..."]', 'Nowy Apartament');
+  // UWAGA: placeholder ma typograficzny wielokropek „…", nie trzy kropki. Selektor po
+  // pełnym placeholderze zgnił na tej jednej różnicy — dopasowanie po fragmencie jest odporne.
+  await page.fill('input[placeholder^="Nazwa nowego obiektu"]', 'Nowy Apartament');
   await page.click('button[type="submit"]:has(svg.lucide-plus)');
 
   // 5. Navigate back to 'Integracje' tab
