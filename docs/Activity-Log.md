@@ -6,6 +6,17 @@ Project timeline and key milestones.
 
 ## 2026-08-12
 
+### Nawigacja mobilna landingu (≤900px)
+- 🎯 **Powód**: luka wykryta przy naprawie e2e — poniżej 900px `.wp4-nav` znikała i **nic jej nie zastępowało**. Z nagłówka zostawało logo i CTA, a do Cennika, FAQ czy Bazy wiedzy trzeba było scrollować do stopki. Poniżej 560px chował się dodatkowo tekstowy „Zaloguj się", więc na małym telefonie nie było z nagłówka drogi do logowania.
+- ✅ **Wdrożone** (`19eef00`): przycisk 40×40 (lucide `Menu`/`X`, ten sam idiom co ikony panelu) pojawia się dokładnie tam, gdzie znika nawigacja desktopowa. Panel rozwija się pod topbarem: 8 pozycji (sekcje landingu + [[support/README|Centrum pomocy]] i Kontakt, których nie było nawet w nawigacji desktopowej) plus stopka z „Zaloguj się" i „Wypróbuj za darmo".
+- ✅ **Dostępność**: `aria-expanded` / `aria-controls`, fokus wchodzi do panelu przy otwarciu i **wraca na przycisk** po Escape, kurtyna zamyka kliknięciem, animacja wyłączona przy `prefers-reduced-motion`.
+- 🛑 **Dwa błędy złapane dopiero w przeglądarce, nie w kodzie** — oba naprawione przed commitem:
+  1. **Kurtyna musi leżeć poza `<header>`**: `.wp4-topbar` ma `backdrop-filter`, który tworzy blok zawierający dla `position:fixed`. Wewnątrz nagłówka kurtyna pozycjonowałaby się względem niego, a nie względem okna.
+  2. **Blokada przewijania tła zostawała zamrożona na desktopie.** Inline `overflow:hidden` przeżywał przejście przez breakpoint, gdy zmiana viewportu nie wygenerowała zdarzenia (`resize` ani `matchMedia`) — strona stawała się nieprzewijalna. Przeniesione na klasę `body.wp4-lock` z regułą w **tym samym media query co panel**, więc powyżej 900px przestaje obowiązywać sama z siebie. Do tego pas bezpieczeństwa `@media (min-width:901px)` ukrywa panel i kurtynę niezależnie od stanu Reacta.
+- 📌 **Wniosek**: obu tych błędów nie dało się zobaczyć w kodzie ani w e2e — wyszły z ręcznego sprawdzenia zachowania przy zmianie szerokości okna. Weryfikacja przez przeglądarkę na trzech szerokościach (375/768/1280) była tu bramką, nie formalnością.
+- ✅ **Testy**: dwa testy `ui-scaling` opisywały dotąd **brak** menu (stan zapisany 12.08 jako świadomy) — przepisane na jego zachowanie. Obu dołożono `setupFirebaseMocks`: baner cookies jest `fixed` przy dolnej krawędzi i na ekranie 667px przechwytywał kliki w pozycje panelu. To **trzeci raz** tego dnia, gdy baner zgody okazał się przyczyną „niedziałającego" kliku.
+- ✅ **Weryfikacja**: e2e **128/128**, lint 0, build OK.
+
 ### Suita e2e w całości zielona: 50 czerwonych → 0 (128/128)
 - 🎯 **Powód**: pierwszy pełny przebieg od miesięcy dał **50 czerwonych ze 133**. Przyczyna nie leżała w testach — przebudowy V2 i X4 zmieniły treść i strukturę UI, a suity nigdy nie puszczano w całości. Przy X4 w tym dzienniku stoi „e2e 30/30" i „e2e zaufany zielony": trzydzieści ze stu trzydziestu trzech.
 - ✅ **44 naprawione, 5 usuniętych, 1 odwrócony** (`aa232a8`). Dryf treści: „Zaakceptuj regulamin, aby odkryć" → „Dane dostępowe zablokowane", „Aktywuj subskrypcję i odzyskaj dane" → „Aktywuj i odzyskaj dane", `29.99` → `29,99` (polski przecinek), spinner `svg.lucide-loader-circle` → `span.wpb-spin`.
