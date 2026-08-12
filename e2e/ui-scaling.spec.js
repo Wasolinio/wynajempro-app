@@ -165,8 +165,9 @@ test.describe('UI Scaling Tests', () => {
     await page.setViewportSize({ width: 820, height: 1180 });
     await page.goto('/dashboard');
     await page.waitForTimeout(500);
-    await page.locator('button:has-text("Rezerwacje")').first().click();
-    
+    // Poniżej 980px .wpd-side znika, a nawigacja przechodzi do dolnego paska (X12)
+    await page.locator('.wpd-bottombar button:has-text("Rezerwacje")').click();
+
     const desktopTable = page.locator('table.wpd-table').first();
     await expect(desktopTable).toBeVisible();
     
@@ -229,18 +230,24 @@ test.describe('UI Scaling Tests', () => {
     await page.locator('button.wpd-dialog__close').first().click({ force: true });
     
     // Verify we are back to dashboard elements
-    await expect(page.locator('button', { hasText: /Dodaj rezerwację|Dodaj wpis/i }).first()).toBeVisible();
+    // Na telefonie .wpd-top__btnlabel jest ukryta, więc przycisk jest sam ikonowy —
+    // celujemy w title, który zostaje niezależnie od szerokości
+    await expect(page.locator('button[title="Nowa rezerwacja"]')).toBeVisible();
   });
 
   // Tier 4: Real-World Application (1 case)
   test('Full user walkthrough: visit landing page on desktop, resize to mobile, verify inputs', async ({ page }) => {
-    // Visit landing page on desktop
+    // setupFirebaseMocks ustawia zgodę na cookies (consentCookies domyślnie true). Bez tego
+    // baner .wpc-bar wisi nad stopką i PRZECHWYTUJE klik w link „Kontakt" — klik nie dociera
+    // do elementu i test wisi 30 s na locatorze, który jest w DOM.
+    await setupFirebaseMocks(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');
     await expect(page.locator('text=Wynajem').first()).toBeVisible();
     
-    // Navigate to Contact Page
-    await page.click('text=Kontakt');
+    // Navigate to Contact Page — link żyje w stopce, nie w nagłówku
+    await page.locator('a[href="/kontakt"]').first().click();
+    await page.waitForURL('**/kontakt');
     await expect(page.locator('text=Adres e-mail').first()).toBeVisible();
     
     // Resize viewport to mobile

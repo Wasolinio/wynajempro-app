@@ -24,7 +24,16 @@ const mockDbData = {
     entityName: 'Test Host',
     identifierType: 'NIP',
     taxIdentifier: '1234567890'
-  }
+  },
+  // Raport rentowności ma przycisk CSV wyłączony przy pustych danych (`disabled={empty}`),
+  // więc eksport wymaga co najmniej jednej rezerwacji w BIEŻĄCYM roku. Data liczona
+  // względem dnia uruchomienia — wpisana na sztywno zgniłaby po zmianie roku.
+  'users/uid-test/rentals/rental-csv': {
+    id: 'rental-csv', type: 'booking', property: 'Domek nad Jeziorem', guest: 'Jan Kowalski',
+    source: 'Booking.com', date: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    income: 1500, commission: 150, tax: 114.75, isPaid: true, isCompleted: false, completedTasks: {},
+  },
 };
 
 const GUIDE_ID = 'guide_test_links_buttons';
@@ -190,11 +199,15 @@ test.describe('Links and Buttons Tests', () => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: mockDbData });
     await page.goto('/dashboard');
 
-    await page.click('button:has-text("Podatki")');
+    // Eksport dla księgowego przeniósł się przy X4: Finanse → Raporty → Raport rentowności.
+    // Dawny panel „Podatki" nie istnieje (ADR-013).
+    await page.locator('button:has-text("Finanse")').first().click();
+    await page.locator('button:has-text("Raporty")').first().click();
+    await page.locator('button:has-text("Raport rentowności")').first().click();
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.click('button:has-text("Raport Księgowy")')
+      page.locator('button:has-text("CSV")').first().click()
     ]);
 
     expect(download.suggestedFilename()).toContain('.csv');
@@ -326,8 +339,9 @@ test.describe('Links and Buttons Tests', () => {
     await page.locator('a[href^="/blog/"]').first().click();
     await page.waitForSelector('text=Wróć do Bazy Wiedzy');
 
-    // 5. Click contacts (header link)
-    await page.locator('footer a[href="/kontakt"]').first().click();
+    // 5. Click contacts — jesteśmy na wpisie bloga (inny layout niż landing),
+    // więc nie zawężamy do stopki
+    await page.locator('a[href="/kontakt"]').first().click();
     await page.waitForURL('**/kontakt');
 
     // 6. Fill form
@@ -340,13 +354,20 @@ test.describe('Links and Buttons Tests', () => {
     await page.locator('text=Zarejestruj się').first().click();
     await page.waitForURL('**/login');
 
-    // Go to registration
-    await page.click('text=Rozpocznij 14-dniowy test');
+    // Go to registration — „Rozpocznij 14-dniowy test" to na /login sam OPIS pod
+    // nagłówkiem, nie kontrolka. Tryb rejestracji włącza zakładka.
+    await page.locator('button:has-text("Rejestracja")').first().click();
 
     // Fill registration
     await page.fill('input[name="name"]', 'Walkthrough User');
     await page.fill('input[name="email"]', 'walkthrough-reg@example.com');
     await page.fill('input[name="password"]', 'password123');
+    // Wymagana zgoda na regulamin — bez niej przeglądarka blokuje submit. Input jest
+    // wizualnie ukryty pod własną stylizacją, więc check() bez force czeka na widoczność.
+    // Input jest wyprowadzony poza kanwę (wzorzec „visually hidden"), więc ani check(),
+    // ani scrollIntoViewIfNeeded go nie dosięgną. dispatchEvent omija sprawdzanie widoczności,
+    // a React i tak obsługuje zdarzenie click na inpucie.
+    await page.locator('input[type="checkbox"][required]').dispatchEvent('click');
     await page.click('button[type="submit"]');
 
     // Redirect to email verification
