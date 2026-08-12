@@ -21,6 +21,20 @@ Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`,
 `marketing`, `support`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.
 Wspólna metodologia (obowiązuje wszystkich, także głównego Claude'a): `docs/Team-Playbook.md`.
 
+## Skille projektu
+Procedury WynajemPRO spisane jako skille w `.claude/skills/` — ładują się same, gdy zadanie
+do nich pasuje, albo wywołasz je jako `/nazwa`:
+- **`deploy`** — rytuał wydania: pre-flight, komenda per cel, weryfikacja live **przez
+  przeglądarkę** (curl nie weryfikuje deployu PWA — lekcja z 2026-08-10).
+- **`dziennik`** — wpis do `docs/Activity-Log.md` w konwencji projektu + synchronizacja
+  Roadmapy i Known-Issues.
+- **`reguly`** — zmiana `firestore.rules`/`storage.rules` bez emulatora (lustrzany tester
+  w `functions/*.cjs`, bramka deployu, pułapki App Check).
+- **`zgloszenie`** — obsługa zgłoszenia: odsiew testów po `source`, stopniowany dostęp do danych.
+
+Osobno, globalnie: **`humanizer`** (`~/.claude/skills/`) do tekstów dla klientów —
+landing, maile, wpisy, odpowiedzi supportu. Kalibracja polska w jego `PL.md`.
+
 ## Obsługa zgłoszeń (support)
 Zgłoszenia z `/kontakt` lądują w Firestore (`contact_messages`), a reguły zabraniają odczytu
 klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase MCP** (`.mcp.json`,

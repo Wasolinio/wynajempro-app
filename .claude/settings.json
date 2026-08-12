@@ -6,7 +6,29 @@
       "mcp__firebase__firestore_get_document",
       "mcp__firebase__firestore_list_collections",
       "mcp__firebase__firestore_list_documents",
-      "mcp__firebase__auth_get_users"
+      "mcp__firebase__auth_get_users",
+
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "Bash(npm run test:e2e)",
+      "Bash(npx vite build)",
+      "Bash(npx playwright test *)",
+      "Bash(node --check *)",
+
+      "mcp__Claude_Browser__read_page",
+      "mcp__Claude_Browser__get_page_text",
+      "mcp__Claude_Browser__read_console_messages",
+      "mcp__Claude_Browser__read_network_requests",
+      "mcp__Claude_Browser__find",
+      "mcp__Claude_Browser__resize_window",
+      "mcp__Claude_Browser__preview_logs",
+      "mcp__Claude_Browser__preview_list",
+
+      "mcp__claude-in-chrome__read_page",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__read_network_requests",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__tabs_context_mcp"
     ],
     "deny": [
       "mcp__firebase__firestore_delete_database",

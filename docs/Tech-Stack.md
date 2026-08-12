@@ -6,7 +6,7 @@ Complete technology overview for WynajemPRO.
 
 ### Core Framework
 ```
-React 18+
+React 19
 - Component-based architecture
 - Hooks for state management
 - JSX syntax
@@ -40,7 +40,7 @@ No Redux, no Zustand.
 
 ### Styling
 ```
-TailwindCSS (likely)
+TailwindCSS 4
 - Utility-first CSS
 - Responsive design
 - Dark mode support
@@ -206,15 +206,26 @@ Recommended:
 
 | Package | Purpose | Version |
 |---------|---------|---------|
-| react | UI framework | 18+ |
-| react-router-dom | Routing | 6+ |
-| vite | Bundler | Latest |
-| firebase | Backend SDK | Latest |
-| stripe | Payments | Latest |
-| tailwindcss | Styling | Latest |
-| playwright | E2E tests | Latest |
+| react | UI framework | 19.2 |
+| react-router-dom | Routing | 7.15 |
+| vite | Bundler | 8.0 |
+| firebase | Backend SDK (klient) | 12.12 |
+| @tanstack/react-query | Cache zapytań | 5.100 |
+| framer-motion | Animacje | 12.40 |
+| lucide-react | Ikony | 1.14 |
+| tailwindcss | Styling | 4.2 |
+| @playwright/test | E2E tests | 1.61 |
 
-📝 See `package.json` for exact versions
+Cloud Functions (`functions/package.json`, Node >= 20):
+
+| Package | Purpose | Version |
+|---------|---------|---------|
+| firebase-admin | Admin SDK | 13.0 |
+| firebase-functions | Runtime funkcji | 6.3 |
+| stripe | Płatności (serwer) | 17.7 |
+
+📝 Stan na 2026-08-12. Źródłem prawdy jest `package.json` — te liczby są tylko orientacją
+i starzeją się przy każdej aktualizacji zależności.
 
 ---
 

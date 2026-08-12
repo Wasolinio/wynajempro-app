@@ -21,7 +21,7 @@
 - **[[Architecture]]** - How the app works (data flow, components, security)
 - **[[Agent-Process-Map]]** - ⚡ FAST AGENT NAVIGATION: High-density map of processes to file paths
 - **[[Features]]** - What users can do (auth, guides, iCal, payments)
-- **[[Tech Stack]]** - Tech choices (React, Firebase, Playwright)
+- **[[Tech-Stack]]** - Tech choices (React, Firebase, Playwright)
 - **[[Schema]]** - Database structure (Firestore collections, fields)
 
 ### 🛠️ Development
