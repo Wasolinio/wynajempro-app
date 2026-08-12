@@ -88,12 +88,16 @@ test.describe('Stripe Payment E2E Tests', () => {
 
   // TIER 1: Feature Coverage (5 cases)
 
-  test('1. Verify paywall screen renders billing options (monthly, annual subscription packages)', async ({ page }) => {
+  test('1. Paywall pokazuje WYŁĄCZNIE pakiet miesięczny (plan roczny celowo ukryty)', async ({ page }) => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
     await page.goto('/dashboard');
 
-    await expect(page.locator('text=Pakiet Miesięczny')).toBeVisible();
-    await expect(page.locator('text=Pakiet Roczny')).toBeVisible();
+    await expect(page.locator('text=Pakiet miesięczny')).toBeVisible();
+
+    // Plan roczny jest UKRYTY decyzją właściciela (2026-07-10, Known-Issues #7): backend ma
+    // jeden Price ID, więc klik „roczny" pobrałby opłatę miesięczną. Test pilnuje tej decyzji —
+    // gdyby karta wróciła bez drugiego Price ID po stronie functions, to jest błąd rozliczeniowy.
+    await expect(page.locator('text=Pakiet roczny')).toHaveCount(0);
   });
 
   test('2. Verify click on subscription plan buttons triggers paywall redirect action', async ({ page }) => {
@@ -101,10 +105,10 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.route('**/*stripe.com/**', route => route.fulfill({ status: 200, body: 'Stripe Mock' }));
 
     await page.goto('/dashboard');
-    await page.waitForSelector('text=Pakiet Miesięczny');
+    await page.waitForSelector('text=Pakiet miesięczny');
 
     // Click subscribe for monthly plan
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
     await page.waitForURL('**/checkout.stripe.com/**');
 
     expect(page.url()).toContain('checkout.stripe.com');
@@ -115,7 +119,7 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.goto('/dashboard');
 
     await expect(page.locator('text=Koniec okresu próbnego')).toBeVisible();
-    await expect(page.locator('text=darmowy 14-dniowy dostęp do WynajemPro dobiegł końca')).toBeVisible();
+    await expect(page.locator('text=Twój darmowy 14-dniowy dostęp dobiegł końca')).toBeVisible();
   });
 
   test('4. Verify Stripe pricing labels are correctly rendered (in PLN)', async ({ page }) => {
@@ -123,13 +127,12 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.goto('/dashboard');
 
     // Verify PLN pricing text exists
-    await expect(page.locator('text=29.99')).toBeVisible();
+    await expect(page.locator('text=29,99')).toBeVisible();
     await expect(page.locator('text=zł / msc').first()).toBeVisible();
     
-    // Switch to yearly and check
-    await page.click('button:has-text("Rocznie")');
-    await expect(page.locator('text=299.90')).toBeVisible();
-    await expect(page.locator('text=zł / rok')).toBeVisible();
+    // Przełącznika interwału nie ma — paywall oferuje jeden plan (Known-Issues #7)
+    await expect(page.locator('button:has-text("Rocznie")')).toHaveCount(0);
+    await expect(page.locator('text=zł / rok')).toHaveCount(0);
   });
 
   test('5. Verify redirect URLs/parameters for Stripe success/cancel flows', async ({ page }) => {
@@ -159,7 +162,7 @@ test.describe('Stripe Payment E2E Tests', () => {
     });
 
     await page.goto('/dashboard');
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
     // Wait short time for async function to invoke
     await page.waitForTimeout(500);
@@ -224,7 +227,7 @@ test.describe('Stripe Payment E2E Tests', () => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: trialExpiredDb });
     await page.goto('/dashboard');
 
-    const monthlyBtn = page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first();
+    const monthlyBtn = page.locator('button:has-text("Aktywuj i odzyskaj dane")').first();
     await expect(monthlyBtn).toBeVisible();
 
     // Verify that the element fits in the viewport bounds
@@ -238,17 +241,13 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.goto('/dashboard');
 
     // Default is monthly
-    await expect(page.locator('text=29.99')).toBeVisible();
+    await expect(page.locator('text=29,99')).toBeVisible();
     await expect(page.locator('text=zł / msc').first()).toBeVisible();
 
-    // Click yearly tab
-    await page.click('button:has-text("Rocznie")');
-    await expect(page.locator('text=299.90')).toBeVisible();
-    await expect(page.locator('text=zł / rok').first()).toBeVisible();
-
-    // Click monthly tab again
-    await page.click('button:has-text("Miesięcznie")');
-    await expect(page.locator('text=29.99')).toBeVisible();
+    // Nie ma czego przełączać: paywall celowo wystawia jeden interwał (Known-Issues #7).
+    // Test pilnuje, że przełącznik NIE wrócił bez drugiego Price ID po stronie functions.
+    await expect(page.locator('button:has-text("Rocznie")')).toHaveCount(0);
+    await expect(page.locator('button:has-text("Miesięcznie")')).toHaveCount(0);
     await expect(page.locator('text=zł / msc').first()).toBeVisible();
   });
 
@@ -268,9 +267,8 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.waitForURL('**/dashboard');
     await expect(page.locator('text=Koniec okresu próbnego')).toBeVisible();
 
-    // Select yearly plan
-    await page.click('button:has-text("Rocznie")');
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').last().click();
+    // Jedyny dostępny plan to miesięczny (Known-Issues #7)
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').last().click();
     await page.waitForURL('**/checkout.stripe.com/**');
 
     expect(page.url()).toContain('checkout.stripe.com');
@@ -313,7 +311,7 @@ test.describe('Stripe Payment E2E Tests', () => {
     await expect(page.locator('text=Koniec okresu próbnego')).toBeVisible();
 
     // 3. Click monthly subscription
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
     // 4. Mock checkout redirection & verify redirect parameters
     await page.waitForURL('**/checkout.stripe.com/**');

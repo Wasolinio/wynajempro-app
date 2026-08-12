@@ -60,11 +60,11 @@ test.describe('Stripe Paywall — Tier 1: Feature Coverage', () => {
 
     // Paywall title and pricing
     await expect(page.locator('text=Koniec okresu próbnego')).toBeVisible();
-    await expect(page.locator('text=29.99')).toBeVisible();
+    await expect(page.locator('text=29,99')).toBeVisible();
     await expect(page.locator('text=zł / msc').first()).toBeVisible();
 
     // Subscribe button is present
-    await expect(page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first()).toBeVisible();
+    await expect(page.locator('button:has-text("Aktywuj i odzyskaj dane")').first()).toBeVisible();
 
     // Logout link present
     await expect(page.locator('button:has-text("Wyloguj się")')).toBeVisible();
@@ -80,7 +80,7 @@ test.describe('Stripe Paywall — Tier 1: Feature Coverage', () => {
     await page.waitForSelector('text=Koniec okresu próbnego');
 
     // Click subscribe
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
     // Verify the redirect URL was captured
     await page.waitForURL('**/checkout.stripe.com/**');
@@ -112,7 +112,7 @@ test.describe('Stripe Paywall — Tier 1: Feature Coverage', () => {
 
     // Past due specific banner
     await expect(page.locator('text=Zaległość w płatności')).toBeVisible();
-    await expect(page.locator('text=Twoja karta odrzuciła płatność')).toBeVisible();
+    await expect(page.locator('text=Nie mogliśmy automatycznie odnowić subskrypcji')).toBeVisible();
 
     // Manage subscription button should be visible for past_due
     await expect(page.locator('button:has-text("Otwórz panel zarządzania")').first()).toBeVisible();
@@ -137,13 +137,13 @@ test.describe('Stripe Paywall — Tier 2: Edge Cases', () => {
     });
     await page.waitForSelector('text=Koniec okresu próbnego');
 
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
     // Spinner should appear (Loader2 with animate-spin)
-    await expect(page.locator('button:has(svg.lucide-loader-circle)').first()).toBeVisible();
+    await expect(page.locator('button:has(span.wpb-spin)').first()).toBeVisible();
 
     // Subscribe button should be disabled while loading
-    const subscribeBtn = page.locator('button').filter({ has: page.locator('svg.lucide-loader-circle') }).first();
+    const subscribeBtn = page.locator('button').filter({ has: page.locator('span.wpb-spin') }).first();
     await expect(subscribeBtn).toBeDisabled();
   });
 
@@ -161,7 +161,7 @@ test.describe('Stripe Paywall — Tier 2: Edge Cases', () => {
     await page.locator('button:has-text("Otwórz panel zarządzania")').first().click();
 
     // Spinner should appear in the manage button
-    const manageBtn = page.locator('button').filter({ has: page.locator('svg.lucide-loader-circle') }).first();
+    const manageBtn = page.locator('button').filter({ has: page.locator('span.wpb-spin') }).first();
     await expect(manageBtn).toBeVisible();
   });
 
@@ -181,10 +181,10 @@ test.describe('Stripe Paywall — Tier 2: Edge Cases', () => {
       dialog.accept();
     });
 
-    await page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first().click();
+    await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
     // After error, subscribe button should become clickable again (loading state resets)
-    await expect(page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first()).toBeVisible();
+    await expect(page.locator('button:has-text("Aktywuj i odzyskaj dane")').first()).toBeVisible();
   });
 
   test('Paywall shows correct trial expiry messaging vs subscription canceled', async ({ page }) => {
@@ -207,7 +207,7 @@ test.describe('Stripe Paywall — Tier 2: Edge Cases', () => {
 
     // Deletion banner
     await expect(page.locator('text=Planowana kasacja danych')).toBeVisible();
-    await expect(page.locator('text=trwale i bezpowrotnie usunięci')).toBeVisible();
+    await expect(page.locator('text=zostaną trwale usunięte')).toBeVisible();
 
     // Days remaining badge — should show ~15 days
     const daysText = page.locator('text=/Pozostało: \\d+ dn/');
@@ -231,13 +231,13 @@ test.describe('Stripe Paywall — Tier 3: Full Flows', () => {
 
     // Step 1: Paywall is displayed
     await expect(page.locator('text=Koniec okresu próbnego')).toBeVisible();
-    await expect(page.locator('text=29.99')).toBeVisible();
+    await expect(page.locator('text=29,99')).toBeVisible();
 
     // Step 2: Verify the description text
     await expect(page.locator('text=darmowy 14-dniowy dostęp')).toBeVisible();
 
     // Step 3: Click subscribe button
-    const subscribeBtn = page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first();
+    const subscribeBtn = page.locator('button:has-text("Aktywuj i odzyskaj dane")').first();
     await expect(subscribeBtn).toBeEnabled();
     await subscribeBtn.click();
 
@@ -257,7 +257,7 @@ test.describe('Stripe Paywall — Tier 3: Full Flows', () => {
     await expect(page.locator('text=Twoja subskrypcja wygasła')).toBeVisible();
 
     // Step 2: Both buttons should be visible
-    await expect(page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first()).toBeVisible();
+    await expect(page.locator('button:has-text("Aktywuj i odzyskaj dane")').first()).toBeVisible();
     const manageBtn = page.locator('button:has-text("Otwórz panel zarządzania")').first();
     await expect(manageBtn).toBeVisible();
 
@@ -277,7 +277,7 @@ test.describe('Stripe Paywall — Tier 3: Full Flows', () => {
     await page.waitForSelector('text=Zaległa płatność');
 
     // Both buttons present
-    await expect(page.locator('button:has-text("Aktywuj subskrypcję i odzyskaj dane")').first()).toBeVisible();
+    await expect(page.locator('button:has-text("Aktywuj i odzyskaj dane")').first()).toBeVisible();
     await expect(page.locator('button:has-text("Otwórz panel zarządzania")').first()).toBeVisible();
 
     // Click manage subscription

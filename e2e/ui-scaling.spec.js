@@ -78,7 +78,7 @@ test.describe('UI Scaling Tests', () => {
     // Check main elements
     await expect(page.locator('text=Wynajem').first()).toBeVisible();
     await expect(page.locator('text=Cennik').first()).toBeVisible();
-    await expect(page.locator('text=Rozpocznij za darmo').first()).toBeVisible();
+    await expect(page.locator('text=Rozpocznij 14-dniowy test').first()).toBeVisible();
   });
 
   test('Test landing page layout elements are visible on mobile viewport (375x667)', async ({ page }) => {
@@ -86,7 +86,10 @@ test.describe('UI Scaling Tests', () => {
     await page.goto('/');
     
     await expect(page.locator('text=Wynajem').first()).toBeVisible();
-    await expect(page.locator('header button.md\\:hidden').first()).toBeVisible();
+    // Landing v2 NIE ma menu mobilnego: .wp4-nav jest ukrywana CSS-em i nic jej nie zastępuje.
+    // Na telefonie widoczne zostaje logo i CTA; nawigacja żyje dopiero w stopce.
+    await expect(page.locator('header .wp4-nav')).toBeHidden();
+    await expect(page.locator('header .wp4-btn--primary')).toBeVisible();
   });
 
   test('Test navigation bar visibility on desktop viewport', async ({ page }) => {
@@ -103,13 +106,13 @@ test.describe('UI Scaling Tests', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     
-    // Find hamburger menu button and click it
-    const menuBtn = page.locator('header button.md\\:hidden').first();
-    await expect(menuBtn).toBeVisible();
-    await menuBtn.click();
-    
-    // Check if navigation links in mobile nav are shown
-    await expect(page.locator('text=Zaloguj się').first()).toBeVisible();
+    // ŚWIADOMY STAN, NIE BŁĄD TESTU: landing v2 nie ma hamburgera ani menu mobilnego.
+    // Test pilnuje, że nawigacja jest ukryta i że nie pojawił się przycisk-widmo.
+    // Jeśli menu mobilne kiedyś powstanie, ten test trzeba przepisać na jego zachowanie.
+    await expect(page.locator('header .wp4-nav')).toBeHidden();
+    // Wejście do panelu musi zostać osiągalne mimo braku nawigacji. Poniżej 560px tekstowy
+    // link „Zaloguj się" też znika (.wp4-topbar__cta .wp4-link), więc jedyną drogą jest CTA.
+    await expect(page.locator('header .wp4-btn--primary')).toBeVisible();
   });
 
   test('Test responsive bookings view: Desktop vs Mobile', async ({ page }) => {
@@ -119,21 +122,20 @@ test.describe('UI Scaling Tests', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/dashboard');
     await page.waitForTimeout(500); // let snapshot load
+    await page.locator('button:has-text("Rezerwacje")').first().click();
     
-    // DesktopBookingsTable has class hidden md:block
-    // MobileBookingsList has class grid grid-cols-1 gap-4 p-4 md:hidden
-    const desktopTable = page.locator('div.hidden.md\\:block');
-    const mobileList = page.locator('div.md\\:hidden');
+    // Panel v2 nie ma pary „tabela desktop / lista mobile" na klasach Tailwind — jest JEDNA
+    // responsywna tabela .wpd-table, która restackuje się CSS-em. Test pilnuje więc tego,
+    // co ma znaczenie dla użytkownika: tabela jest widoczna i nic nie wychodzi poza ekran.
+    const table = page.locator('table.wpd-table').first();
+    await expect(table).toBeVisible();
     
-    await expect(desktopTable).toBeVisible();
-    await expect(mobileList).toBeHidden();
-    
-    // Mobile: DesktopBookingsTable is hidden, MobileBookingsList is rendered
+    // Mobile: ta sama tabela ma się zrestackować, a nie zniknąć ani rozepchać strony
     await page.setViewportSize({ width: 375, height: 667 });
     await page.waitForTimeout(500);
-    
-    await expect(desktopTable).toBeHidden();
-    await expect(mobileList).toBeVisible();
+
+    await expect(table).toBeVisible();
+    expect(await page.evaluate(() => document.body.scrollWidth)).toBeLessThanOrEqual(375);
   });
 
   // Tier 2: Boundary & Corner Cases (5 cases)
@@ -163,9 +165,9 @@ test.describe('UI Scaling Tests', () => {
     await page.setViewportSize({ width: 820, height: 1180 });
     await page.goto('/dashboard');
     await page.waitForTimeout(500);
+    await page.locator('button:has-text("Rezerwacje")').first().click();
     
-    // Medium viewports (768px) are "md", so DesktopBookingsTable should be visible
-    const desktopTable = page.locator('div.hidden.md\\:block');
+    const desktopTable = page.locator('table.wpd-table').first();
     await expect(desktopTable).toBeVisible();
     
     // Table content might be taking a moment to render
@@ -179,11 +181,11 @@ test.describe('UI Scaling Tests', () => {
     await page.waitForTimeout(500);
     
     // Open settings modal (the button has class containing settings icon or can be found by selector)
-    await page.locator('button:has(svg.lucide-settings)').first().click({ force: true });
-    await expect(page.locator('text=Ustawienia Systemu')).toBeVisible();
+    await page.locator('button[title="Ustawienia"]').first().click({ force: true });
+    await expect(page.locator('text=Ustawienia aplikacji')).toBeVisible();
     
     // Check if modal container fits inside viewport
-    const modal = page.locator('div.bg-white.dark\\:bg-slate-900').first();
+    const modal = page.locator('div.wpd-dialog').first();
     const box = await modal.boundingBox();
     expect(box.width).toBeLessThanOrEqual(375); // Should constrain to mobile width
   });
@@ -193,10 +195,10 @@ test.describe('UI Scaling Tests', () => {
     
     // Desktop
     await page.setViewportSize({ width: 1280, height: 720 });
-    const banner = page.locator('div.fixed.bottom-0'); // typically sticks to bottom
+    const banner = page.locator('div.wpc-bar'); // baner zgody ma własny namespace .wpc (v2)
     await expect(banner).toBeVisible();
     let box = await banner.boundingBox();
-    expect(box.y).toBeGreaterThan(500); // Near bottom
+    expect(box.y + box.height).toBeGreaterThan(600); // dolna krawędź blisko dołu ekranu (720px)
 
     // Mobile
     await page.setViewportSize({ width: 375, height: 667 });
@@ -213,8 +215,8 @@ test.describe('UI Scaling Tests', () => {
     await page.goto('/dashboard');
     
     // Open settings modal
-    await page.locator('button:has(svg.lucide-settings)').first().click({ force: true });
-    await expect(page.locator('text=Ustawienia Systemu')).toBeVisible();
+    await page.locator('button[title="Ustawienia"]').first().click({ force: true });
+    await expect(page.locator('text=Ustawienia aplikacji')).toBeVisible();
     
     // Switch to Tax tab using exact text match to avoid ambiguous matches
     await page.locator('button', { hasText: /^Podatki$/ }).first().click({ force: true });
@@ -224,7 +226,7 @@ test.describe('UI Scaling Tests', () => {
     await expect(vatText).toBeVisible({ timeout: 10000 });
     
     // Close modal
-    await page.locator('button:has(svg.lucide-circle-x)').first().click({ force: true });
+    await page.locator('button.wpd-dialog__close').first().click({ force: true });
     
     // Verify we are back to dashboard elements
     await expect(page.locator('button', { hasText: /Dodaj rezerwację|Dodaj wpis/i }).first()).toBeVisible();
@@ -239,7 +241,7 @@ test.describe('UI Scaling Tests', () => {
     
     // Navigate to Contact Page
     await page.click('text=Kontakt');
-    await expect(page.locator('text=Formularz kontaktowy').first()).toBeVisible();
+    await expect(page.locator('text=Adres e-mail').first()).toBeVisible();
     
     // Resize viewport to mobile
     await page.setViewportSize({ width: 375, height: 667 });

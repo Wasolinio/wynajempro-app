@@ -31,7 +31,8 @@ const fullGuideData = {
     doorPin: '4455#'
   },
   // Host profile
-  ['users/owner-uid-123/settings/hostProfile']: {
+  // Przewodnik czyta WĄSKI kontakt publiczny, nie pełny hostProfile (RODO-UI, N5).
+  ['users/owner-uid-123/settings/publicContact']: {
     entityName: 'Jan Kowalski',
     phone: '+48 123 456 789',
     email: 'jan@example.com'
@@ -63,7 +64,7 @@ test.describe('Guest Guide — Tier 1: Basic Feature Coverage', () => {
     await page.goto(`/guide/${GUIDE_ID}`);
 
     // Loading spinner should disappear
-    await expect(page.locator('text=Ładowanie przewodnika...')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Ładowanie przewodnika…')).not.toBeVisible({ timeout: 5000 });
 
     // Guide name is visible in the header
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
@@ -81,8 +82,8 @@ test.describe('Guest Guide — Tier 1: Basic Feature Coverage', () => {
     // Property ID badge
     await expect(page.locator('text=Domek Leśny').first()).toBeVisible();
 
-    // WiFi section exists (masked before acceptance)
-    await expect(page.locator('text=Sieć Wi-Fi')).toBeVisible();
+    // Przed akceptacją sekcja dostępowa jest zablokowana
+    await expect(page.locator('text=Dane dostępowe zablokowane')).toBeVisible();
 
     // House rules section
     await expect(page.locator('text=Regulamin Obiektu')).toBeVisible();
@@ -96,7 +97,7 @@ test.describe('Guest Guide — Tier 1: Basic Feature Coverage', () => {
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
 
     // Acceptance section is visible
-    await expect(page.locator('text=Akceptacja dokumentów')).toBeVisible();
+    await expect(page.locator('text=Odblokuj dane dostępowe')).toBeVisible();
 
     // The unlock button should be disabled before checking boxes
     const unlockButton = page.locator('button:has-text("Odkryj dane dostępowe")');
@@ -145,8 +146,8 @@ test.describe('Guest Guide — Tier 2: Boundary & Edge Cases', () => {
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
 
     // Key sections should be visible and not overflow
-    await expect(page.locator('text=Sieć Wi-Fi')).toBeVisible();
-    await expect(page.locator('text=Regulamin Obiektu')).toBeVisible();
+    await expect(page.locator('text=Dane dostępowe zablokowane')).toBeVisible();
+    await expect(page.locator('text=Regulamin obiektu')).toBeVisible();
     await expect(page.locator('text=Stworzono za pomocą WynajemPRO')).toBeVisible();
 
     // Ensure nothing overflows horizontally
@@ -166,7 +167,7 @@ test.describe('Guest Guide — Tier 2: Boundary & Edge Cases', () => {
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
 
     // The acceptance panel should be present (only for anonymous users)
-    await expect(page.locator('text=Akceptacja dokumentów')).toBeVisible();
+    await expect(page.locator('text=Odblokuj dane dostępowe')).toBeVisible();
   });
 
   test('WiFi password and door PIN are masked before acceptance', async ({ page }) => {
@@ -175,11 +176,8 @@ test.describe('Guest Guide — Tier 2: Boundary & Edge Cases', () => {
 
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
 
-    // Sensitive data should be masked with bullets
-    await expect(page.locator('text=••••••••').first()).toBeVisible();
-
-    // The lock overlay should be visible
-    await expect(page.locator('text=Zaakceptuj regulamin, aby odkryć')).toBeVisible();
+    // v2 nie maskuje kropkami — zamiast danych renderuje kartę blokady
+    await expect(page.locator('text=Dane dostępowe zablokowane')).toBeVisible();
 
     // Actual WiFi password should NOT be visible yet
     await expect(page.locator('text=supertajne123')).not.toBeVisible();
@@ -237,7 +235,7 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await expect(page.locator('text=Zakaz używania otwartego ognia')).toBeVisible();
 
     // 4. Sensitive data is masked
-    await expect(page.locator('text=Zaakceptuj regulamin, aby odkryć')).toBeVisible();
+    await expect(page.locator('text=Dane dostępowe zablokowane')).toBeVisible();
     await expect(page.locator('text=supertajne123')).not.toBeVisible();
 
     // 5. Check both checkboxes
@@ -251,10 +249,10 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await unlockButton.click();
 
     // 7. Acceptance panel should disappear, secrets revealed
-    await expect(page.locator('text=Akceptacja dokumentów')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Odblokuj dane dostępowe')).not.toBeVisible({ timeout: 5000 });
 
     // Lock overlay should be gone
-    await expect(page.locator('text=Zaakceptuj regulamin, aby odkryć')).not.toBeVisible();
+    await expect(page.locator('text=Dane dostępowe zablokowane')).not.toBeVisible();
 
     // WiFi and PIN should now be visible
     await expect(page.locator('text=Domek_Goscie')).toBeVisible();
@@ -283,8 +281,8 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await expect(page.locator('text=Regulamin Obiektu')).toBeVisible();
     await expect(page.locator('text=Prosimy o utrzymanie porządku')).toBeVisible();
 
-    // WiFi section should NOT appear (no wifiNetwork in guide data)
-    await expect(page.locator('text=Sieć Wi-Fi')).not.toBeVisible();
+    // Bez danych wrażliwych nie ma ani karty blokady, ani sekcji dostępowej
+    await expect(page.locator('text=Dane dostępowe zablokowane')).not.toBeVisible();
 
     // Door PIN section should NOT appear
     await expect(page.locator('text=Kod do drzwi')).not.toBeVisible();
@@ -296,7 +294,7 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await expect(page.locator('text=Instrukcja Bezpieczeństwa PPOŻ')).not.toBeVisible();
 
     // No acceptance panel when hasSensitiveData is false
-    await expect(page.locator('text=Akceptacja dokumentów')).not.toBeVisible();
+    await expect(page.locator('text=Odblokuj dane dostępowe')).not.toBeVisible();
 
     // No error or crash — footer is visible
     await expect(page.locator('text=Stworzono za pomocą WynajemPRO')).toBeVisible();
@@ -319,7 +317,7 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await expect(page.locator('h1')).toContainText('Informator - Domek Leśny');
 
     // Check-in section
-    await expect(page.locator('text=Wskazówki Dotarcia i Zameldowania')).toBeVisible();
+    await expect(page.locator('text=Dotarcie i zameldowanie')).toBeVisible();
     await expect(page.locator('text=Kluczyk znajduje się w skrytce obok drzwi')).toBeVisible();
 
     // Google Maps navigation link
@@ -399,7 +397,7 @@ test.describe('Guest Guide — Tier 3: Full Flows & Combinatorial', () => {
     await expect(page.locator('h1')).toContainText('Domek Górski');
 
     // Acceptance panel should be visible
-    await expect(page.locator('text=Akceptacja dokumentów')).toBeVisible();
+    await expect(page.locator('text=Odblokuj dane dostępowe')).toBeVisible();
 
     // Only one checkbox (regulations, no PPOŻ)
     const checkboxes = page.locator('input[type="checkbox"]');

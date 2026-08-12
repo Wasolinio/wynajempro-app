@@ -230,6 +230,41 @@ Deleted together with the guide by `deleteUserAccount` (`bucket.deleteFiles({ pr
 
 ---
 
+## ADR-013: Rezygnacja z panelu podsumowania podatkowego
+
+**Date**: 2026-08-12
+**Status**: ACCEPTED
+**Context**: Commit `41383e7` (8.06) dodał `TaxSummaryPanel` — mikrorachunek, VAT-UE, próg
+ryczałtu, tytuły przelewów. Commit `fb8a00e` („porządek struktury repo") przeniósł go do
+`_legacy/` razem z wariantem V4, a produkcyjny panel v2 nigdy nie dostał zastępnika.
+**Usunięcie nie zostało nigdzie odnotowane** — ani w [[Activity-Log]], ani w [[Known-Issues]],
+ani tutaj. Wyszło dopiero przy naprawie e2e 12.08: `taxCalculator.js` eksportował cztery
+funkcje, z czego trzy nie były wywoływane przez żaden komponent. Przy życiu trzymał je
+wyłącznie import w teście.
+
+**Decision**: Panel nie wraca. Usunięte: `calculateMonthlyTaxes()`, `generateMicroAccount()`,
+`generateTransferTitle()` (246 linii) plus 8 osieroconych helperów, oraz 5 testów e2e,
+które go sprawdzały.
+
+**Rationale**:
+- ✅ Martwy kod przez dwa miesiące — nikt nie zgłosił braku
+- ✅ `calculateTaxes()` zostaje i **dalej pilnuje progu 100 000 zł**, więc obietnica
+  z landingu („system sam przełącza stawkę") pozostaje prawdziwa
+- ✅ `taxCalculator.js`: 462 → 166 linii, jeden eksport zamiast czterech
+- ❌ Gospodarz nie zobaczy w aplikacji numeru mikrorachunku ani kwoty VAT-UE
+- ❌ Kod da się odzyskać tylko z historii gita (`git show 41383e7`) albo z `_legacy/`
+
+**Consequences**:
+- Rozliczenie miesięczne gospodarz robi poza aplikacją; zostaje mu eksport CSV
+  dla księgowego z Raportów (X4 partia 3)
+- Gdyby panel miał wrócić: `_legacy/dashboard-original/components/TaxSummaryPanel.jsx`
+  jest punktem wyjścia, ale wymaga portu na identyfikację `wpd-*` i podzakładkę w Finansach
+- **Wniosek procesowy**: to zniknęło niezauważone, bo przy X4 przepuszczano tylko część
+  suity („e2e 30/30" przy 133 testach). Deklaracja „e2e zielony" bez pełnego przebiegu
+  nie jest dowodem.
+
+---
+
 ## Decision Template
 
 ```markdown

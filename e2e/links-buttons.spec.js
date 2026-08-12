@@ -68,7 +68,7 @@ test.describe('Links and Buttons Tests', () => {
 
     const logo = page.locator('text=WynajemPro').first();
     const blogLink = page.locator('header a[href="/blog"]').first();
-    const contactLink = page.locator('header a[href="/kontakt"]').first();
+    const contactLink = page.locator('footer a[href="/kontakt"]').first();
     const loginLink = page.locator('header a[href="/login"]').first();
 
     await expect(logo).toBeVisible();
@@ -327,7 +327,7 @@ test.describe('Links and Buttons Tests', () => {
     await page.waitForSelector('text=Wróć do Bazy Wiedzy');
 
     // 5. Click contacts (header link)
-    await page.locator('header a[href="/kontakt"]').first().click();
+    await page.locator('footer a[href="/kontakt"]').first().click();
     await page.waitForURL('**/kontakt');
 
     // 6. Fill form
