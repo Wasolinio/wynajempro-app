@@ -4,6 +4,21 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-12
+
+### Skille projektu, uprawnienia i porządek w repo
+- 🎯 **Powód**: procedury zespołu żyły wyłącznie w dokumentach, które agent musiał *pamiętać*, żeby otworzyć. Lekcja z 10.08 („curl nie weryfikuje deployu PWA") wisiała w jednym akapicie dziennika i przy następnym deployu nikt by jej nie przeczytał.
+- ✅ **Cztery skille w `.claude/skills/`** (`726e2a1`), ładują się same albo przez `/nazwa`: **deploy** (rytuał wydania + weryfikacja live przez przeglądarkę), **dziennik** (konwencja tego pliku, errata, synchronizacja Roadmapy), **reguly** (zmiana reguł bez emulatora — lustrzany tester, bramka deployu), **zgloszenie** (odsiew po `source`, poziomy 1–3, `taxIdentifier`).
+- 🛑 **Pułapka znaleziona przy pisaniu skilla deploy**: `npm run deploy` w `package.json` to `vite build && firebase deploy` **bez `--only`** — jednym ruchem wypycha hosting, reguły, functions i indeksy naraz, omijając wszystkie bramki opisane przy N2 i N3. Skill tego zakazuje wprost; sam skrypt zostaje bez zmian (usunięcie go to osobna decyzja).
+- ✅ **Uprawnienia**: 19 reguł odczytu w `.claude/settings.json`, wyprowadzonych z 3916 wywołań narzędzi w transkryptach. Świadomie odrzucone mimo wysokiej częstotliwości: `curl` (93 użycia — potrafi POST-ować), `npx eslint *` (64 — wildcard przepuszcza `--fix`), `node -e` i `npx *` (dowolne wykonanie kodu).
+- ✅ **Repo odchudzone o 707 MB**: trzy worktree z 3 i 21 lipca, wszystkie scalone w main. Sprawdzone plik po pliku przed usunięciem — 19 z 20 „nieśledzonych" plików `unruffled` istnieje dziś w main, dwudziesty to `__CostsPreview.jsx` z komentarzem „TYMCZASOWY — DO USUNIĘCIA po weryfikacji". Łatki i tak zarchiwizowane na Pulpicie (`WynajemPRO-worktree-backup-2026-08-12`). `.claude`: 707 MB → 80 KB.
+- ✅ **Dokumenty**: usunięty **pusty** `docs/Tech Stack.md`, na który wskazywał wikilink z [[Home]] — treść od zawsze była w [[Tech-Stack]]. Wersje w [[Tech-Stack]] doprowadzone do `package.json` (twierdził React 18+, jest 19.2). Kontrola całego vaulta: **261 wikilinków, zero zepsutych**.
+- ✅ **Naprawiony test**: `ical_token.spec.js` dopasowywał placeholder po trzech kropkach, a pole ma typograficzny wielokropek „…" (U+2026). Dopasowanie prefiksem — `1/1`, lint czysty (`2a549a9`). To ten sam kształt błędu co zgniły `panel-v2` z 10.08: selektor rozjeżdża się z UI bez żadnego sygnału.
+- ⚠️ **Zostaje do zrobienia ręcznie**: `.claude/settings.local.json` ma 32 martwe jednorazówki (konkretne treści commitów, wywołania z `~/Downloads`, instalatory). Zapis do tego pliku jest agentowi zablokowany przez harness — czyszczenie należy do właściciela.
+- ⚖️ **Czego to nie załatwia**: skille opisują procedury, ale ich nie egzekwują. Nie ma CI (brak `.github`) ani hooków dla Claude — jedyny hook w repo (`.codex/hooks.json`) obsługuje Codex. Suita e2e ma **52 zastane awarie** ze 132 testów i to zostaje osobnym zadaniem; daty na sztywno wciąż siedzą w `ui-scaling.spec.js` (gnije po 25.12) i `costs-tasks.spec.js`.
+
+---
+
 ## 2026-08-11
 
 ### Znacznik zgłoszeń testowych w formularzu `/kontakt`
