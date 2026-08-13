@@ -4,6 +4,21 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-13
+
+### DEPLOY `hosting:app` — nawigacja mobilna, fix przewijania panelu, znacznik `?test=1`
+- 🎯 **Zakres**: pierwszy deploy od 10.08. Paczka objęła **4 pliki `src`** z 11 commitów: `LandingPage.jsx` (nawigacja mobilna), `styles.js` (poziome przewijanie panelu), `taxCalculator.js` (usunięcie martwego kodu, ADR-013) oraz — **niezaplanowanie** — `ContactPage.jsx`.
+- ⚠️ **Znacznik `/kontakt?test=1` czekał na deploy dwa dni.** Zmiana z 11.08 (`08f9961`) nigdy nie trafiła na produkcję; wyszło to przy ustalaniu zakresu (`git diff 69f05c3..HEAD`). Do dziś każde zgłoszenie testowe właściciela było na produkcji **nieodróżnialne** od prawdziwego — czyli mechanizm, który miał zapobiec powtórce z 10.08, nie działał tam, gdzie miał. Teraz działa: baner „Tryb testowy" potwierdzony na żywo.
+- ✅ **Pre-flight**: lint 0, build OK, **e2e 128/128** (przebieg z 13.08 — deklaracja ważna na ten dzień).
+- ✅ **Cel `hosting:app`**, świadomie bez reguł i functions: `git diff` potwierdził **zero zmian** w `firestore.rules`, `storage.rules`, `functions/`, `firestore.indexes.json` i `firebase.json`. Deploy: **39 plików, 23 nowe, release OK**.
+- ✅ **Weryfikacja live przez przeglądarkę** (nie curlem — [[Known-Issues]] #12): twarde przeładowanie z aktualizacją service workera; `/`, `/kontakt`, `/pomoc`, `/dashboard` = **200**; **brak `Failed to fetch dynamically imported module`**, czyli objaw incydentu z 10.08 nie występuje; 301 ze starej domeny **z zachowaniem ścieżki** (`moje-domki-6c77d.web.app/pomoc` → `wynajempro.com/pomoc`).
+- ✅ **Nawigacja mobilna przetestowana NA PRODUKCJI**, nie tylko lokalnie: przycisk widoczny, `.wp4-nav` ukryta, panel z 10 pozycjami, `aria-expanded=true`, blokada tła aktywna, `scrollWidth` 375, Escape zamyka i **oddaje fokus przyciskowi**.
+- ✅ **Fix panelu potwierdzony bez sesji** metodą z 10.08: chunk `ManagerApp-CEDslQSv.js` pobrany z produkcji jest **bajt w bajt** identyczny z lokalnym buildem (267 292 B, ten sam SHA-256), a reguła `.wpd-seg{ … min-width:0; max-width:100%; overflow-x:auto; }` jest w nim obecna. Tak samo `LandingPage-BRTYVL8O.js`.
+- 📌 **`npm run help:build` pominięty świadomie**: artykuły w `docs/support/` opisują menu **panelu**, nie landingu — zmiana ich nie dotyka.
+- ⏸ **Zostaje**: 11 commitów niewypchniętych na GitHub (`git push` to decyzja właściciela). Konsola produkcji nadal zwraca **App Check 403** — stan znany i nieszkodliwy dopóki egzekwowanie jest wyłączone ([[Known-Issues]] #13); **nie włączać** bez naprawy.
+
+---
+
 ## 2026-08-12
 
 ### Nawigacja mobilna landingu (≤900px)
