@@ -134,9 +134,28 @@ jako potwierdzenie stanu produkcji na 10.08:
 
 ---
 
-### 16. 🔴 Strony gościa nie działają na produkcji — logowanie anonimowe odbijane (`auth/admin-restricted-operation`)
-**Severity**: 🔴 cała gościnna połowa produktu niedostępna · **Status**: ⏳ OTWARTE — wymaga konsoli właściciela
+### 16. 🔴 Strony gościa: logowanie anonimowe odbijane przez App Check
+**Severity**: 🔴 potencjalnie cała gościnna połowa produktu · **Status**: ⏳ OTWARTE — wymaga konsoli właściciela **i jednego testu z telefonu**
 **Zaobserwowane 2026-08-13** przy weryfikacji live deployu (znalezione przypadkiem, nie szukane).
+
+> ⚠️ **KOREKTA 2026-08-13, ta sama sesja — kilka godzin po pierwszym zapisie.** Pomiar
+> powtórzony w **czystym Chromium** (Playwright, przy budowie smoke'a produkcji) dał **inny
+> błąd** niż przeglądarka wbudowana: `401 accounts:signUp` → **`auth/firebase-app-check-token-is-invalid`**,
+> poprzedzone **403** przy wymianie tokenu App Check. To znaczy: (1) **App Check jest
+> egzekwowany dla Authentication**, (2) klient nie umie zdobyć tokenu — czyli to **ten sam
+> 403 co w #13**. Obie pozycje, prowadzone dotąd osobno, opisują **jeden problem**.
+>
+> **Co upada z pierwotnego zapisu:** teza „wyłączony dostawca Anonymous albo zablokowane
+> tworzenie kont" jako przyczyna główna — `admin-restricted-operation` zaobserwowany
+> w przeglądarce wbudowanej zostaje jako fakt, ale nie jest już wyjaśnieniem pierwszego wyboru.
+> **Co przeżywa:** strony gościa nie wczytują się **dla klienta bez ważnego tokenu App Check**;
+> ścieżka kodu (`signInAnonymously` przed odczytem) i skutek są opisane poprawnie.
+>
+> 🛑 **Czego NIE wiemy, a twierdziłem inaczej:** że „cała gościnna połowa produktu leży dla
+> wszystkich". Obie moje przeglądarki są **sterowane automatem** — czyli dokładnie ten ruch,
+> który App Check ma odsiewać. Niska ocena reCAPTCHA jest dla nich spodziewana. **Czy
+> człowiek z prawdziwej przeglądarki wejdzie, rozstrzyga jedno otwarcie prawdziwego linku
+> na telefonie** — i to jest teraz pierwszy krok, przed czymkolwiek w konsoli.
 
 **Objaw:** wejście na `https://wynajempro.com/guide/<cokolwiek>` kończy się ekranem
 **„Brak dostępu — Wystąpił błąd autoryzacji sesji. Odśwież stronę."**, a `/opinie/<cokolwiek>`
@@ -169,15 +188,28 @@ gdy zablokowane jest **tworzenie kont**: albo wyłączony dostawca „Anonymous"
 na produkcji świadomie: każda próba to albo realne konto, albo hałas w danych. To pytanie do
 konsoli, nie do agenta.
 
-**Co sprawdzić (właściciel, ~3 min), Firebase Console → Authentication:**
-1. **Sign-in method → Anonymous** — czy włączone.
-2. **Settings → User actions → „Enable create (sign-up)"** — czy tworzenie kont nie jest zablokowane.
-3. **App Check → Apps → Authentication (Identity Platform)** — jaki jest stan egzekwowania.
-   To samo pytanie wraca przy N6.4; teraz są na nie twarde dane, nie domysł.
+**Co zrobić, w tej kolejności:**
+0. **NAJPIERW, 30 sekund, bez konsoli:** otwórz **prawdziwy** link do swojego przewodnika
+   na telefonie, w oknie prywatnym. To jedyny pomiar rozstrzygający, czy problem dotyka
+   ludzi, czy tylko klientów bez ważnego tokenu App Check. Od wyniku zależy, czy to pożar,
+   czy dług.
+1. **App Check → Authentication (Identity Platform)** — stan egzekwowania. Jeśli włączone,
+   a 403 z #13 nadal trwa, **wyłączenie egzekwowania dla tej jednej usługi** natychmiast
+   odblokowuje strony gościa i kupuje czas na naprawę reCAPTCHA. Zdejmuje też ryzyko przy
+   N6.4: dziś wiemy, że dla Authentication egzekwowanie **działa**, więc dołożenie go
+   Firestore/Storage przy zepsutym tokenie odcięłoby resztę aplikacji.
+2. **Napraw źródło (#13):** konsola reCAPTCHA → lista dozwolonych domen (czy jest
+   `wynajempro.com`, a nie tylko stara `moje-domki-6c77d.web.app`) i rejestracja aplikacji
+   webowej w App Check tym samym kluczem. Po naprawie doba throttle.
+3. **Dopiero gdyby to nie pomogło** — pierwotna hipoteza: Authentication → Sign-in method →
+   **Anonymous** (czy włączone) oraz Settings → User actions → **„Enable create (sign-up)"**.
+   ⚠️ Gdyby to drugie było zablokowane, **nie działa też rejestracja nowych użytkowników**.
 
 **Po naprawie:** otworzyć **prawdziwy** link do przewodnika (nie zmyślone id) i potwierdzić,
 że gość widzi treść. Regresja e2e tego nie złapie — suita mockuje Firebase, więc świeci
-zielono niezależnie od stanu produkcji.
+zielono niezależnie od stanu produkcji. Od 2026-08-13 pilnuje tego osobny smoke produkcji
+(`e2e-prod/smoke.spec.js`, przepływ `prod-smoke.yml`, co godzinę) — z zastrzeżeniem, że
+**kanarek sesji gościa mierzy klienta bez tokenu App Check**, a nie człowieka z przeglądarki.
 
 ---
 
@@ -216,7 +248,10 @@ starym SW dostaną go po staremu; pasek zacznie działać dla nich od kolejnego 
 ---
 
 ### 13. App Check zwraca 403 na produkcji — blokuje włączenie egzekwowania
-**Severity**: 🔴 blokuje zadanie 1 z [[Projects/Instrukcje-wlasciciela]] · **Status**: ⏳ OTWARTE
+**Severity**: 🔴 blokuje zadanie 1 z [[Projects/Instrukcje-wlasciciela]] **i jest przyczyną #16** · **Status**: ⏳ OTWARTE
+> ⚠️ **2026-08-13:** ta pozycja i **#16 to jeden problem**. Ten sam nieudany token App Check,
+> opisany tu jako „blokada przed włączeniem egzekwowania", **już dziś odcina strony gościa** —
+> bo dla Authentication egzekwowanie okazało się WŁĄCZONE. Czytaj obie pozycje razem.
 **Objaw (zaobserwowany na żywo 10.08 na `wynajempro.com`):**
 ```
 @firebase/app-check: AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle)

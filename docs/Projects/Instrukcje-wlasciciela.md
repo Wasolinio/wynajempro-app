@@ -25,8 +25,11 @@
 > kliknięcia w Firebase Console → Authentication: [[Projects/Zlecenia-wlasciciela]] #9,
 > diagnostyka w [[Known-Issues]] #16. Bije wszystko poniżej, bo to nie jest dług ani
 > ryzyko na przyszłość, tylko **funkcja niedostępna dla klientów już teraz**.
-> Przy okazji: dane z tej diagnostyki zmieniają sekcję 1 (App Check) — egzekwowanie
-> dla Authentication najwyraźniej **już działa**.
+> ⚠️ **Korekta z wieczora 13.08:** przyczyną jest **App Check**, nie wyłączony dostawca
+> „Anonymous" — i to ten sam 403 co w sekcji 1. Zacznij od **kroku 0**: otwórz prawdziwy
+> link do przewodnika na telefonie. To rozstrzyga, czy problem dotyka ludzi, czy tylko
+> klientów bez tokenu App Check (obie moje przeglądarki są sterowane automatem, więc
+> App Check odsiewa je z definicji). Szczegóły: [[Projects/Zlecenia-wlasciciela]] #9.
 
 | # | Zadanie | Sekcja | Czas | Dlaczego tak wysoko / nisko |
 |---|---|---|---|---|

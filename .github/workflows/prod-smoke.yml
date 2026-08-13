@@ -1,0 +1,54 @@
+name: Smoke produkcji
+
+# PO CO: suita e2e mockuje Firebase, więc świeci zielono niezależnie od stanu produkcji.
+# 2026-08-13 przy 133/133 na zielono połowa produktu (strony gościa) była martwa i nikt
+# nie wiedział, od kiedy ([[Known-Issues]] #16). Ten przepływ chodzi po żywym serwisie.
+#
+# Gdy zgłosi błąd, GitHub wysyła powiadomienie na adres właściciela repozytorium —
+# to jest cały mechanizm alertowania, świadomie bez dodatkowego dostawcy.
+
+on:
+  schedule:
+    # co godzinę; produkcja zmienia się rzadko, ale awaria ma być zauważona tego samego dnia
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      adres:
+        description: 'Adres do sprawdzenia (domyślnie produkcja)'
+        required: false
+        default: 'https://wynajempro.com'
+
+concurrency:
+  group: prod-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: żywa produkcja
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Smoke
+        env:
+          PROD_URL: ${{ github.event.inputs.adres || 'https://wynajempro.com' }}
+        run: npm run test:prod
+
+      - name: Ślad z nieudanego przebiegu
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-smoke-trace
+          path: test-results/
+          retention-days: 7

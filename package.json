@@ -11,6 +11,7 @@
     "docs:docx": "node scripts/build-docx.mjs",
     "help:build": "node scripts/build-help-articles.mjs",
     "deploy": "npm run build && firebase deploy",
+    "test:prod": "playwright test --config=playwright.prod.config.js",
     "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",
     "test:e2e:ui": "cross-env VITE_USE_EMULATORS=true playwright test --ui",
     "test:e2e:debug": "cross-env VITE_USE_EMULATORS=true playwright test --debug",

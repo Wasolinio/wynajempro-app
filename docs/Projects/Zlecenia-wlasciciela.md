@@ -19,27 +19,46 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
-### 9. 🔴 PILNE — odblokuj logowanie anonimowe (strony gościa leżą) — nowe 2026-08-13
+### 9. 🔴 App Check odbija sesję gościa — sprawdź, czy strony gościa działają (nowe 2026-08-13)
 **Co się dzieje:** każdy link do przewodnika (`/guide/…`) i każda strona opinii (`/opinie/…`)
 kończy się u gościa komunikatem **„Brak dostępu — Wystąpił błąd autoryzacji sesji"**.
 Aplikacja loguje gościa anonimowo, zanim pokaże treść, a Google odbija to logowanie:
 `auth/admin-restricted-operation`. Znalezione przy weryfikacji deployu 13.08, powtórzone
 w czystej karcie. Pełna diagnostyka: [[Known-Issues]] #16.
 
-**Dlaczego to Ty:** to ustawienie w konsoli, agent nie ma tam dostępu.
+> ⚠️ **KOREKTA z tego samego dnia (13.08, wieczór).** Powtórzyłem pomiar w czystym Chromium
+> i dostałem **inny błąd** niż rano: `401` → `auth/firebase-app-check-token-is-invalid`,
+> poprzedzony **403** przy pobieraniu tokenu App Check. Czyli winowajcą jest **App Check**
+> (ten sam 403 co w [[Known-Issues]] #13), a nie — jak pisałem rano — wyłączony dostawca
+> „Anonymous". **I ważniejsze:** obie moje przeglądarki są sterowane automatem, czyli
+> dokładnie tym ruchem, który App Check ma odsiewać. **Nie wiem więc, czy problem dotyka
+> prawdziwych ludzi** — rano napisałem, że „cała gościnna połowa produktu leży"; to była teza
+> za mocna wobec dowodów.
 
-**Firebase Console → Authentication:**
-1. **Sign-in method → Anonymous** — czy jest włączone. Jeśli nie: włącz.
-2. **Settings → User actions → „Enable create (sign-up)"** — czy tworzenie kont nie jest
-   zablokowane. ⚠️ Jeśli jest, **nie działa też rejestracja nowych użytkowników** — tego
-   celowo nie sprawdzałem na produkcji, bo każda próba to albo realne konto, albo śmieci w danych.
-3. **App Check → Authentication** — jaki jest stan egzekwowania. Twarda poszlaka z 13.08:
-   żądanie bez tokenu App Check dostaje 401 „App Check token is invalid", czyli **egzekwowanie
-   dla Authentication już działa** — czego nie zakładała ani pozycja #8, ani [[Known-Issues]] #13.
-   Ta informacja zmienia obraz zadania „App Check" (sekcja 1 [[Projects/Instrukcje-wlasciciela]]).
+**KROK 0 — 30 sekund, zanim wejdziesz w jakąkolwiek konsolę:**
+Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie prywatnym.
+- Widzisz treść przewodnika → problem dotyczy tylko klientów bez tokenu App Check
+  (m.in. moich narzędzi). To dług, nie pożar — reszta poniżej zostaje, ale bez pośpiechu.
+- Widzisz „Brak dostępu — błąd autoryzacji sesji" → **pożar**: żaden Twój gość nie otworzy
+  dziś przewodnika. Rób kroki 1–3 od razu.
 
-**Potem:** otwórz **prawdziwy** link do przewodnika (nie zmyślone id) i sprawdź, że gość widzi
-treść. Napisz wynik — dopiszę do dziennika i zamknę #16.
+**Dlaczego reszta to Ty:** to ustawienia w konsoli, agent nie ma tam dostępu.
+
+**Firebase Console:**
+1. **App Check → Authentication (Identity Platform)** — jaki jest stan egzekwowania.
+   Jeśli WŁĄCZONE: **wyłącz je dla tej jednej usługi**. To natychmiast odblokowuje strony
+   gościa i kupuje czas na naprawę reCAPTCHA. Przy okazji zdejmuje pułapkę z zadania „App
+   Check" (sekcja 1): skoro dla Authentication egzekwowanie **działa i odbija**, to dołożenie
+   go Firestore/Storage przy zepsutym tokenie odcięłoby całą aplikację.
+2. **Napraw źródło — reCAPTCHA (to jest #13):** konsola reCAPTCHA → lista dozwolonych domen.
+   Czy jest tam `wynajempro.com`, czy tylko stara `moje-domki-6c77d.web.app`? Domena
+   kanoniczna zmieniła się 22.07 i to najpoważniejszy podejrzany. Potem: Firebase → App Check
+   → czy aplikacja webowa jest zarejestrowana tym samym kluczem. Po naprawie doba throttle.
+3. **Dopiero gdyby to nie pomogło** — hipoteza z rana: Authentication → Sign-in method →
+   **Anonymous** (czy włączone) i Settings → User actions → **„Enable create (sign-up)"**.
+   ⚠️ Gdyby to drugie było zablokowane, **nie działa też rejestracja nowych użytkowników**.
+
+**Potem:** ponów krok 0 i napisz wynik — dopiszę do dziennika i zamknę #16.
 
 ### 1. ✅ Google Search Console — WYKONANE 2026-07-22
 Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzenie właściciela).
