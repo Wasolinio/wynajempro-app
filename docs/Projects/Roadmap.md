@@ -240,6 +240,20 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 - ✅ **Deploy wykonany 2026-08-10** (reguły → hosting, kolejność zachowana). Odkrycie przy wdrożeniu: `firestore.rules` były **już wydane** na produkcji i identyczne z repo (CLI: „already up to date, skipping upload") — wdrożony był sam backend, front nigdy za nim nie poszedł. To bezpieczna strona rozjazdu (reguły = nadzbiór), ale przez 16 dni panel nie miał pól rozbicia, mimo że reguły je przyjmowały.
 - ⏸ **Zostaje:** smoke właściciela (dodanie rezerwacji z rozbiciem + edycja starej rezerwacji, żeby potwierdzić migrację `guests`→`adults`) + opcjonalnie `validate-schema-n3.cjs` na produkcji ze świeżym kluczem. Drobne z audytu → [[Projects/Backlog]].
 
+### X18. Raport rentowności do druku i PDF — przebudowa (właściciel, 2026-08-13)
+**Po co:** zgłoszone przy smoke 4e — raport **generuje się**, ale wygląda źle i nie nadaje się do wysłania księgowemu ani do teczki. To dokument, który gospodarz pokazuje na zewnątrz, więc jego wygląd jest częścią produktu, nie kosmetyką.
+**Zaobserwowane na pliku z produkcji** (3 strony, A4 595×842 pt — sam rozmiar strony poprawny):
+1. 🔴 **Pierwsza strona wychodzi pusta** — treść zaczyna się dopiero na drugiej. Podejrzenie: technika druku opiera się na `body * { visibility:hidden }` plus `.wpd-report-print{ position:absolute; top:0 }` (`styles.js`, blok `@media print`). Elementy ukryte przez `visibility` **nadal zajmują miejsce w układzie**, więc wysoka niewidzialna powłoka panelu spycha treść na kolejną stronę. Do potwierdzenia pomiarem.
+2. 🟡 **Tytuł dokumentu to tytuł strony aplikacji** — „WynajemPRO - Prosty system do zarządzania najmem krótkoterminowym". Ten ciąg trafia do metadanych PDF **i do domyślnej nazwy pliku**, więc księgowy dostaje plik o nazwie hasła reklamowego zamiast „Raport rentowności — sierpień 2026". Tanie do naprawienia: podmiana `document.title` na czas drukowania i przywrócenie po.
+3. 🟡 **Trzy strony na raport**, który mieści się na jednej–dwóch — do sprawdzenia po naprawie punktu 1.
+**Gotowe, gdy:** raport otwiera się od pierwszej strony, ma sensowną nazwę pliku i tytuł, mieści się w rozsądnej liczbie stron, a układ A4 nie łamie tabel w połowie wiersza. Wydruk wygląda jak dokument firmowy w identyfikacji v2, nie jak zrzut ekranu panelu.
+**Weryfikacja:** wygenerowany PDF obejrzany stronami (nie sam fakt, że plik powstał — dziś powstawał i był zły) + kontrola na dwóch długościach danych: jeden obiekt i kilka obiektów z pełnym rokiem.
+**Do rozważenia przy okazji:** czy zamiast drukowania widoku modalu nie zrobić **osobnego widoku wydruku** (dedykowana trasa albo kontener renderowany tylko do druku) — technika „ukryj wszystko oprócz jednego elementu" jest źródłem punktu 1 i wraca przy każdej zmianie panelu.
+**Agent:** `designer` (układ dokumentu, typografia, identyfikacja) → `dev` (wdrożenie, `ProfitabilityReportModal.jsx` + blok `@media print` w `styles.js`).
+**Status:** ⬜ **kolejka: PO smoke testach właściciela** (jego decyzja z 2026-08-13). Nie blokuje launchu — funkcja działa, chodzi o jakość dokumentu.
+
+---
+
 **Kolejność pracy nad X14–X16 i X4 (ustalona 2026-07-15):** ① X16 (minuty, zdejmuje ryzyko prawne) → ② X14 (mała funkcja, ale zmiana schematu danych — porządnie z regułami) → ③ X4 partiami (największa wartość) → ④ X15 (kosmetyka, po przemeblowaniu kosztów w X4).
 
 ---
