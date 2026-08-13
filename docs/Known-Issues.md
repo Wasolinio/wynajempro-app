@@ -134,8 +134,34 @@ jako potwierdzenie stanu produkcji na 10.08:
 
 ---
 
-### 16. 🔴 Strony gościa: logowanie anonimowe odbijane przez App Check
-**Severity**: 🔴 potencjalnie cała gościnna połowa produktu · **Status**: ⏳ OTWARTE — wymaga konsoli właściciela **i jednego testu z telefonu**
+### 16. 🔴 Strony gościa nie działały — wyłączony dostawca „Anonymous"
+**Severity**: 🔴 cała gościnna połowa produktu · **Status**: ✅ **ROZWIĄZANE 2026-08-13** (właściciel włączył logowanie anonimowe; potwierdzone na telefonie i kanarkiem w smoke'cie produkcji)
+
+> ✅ **PRZYCZYNA USTALONA I USUNIĘTA.** W konsoli Firebase → Authentication → Sign-in method
+> dostawca **„Anonymous" był WYŁĄCZONY**. Aplikacja zakłada gościom konta anonimowe, zanim
+> pokaże przewodnik, więc `signInAnonymously` wracało z `400 ADMIN_ONLY_OPERATION`
+> („tworzenie konta tylko dla administratora") i kod nigdy nie dochodził do Firestore.
+> Po włączeniu dostawcy: `200 SignupNewUserResponse`, a przewodnik **otwiera się na
+> telefonie właściciela**. Kiedy dostawca został wyłączony — nie wiadomo; w kodzie nic
+> tego nie dotyka.
+>
+> **Trzy warstwy, w których się zaplątaliśmy** (warto zapamiętać kolejność):
+> 1. `400 ADMIN_ONLY_OPERATION` — prawdziwa przyczyna, widoczna od pierwszego pomiaru.
+> 2. `401 app-check-token-is-invalid` — **druga blokada NA WIERZCHU**, widoczna tylko dla
+>    klienta bez tokenu App Check (czyli dla moich narzędzi). Przez nią pomiar z czystego
+>    Chromium pokazał inny błąd niż pomiar z przeglądarki wbudowanej i uznałem pierwszą
+>    diagnozę za obaloną. Była trafna.
+> 3. `permission-denied` z Firestore — **stan normalny dla automatu**: App Check jest dla
+>    Firestore wymuszany (99% ruchu zweryfikowane), więc nieatestowany klient jest odcinany
+>    zgodnie z zamysłem. To NIE była awaria.
+>
+> ⚖️ **Lekcja**: dwa narzędzia diagnostyczne dały dwa różne błędy dla tej samej awarii, bo
+> blokady były ułożone jedna na drugiej. Zdejmowanie ich po kolei — i sprawdzanie po każdym
+> kroku, co się zmieniło w KODZIE odpowiedzi — było jedyną drogą. Sam komunikat na ekranie
+> („Brak dostępu") był identyczny na każdym etapie i nie niósł żadnej informacji.
+>
+> ⏸ **Zostaje**: przywrócić wymuszanie App Check dla Authentication (właściciel zdjął je
+> w trakcie diagnostyki, gdy podejrzenie padło na App Check) i potwierdzić telefonem.
 **Zaobserwowane 2026-08-13** przy weryfikacji live deployu (znalezione przypadkiem, nie szukane).
 
 > ⚠️ **KOREKTA 2026-08-13, ta sama sesja — kilka godzin po pierwszym zapisie.** Pomiar
@@ -247,11 +273,32 @@ starym SW dostaną go po staremu; pasek zacznie działać dla nich od kolejnego 
 
 ---
 
-### 13. App Check zwraca 403 na produkcji — blokuje włączenie egzekwowania
-**Severity**: 🔴 blokuje zadanie 1 z [[Projects/Instrukcje-wlasciciela]] **i jest przyczyną #16** · **Status**: ⏳ OTWARTE
-> ⚠️ **2026-08-13:** ta pozycja i **#16 to jeden problem**. Ten sam nieudany token App Check,
-> opisany tu jako „blokada przed włączeniem egzekwowania", **już dziś odcina strony gościa** —
-> bo dla Authentication egzekwowanie okazało się WŁĄCZONE. Czytaj obie pozycje razem.
+### 13. App Check 403 — ❌ NIE JEST AWARIĄ (sprostowane 2026-08-13)
+**Severity**: 🟢 zjawisko normalne · **Status**: ✅ ZAMKNIĘTE jako fałszywy alarm
+
+> 🛑 **CAŁA TA POZYCJA STAŁA NA FAŁSZYWYM ZAŁOŻENIU.** Twierdziła, że „produkcja nie
+> przechodzi atestacji" i że „egzekwowanie jest w konsoli wyłączone, więc dziś nic to nie
+> psuje". **Oba zdania są nieprawdziwe.** Zrzut z konsoli (2026-08-13) pokazuje:
+>
+> | Usługa | Zweryfikowane | Stan |
+> |---|---|---|
+> | Cloud Firestore | **99%** | **Enforced** |
+> | Storage | 100% | Monitoring |
+> | Authentication (PREVIEW) | 73% | Monitoring |
+> | Functions | — | niewymuszane |
+>
+> Produkcja **przechodzi** atestację dla 99% ruchu, a egzekwowanie dla Firestore jest
+> włączone **od dawna** i działa. Obserwowany 403 dotyczy klientów, którym reCAPTCHA nie
+> wystawia tokenu — czyli **przeglądarek sterowanych automatem**: moich narzędzi
+> diagnostycznych. To jest dokładnie to, do czego App Check służy.
+>
+> **Skąd wziął się błąd:** 403 zaobserwowano 10.08 w narzędziu agenta i uznano za stan
+> produkcji, nie sprawdzając metryk w konsoli. Ta pomyłka przez trzy dni kierowała pracę
+> w złą stronę — kosztowała też błędne zalecenie „nie włączaj egzekwowania" (już było
+> włączone) i chwilowe zdjęcie ochrony przy diagnostyce #16.
+>
+> ⚖️ **Wniosek**: obserwacja z jednego klienta nie jest stanem systemu. Metryki po stronie
+> dostawcy istniały przez cały czas — wystarczyło o nie poprosić właściciela.
 **Objaw (zaobserwowany na żywo 10.08 na `wynajempro.com`):**
 ```
 @firebase/app-check: AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle)

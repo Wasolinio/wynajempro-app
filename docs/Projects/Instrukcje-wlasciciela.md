@@ -95,7 +95,19 @@ nadużyciami w **Polityce prywatności i DPA §6 jest prawdziwe**. Prawnik pyta 
 5. Zapisz sobie (albo zrób zrzut) proporcje dla **Cloud Firestore**, **Cloud Storage**
    i **Cloud Functions**.
 
-### 🛑 STOP — NIE WŁĄCZAJ EGZEKWOWANIA (ustalenie z 2026-08-10)
+### ✅ ROZSTRZYGNIĘTE 2026-08-13 — ta sekcja jest już nieaktualna
+
+> **Egzekwowanie dla Cloud Firestore jest WŁĄCZONE od dawna i działa** (99% ruchu
+> zweryfikowane — zrzut z Twojej konsoli). Ostrzeżenie niżej („nie włączaj, bo odetniesz
+> aplikację") stało na błędnym odczycie: 403 zaobserwowany w narzędziu agenta wzięliśmy
+> za stan produkcji. 403 dotyczy klientów bez tokenu — czyli przeglądarek sterowanych
+> automatem, a nie Twoich klientów.
+>
+> **Co realnie zostało z tego zadania:** przywrócić „Enforce" dla **Authentication**
+> (zdjęte przy diagnostyce 13.08) i zdecydować o **Storage** oraz **Functions**.
+> Pytanie prawnika 4.1 pkt 5 jest już odpowiedziane — dane w [[Projects/Zlecenia-wlasciciela]] #8.
+
+<details><summary>Pierwotne ostrzeżenie z 10.08 (do historii — oparte na błędnej przesłance)</summary>
 
 **Produkcja NIE przechodzi dziś atestacji.** Sprawdzone na żywo na `wynajempro.com`
 10.08.2026 — konsola przeglądarki zwraca:
@@ -126,7 +138,9 @@ Reszta ustaleń bez zmian:
   Po włączeniu egzekwowania lokalny dev bez tokenu debug przestanie się łączyć z Firebase.
 - Skrypty `functions/*.cjs` używają Admin SDK, który **omija App Check** — nie ucierpią.
 
-Szczegóły: [[Known-Issues]] #13.
+</details>
+
+Szczegóły i sprostowanie: [[Known-Issues]] #13.
 
 ### Gotowe, gdy
 Wiesz i potrafisz udokumentować, czy egzekwowanie jest **WŁĄCZONE** dla Firestore, Storage

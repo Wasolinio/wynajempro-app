@@ -70,35 +70,42 @@ test('Stara domena przekierowuje z zachowaniem ścieżki', async ({ page }) => {
 });
 
 /*
-  KANAREK #16 — sesja gościa bez ważnego tokenu App Check.
+  KANAREK sesji gościa (dawne [[Known-Issues]] #16, zamknięte 2026-08-13).
 
-  Strony `/guide/:id` i `/opinie/:id` logują gościa anonimowo, ZANIM pokażą treść.
-  Dziś produkcja odbija to logowanie: `401 accounts:signUp` →
-  `auth/firebase-app-check-token-is-invalid`. Czyli App Check jest **egzekwowany dla
-  Authentication**, a klient nie umie zdobyć tokenu (403 przy wymianie — [[Known-Issues]] #13).
-  Te dwie sprawy, prowadzone dotąd osobno, są jedną.
+  Strony `/guide/:id` i `/opinie/:id` logują gościa anonimowo, ZANIM pokażą treść — więc
+  wyłączony dostawca „Anonymous" w konsoli kładzie całą gościnną połowę produktu, nie
+  ruszając panelu właściciela. Dokładnie to się stało i przeleżało nie wiadomo jak długo,
+  bo suita e2e mockuje Firebase i świeciła 133/133. Ten test pilnuje TEJ warstwy: czy
+  sesja gościa w ogóle powstaje.
 
-  ⚠️ CZEGO TEN TEST NIE ROZSTRZYGA: przeglądarka sterowana automatem to dokładnie ten ruch,
-  który App Check ma odsiewać, więc niska ocena reCAPTCHA jest tu spodziewana. Ten kanarek
-  mówi „gość BEZ ważnego tokenu App Check nie wejdzie" — i tyle. Czy wejdzie **człowiek
-  z prawdziwej przeglądarki**, rozstrzyga wyłącznie otwarcie prawdziwego linku na telefonie.
-  Nie zastępuj tym smoke testu właściciela.
-
-  Test jest ODWRÓCONY (`test.fail`) — ten sam idiom co przy ukrytym pakiecie rocznym
-  ([[Known-Issues]] #7): dopóki stan trwa, przechodzi i nie zasypuje nas czerwienią,
-  a gdy przestanie, Playwright zgłosi „spodziewano się porażki, a test przeszedł".
-  ⚠️ PO NAPRAWIE #16 zdejmij `test.fail()`.
+  ⚠️ CZEGO NIE SPRAWDZA: odczytu przewodnika z bazy. App Check jest dla Firestore
+  **wymuszany** (99% ruchu zweryfikowane), a przeglądarka sterowana automatem tokenu nie
+  dostaje i jest — słusznie — odcinana. Asercja celuje więc wyłącznie w komunikat o błędzie
+  autoryzacji SESJI; „błąd ładowania przewodnika" jest tu stanem normalnym i oczekiwanym.
+  Czy człowiek widzi treść, rozstrzyga wyłącznie otwarcie prawdziwego linku na telefonie.
 
   Identyfikatorów przewodników celowo nie ma w repozytorium — to one są jedyną barierą
   dostępu do strony (`Ocena-linki-guide-opinie.md`), a zmyślone id wystarczy: przy
   działającej sesji daje „nie istnieje", a nie „błąd autoryzacji sesji".
 */
-test('Sesja gościa na stronach publicznych działa', async ({ page }) => {
-  test.fail(true, 'Known-Issues #16 — App Check odbija logowanie anonimowe');
+test('Sesja gościa: logowanie anonimowe nie jest zablokowane', async ({ page }) => {
+  // Celujemy w ODPOWIEDŹ SERWERA, nie w tekst na ekranie. Powód: komunikat „błąd
+  // autoryzacji sesji" pojawia się przy KAŻDEJ nieudanej sesji, a automat bywa odbijany
+  // z powodu, który jest w porządku (brak tokenu App Check). Rozróżnia je dopiero kod:
+  //   400 ADMIN_ONLY_OPERATION  → dostawca „Anonymous" wyłączony w konsoli = REGRESJA
+  //   401 App Check             → bot bez tokenu = stan normalny, nie alarmujemy
+  const odmowyPolityki = [];
+  page.on('response', async (odpowiedz) => {
+    if (!odpowiedz.url().includes('identitytoolkit')) return;
+    if (odpowiedz.status() !== 400) return;
+    const tresc = await odpowiedz.text().catch(() => '');
+    if (tresc.includes('ADMIN_ONLY_OPERATION')) odmowyPolityki.push(tresc.slice(0, 120));
+  });
 
-  // networkidle, bo komunikat pojawia się dopiero PO odbitym żądaniu do Auth —
-  // asercja postawiona od razu po `load` przechodziła, zanim błąd zdążył się pokazać.
-  await page.goto('/guide/smoke-test-nieistniejacy', { waitUntil: 'networkidle' });
-  await expect(page.getByRole('heading').first()).toBeVisible();
-  await expect(page.getByText(/błąd autoryzacji sesji/i)).toHaveCount(0);
+  // Bez `networkidle`: od kiedy sesja gościa działa, strona trzyma otwarty strumień
+  // Firestore i sieć nigdy nie cichnie — czekamy na wyrenderowany panel.
+  await page.goto('/guide/smoke-test-nieistniejacy');
+  await expect(page.locator('.wpb-body').first()).toBeVisible({ timeout: 20000 });
+
+  expect(odmowyPolityki, 'Logowanie anonimowe odbite przez politykę kont — patrz Zlecenia #9').toEqual([]);
 });

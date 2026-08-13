@@ -19,7 +19,16 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
-### 9. 🔴 App Check odbija sesję gościa — sprawdź, czy strony gościa działają (nowe 2026-08-13)
+### 9. ✅ Strony gościa naprawione — WYKONANE 2026-08-13
+**Wynik:** przyczyną był **wyłączony dostawca „Anonymous"** w Authentication → Sign-in method.
+Po włączeniu przewodnik otwiera się na telefonie (potwierdzone przez właściciela w incognito),
+a serwer zwraca `200` zamiast `400 ADMIN_ONLY_OPERATION`. Pełny przebieg: [[Known-Issues]] #16.
+⏸ **Zostaje jedno kliknięcie:** App Check → Interfejsy API → **Authentication** z powrotem na
+**„Enforce"** (zdjęte w trakcie diagnostyki, gdy podejrzenie padło na App Check) i sprawdzenie
+telefonem. Dopóki jest „Monitoring", zdanie o ochronie przed nadużyciami w Polityce i DPA §6
+jest dla logowania nieprawdziwe.
+
+<details><summary>Pierwotny opis zlecenia (do historii)</summary>
 **Co się dzieje:** każdy link do przewodnika (`/guide/…`) i każda strona opinii (`/opinie/…`)
 kończy się u gościa komunikatem **„Brak dostępu — Wystąpił błąd autoryzacji sesji"**.
 Aplikacja loguje gościa anonimowo, zanim pokaże treść, a Google odbija to logowanie:
@@ -59,6 +68,7 @@ Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie pryw
    ⚠️ Gdyby to drugie było zablokowane, **nie działa też rejestracja nowych użytkowników**.
 
 **Potem:** ponów krok 0 i napisz wynik — dopiszę do dziennika i zamknę #16.
+</details>
 
 ### 1. ✅ Google Search Console — WYKONANE 2026-07-22
 Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzenie właściciela).
@@ -124,9 +134,12 @@ Z roadmapy: przebudowa zrobiona (`ce2b80f`), rozszerzenie **czeka na Twoją decy
 ### 8. Braki bezpieczeństwa §9 do domknięcia w konsoli (przed launchem) — nowe 2026-07-23
 Z oceny 3 dokumentów dla prawnika (`docs/legal/Bezpieczenstwo-kont-i-danych.md` §9).
 Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
-1. **App Check — egzekwowanie**: potwierdź, że jest WŁĄCZONE dla Firestore / Storage / Functions
-   (konsola Firebase → App Check). Z kodu widać tylko inicjalizację reCAPTCHA v3. Od tego zależy
-   prawdziwość deklaracji w Polityce i DPA §6. (= N6.4; dublet informacyjny z sekcji #6 pkt 1.)
+1. ✅ **App Check — egzekwowanie: USTALONE 2026-08-13** (zrzut z konsoli od właściciela).
+   **Cloud Firestore: Enforced, 99% ruchu zweryfikowane.** Storage: Monitoring (100%).
+   Authentication: Monitoring, 73% — do przywrócenia na Enforce (patrz #9). Functions:
+   niewymuszane. To odpowiedź na **pytanie prawnika 4.1 pkt 5**, wiszące od 22.07.
+   ⏸ Zostaje decyzja, czy włączać wymuszanie dla **Storage** i **Functions** — osobno,
+   z weryfikacją po każdym kroku (Storage niesie okładki przewodników dla gości). (= N6.4.)
 2. ✅ **Kopie zapasowe Firestore — WYKONANE 2026-08-13** (agent, firebase CLI, na Twoje zlecenie): PITR
    włączone (okno 7 dni) + dzienny harmonogram z retencją 7 dni. Przed zmianą: PITR wyłączone, zero
    harmonogramów, retencja wersji 1 h. ⚠️ Dotyczy Firestore, **nie** Storage. (= N6.3.)
