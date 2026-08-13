@@ -7,6 +7,10 @@ i decyzje zastrzeżone dla właściciela. Główny agent przypomina o tej liści
 Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właściciela
 (wpis w [[Activity-Log]]).
 
+> 📄 **Wolisz Worda?** `npm run docs:docx` generuje czytelną kopię tego dokumentu
+> w `docs/docx/` (do otwarcia w Wordzie, Pages, Dokumentach Google). Kopia jest
+> **generowana** — zmiany nanosi się tutaj, w pliku `.md`, bo tamta zostanie nadpisana.
+
 > 📘 **Instrukcje krok po kroku: [[Projects/Instrukcje-wlasciciela]]** (od 2026-08-10).
 > Ten plik trzyma **CO i dlaczego**, tamten **JAK** — klik po kliku i komenda po komendzie
 > (App Check, kopie zapasowe, N6.5, smoke testy, logi purge, prawnik, polityka haseł).

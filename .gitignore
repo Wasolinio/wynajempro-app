@@ -54,3 +54,6 @@ playwright-report/
 docs/.obsidian/workspace*.json
 docs/.obsidian/graph.json
 docs/.obsidian/cache
+
+# czytelne kopie dokumentów (generowane: npm run docs:docx)
+docs/docx/

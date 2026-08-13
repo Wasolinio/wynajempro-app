@@ -7,6 +7,10 @@
 > **Wersja:** 2026-08-11 — dopisany plan tygodnia 11–17.08 i kolejność wg pilności.
 > (Poprzednia: 2026-08-10, po deployu bloku A — push + reguły + `hosting:app`.)
 >
+> 📄 **Wolisz Worda?** `npm run docs:docx` generuje czytelną kopię tego dokumentu
+> w `docs/docx/` (do otwarcia w Wordzie, Pages, Dokumentach Google). Kopia jest
+> **generowana** — zmiany nanosi się tutaj, w pliku `.md`, bo tamta zostanie nadpisana.
+
 > ⚠️ **Numery sekcji to identyfikatory, NIE kolejność.** Numeracja 1–7 zostaje nietknięta,
 > bo odwołują się do niej [[Known-Issues]] #13 i wpisy w [[Activity-Log]] — przenumerowanie
 > unieważniłoby tamte odesłania. Kolejność wykonania daje tabela niżej.
