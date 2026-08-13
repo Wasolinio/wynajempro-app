@@ -6,6 +6,16 @@ Project timeline and key milestones.
 
 ## 2026-08-13
 
+### X18 część pierwsza: druk raportu bez pustych stron i z sensowną nazwą pliku
+- 🎯 **Powód**: właściciel zgłosił, że PDF raportu wygląda źle, i wskazał objaw — **pusta strona 1, treść na 2 i 3**.
+- 🔎 **Diagnoza przez pomiar, nie przez czytanie kodu**: odtworzyłem strukturę panelu (`#root > .wpd > powłoka + overlay`) z **prawdziwym blokiem `@media print`** wyciętym ze `styles.js` i zmierzyłem geometrię w trybie druku. Wynik: dokument ma 2448 px (3 strony), z czego raport zajmuje 689 px. Winne były **dwie techniki naraz**: `visibility:hidden` na panelu (nie zwalnia miejsca — niewidzialny sidebar dalej ma 2400 px) i `position:absolute; top:0` na raporcie (wiąże go z pozycjonowanym przodkiem w drzewie panelu).
+- 🛑 **Moja pierwsza hipoteza była błędna i mówię to wprost**: napisałem właścicielowi, że treść „spycha się w dół". Pomiar w mojej pierwszej próbie pokazał coś odwrotnego (raport na stronie 1, pusty ogon), a jego wydruk — jeszcze co innego (pusta strona 1). Dopiero to zestawienie pokazało, że **problem nie ma jednej przyczyny do odgadnięcia**, tylko dwie współpracujące sztuczki, których skutek zależy od drzewa DOM. Dlatego naprawa nie celuje w żadną z hipotez, tylko **usuwa obie techniki**.
+- ✅ **Nowy druk**: jedna reguła `display:none` na wszystkim, co nie jest raportem ani jego przodkiem (`:has()`), raport w normalnym przepływie. Zmierzone: **3 strony → 1**, raport na pierwszej, powłoka poza układem, nagłówek wydruku widoczny.
+- ✅ **Tytuł dokumentu**: podmiana `document.title` na czas drukowania („Raport rentowności 2026 — {podmiot}") z przywróceniem przez `afterprint`. Dotąd nazwa pliku i metadane brały się z tytułu strony aplikacji, czyli z hasła reklamowego.
+- 📌 **Hook lintujący mnie nie złapał** — i to jest informacja o narzędziu, nie o mnie. Wstawiłem odwrócone apostrofy do komentarza CSS w `styles.js` (ten sam błąd co przy poprawce dialogów), ale edytowałem plik **skryptem Pythona**, a hook `PostToolUse` reaguje wyłącznie na narzędzia edycji. Złapał to dopiero `npm run lint`. Ograniczenie warte zapamiętania: hooki pilnują ścieżki narzędziowej, nie każdej zmiany na dysku.
+- ⚠️ **Anomalia w jednym przebiegu testów, odnotowana zamiast zamiecenia**: przebieg puszczony równolegle z innym zadaniem zgłosił **130 passed w 16,1 min** zamiast zwykłych 134 w ~45 s. Czysty przebieg zaraz potem: **134/134 w 42,3 s**, `--list` potwierdza 134 testy w 18 plikach. Traktuję to jako artefakt obciążonej maszyny, nie sygnał o suicie — ale zapisuję, bo „testy przeszły" przy niepełnej liczbie testów to dokładnie ten rodzaj rzeczy, który potem gnije.
+- ⏸ **Zostaje**: deploy i **ponowny wydruk właściciela** (raport jest za logowaniem, więc to jedyny możliwy dowód końcowy). Właściwe X18 — typografia, gęstość tabel, decyzja o osobnym widoku wydruku — dalej otwarte dla `designer`.
+
 ### Pakiet dla prawnika doprowadzony do stanu bieżącego (prawnik ponaglony)
 - 🎯 **Powód**: właściciel ponaglił prawnika, a pakiet leżał u niego od 22.07 w stanie lipcowym. Przez ten jeden dzień zmieniło się w nim tyle, że lektura oryginału wprowadzałaby w błąd — a to jest dokument, na podstawie którego ktoś ma wydać opinię.
 - ✅ **Konwencja erraty utrzymana**: pierwotnych zdań nie przepisujemy, dopisujemy pozycje i aktualizacje z datą. Errata urosła do **E10**.

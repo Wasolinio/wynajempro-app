@@ -146,6 +146,23 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
   const generatedAt = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
   const empty = rep.T.income === 0 && rep.totalCosts === 0;
 
+  // Nazwa pliku PDF i tytuł dokumentu biorą się z `document.title`, czyli domyślnie
+  // z tytułu strony aplikacji — księgowy dostawał plik nazwany hasłem reklamowym
+  // („WynajemPRO - Prosty system do zarządzania…"), zgłoszone 2026-08-13. Podmieniamy
+  // na czas drukowania i przywracamy po. `afterprint` odpala się także po anulowaniu
+  // okna drukowania, więc tytuł wraca również wtedy.
+  const drukuj = () => {
+    const poprzedniTytul = document.title;
+    const podmiot = hostProfile?.entityName ? ` — ${hostProfile.entityName}` : '';
+    document.title = `Raport rentowności ${rep.y}${podmiot}`;
+    const przywroc = () => {
+      document.title = poprzedniTytul;
+      window.removeEventListener('afterprint', przywroc);
+    };
+    window.addEventListener('afterprint', przywroc);
+    window.print();
+  };
+
   return (
     <div className="wpd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowStatsModal(false); }}>
       <div className="wpd-dialog wpd-dialog--lg" {...dialogA11y}>
@@ -158,7 +175,7 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
           <select className="wpd-select" style={{ width: 'auto', marginLeft: 'auto' }} value={selectedYear} onChange={(e) => handleYearChange(e.target.value)}>
             {availableYears.map((y) => <option key={y} value={y}>Rok {y}</option>)}
           </select>
-          <button className="wpd-btn wpd-btn--sm" onClick={() => window.print()} disabled={empty}><Printer /> Drukuj / PDF</button>
+          <button className="wpd-btn wpd-btn--sm" onClick={drukuj} disabled={empty}><Printer /> Drukuj / PDF</button>
           <button className="wpd-btn wpd-btn--sm" onClick={exportCsv} disabled={empty}><FileSpreadsheet /> CSV</button>
           <button className="wpd-dialog__close" onClick={() => setShowStatsModal(false)}><X /></button>
         </div>

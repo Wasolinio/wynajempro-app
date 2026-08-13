@@ -250,7 +250,13 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 **Weryfikacja:** wygenerowany PDF obejrzany stronami (nie sam fakt, że plik powstał — dziś powstawał i był zły) + kontrola na dwóch długościach danych: jeden obiekt i kilka obiektów z pełnym rokiem.
 **Do rozważenia przy okazji:** czy zamiast drukowania widoku modalu nie zrobić **osobnego widoku wydruku** (dedykowana trasa albo kontener renderowany tylko do druku) — technika „ukryj wszystko oprócz jednego elementu" jest źródłem punktu 1 i wraca przy każdej zmianie panelu.
 **Agent:** `designer` (układ dokumentu, typografia, identyfikacja) → `dev` (wdrożenie, `ProfitabilityReportModal.jsx` + blok `@media print` w `styles.js`).
-**Status:** ⬜ **kolejka: PO smoke testach właściciela** (jego decyzja z 2026-08-13). Nie blokuje launchu — funkcja działa, chodzi o jakość dokumentu.
+**Status:** 🔄 **mechanika naprawiona 2026-08-13, czeka na deploy i ponowny wydruk właściciela.**
+- ✅ **Puste strony — przyczyna zmierzona, nie zgadnięta.** Druk stał na dwóch technikach naraz: `visibility:hidden` na całym panelu (co **nie zwalnia miejsca w układzie** — niewidzialny sidebar dalej miał ~2400 px) oraz `position:absolute; top:0` na raporcie (co wiąże go z najbliższym **pozycjonowanym przodkiem** w drzewie panelu). Pierwsze dawało pusty ogon, drugie potrafiło przesunąć wydruk o całą stronę. Właściciel potwierdził objaw: **pusta strona 1, treść na 2 i 3**.
+- ✅ **Naprawa**: wszystko poza raportem i jego przodkami znika przez `display:none` (czyli **wychodzi z układu**), raport wraca do normalnego przepływu — zero pozycjonowania, zero balastu. Jedna reguła z `:has()` zamiast trzech współpracujących sztuczek.
+- ✅ **Zmierzone na próbie z prawdziwym blokiem `@media print`** (odtworzona struktura `#root > .wpd > powłoka + overlay`, z pozycjonowanym przodkiem jako podejrzanym): **3 strony → 1**, raport na stronie pierwszej, powłoka usunięta z układu, nagłówek wydruku widoczny.
+- ✅ **Tytuł dokumentu**: `document.title` podmieniany na „Raport rentowności {rok} — {podmiot}" na czas drukowania i przywracany przez `afterprint` (odpala się także po anulowaniu okna). Dotąd do metadanych PDF **i do nazwy pliku** trafiało hasło ze strony.
+- ⏸ **Czego jeszcze NIE zrobiono** (właściwe X18): typografia i układ dokumentu, gęstość tabel, sensowna liczba stron przy pełnym roku i wielu obiektach, decyzja o osobnym widoku wydruku zamiast drukowania modalu. To robota dla `designer` — dzisiejsza zmiana usuwa **wady mechaniczne**, nie projektuje dokumentu.
+- ⏸ **Weryfikacja końcowa należy do właściciela**: raport jest za logowaniem, więc dowodem jest jego ponowny wydruk po deployu.
 
 ---
 

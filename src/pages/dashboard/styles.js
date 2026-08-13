@@ -653,13 +653,30 @@ export const DASHBOARD_CSS = `
 .wpd-report-onlyprint{ display:none; }
 .wpd-rpt-total td{ border-top:2px solid var(--ink); padding-top:10px; }
 @media print {
-  body * { visibility:hidden !important; }
-  .wpd-report-print, .wpd-report-print * { visibility:visible !important; }
-  .wpd-overlay{ position:static !important; display:block !important; background:#fff !important; padding:0 !important; }
-  .wpd-dialog{ position:static !important; box-shadow:none !important; border:none !important; border-radius:0 !important; width:100% !important; max-width:none !important; max-height:none !important; }
-  .wpd-report-print{ position:absolute !important; left:0; top:0; width:100%; max-height:none !important; overflow:visible !important; padding:0 !important; background:#fff !important; }
+  /* ── DRUK RAPORTU ──
+     Poprzednia wersja ukrywała panel przez visibility:hidden i wyrywała raport z układu
+     przez position:absolute z top:0. Obie rzeczy okazały się źródłem wad zgłoszonych
+     2026-08-13: visibility NIE zwalnia miejsca (niewidzialny panel dalej miał ~2400 px
+     wysokości, stąd puste strony), a position:absolute wiąże raport z najbliższym
+     pozycjonowanym przodkiem — czyli z czymś w drzewie panelu, co potrafi przesunąć
+     wydruk o całą stronę (u właściciela: pusta strona 1, treść na 2 i 3).
+
+     Teraz: wszystko, co nie jest raportem ani jego przodkiem, znika przez display:none,
+     czyli WYCHODZI Z UKŁADU. Raport zostaje w normalnym przepływie na początku dokumentu.
+     Zmierzone na próbie z tym samym CSS: 3 strony -> 1, raport na stronie pierwszej.
+     UWAGA: ten plik to szablon JS — bez odwróconych apostrofów w komentarzach. */
+  body :not(:has(.wpd-report-print)):not(.wpd-report-print):not(.wpd-report-print *) { display:none !important; }
+
+  .wpd-overlay{ position:static !important; display:block !important; background:#fff !important;
+    padding:0 !important; inset:auto !important; }
+  .wpd-dialog{ position:static !important; box-shadow:none !important; border:none !important;
+    border-radius:0 !important; width:100% !important; max-width:none !important;
+    max-height:none !important; overflow:visible !important; display:block !important; }
+  .wpd-report-print{ position:static !important; max-height:none !important; overflow:visible !important;
+    padding:0 !important; background:#fff !important; }
+
   .wpd-report-noprint{ display:none !important; }
-  .wpd-report-onlyprint{ display:block !important; visibility:visible !important; }
+  .wpd-report-onlyprint{ display:block !important; }
   .wpd-rpt-section{ break-inside:avoid; page-break-inside:avoid; margin-bottom:16px !important; }
   .wpd-rpt-head{ display:flex !important; justify-content:space-between; align-items:flex-end; gap:16px; border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:18px; }
   .wpd-rpt-head__title{ font-size:20px; font-weight:800; letter-spacing:-0.01em; }
