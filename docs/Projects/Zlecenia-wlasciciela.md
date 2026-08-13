@@ -69,6 +69,44 @@ Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie pryw
 **Potem:** ponów krok 0 i napisz wynik — dopiszę do dziennika i zamknę #16.
 </details>
 
+### 10. 🟠 Podmień adres w szablonach e-maili Auth — markowa strona już czeka (nowe 2026-08-13)
+**Zgłoszone przez właściciela przy smoke 4f:** „nie podoba mi się link służący do weryfikacji
+oraz samo zatwierdzanie konta". Oba zarzuty trafione i mają **jedną przyczynę**.
+
+**Co dziś dostaje nowy klient:**
+1. Link w mailu prowadzi na `moje-domki-6c77d.firebaseapp.com` — **domenę, która nie ma nic
+   wspólnego z produktem**. Dla użytkownika, który właśnie założył konto w WynajemPRO, wygląda
+   to jak próba wyłudzenia. To problem **zaufania**, nie estetyki.
+2. Ląduje na **domyślnej stronie Google**: po angielsku („Verify Email Address", „COMPLETE
+   VERIFICATION"), w niebieskim Material Design, bez śladu naszej marki. Pierwszy kontakt
+   klienta z produktem po rejestracji.
+
+**Dobra wiadomość:** własna, markowa strona **istnieje i działa na produkcji od 1 lipca** —
+`src/pages/AuthActionHandler.jsx`, trasa `/auth/action`, obsługuje weryfikację adresu, reset
+hasła i cofnięcie zmiany adresu. Sprawdzone na żywo 13.08: `wynajempro.com/auth/action`
+z niepoprawnym kodem pokazuje markowy ekran „Wystąpił problem" z przyciskiem powrotu.
+**Firebase po prostu nigdy nie dostał polecenia, żeby z niej korzystać.**
+
+**Kroki (konsola Firebase → Authentication → Templates / Szablony):**
+1. Wybierz szablon **„Weryfikacja adresu e-mail"** → ikona ołówka.
+2. Znajdź **„Dostosuj adres URL akcji" / „Customize action URL"** (link na dole edytora).
+3. Wpisz: `https://wynajempro.com/auth/action` → zapisz.
+4. **Powtórz dla pozostałych szablonów**: „Resetowanie hasła" i „Zmiana adresu e-mail" —
+   nasza strona obsługuje wszystkie trzy tryby.
+5. Przy okazji, w tym samym edytorze, popraw **pisownię marki**: w treści maila jest
+   „WynajemPro" (temat i podpis „Zespół aplikacji WynajemPro"), a identyfikacja mówi
+   **WynajemPRO** — tak jak w nazwie nadawcy.
+
+**Weryfikacja:** zarejestruj konto na kolejny alias (`+test2`) i sprawdź, że link prowadzi na
+`wynajempro.com` i otwiera **naszą** stronę, a nie ekran Google.
+
+⚠️ **Bez ryzyka dla starych linków**: maile już wysłane niosą stary adres i dalej zadziałają
+na domyślnym ekranie Google. Zmiana dotyczy wyłącznie kolejnych wiadomości.
+
+📌 Ta pozycja była już raz odnotowana — w zleceniu #2 jako „opcjonalna kosmetyka na kiedyś,
+action URL na domenę kanoniczną". Wtedy widzieliśmy tylko problem domeny i nie zauważyliśmy,
+że przez to **nasza własna strona nigdy się nie pokazuje**. Stąd zmiana wagi z 🟢 na 🟠.
+
 ### 1. ✅ Google Search Console — WYKONANE 2026-07-22
 Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzenie właściciela).
 Po drodze dwie pułapki na przyszłość: zgłoszony omyłkowo URL strony głównej = błąd „mapa w formacie
