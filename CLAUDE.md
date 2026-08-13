@@ -16,6 +16,15 @@ Materiały projektowe/brand: **`/_design-reference`**.
 UWAGA: produkcyjny panel przeniesiony do `src/pages/dashboard/` (logika 1:1 jak opisana w mapie);
 stary `src/ManagerApp.jsx` i `src/pages/LoginPanel.jsx` są teraz w `/_legacy`.
 
+## Dokumenty dla właściciela — ZAWSZE dwie postacie
+Każdy dokument pisany **do czytania przez właściciela** (instrukcja, raport, analiza,
+podsumowanie) oddaje się w `.md` **i** w `.docx`: `npm run docs:docx` (stały zestaw) albo
+`node scripts/build-docx.mjs <ścieżka.md>` (pojedynczy plik) → `docs/docx/`.
+Markdown jest źródłem prawdy — poprawki nanosi się w nim i regeneruje kopię; `.docx` to
+artefakt (w `.gitignore`). Dokument cykliczny dopisz do listy `DOKUMENTY` w skrypcie
+i **regeneruj przy każdej aktualizacji**, żeby kopia się nie rozjechała.
+Pełna zasada: `docs/Team-Playbook.md` → „Dokumenty dla właściciela".
+
 ## Zespół agentów
 Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`, `seo`,
 `marketing`, `support`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.

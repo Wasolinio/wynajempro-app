@@ -6,6 +6,10 @@
  * i znacznikami jest męczący. Ten skrypt daje drugą postać tego samego tekstu —
  * do otwarcia w Wordzie / Pages / Dokumentach Google.
  *
+ * ZASADA PROJEKTU (2026-08-13, polecenie właściciela): każdy dokument pisany DLA WŁAŚCICIELA
+ * do czytania — instrukcja, raport, analiza, podsumowanie — oddaje się w OBU postaciach,
+ * .md i .docx, w tym samym zadaniu. Opis: docs/Team-Playbook.md → „Dokumenty dla właściciela".
+ *
  * ⚠️ ŹRÓDŁEM PRAWDY POZOSTAJE .md. Pliki .docx są generowane i NIE edytuje się ich
  * ręcznie — przy następnym uruchomieniu i tak zostaną nadpisane.
  *
@@ -36,7 +40,11 @@ import {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const WY = join(ROOT, 'docs', 'docx');
 
-/** Domyślny zestaw: dokumenty, które właściciel czyta, a nie edytuje agent. */
+/**
+ * Stały zestaw — dokumenty, które właściciel czyta regularnie. Odświeżają się razem
+ * przy `npm run docs:docx`. Dokument jednorazowy generuj ścieżką w argumencie zamiast
+ * dopisywać go tutaj; cykliczny (wraca co tydzień, co wydanie) — dopisz.
+ */
 const DOKUMENTY = [
   'docs/Projects/Instrukcje-wlasciciela.md',
   'docs/Projects/Zlecenia-wlasciciela.md',

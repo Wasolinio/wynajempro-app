@@ -92,6 +92,34 @@ wprost jest w porządku; zamieciona pod dywan — nigdy. Nie koloryzuj wyników.
 
 ---
 
+## Dokumenty dla właściciela: zawsze dwie postacie
+
+**Zasada (ustalona 2026-08-13, na polecenie właściciela):** każdy dokument, który powstaje
+**do czytania przez właściciela** — instrukcja, raport, analiza, podsumowanie, plan —
+oddajesz w **dwóch postaciach**:
+
+| Postać | Dla kogo | Rola |
+|---|---|---|
+| `.md` w `docs/` | agenci, git, Obsidian | **źródło prawdy** — tu się pisze i poprawia |
+| `.docx` w `docs/docx/` | właściciel | kopia do czytania (Word, Pages, Dokumenty Google) |
+
+```bash
+npm run docs:docx                                   # stały zestaw z listy DOKUMENTY
+node scripts/build-docx.mjs docs/legal/Raport.md    # pojedynczy, świeżo napisany dokument
+```
+
+- **Generujesz od razu**, w tym samym zadaniu co dokument — nie „przy okazji następnym razem".
+  Dokument oddany właścicielowi wyłącznie jako `.md` to zadanie zrobione w połowie.
+- **Kierunek jest jeden.** Zmiany nanosi się w `.md` i regeneruje. Poprawka wpisana w `.docx`
+  przepada przy następnym uruchomieniu — dlatego każdy plik ma to napisane na pierwszej stronie.
+- **Dokument cykliczny** (wraca co tydzień, co wydanie) dopisz do listy `DOKUMENTY`
+  w `scripts/build-docx.mjs`, żeby `npm run docs:docx` odświeżał go razem z resztą.
+- **Aktualizujesz istniejący dokument z listy — regenerujesz `.docx`.** Rozjechana kopia jest
+  gorsza niż jej brak: właściciel czyta wtedy nieaktualny stan i nie ma jak tego zauważyć.
+- `docs/docx/` jest w `.gitignore` — to artefakt, nie źródło. Wersjonuje się `.md`.
+- **Czego to nie dotyczy:** dokumentów roboczych zespołu (dziennik, backlog, notatki),
+  chyba że właściciel prosi o konkretny wprost.
+
 ## Twarde zasady projektu
 
 - **Kod archiwalny `/_legacy` jest nietykalny** — nie edytować i nie wzorować się na nim.

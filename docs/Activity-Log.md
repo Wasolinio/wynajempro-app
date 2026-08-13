@@ -6,6 +6,12 @@ Project timeline and key milestones.
 
 ## 2026-08-13
 
+### Zasada stała: dokument dla właściciela powstaje w `.md` i `.docx` naraz
+- 🎯 **Powód**: po jednorazowej konwersji instrukcji właściciel podniósł to do reguły — „zawsze rób dwie wersje: `.md` dla Ciebie i agentów, `.docx` dla mnie".
+- ✅ **Zapisane w trzech miejscach**, bo każde łapie inny moment: [[Team-Playbook]] → „Dokumenty dla właściciela" (pełna zasada z tabelą, komendami i granicami — czyta ją każdy agent zespołu), `CLAUDE.md` (skrót w instrukcjach projektu, ładuje się w każdej sesji), nagłówek `scripts/build-docx.mjs` (widzi go ten, kto dotknie generatora). Do tego wpis w pamięci głównego agenta.
+- 🛡️ **Zakres celowo zawężony**: reguła dotyczy dokumentów pisanych **właścicielowi do czytania** (instrukcja, raport, analiza, podsumowanie, plan), a nie dokumentów roboczych zespołu — dziennik, backlog i notatki zostają w markdownie, bo nikt ich tak nie czyta. Inaczej `docs/docx/` zapełniłby się kopiami, których nikt nie otwiera, a przy każdej rozjechałoby się pytanie „która wersja jest aktualna".
+- 📌 **Dwa warunki dopisane do zasady, żeby nie zgniła**: (1) generujesz **w tym samym zadaniu**, nie „następnym razem"; (2) **aktualizujesz dokument z listy → regenerujesz kopię**, bo nieaktualny `.docx` jest gorszy niż jego brak — właściciel czyta wtedy stary stan i nie ma jak tego zauważyć.
+
 ### Instrukcje właściciela mają drugą postać: `.docx` generowany z markdowna
 - 🎯 **Powód**: właściciel czyta instrukcje, których nie edytuje — a markdown z tabelami, znacznikami i wikilinkami jest do czytania męczący. Prośba wprost: „zmień na docx".
 - 🛡️ **Nie zamiana, tylko druga postać**: `.md` zostaje **źródłem prawdy**. Na nim stoi cały system — wikilinki vaulta, diffy w gicie, odesłania z [[Known-Issues]] i [[Activity-Log]], no i agenci czytają go bez konwersji. Zamiana plików na binarne `.docx` zabrałaby to wszystko naraz. Zamiast tego generator: `scripts/build-docx.mjs` + `npm run docs:docx`, plus nagłówek w obu dokumentach mówiący, gdzie się nanosi zmiany. Pierwsza strona każdego `.docx` powtarza to zdanie, żeby nikt nie poprawiał kopii.
