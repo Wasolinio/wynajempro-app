@@ -105,6 +105,34 @@ for (const [nazwa, path, dbData] of [
   });
 }
 
+/*
+  Ekran błędu obu widoków gościa (wygasły/nieistniejący link) renderuje panel BEZ kredytu,
+  a baner zgody działa tam tak samo — bez osobnego wejścia gość, który kliknie „Akceptuję"
+  na ślepej uliczce, nie ma jak zgody wycofać. Dlatego samo „Ustawienia cookies", bez kredytu.
+*/
+for (const [nazwa, path, naglowek] of [
+  ['przewodnik gościa', '/guide/nie_istnieje_cookie', 'Brak dostępu'],
+  ['strona opinii', '/opinie/nie_istnieje_cookie', 'Nie znaleziono strony'],
+]) {
+  test(`Ekran błędu (${nazwa}): wycofanie zgody możliwe mimo braku treści`, async ({ page }) => {
+    // Pusta baza → getDoc.exists() === false → gałąź błędu widoku.
+    await setupFirebaseMocks(page, { consentCookies: true, dbData: {} });
+    await page.goto(path);
+
+    await expect(page.getByRole('heading', { name: naglowek })).toBeVisible();
+    await expect(page.getByText('Stworzono za pomocą WynajemPRO')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Ustawienia cookies' }).click();
+    const bar = page.locator('.wpc-bar');
+    await expect(bar).toBeVisible();
+
+    await bar.getByRole('button', { name: 'Wycofaj zgodę', exact: true }).click();
+    await expect(page.locator('.wpc-bar')).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem('cookie_consent'))).toBeNull();
+    expect(await page.evaluate(gaDisabled)).toBe(true);
+  });
+}
+
 test('Pierwsza wizyta: baner sam się pokazuje, zgoda ustawia flagę', async ({ page }) => {
   // Brak zapisanej decyzji — baner opt-in widoczny od razu.
   await setupFirebaseMocks(page, { consentCookies: false });

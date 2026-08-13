@@ -70,12 +70,24 @@ export default function ReviewPageView() {
     return (
       <div className="wpb">
         <BrandStyles />
-        <div className="wpb-center">
+        <div className="wpb-center" style={{ flexDirection: 'column', gap: 14 }}>
           <div className="wpb-panel" style={{ textAlign: 'center' }}>
             <span className="wpb-ic" style={{ margin: '0 auto 16px' }}><AlertCircle /></span>
             <h1 className="wpb-h2" style={{ marginBottom: 8 }}>Nie znaleziono strony</h1>
             <p className="wpb-body" style={{ margin: 0 }}>{error || 'Strona nie została odnaleziona.'}</p>
           </div>
+          {/* Baner zgody renderuje się także na tym ekranie, a gość z wygasłym linkiem
+              nie ma dokąd pójść dalej — bez tego wyjścia zgoda udzielona tutaj byłaby
+              nie do wycofania (RODO art. 7 ust. 3). Kredytu nie ma: nie ma czego kredytować. */}
+          <p className="wpb-meta" style={{ margin: 0, textAlign: 'center' }}>
+            <button
+              type="button"
+              className="wpb-meta__btn"
+              onClick={() => window.dispatchEvent(new Event('wpc:open'))}
+            >
+              Ustawienia cookies
+            </button>
+          </p>
         </div>
       </div>
     );
