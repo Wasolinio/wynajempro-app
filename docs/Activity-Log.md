@@ -6,6 +6,14 @@ Project timeline and key milestones.
 
 ## 2026-08-13
 
+### DEPLOY `hosting:app` (drugi tego dnia) — poprawka przewijania dialogów, Sentry, react-router
+- 🎯 **Zakres**: cztery pliki `src` z trzech commitów — `styles.js` (przewijanie dialogów, zgłoszone przy smoke 4e), `monitoring.js` + `main.jsx` + `GlobalErrorBoundary.jsx` (Sentry, wyłączony) oraz podbicie `react-router` 7.15.0 → 7.18.2 z triage'u podatności.
+- ✅ **Pre-flight**: lint 0, build OK, **e2e 134/134** (przebieg 13.08).
+- ✅ **Cel `hosting:app`**: `git diff` potwierdził **zero zmian** w regułach, `functions/`, indeksach i `firebase.json`.
+- ✅ **Weryfikacja live**: **smoke produkcji 8/8** — po raz pierwszy wdrożenie sprawdzone automatem, a nie ręcznym klikaniem. Przy okazji potwierdzony tryb service workera („prompt", nie „autoUpdate") i przekierowanie ze starej domeny.
+- ✅ **Sentry NIE trafił do paczki**: pobrane 11 plików JS z produkcji, **zero** zawierających kod Sentry. Dynamiczny import za `VITE_SENTRY_DSN` działa zgodnie z założeniem — dopóki właściciel nie zdecyduje o podprocesorze, nic nie wychodzi na zewnątrz i nic nie waży.
+- 📌 **Kanarek sesji gościa przeszedł również po ponownym włączeniu wymuszania App Check** — mierzy kod odpowiedzi, nie tekst na ekranie, więc odsiewanie botów go nie myli.
+
 ### Smoke testy właściciela 4a–4f — komplet zdany, cztery znaleziska po drodze
 - 🎯 **Kontekst**: pierwsza tura smoke testów po wdrożeniach z 10 i 13.08. Prowadzone przez właściciela, bo wszystko siedzi za logowaniem — agent może tylko podawać kroki i czytać wyniki.
 - ✅ **4c — wycofanie zgody u gościa: OK**. Test był **niewykonalny do dzisiaj**, bo strony gościa nie działały (#16); odblokował się dosłownie godzinę wcześniej.
