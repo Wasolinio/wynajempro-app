@@ -6,6 +6,17 @@ Project timeline and key milestones.
 
 ## 2026-08-13
 
+### Pakiet dla prawnika doprowadzony do stanu bieżącego (prawnik ponaglony)
+- 🎯 **Powód**: właściciel ponaglił prawnika, a pakiet leżał u niego od 22.07 w stanie lipcowym. Przez ten jeden dzień zmieniło się w nim tyle, że lektura oryginału wprowadzałaby w błąd — a to jest dokument, na podstawie którego ktoś ma wydać opinię.
+- ✅ **Konwencja erraty utrzymana**: pierwotnych zdań nie przepisujemy, dopisujemy pozycje i aktualizacje z datą. Errata urosła do **E10**.
+- ✅ **Trzy pozycje zeszły z listy braków** do wykazu domkniętych: kopie zapasowe (E8), egzekwowanie App Check (E9) oraz **ostrzeżenie przy usuwaniu konta** — to ostatnie nosiło zastrzeżenie „potwierdzone wyłącznie w kodzie, nie było oglądane na produkcji", które **zdejmuje dzisiejszy smoke 4d**. Przy tej samej weryfikacji potwierdzona ścieżka usuwania konta założonego przez Google, czyli realizacja art. 17 dla kont bez hasła — dotąd też tylko „w kodzie".
+- ✅ **Nowa pozycja domknięta: weryfikacja adresu e-mail (N1)** — pełny przebieg na żywo ze smoke 4f. To był ostatni element N1, którego **nie dało się sprawdzić w środowisku agenta**; wisiał od lipca z adnotacją „do potwierdzenia na żywo".
+- ✅ **Nowa pozycja OTWARTA, dopisana uczciwie: eksport CSV** — nazwy z kalendarzy portali mogą zostać zinterpretowane przez arkusz jako formuła. Niska waga, ale §9 jest listą braków, nie listą sukcesów, i nie ma powodu tego pomijać akurat teraz, gdy pakiet idzie do czytania.
+- ✅ **Polityka haseł w E10 jako pytanie, nie deklaracja**: decyzja właściciela (8 znaków + litera i cyfra) zapisana wraz z jawnym „wprowadzenie w panelu dostawcy jeszcze przed nami", plus prośba o ocenę, czy przy tym profilu usługi próg nie powinien być wyższy.
+- ✅ **Checklista zgodności** dostała sekcję **D bis** — tabelę „stan techniczny na 13.08", żeby wcześniejsze sekcje czytało się z poprawką, a nie zamiast niej.
+- 📌 **Wszystkie trzy dokumenty przegenerowane do `.docx`** (zasada z dzisiaj) — prawnik dostaje je w postaci, którą otworzy bez narzędzi programistycznych.
+- ⏸ **Zostaje po stronie właściciela**: **dane rejestrowe firmy**. Bez nich dokumenty nie wyjdą z etapu projektu — miejsca `[DO UZUPEŁNIENIA]` to nazwa, adres, NIP i warunki oferty „founding members".
+
 ### DEPLOY `hosting:app` (drugi tego dnia) — poprawka przewijania dialogów, Sentry, react-router
 - 🎯 **Zakres**: cztery pliki `src` z trzech commitów — `styles.js` (przewijanie dialogów, zgłoszone przy smoke 4e), `monitoring.js` + `main.jsx` + `GlobalErrorBoundary.jsx` (Sentry, wyłączony) oraz podbicie `react-router` 7.15.0 → 7.18.2 z triage'u podatności.
 - ✅ **Pre-flight**: lint 0, build OK, **e2e 134/134** (przebieg 13.08).

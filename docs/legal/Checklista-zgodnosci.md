@@ -125,6 +125,26 @@ Zweryfikowane 2026-07-04. Preferowane źródła oficjalne. **Nie cytowano przepi
 9. **Kancelaria/prawnik do weryfikacji** — otwarta decyzja nr 4 roadmapy; do wyboru przez właściciela.
 10. **Sposób wdrożenia DPA:** integralna część Regulaminu przy rejestracji czy osobny dokument akceptowany w panelu? (rekomendacja: część Regulaminu).
 
+## D bis. Stan techniczny na 2026-08-13 (aktualizacja po testach Operatora)
+
+Pozycje, które od sporządzenia checklisty **zmieniły stan** — spisane tu, żeby lektura
+wcześniejszych sekcji nie wprowadzała w błąd. Dowody: `Bezpieczenstwo-kont-i-danych.md` §9.1.
+
+| Pozycja | Stan na 2026-08-13 |
+|---|---|
+| Egzekwowanie App Check | **Włączone i działające** dla bazy danych (99% ruchu zweryfikowane) oraz uwierzytelniania. Magazyn plików i funkcje: monitorowanie bez odrzucania |
+| Kopie zapasowe bazy | **Skonfigurowane**: odtwarzanie do punktu w czasie (7 dni) + dzienny harmonogram (retencja 7 dni) |
+| Weryfikacja adresu e-mail | **Potwierdzona na żywo** — pełny przebieg rejestracji na koncie testowym |
+| Ostrzeżenie przy usuwaniu konta | **Obejrzane na produkcji**, wraz ze ścieżką dla kont zakładanych przez Google |
+| Polityka haseł | Decyzja Operatora: podniesienie do 8 znaków z wymogiem litery i cyfry; **wprowadzenie w panelu dostawcy jeszcze przed nami** |
+| Wycofanie zgody na cookies | Działa w serwisie, na stronie Polityki **oraz na stronach dla Gości**, łącznie z ekranami błędu |
+| Eksport CSV (nowa pozycja otwarta) | Nazwy pobierane z kalendarzy portali mogą zostać zinterpretowane przez arkusz jako formuła — dług techniczny, naprawa prosta |
+
+**Podstawa prawna cookies** pozostaje do korekty przez prawnika: dokumenty powołują Prawo
+telekomunikacyjne, a od 2024-11-10 obowiązuje Prawo komunikacji elektronicznej (art. 399 PKE).
+
+---
+
 ## E. Punkty do BEZWZGLĘDNEJ weryfikacji prawnika
 
 1. **Sekcja odstąpienia (Regulamin §7)** — konstrukcja zgody na rozpoczęcie świadczenia i utraty prawa odstąpienia, dopasowana do faktycznego przepływu Stripe. Największe ryzyko sporne.

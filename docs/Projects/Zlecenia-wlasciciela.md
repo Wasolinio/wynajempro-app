@@ -128,7 +128,13 @@ i bez tego (rezerwowane `/__/*` nie podlega przekierowaniom).
 
 ---
 
-### 6. Przed/na spotkaniu z prawnikiem (2026-07-22) 🔄
+### 6. Prawnik — pakiet u niego, PONAGLONY 2026-08-13 🔄
+> ✅ **2026-08-13: właściciel ponaglił.** Pakiet zaktualizowany tego samego dnia do stanu
+> bieżącego — errata urosła do **E10**, a z listy braków zeszły trzy pozycje (kopie zapasowe,
+> egzekwowanie App Check, ostrzeżenie przy usuwaniu konta) i doszła jedna (eksport CSV).
+> Gdyby prawnik zaczął czytać teraz, czyta stan faktyczny, nie lipcowy.
+> ⏸ **Zostaje po Twojej stronie: dane rejestrowe firmy** — bez nich dokumenty nie mogą wyjść
+> z etapu projektu (miejsca `[DO UZUPEŁNIENIA]`: nazwa, adres, NIP, warunki „founding members").
 Pakiet gotowy: **`docs/legal/Raport-dla-prawnika-2026-07-22.md`** (zacznij od niego — ma spis
 wszystkich plików i 15 pytań w priorytetach). Do wzięcia: Regulamin, Polityka, DPA,
 Bezpieczeństwo-kont-i-danych, Ocena-linki-guide-opinie, Checklista, Uwagi-N5.
