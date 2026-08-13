@@ -40,7 +40,7 @@
 |---|---|---|
 | **wt 11.08** | ① prawnik + dane firmy · ② PITR · ③ logi purge | triage 52 zastanych awarii e2e |
 | **śr 12.08** | ④ smoke 4a + **4b** · ⑤ App Check (403) | triage · luka N6.1 na ekranach błędu |
-| **czw 13.08** | ④ smoke 4f · ⑥ N6.5 DRY-RUN | naprawy z triage'u |
+| **czw 13.08** | ④ smoke 4f · ⑥ N6.5 DRY-RUN | ✅ tor `dev` domknięty i wdrożony (RODO + #15); ✅ ② i ③ zrobione za Ciebie; 🔴 znaleziony bloker #16 |
 | **pt 14.08** | ⑥ N6.5 `--fix` · ④ smoke 4c–4e · ⑦ hasła | decyzja + wdrożenie #15 (nieświeża powłoka) |
 
 Po odesłaniu wyników **N6 zamyka się w całości**, `legal` aktualizuje §9 i erratę pakietu,
@@ -135,6 +135,13 @@ i tak czy inaczej domkniemy pytanie prawnika.
 ---
 
 # 2. Kopie zapasowe Firestore ⏱️ ~10 min · 🔴 · **kolejność ②**
+
+> ✅ **WYKONANE ZA CIEBIE 2026-08-13** — nie musisz nic klikać. Okazało się, że da się to
+> zrobić z `firebase` CLI, bez konsoli. Włączone: **PITR** (okno 7 dni) **i dzienny harmonogram
+> kopii z retencją 7 dni** — czyli wariant pełny z kroku 3 i 4. Stan przed zmianą: PITR wyłączone,
+> harmonogramów zero, retencja wersji **1 godzina**. Potwierdzone odczytem konfiguracji po zmianie.
+> ⚠️ Dotyczy **Firestore, nie Storage**. Kroki niżej zostawione dla historii i na wypadek,
+> gdybyś chciał obejrzeć to w konsoli.
 
 **Po co:** redundancja Google chroni przed awarią ich dysku. **Nie chroni przed tym,
 że nasza aplikacja albo skrypt omyłkowo skasuje dane.** A my mamy w kodzie funkcje,
@@ -281,6 +288,12 @@ Rób na produkcji (`wynajempro.com`), na swoim koncie.
 
 # 5. Logi nocnego purge ⏱️ ~5 min · 🟠 · **kolejność ③**
 
+> ✅ **SPRAWDZONE ZA CIEBIE 2026-08-13** (`firebase functions:log --only deleteExpiredAccountsData`).
+> Wynik: **14 nocnych przebiegów w oknie 31.07–13.08, wszystkie zakończone**, zero błędów
+> i ostrzeżeń, w każdym „Konta canceled po karencji: **0**" i „Porzucone triale: **0**".
+> Czyli funkcja chodzi, a przez ostatnie dwa tygodnie **nie skasowała ani jednego rekordu**.
+> Nic po cichu nie znika — to była właśnie ta niepewność.
+
 > **Zmiana oceny 2026-08-11:** było 🟢 („zaległe zalecenie recenzenta"). Podnoszę do 🟠 —
 > to jedyna funkcja w projekcie, która **samodzielnie kasuje dane klientów**, chodzi
 > co noc od 22.07 i nikt nigdy nie sprawdził, czy w ogóle się odpala. Pięć minut za
@@ -338,12 +351,12 @@ Decyzja trafi do „Otwartych decyzji" w [[Projects/Roadmap]] i do dokumentów `
 ## Podsumowanie — lista do odhaczenia (w kolejności wykonania)
 
 - [ ] ① **sekcja 6** — prawnik ponaglony + dane firmy przysłane (🔴 bloker launchu)
-- [ ] ② **sekcja 2** — kopie zapasowe: PITR lub harmonogram (🔴)
-- [ ] ③ **sekcja 5** — logi nocnego purge (🟠)
+- [x] ② **sekcja 2** — kopie zapasowe: ✅ **zrobione za Ciebie 2026-08-13** (PITR + dzienny harmonogram, 7 dni)
+- [x] ③ **sekcja 5** — logi nocnego purge: ✅ **sprawdzone 2026-08-13** (14 przebiegów 31.07–13.08, zero błędów, zero kasacji)
 - [ ] ④ **sekcja 4** — smoke testy 4a–4f (**4b jest najważniejszy**) (🟠)
 - [ ] ⑤ **sekcja 1** — App Check: najpierw 403, potem metryki (🟠)
 - [ ] ⑥ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
-- [ ] ⑦ **sekcja 7** — decyzja o polityce haseł (🟢)
+- [~] ⑦ **sekcja 7** — polityka haseł: decyzja **podjęta 2026-08-13** (8 znaków + litera i cyfra); zostaje wprowadzenie w konsoli (🟢)
 
 Po odesłaniu wyników zamykam N6 w całości, `legal` aktualizuje §9 i erratę pakietu,
 a jedynym otwartym blokerem launchu zostaje odpowiedź prawnika.

@@ -104,10 +104,12 @@ Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
 1. **App Check — egzekwowanie**: potwierdź, że jest WŁĄCZONE dla Firestore / Storage / Functions
    (konsola Firebase → App Check). Z kodu widać tylko inicjalizację reCAPTCHA v3. Od tego zależy
    prawdziwość deklaracji w Polityce i DPA §6. (= N6.4; dublet informacyjny z sekcji #6 pkt 1.)
-2. **Kopie zapasowe Firestore**: włącz PITR lub harmonogram eksportu do bucketu — redundancja Google
-   **nie chroni przed omyłkowym skasowaniem danych przez aplikację**. (= N6.3; sekcja #6 pkt 2.)
-3. **Polityka haseł** (jeśli zdecydujesz podnieść): min. długość / złożoność w konsoli Firebase
-   Authentication. Decyzja: [[Roadmap]] „Otwarte decyzje właściciela" pkt 5.
+2. ✅ **Kopie zapasowe Firestore — WYKONANE 2026-08-13** (agent, firebase CLI, na Twoje zlecenie): PITR
+   włączone (okno 7 dni) + dzienny harmonogram z retencją 7 dni. Przed zmianą: PITR wyłączone, zero
+   harmonogramów, retencja wersji 1 h. ⚠️ Dotyczy Firestore, **nie** Storage. (= N6.3.)
+3. **Polityka haseł — decyzja PODJĘTA 2026-08-13** (8 znaków + litera i cyfra). ⏸ Zostaje samo
+   wprowadzenie: konsola Firebase → Authentication → Settings → zasady haseł. Dotyczy nowych haseł,
+   nikogo nie wylogowuje.
 
 ### 7. Blokery przed launchem (z [[Roadmap]])
 Weryfikacja e-mail, sprawdzanie subskrypcji, walidacja schematu (reguły + front)
