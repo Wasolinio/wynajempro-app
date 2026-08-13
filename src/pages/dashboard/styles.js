@@ -425,6 +425,15 @@ export const DASHBOARD_CSS = `
 .wpd-input--num{ font-family:'IBM Plex Mono', monospace; }
 .wpd-fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .wpd-fgrid--3{ grid-template-columns:1fr 1fr 1fr; }
+/* Pola w siatce MUSZĄ móc zejść poniżej swojej szerokości własnej. Pola typu month
+   i date mają w przeglądarce dużą szerokość intrinsic (wartość + ikona kalendarza),
+   a element siatki domyślnie stoi na min-width:auto i nie da się go ścisnąć — w wąskim
+   dialogu (--sm = 400 px) para takich pól rozpychała okno o ~32 px i dawała poziome
+   przewijanie w środku modalu. Zgłoszone przez właściciela przy smoke 4e (2026-08-13),
+   odtworzone pomiarem. Ten sam idiom co przy .wpd-seg i .wpd-tabs.
+   UWAGA: ten plik to szablon JS — bez odwróconych apostrofów w komentarzach CSS. */
+.wpd-fgrid > *{ min-width:0; }
+.wpd-input, .wpd-select, .wpd-textarea{ min-width:0; }
 /* dyskretny podpis pod grupą pól (np. wyliczona suma osób w rezerwacji) */
 .wpd-fhint{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.05em;
   color:var(--faint); margin:12px 0 0; }

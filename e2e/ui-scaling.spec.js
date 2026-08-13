@@ -218,6 +218,32 @@ test.describe('UI Scaling Tests', () => {
     expect(box.width).toBeLessThanOrEqual(375); // Should constrain to mobile width
   });
 
+  test('Dialog z parą pól dat nie przewija się w poziomie', async ({ page }) => {
+    // Regresja zgłoszona przez właściciela przy smoke 4e (2026-08-13): modal „Edytuj koszt
+    // stały" rozpychał się w poziomie i ucinał drugie pole daty. Przyczyna: pola typu
+    // month/date mają dużą szerokość własną, a element siatki stoi domyślnie na
+    // min-width:auto, więc nie dawał się ścisnąć w wąskim dialogu (--sm = 400 px).
+    // Test celuje w SIATKĘ (.wpd-fgrid), bo to ona przepełniała rodzica — mierzenie
+    // samego okna dialogu tego nie pokazuje.
+    await setupFirebaseMocks(page, { user: mockUser, dbData: mockDbData });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/dashboard');
+    await page.waitForTimeout(500);
+
+    await page.locator('button[title="Ustawienia"]').first().click({ force: true });
+    await expect(page.locator('div.wpd-dialog').first()).toBeVisible();
+
+    const siatki = page.locator('.wpd-dialog .wpd-fgrid');
+    const ile = await siatki.count();
+    // Bez tego test przestałby cokolwiek sprawdzać, gdyby modal kiedyś zmienił układ —
+    // przechodziłby na zielono z zerem asercji (lekcja z [[Known-Issues]] #14).
+    expect(ile, 'w dialogu nie ma ani jednej siatki pól — test stracił przedmiot').toBeGreaterThan(0);
+    for (let i = 0; i < ile; i += 1) {
+      const wymiary = await siatki.nth(i).evaluate((el) => ({ tresc: el.scrollWidth, widok: el.clientWidth }));
+      expect(wymiary.tresc, `siatka pól #${i} przepełnia dialog`).toBeLessThanOrEqual(wymiary.widok);
+    }
+  });
+
   test('Test cookie banner positioning on mobile vs desktop', async ({ page }) => {
     await page.goto('/');
     
