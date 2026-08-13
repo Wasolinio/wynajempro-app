@@ -14,7 +14,7 @@ Project timeline and key milestones.
 - ✅ **Poprawka RODO potwierdzona na produkcji**: `/opinie/<nieistniejące>` → „Nie znaleziono strony" **z przyciskiem „Ustawienia cookies"** i bez kredytu; klik otwiera baner ze statusem „zgoda udzielona"; „Wycofaj zgodę" → `cookie_consent` skasowane, `ga-disable-G-BZ0SJC201Z=true`, ciastka `_ga*` puste. `/guide/<nieistniejące>` → „Brak dostępu", jedyny przycisk na ekranie to „Ustawienia cookies". Luka „równej łatwości" zamknięta także na ślepych uliczkach.
 - ✅ **Nowy tryb SW potwierdzony w serwowanym pliku**: `wynajempro.com/sw.js` ma nasłuch `SKIP_WAITING`, **nie ma** automatycznego `self.skipWaiting()` ani `clientsClaim` — czyli na produkcji leży wersja „prompt". ⚠️ Efektu jeszcze nikt nie zobaczy: użytkownicy z aktywnym **starym** SW dostali tę paczkę po staremu, pasek zadziała u nich dopiero przy **następnym** wydaniu.
 - 🔴 **Przy okazji znalezione**: strony gościa nie działają na produkcji — osobny wpis wyżej i [[Known-Issues]] #16. Deploy tego nie spowodował i nie naprawia.
-- ⏸ **Zostaje**: 15 commitów niewypchniętych na GitHub (`git push` to decyzja właściciela). App Check — patrz #16, obraz się zmienił.
+- ⏸ **Zostaje**: 6 commitów z dzisiejszej sesji niewypchniętych na GitHub (`git push` to decyzja właściciela) — wcześniejsze 11 z wpisu porannego jest już na zdalnym. App Check — patrz #16, obraz się zmienił.
 
 ### 🔴 Znalezione przy weryfikacji deployu: strony gościa nie działają na produkcji
 - 🎯 **Jak wyszło**: krok „konsola bez błędów" ze skilla `deploy`. Sprawdzałem własną poprawkę na `/opinie/…` i `/guide/…`, a w konsoli siedziało `auth/admin-restricted-operation` — nie moje, nie z tej paczki.
