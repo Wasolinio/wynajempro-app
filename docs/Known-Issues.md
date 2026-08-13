@@ -134,8 +134,55 @@ jako potwierdzenie stanu produkcji na 10.08:
 
 ---
 
+### 16. 🔴 Strony gościa nie działają na produkcji — logowanie anonimowe odbijane (`auth/admin-restricted-operation`)
+**Severity**: 🔴 cała gościnna połowa produktu niedostępna · **Status**: ⏳ OTWARTE — wymaga konsoli właściciela
+**Zaobserwowane 2026-08-13** przy weryfikacji live deployu (znalezione przypadkiem, nie szukane).
+
+**Objaw:** wejście na `https://wynajempro.com/guide/<cokolwiek>` kończy się ekranem
+**„Brak dostępu — Wystąpił błąd autoryzacji sesji. Odśwież stronę."**, a `/opinie/<cokolwiek>`
+ekranem „Nie znaleziono strony". W konsoli:
+```
+POST identitytoolkit.googleapis.com/v1/accounts:signUp → 400
+Błąd autentykacji anonimowej: auth/admin-restricted-operation
+```
+Powtórzone w **świeżej karcie**, bez cache i bez service workera.
+
+**Dlaczego to kładzie funkcję, a nie tylko psuje wygląd:** `GuestGuideView.jsx:31-51`
+najpierw loguje gościa anonimowo, a dopiero potem czyta przewodnika. Gdy `signInAnonymously`
+rzuci, kod ustawia `error` i **nigdy nie sięga do Firestore** — nieważne, czy przewodnik
+istnieje. To samo w `ReviewPageView`. Czyli: **każdy link do przewodnika i każda strona opinii
+wysłana gościowi kończy się komunikatem o błędzie.**
+
+**To nie jest skutek deployu z 13.08:** paczka nie tknęła `firebase.js`, `App.jsx` w części
+auth ani reguł — 400 przychodzi z serwera Google, nie z bundla. Kiedy się zaczęło, nie wiadomo;
+nikt tej ścieżki nie sprawdzał na produkcji od czasu wdrożeń N5.
+
+**Poszlaka co do przyczyny (do potwierdzenia w konsoli):** to samo żądanie wysłane **bez**
+tokenu App Check dostaje `401 „Firebase App Check token is invalid"`. Z tego wynikają dwie
+rzeczy: (1) **egzekwowanie App Check dla Authentication jest WŁĄCZONE** — czego nie zakładał
+ani #13, ani N6.4; (2) SDK aplikacji **przechodzi** App Check (dostaje 400, nie 401), więc
+odmowa zapada dalej, na poziomie polityki kont. `admin-restricted-operation` zwracany jest,
+gdy zablokowane jest **tworzenie kont**: albo wyłączony dostawca „Anonymous", albo globalne
+„Prevent account creation" w ustawieniach Authentication.
+
+⚠️ **Jeśli to drugie — nie działa też rejestracja nowych użytkowników.** Nie sprawdzałem tego
+na produkcji świadomie: każda próba to albo realne konto, albo hałas w danych. To pytanie do
+konsoli, nie do agenta.
+
+**Co sprawdzić (właściciel, ~3 min), Firebase Console → Authentication:**
+1. **Sign-in method → Anonymous** — czy włączone.
+2. **Settings → User actions → „Enable create (sign-up)"** — czy tworzenie kont nie jest zablokowane.
+3. **App Check → Apps → Authentication (Identity Platform)** — jaki jest stan egzekwowania.
+   To samo pytanie wraca przy N6.4; teraz są na nie twarde dane, nie domysł.
+
+**Po naprawie:** otworzyć **prawdziwy** link do przewodnika (nie zmyślone id) i potwierdzić,
+że gość widzi treść. Regresja e2e tego nie złapie — suita mockuje Firebase, więc świeci
+zielono niezależnie od stanu produkcji.
+
+---
+
 ### 15. Każdy deploy zostawia użytkowników na starej powłoce (service worker)
-**Severity**: 🟡 opóźnia dotarcie poprawek, mylące przy weryfikacji · **Status**: ✅ ROZWIĄZANE W KODZIE 2026-08-13 (`79b95c7`) — ⏸ czeka na deploy
+**Severity**: 🟡 opóźnia dotarcie poprawek, mylące przy weryfikacji · **Status**: ✅ ROZWIĄZANE 2026-08-13 (`79b95c7`, wdrożone `hosting:app`)
 **Zaobserwowane 2026-08-10** przy weryfikacji wdrożenia `69f05c3`, niezależnie od zgłoszenia:
 `curl` dostawał już **czysty** `index.html`, a przeglądarka z aktywnym service workerem nadal
 serwowała **stary** — czerwony ekran z usuniętego handlera pojawił się na produkcji **po**
