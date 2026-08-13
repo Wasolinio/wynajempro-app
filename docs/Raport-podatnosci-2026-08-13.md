@@ -84,7 +84,19 @@ z podbiciem zależności. Do dziś nie było sensu tego włączać — nie było
 nie sprawdził, czy taki PR niczego nie psuje. **Od dzisiaj CI jest**, więc każdy taki PR
 sam się weryfikuje (lint, build, 133 testy) i wystarczy go zatwierdzić albo zamknąć.
 
-To jedna decyzja: włączyć czy nie. Jeśli tak — dopiszę plik konfiguracyjny.
+✅ **Włączone 2026-08-13** (`.github/dependabot.yml`): aplikacja i Cloud Functions co
+poniedziałek rano, akcje CI raz w miesiącu. Drobne podbicia (minor/patch) przychodzą
+**zgrupowane w jednym PR**, żeby poniedziałek nie zaczynał się od dziesięciu osobnych
+przeglądów tej samej zmiany; łatki bezpieczeństwa idą osobno, bo mają inny priorytet.
+
+**Zmiany głównej wersji celowo wyłączone z automatu** dla `firebase`, `react`, `react-dom`,
+`react-router-dom`, `firebase-admin` i `firebase-functions` — to rdzeń aplikacji i funkcji,
+które kasują dane; taki PR ma powstawać decyzją człowieka, nie harmonogramem.
+
+⏸ **Zostaje jeden przełącznik po Twojej stronie** (GitHub → Settings → Code security):
+**Dependabot alerts** i **Dependabot security updates**. Plik konfiguracyjny włącza
+aktualizacje *wersji*; alerty o nowo ogłoszonych podatnościach to osobne ustawienie
+repozytorium, którego nie ustawię z wiersza poleceń (`gh` nie jest zainstalowany).
 
 ---
 

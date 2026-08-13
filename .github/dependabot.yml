@@ -1,0 +1,75 @@
+version: 2
+
+# PO CO: 2026-08-13 triage pokazał 24 ostrzeżenia w drzewie zależności, w tym otwarte
+# przekierowanie w react-routerze, które siedziało w paczce serwowanej przeglądarce.
+# Ręcznie nikt tego nie pilnował. Dependabot ma sens dopiero od dziś, bo dopiero dziś
+# jest CI (`ci.yml`) — każdy jego pull request sam się weryfikuje: lint, build i pełna
+# suita e2e. Bez tego byłyby to PR-y, których nikt nie umiałby bezpiecznie zatwierdzić.
+
+updates:
+  # ── Aplikacja (React + Vite) ────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Europe/Warsaw
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(deps-dev)'
+    groups:
+      # Drobne podbicia w jednym PR — inaczej poniedziałek to dziesięć osobnych
+      # przeglądów tego samego rodzaju zmiany.
+      drobne-aktualizacje:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      # Łatki bezpieczeństwa osobno i bez grupowania z resztą — mają inny priorytet.
+      bezpieczenstwo:
+        applies-to: security-updates
+        patterns: ['*']
+    ignore:
+      # Zmiany głównej wersji zostają decyzją człowieka: firebase i react to rdzeń
+      # aplikacji, a react-router przy majorze zmienia API routingu.
+      - dependency-name: firebase
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: react-router-dom
+        update-types: [version-update:semver-major]
+
+  # ── Cloud Functions (Node, osobny package.json) ─────────────────────────────
+  # Tu mieszka dziś większość ostrzeżeń (12, w tym jedno krytyczne) — wszystkie
+  # tranzytywne przez firebase-admin. Major tej biblioteki NIE wchodzi automatem:
+  # funkcje kasują dane po karencji i obsługują Stripe, więc wymaga przeglądu
+  # i osobnego `firebase deploy --only functions`.
+  - package-ecosystem: npm
+    directory: /functions
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Europe/Warsaw
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: 'chore(deps-functions)'
+    groups:
+      drobne-aktualizacje:
+        applies-to: version-updates
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: firebase-admin
+        update-types: [version-update:semver-major]
+      - dependency-name: firebase-functions
+        update-types: [version-update:semver-major]
+
+  # ── Akcje w przepływach CI ──────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'chore(ci)'
