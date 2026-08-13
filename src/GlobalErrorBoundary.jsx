@@ -2,6 +2,7 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { BrandStyles } from './styles/brand';
+import { zglosBlad } from './monitoring';
 
 // Widok fallbackowy, gdy aplikacja napotka błąd renderowania — identyfikacja WynajemPRO v2 (.wpb)
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -41,6 +42,9 @@ export function GlobalErrorBoundary({ children }) {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
+      // Ten ekran widział użytkownik — bez zgłoszenia nikt poza nim o tym nie wie.
+      // Bez VITE_SENTRY_DSN wywołanie nic nie robi (patrz src/monitoring.js).
+      onError={(error, info) => zglosBlad(error, { componentStack: info?.componentStack })}
       onReset={() => {
         // Wymuszenie usunięcia cache PWA przed odświeżeniem strony, by uciec z pętli błędu
         if ('serviceWorker' in navigator) {
