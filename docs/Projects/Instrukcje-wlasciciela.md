@@ -19,25 +19,18 @@
 
 ## 🗓️ Plan tygodnia 11–17.08 — od najpilniejszego
 
-> 🔴 **Dopisane 2026-08-13, przed całą resztą: odblokuj logowanie anonimowe.**
-> Strony gościa (`/guide/…`, `/opinie/…`) **nie działają na produkcji** — każdy link
-> wysłany gościowi kończy się komunikatem o błędzie autoryzacji sesji. To jedno-dwa
-> kliknięcia w Firebase Console → Authentication: [[Projects/Zlecenia-wlasciciela]] #9,
-> diagnostyka w [[Known-Issues]] #16. Bije wszystko poniżej, bo to nie jest dług ani
-> ryzyko na przyszłość, tylko **funkcja niedostępna dla klientów już teraz**.
-> ⚠️ **Korekta z wieczora 13.08:** przyczyną jest **App Check**, nie wyłączony dostawca
-> „Anonymous" — i to ten sam 403 co w sekcji 1. Zacznij od **kroku 0**: otwórz prawdziwy
-> link do przewodnika na telefonie. To rozstrzyga, czy problem dotyka ludzi, czy tylko
-> klientów bez tokenu App Check (obie moje przeglądarki są sterowane automatem, więc
-> App Check odsiewa je z definicji). Szczegóły: [[Projects/Zlecenia-wlasciciela]] #9.
+> ✅ **2026-08-13, domknięte tego samego dnia: strony gościa działają.** Przyczyną był
+> **wyłączony dostawca „Anonymous"** w Authentication → Sign-in method (nie App Check, jak
+> podejrzewałem po drodze). Właściciel włączył, przewodnik otwiera się na telefonie,
+> wymuszanie App Check przywrócone. Przebieg i trzy warstwy blokad: [[Known-Issues]] #16.
 
 | # | Zadanie | Sekcja | Czas | Dlaczego tak wysoko / nisko |
 |---|---|---|---|---|
 | ① | **Ponaglić prawnika + przysłać dane firmy** | sekcja **6** | ~5 min | Jedyny twardy bloker launchu i **jedyna pozycja, która nie ruszy się sama**. Pakiet leży u prawnika od 22.07. |
-| ② | **Kopie zapasowe Firestore (PITR)** | sekcja **2** | ~10 min | Dziś **zero** ścieżki odtworzenia danych, a co noc chodzi funkcja, która kasuje. Najtańsza rzecz o największej asymetrii. |
-| ③ | **Logi nocnego purge** | sekcja **5** | ~5 min | Funkcja kasująca dane chodzi od 22.07 **bez ani jednego spojrzenia w logi**. |
-| ④ | **Smoke testy 4a–4f** (4b najważniejszy) | sekcja **4** | ~20 min | X17 wszedł na produkcję **10.08**. Jeśli migracja `guests`→`adults` nie działa na realnych danych, zapis starej rezerwacji **cicho zeruje liczbę osób**. |
-| ⑤ | **App Check — najpierw napraw 403** | sekcja **1** | ~10 min | Ważne (prawnik pyta wprost), ale **nie da się domknąć jednym kliknięciem** — najpierw reCAPTCHA, potem doba throttle. Włączenie egzekwowania dziś odcięłoby aplikację. |
+| ② ✅ | **Kopie zapasowe Firestore (PITR)** — zrobione za Ciebie 13.08 | sekcja **2** | — | Dziś **zero** ścieżki odtworzenia danych, a co noc chodzi funkcja, która kasuje. Najtańsza rzecz o największej asymetrii. |
+| ③ ✅ | **Logi nocnego purge** — sprawdzone 13.08, czysto | sekcja **5** | — | Funkcja kasująca dane chodzi od 22.07 **bez ani jednego spojrzenia w logi**. |
+| ④ ✅ | **Smoke testy 4a–4f** — komplet zdany 13.08 | sekcja **4** | — | X17 wszedł na produkcję **10.08**. Jeśli migracja `guests`→`adults` nie działa na realnych danych, zapis starej rezerwacji **cicho zeruje liczbę osób**. |
+| ⑤ ✅ | **App Check** — potwierdzone i egzekwowane; 403 okazał się fałszywym alarmem | sekcja **1** | — | Ważne (prawnik pyta wprost), ale **nie da się domknąć jednym kliknięciem** — najpierw reCAPTCHA, potem doba throttle. Włączenie egzekwowania dziś odcięłoby aplikację. |
 | ⑥ | **N6.5 — czyszczenie sierot** | sekcja **3** | ~20 min | Dług z przeszłości, nie rośnie — nowe kasacje sprzątają po sobie. |
 | ⑦ | **Decyzja: polityka haseł** | sekcja **7** | ~5 min | Tanie, nie blokuje niczego. Potrzebne jedno zdanie. |
 
@@ -47,8 +40,8 @@
 |---|---|---|
 | **wt 11.08** | ① prawnik + dane firmy · ② PITR · ③ logi purge | triage 52 zastanych awarii e2e |
 | **śr 12.08** | ④ smoke 4a + **4b** · ⑤ App Check (403) | triage · luka N6.1 na ekranach błędu |
-| **czw 13.08** | ④ smoke 4f · ⑥ N6.5 DRY-RUN | ✅ tor `dev` domknięty i wdrożony (RODO + #15); ✅ ② i ③ zrobione za Ciebie; 🔴 znaleziony bloker #16 |
-| **pt 14.08** | ⑥ N6.5 `--fix` · ④ smoke 4c–4e · ⑦ hasła | decyzja + wdrożenie #15 (nieświeża powłoka) |
+| **czw 13.08** | ✅ **④ smoke 4a–4f — komplet** · ✅ #16 (logowanie anonimowe) · ✅ ⑤ App Check | ✅ tor `dev` wdrożony (RODO + #15) · ✅ ② i ③ za Ciebie · ✅ CI + smoke produkcji + hooki · ✅ Sentry (wyłączony) · ✅ Dependabot |
+| **pt 14.08** | ① prawnik · ⑥ N6.5 (potrzebny klucz serwisowy) · ⑦ hasła w konsoli · #10 adres w szablonach maili | X18 (raport PDF) po Twojej stronie decyzji o kolejności |
 
 Po odesłaniu wyników **N6 zamyka się w całości**, `legal` aktualizuje §9 i erratę pakietu,
 a jedynym otwartym blokerem launchu zostaje **odpowiedź prawnika**.
