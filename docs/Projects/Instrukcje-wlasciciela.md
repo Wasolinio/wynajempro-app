@@ -374,7 +374,7 @@ Decyzja trafi do „Otwartych decyzji" w [[Projects/Roadmap]] i do dokumentów `
 - [ ] ① **sekcja 6** — prawnik ponaglony + dane firmy przysłane (🔴 bloker launchu)
 - [x] ② **sekcja 2** — kopie zapasowe: ✅ **zrobione za Ciebie 2026-08-13** (PITR + dzienny harmonogram, 7 dni)
 - [x] ③ **sekcja 5** — logi nocnego purge: ✅ **sprawdzone 2026-08-13** (14 przebiegów 31.07–13.08, zero błędów, zero kasacji)
-- [ ] ④ **sekcja 4** — smoke testy 4a–4f (**4b jest najważniejszy**) (🟠)
+- [x] ④ **sekcja 4** — smoke testy 4a–4f: ✅ **KOMPLET ZDANY 2026-08-13**; po drodze naprawione przewijanie dialogów, dopisane X18 (raport PDF), zlecenie #10 (adres w szablonach maili) i dług CSV w Backlogu
 - [ ] ⑤ **sekcja 1** — App Check: najpierw 403, potem metryki (🟠)
 - [ ] ⑥ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
 - [~] ⑦ **sekcja 7** — polityka haseł: decyzja **podjęta 2026-08-13** (8 znaków + litera i cyfra); zostaje wprowadzenie w konsoli (🟢)
