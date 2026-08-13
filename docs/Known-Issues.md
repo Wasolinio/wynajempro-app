@@ -160,8 +160,12 @@ jako potwierdzenie stanu produkcji na 10.08:
 > kroku, co się zmieniło w KODZIE odpowiedzi — było jedyną drogą. Sam komunikat na ekranie
 > („Brak dostępu") był identyczny na każdym etapie i nie niósł żadnej informacji.
 >
-> ⏸ **Zostaje**: przywrócić wymuszanie App Check dla Authentication (właściciel zdjął je
-> w trakcie diagnostyki, gdy podejrzenie padło na App Check) i potwierdzić telefonem.
+> ✅ **Domknięte w całości 2026-08-13, wieczorem**: właściciel przywrócił **„Enforce" dla
+> Authentication**, a przewodnik **nadal otwiera się na telefonie**. Stan końcowy: ochrona
+> App Check działa dla Firestore i Authentication, goście wchodzą, deklaracja z Polityki
+> i DPA §6 jest prawdziwa. Kanarek w smoke'cie produkcji przeszedł również po ponownym
+> włączeniu wymuszania — potwierdza to, że alarmuje na wyłączony dostawca, a nie na
+> odsiewanie botów (8/8).
 **Zaobserwowane 2026-08-13** przy weryfikacji live deployu (znalezione przypadkiem, nie szukane).
 
 > ⚠️ **KOREKTA 2026-08-13, ta sama sesja — kilka godzin po pierwszym zapisie.** Pomiar

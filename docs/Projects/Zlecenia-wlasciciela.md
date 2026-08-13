@@ -23,10 +23,9 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 **Wynik:** przyczyną był **wyłączony dostawca „Anonymous"** w Authentication → Sign-in method.
 Po włączeniu przewodnik otwiera się na telefonie (potwierdzone przez właściciela w incognito),
 a serwer zwraca `200` zamiast `400 ADMIN_ONLY_OPERATION`. Pełny przebieg: [[Known-Issues]] #16.
-⏸ **Zostaje jedno kliknięcie:** App Check → Interfejsy API → **Authentication** z powrotem na
-**„Enforce"** (zdjęte w trakcie diagnostyki, gdy podejrzenie padło na App Check) i sprawdzenie
-telefonem. Dopóki jest „Monitoring", zdanie o ochronie przed nadużyciami w Polityce i DPA §6
-jest dla logowania nieprawdziwe.
+✅ **Domknięte w całości**: wymuszanie App Check dla Authentication **przywrócone**, a przewodnik
+nadal otwiera się na telefonie. Stan końcowy: ochrona działa dla Firestore i Authentication,
+goście wchodzą, deklaracja z Polityki i DPA §6 jest prawdziwa.
 
 <details><summary>Pierwotny opis zlecenia (do historii)</summary>
 **Co się dzieje:** każdy link do przewodnika (`/guide/…`) i każda strona opinii (`/opinie/…`)
