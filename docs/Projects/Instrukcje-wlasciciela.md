@@ -15,6 +15,15 @@
 
 ## 🗓️ Plan tygodnia 11–17.08 — od najpilniejszego
 
+> 🔴 **Dopisane 2026-08-13, przed całą resztą: odblokuj logowanie anonimowe.**
+> Strony gościa (`/guide/…`, `/opinie/…`) **nie działają na produkcji** — każdy link
+> wysłany gościowi kończy się komunikatem o błędzie autoryzacji sesji. To jedno-dwa
+> kliknięcia w Firebase Console → Authentication: [[Projects/Zlecenia-wlasciciela]] #9,
+> diagnostyka w [[Known-Issues]] #16. Bije wszystko poniżej, bo to nie jest dług ani
+> ryzyko na przyszłość, tylko **funkcja niedostępna dla klientów już teraz**.
+> Przy okazji: dane z tej diagnostyki zmieniają sekcję 1 (App Check) — egzekwowanie
+> dla Authentication najwyraźniej **już działa**.
+
 | # | Zadanie | Sekcja | Czas | Dlaczego tak wysoko / nisko |
 |---|---|---|---|---|
 | ① | **Ponaglić prawnika + przysłać dane firmy** | sekcja **6** | ~5 min | Jedyny twardy bloker launchu i **jedyna pozycja, która nie ruszy się sama**. Pakiet leży u prawnika od 22.07. |

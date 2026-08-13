@@ -15,6 +15,28 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
+### 9. 🔴 PILNE — odblokuj logowanie anonimowe (strony gościa leżą) — nowe 2026-08-13
+**Co się dzieje:** każdy link do przewodnika (`/guide/…`) i każda strona opinii (`/opinie/…`)
+kończy się u gościa komunikatem **„Brak dostępu — Wystąpił błąd autoryzacji sesji"**.
+Aplikacja loguje gościa anonimowo, zanim pokaże treść, a Google odbija to logowanie:
+`auth/admin-restricted-operation`. Znalezione przy weryfikacji deployu 13.08, powtórzone
+w czystej karcie. Pełna diagnostyka: [[Known-Issues]] #16.
+
+**Dlaczego to Ty:** to ustawienie w konsoli, agent nie ma tam dostępu.
+
+**Firebase Console → Authentication:**
+1. **Sign-in method → Anonymous** — czy jest włączone. Jeśli nie: włącz.
+2. **Settings → User actions → „Enable create (sign-up)"** — czy tworzenie kont nie jest
+   zablokowane. ⚠️ Jeśli jest, **nie działa też rejestracja nowych użytkowników** — tego
+   celowo nie sprawdzałem na produkcji, bo każda próba to albo realne konto, albo śmieci w danych.
+3. **App Check → Authentication** — jaki jest stan egzekwowania. Twarda poszlaka z 13.08:
+   żądanie bez tokenu App Check dostaje 401 „App Check token is invalid", czyli **egzekwowanie
+   dla Authentication już działa** — czego nie zakładała ani pozycja #8, ani [[Known-Issues]] #13.
+   Ta informacja zmienia obraz zadania „App Check" (sekcja 1 [[Projects/Instrukcje-wlasciciela]]).
+
+**Potem:** otwórz **prawdziwy** link do przewodnika (nie zmyślone id) i sprawdź, że gość widzi
+treść. Napisz wynik — dopiszę do dziennika i zamknę #16.
+
 ### 1. ✅ Google Search Console — WYKONANE 2026-07-22
 Usługa domenowa `wynajempro.com` + sitemapa zgłoszona i przyjęta (potwierdzenie właściciela).
 Po drodze dwie pułapki na przyszłość: zgłoszony omyłkowo URL strony głównej = błąd „mapa w formacie
