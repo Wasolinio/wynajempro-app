@@ -265,6 +265,44 @@ które go sprawdzały.
 
 ---
 
+## ADR-014: Nowa wersja aplikacji wchodzi na klik, nie automatem
+
+**Date**: 2026-08-13
+**Status**: ACCEPTED
+**Context**: Aplikacja jest PWA z service workerem (`vite-plugin-pwa`). Przy
+`registerType:'autoUpdate'` nowa powłoka instalowała się w tle i przejmowała stronę dopiero
+przy kolejnym wejściu — po deployu użytkownik przez nieokreślony czas pracował na starym
+kodzie, bez żadnej informacji ([[Known-Issues]] #15, zaobserwowane 2026-08-10). Decyzja
+należała do właściciela, bo to kompromis między szybkością dotarcia poprawki a ryzykiem
+przerwania pracy.
+
+**Decision**: `registerType: 'prompt'` + pasek „Dostępna nowa wersja aplikacji. Odśwież,
+żeby z niej korzystać." (`src/components/UpdatePrompt.jsx`). Przeładowanie następuje
+wyłącznie po kliknięciu użytkownika. Do tego `registration.update()` co godzinę.
+
+**Rationale**:
+- ✅ Użytkownik wie, że jest nowa wersja — dziś nie wiedział
+- ✅ Moment przeładowania wybiera on, nie deploy: nic nie wypada z formularza w połowie
+- ✅ Pasek daje się zamknąć — to komunikat, nie blokada
+- ❌ Poprawka dociera wolniej niż przy automacie: ktoś, kto zignoruje pasek, zostaje na starym
+- ❌ Jeden komunikat systemowy więcej na ekranie (obok banera zgody i toastów)
+
+**Consequences**:
+- Pierwszy deploy po tej zmianie jeszcze niczego nie pokaże użytkownikom z aktywnym starym
+  SW — pasek zacznie u nich działać od kolejnego wydania
+- Weryfikacja PWA musi sprawdzać `navigator.serviceWorker.controller`: na **niekontrolowanej**
+  karcie (pierwsze wejście) nowa wersja aktywuje się od razu i test wychodzi fałszywie zielony
+- `curl` nadal nie weryfikuje deployu aplikacji — to się nie zmienia
+
+**Alternatives Considered**:
+- `skipWaiting` + automatyczne przeładowanie — odrzucone: mogłoby wypaść w środku
+  wypełniania rezerwacji i skasować niezapisane dane
+- Zostawić `autoUpdate` bez komunikatu — odrzucone: problem realny, koszt naprawy mały
+
+**Related ADRs**: —
+
+---
+
 ## Decision Template
 
 ```markdown

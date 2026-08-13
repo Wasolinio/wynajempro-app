@@ -135,7 +135,7 @@ jako potwierdzenie stanu produkcji na 10.08:
 ---
 
 ### 15. Każdy deploy zostawia użytkowników na starej powłoce (service worker)
-**Severity**: 🟡 opóźnia dotarcie poprawek, mylące przy weryfikacji · **Status**: ⏳ OTWARTE (do decyzji)
+**Severity**: 🟡 opóźnia dotarcie poprawek, mylące przy weryfikacji · **Status**: ✅ ROZWIĄZANE W KODZIE 2026-08-13 (`79b95c7`) — ⏸ czeka na deploy
 **Zaobserwowane 2026-08-10** przy weryfikacji wdrożenia `69f05c3`, niezależnie od zgłoszenia:
 `curl` dostawał już **czysty** `index.html`, a przeglądarka z aktywnym service workerem nadal
 serwowała **stary** — czerwony ekran z usuniętego handlera pojawił się na produkcji **po**
@@ -148,8 +148,18 @@ dwie konsekwencje:
 - **`curl` NIE weryfikuje deployu aplikacji PWA** — sprawdza serwer, nie to, co widzi użytkownik.
   Weryfikacja live musi iść przez przeglądarkę. To najtrwalszy wniosek z tej sesji.
 
-**Do rozważenia:** `skipWaiting` + jawny komunikat „dostępna nowa wersja, odśwież", zamiast
-liczyć na to, że użytkownik sam trafi w moment przeładowania. Decyzja produktowa — nie ruszane.
+**Rozwiązanie (decyzja właściciela 2026-08-13):** komunikat, nie automat. `registerType`
+zmieniony na `'prompt'` (`vite.config.js`), nowy pasek `src/components/UpdatePrompt.jsx`
+u górnej krawędzi: „Dostępna nowa wersja aplikacji. Odśwież, żeby z niej korzystać."
+Przeładowanie następuje **wyłącznie po kliknięciu** — automatyczne `skipWaiting` odrzucone
+świadomie, bo mogłoby wypaść w środku wypełniania rezerwacji. Do tego `registration.update()`
+co godzinę, żeby długo otwarta karta panelu w ogóle dowiedziała się o wydaniu.
+Weryfikacja na buildzie produkcyjnym (`vite preview`): kontrolowana karta + nowy build →
+SW `waiting`, pasek widoczny, **brak samoistnego przeładowania**; klik „Odśwież" → reload
+z nowej wersji. e2e `update-prompt.spec.js` 3/3, suita 133/133.
+⚠️ **Pierwszy deploy po tej zmianie jeszcze tego nie pokaże** — użytkownicy z aktywnym
+starym SW dostaną go po staremu; pasek zacznie działać dla nich od kolejnego wydania.
+⚠️ Wniosek o `curl` **zostaje w mocy**: weryfikacja deployu PWA idzie przez przeglądarkę.
 
 > Wcześniejsza wersja tego wpisu wiązała nieświeży SW z rzekomą awarią dodawania rezerwacji
 > (404 leniwego chunku → odrzucony promise → czerwony ekran). **Ta hipoteza jest wycofana** —

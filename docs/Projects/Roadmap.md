@@ -127,8 +127,9 @@ posiedzeniem.
 
 **Tor `dev` równolegle:** ~~triage 52 zastanych awarii e2e~~ ✅ 12.08 (suita 128/128, dziś
 130/130) · ~~domknięcie „reszty luki" N6.1 na ekranach błędu widoków gościa~~ ✅ 13.08
-(`f442c42`, czeka na deploy) · [[Known-Issues]] #15 (nieświeża powłoka po deployu) —
-**czeka na decyzję właściciela**, ostatnia pozycja toru w tym tygodniu.
+(`f442c42`, czeka na deploy) · ~~[[Known-Issues]] #15 (nieświeża powłoka po deployu)~~ ✅ 13.08
+(`79b95c7` — decyzja właściciela: pasek „dostępna nowa wersja" zamiast automatu; czeka na deploy).
+**Tor `dev` na ten tydzień domknięty**; zostaje wspólny deploy obu poprawek.
 
 ---
 
