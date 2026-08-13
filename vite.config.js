@@ -7,7 +7,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt', nie 'autoUpdate' ([[Known-Issues]] #15, decyzja właściciela 2026-08-13):
+      // nowa powłoka przejmuje stronę dopiero po kliknięciu „Odśwież" w pasku
+      // (src/components/UpdatePrompt.jsx). Automatyczne przeładowanie mogłoby wypaść
+      // w środku wypełniania rezerwacji i skasować niezapisane dane.
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       workbox: {
         navigateFallbackDenylist: [/^\/__\//]

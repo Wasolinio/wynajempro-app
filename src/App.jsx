@@ -8,6 +8,7 @@ import { auth, analytics, initAnalytics } from './firebase';
 import { WynajemProvider } from './context/WynajemContext';
 import { GlobalErrorBoundary } from './GlobalErrorBoundary';
 import ConsentNotice from './components/ConsentNotice';
+import UpdatePrompt from './components/UpdatePrompt';
 import SeoTags from './components/SeoTags';
 
 /*
@@ -160,6 +161,9 @@ export default function App() {
             </Routes>
           </Suspense>
           <ConsentNotice onAccept={() => initAnalytics()} />
+          {/* Pasek „dostępna nowa wersja" (#15) — u góry, żeby nie kolidował z banerem
+              zgody i toastami, które siedzą przy dolnej krawędzi. */}
+          <UpdatePrompt />
         </BrowserRouter>
       </GlobalErrorBoundary>
     </>

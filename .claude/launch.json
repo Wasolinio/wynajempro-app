@@ -8,6 +8,12 @@
       "port": 5173
     },
     {
+      "name": "Vite Preview (build produkcyjny)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--port", "4173"],
+      "port": 4173
+    },
+    {
       "name": "Firebase Emulators (All)",
       "runtimeExecutable": "firebase",
       "runtimeArgs": ["emulators:start"],
