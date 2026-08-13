@@ -47,7 +47,7 @@ jobs:
 
       - name: Ślad z nieudanego przebiegu
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: prod-smoke-trace
           path: test-results/
