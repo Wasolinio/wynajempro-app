@@ -77,7 +77,10 @@ export async function setupFirebaseMocks(page, options = {}) {
         };
         export const createUserWithEmailAndPassword = async (auth, email, password) => {
           const mockAuth = getAuth();
-          if (password && password.length < 6) {
+          // Lustro polityki haseł z konsoli (Require enforcement, od 2026-08-17):
+          // 8 znaków, wielka litera, mała litera, cyfra. Mock ma odrzucać dokładnie to,
+          // co odrzuci produkcja — inaczej testy przepuszczą hasło, które padnie u klienta.
+          if (password && (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password))) {
             throw { code: 'auth/weak-password' };
           }
           if (email === 'existing@example.com') {

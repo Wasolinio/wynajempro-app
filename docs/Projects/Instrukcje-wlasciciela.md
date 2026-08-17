@@ -38,7 +38,7 @@
 | ④ ✅ | Smoke testy 4a–4f | 4 | — | komplet zdany 13.08 |
 | ⑤ | **App Check — Storage i Functions** | **8** ⭐ nowa | ~15 min | ⬜ Firestore i Authentication już wymuszane; zostały dwie usługi i **jedna z nich ma zostać wyłączona świadomie** |
 | ⑥ | **N6.5 — czyszczenie sierot w Storage** | 3 | ~20 min | ⬜ potrzebny klucz serwisowy; robimy razem |
-| ⑦ | **Polityka haseł — wprowadzenie w konsoli** | 7 | ~5 min | ⬜ decyzja podjęta 13.08 (8 znaków + litera i cyfra), zostaje samo kliknięcie |
+| ⑦ ✅ | Polityka haseł — wprowadzona w konsoli | 7 | — | ✅ **17.08**: 8 znaków + wielka i mała litera + cyfra, tryb „Require"; ekrany aplikacji poprawione i wdrożone |
 | ⑧ | **Szablony e-maili Auth** | **9** ⭐ nowa | ~10 min | ⬜ dziś link weryfikacyjny prowadzi na obcą domenę i angielski ekran Google |
 
 **Sugerowana kolejność (dziś i dalej):** ⑦ → ⑧ → ⑤ → ⑥.
@@ -383,7 +383,15 @@ Uwagi przekaż mi w dowolnej postaci — naniosę je na dokumenty i zaktualizuj�
 
 ---
 
-# 7. Polityka haseł — wprowadzenie decyzji ⏱️ ~5 min · 🟢 · **kolejność ⑦ (zrób jako pierwsze)**
+# 7. Polityka haseł — ✅ WYKONANE 2026-08-17
+
+> ✅ **Zrobione razem 17.08.** W konsoli ustawione: tryb **Require enforcement**, minimum
+> **8 znaków**, wymagana **wielka litera, mała litera i cyfra** (właściciel zdecydował
+> o dołożeniu wielkiej litery ponad decyzję z 13.08), znak specjalny niewymagany,
+> `Force upgrade on sign-in` **wyłączone** — istniejące konta nietknięte.
+> 📌 **Ogon wykryty przy tej okazji i naprawiony tego samego dnia:** ekrany aplikacji nadal
+> mówiły o 6 znakach, więc reset hasła zapętlał użytkownika. Poprawione i wdrożone
+> (`hosting:app`, 17.08) — patrz [[Activity-Log]].
 
 > ✅ **Decyzja zapadła 13.08: 8 znaków + wymóg litery i cyfry.** Odrzucone: 10 znaków ze
 > znakiem specjalnym (koszt w porzuconych rejestracjach i hasłach zapisywanych na kartce)
@@ -521,7 +529,7 @@ na ekranie Google. Zmiana dotyczy wyłącznie kolejnych wiadomości.
 - [x] ⑤ **sekcja 1** — App Check dla Firestore: ✅ **potwierdzone 2026-08-13** (Enforced, 99% zweryfikowane; #13 obalony)
 - [ ] ⑥ **sekcja 8** — App Check dla **Storage** (włącz + sprawdź okładki) i **Functions** (świadomie zostawiamy) 🟠
 - [ ] ⑦ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
-- [ ] ⑧ **sekcja 7** — polityka haseł: decyzja **podjęta 2026-08-13** (8 znaków + litera i cyfra); zostaje wprowadzenie w konsoli (🟢)
+- [x] ⑧ **sekcja 7** — polityka haseł: ✅ **WPROWADZONA 2026-08-17** (8 znaków + wielka i mała litera + cyfra, tryb „Require"); ekrany aplikacji zsynchronizowane i wdrożone tego samego dnia
 - [ ] ⑨ **sekcja 9** — szablony e-maili Auth: action URL na `wynajempro.com/auth/action` w 3 szablonach + pisownia marki (🟠)
 
 Po odesłaniu wyników zamykam N6 w całości, `legal` aktualizuje §9 i erratę pakietu,

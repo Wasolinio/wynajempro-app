@@ -361,7 +361,9 @@ test.describe('Links and Buttons Tests', () => {
     // Fill registration
     await page.fill('input[name="name"]', 'Walkthrough User');
     await page.fill('input[name="email"]', 'walkthrough-reg@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    // Hasło zgodne z polityką z konsoli (8 znaków, wielka i mała litera, cyfra — od 17.08).
+    // Bez wielkiej litery rejestracja zatrzymuje się na walidacji i ten spacer kończy się na /login.
+    await page.fill('input[name="password"]', 'Password123');
     // Wymagana zgoda na regulamin — bez niej przeglądarka blokuje submit. Input jest
     // wizualnie ukryty pod własną stylizacją, więc check() bez force czeka na widoczność.
     // Input jest wyprowadzony poza kanwę (wzorzec „visually hidden"), więc ani check(),

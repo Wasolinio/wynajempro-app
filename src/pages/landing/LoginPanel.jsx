@@ -9,6 +9,7 @@ import {
 import { auth, db, analytics, initAnalytics } from '../../firebase';
 import { logEvent } from 'firebase/analytics';
 import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
+import { PASSWORD_HINT, validatePassword } from '../../utils/passwordPolicy';
 
 /**
  * LoginPanel — panel logowania/rejestracji w systemie identyfikacji "Wynajem PRO" v1.0.
@@ -120,6 +121,16 @@ export default function LoginPanel() {
       return;
     }
 
+    // Wymagania sprawdzamy WYŁĄCZNIE przy rejestracji. Przy logowaniu nigdy — konta
+    // założone przed zaostrzeniem polityki (2026-08-17) mają starsze hasła i muszą wchodzić.
+    if (!isLogin) {
+      const niezgodne = validatePassword(formData.password);
+      if (niezgodne) {
+        setError(niezgodne);
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       // "Zapamiętaj mnie" — trwała sesja (local) vs sesja przeglądarki (session)
@@ -157,7 +168,7 @@ export default function LoginPanel() {
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Konto z tym adresem e-mail już istnieje.');
       } else if (err.code === 'auth/weak-password') {
-        setError('Hasło jest za słabe (wymagane minimum 6 znaków).');
+        setError(`Hasło nie spełnia wymagań. ${PASSWORD_HINT}`);
       } else {
         setError(isLogin ? 'Nie udało się zalogować. Sprawdź dane.' : 'Błąd rejestracji. Spróbuj ponownie.');
       }
@@ -430,6 +441,7 @@ export default function LoginPanel() {
                   {showPassword ? 'Ukryj' : 'Pokaż'}
                 </button>
               </div>
+              {!isLogin && <p className="wp4a-hint">{PASSWORD_HINT}</p>}
             </div>
 
             {isLogin ? (
@@ -585,6 +597,8 @@ const CSS = `
   border-bottom:1px solid transparent; }
 .wp4a-minilink:hover{ color:var(--cynober); border-color:var(--cynober); }
 .wp4a-form--reset{ margin-top:4px; width:100%; }
+/* Wymagania hasła pod polem — widoczne przy rejestracji, zanim użytkownik cokolwiek wpisze. */
+.wp4a-hint{ margin:8px 0 0; font-size:13px; line-height:1.45; color:var(--muted); }
 
 /* ── Checkbox (zapamiętaj mnie / regulamin) ── */
 .wp4a-check{ display:flex; align-items:flex-start; gap:11px; cursor:pointer; user-select:none; }

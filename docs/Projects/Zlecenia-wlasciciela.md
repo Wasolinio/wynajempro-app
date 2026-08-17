@@ -196,9 +196,13 @@ Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
 2. ✅ **Kopie zapasowe Firestore — WYKONANE 2026-08-13** (agent, firebase CLI, na Twoje zlecenie): PITR
    włączone (okno 7 dni) + dzienny harmonogram z retencją 7 dni. Przed zmianą: PITR wyłączone, zero
    harmonogramów, retencja wersji 1 h. ⚠️ Dotyczy Firestore, **nie** Storage. (= N6.3.)
-3. **Polityka haseł — decyzja PODJĘTA 2026-08-13** (8 znaków + litera i cyfra). ⏸ Zostaje samo
-   wprowadzenie: konsola Firebase → Authentication → Settings → zasady haseł. Dotyczy nowych haseł,
-   nikogo nie wylogowuje.
+3. ✅ **Polityka haseł — WPROWADZONA 2026-08-17.** W konsoli: tryb **Require enforcement**,
+   minimum **8 znaków**, wymagana **wielka litera, mała litera i cyfra** (właściciel przy
+   wprowadzaniu dołożył wielką literę ponad decyzję z 13.08), znak specjalny niewymagany,
+   `Force upgrade on sign-in` wyłączone — istniejące konta działają dalej.
+   📌 Przy okazji naprawiony ogon: ekrany rejestracji i resetu hasła mówiły o 6 znakach
+   (reset zapętlał użytkownika) — poprawione i wdrożone 17.08. Dokumenty `legal`
+   zaktualizowane: §9.1 dokumentu bezpieczeństwa + **errata E11** pakietu dla prawnika.
 
 ### 7. Blokery przed launchem (z [[Roadmap]])
 Weryfikacja e-mail, sprawdzanie subskrypcji, walidacja schematu (reguły + front)

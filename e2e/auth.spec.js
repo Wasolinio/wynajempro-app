@@ -28,11 +28,11 @@ test.describe('Authentication Tests', () => {
     
     await nameInput.fill('Jan Nowak');
     await emailInput.fill('new@example.com');
-    await passwordInput.fill('password123');
+    await passwordInput.fill('Password123');
     
     await expect(nameInput).toHaveValue('Jan Nowak');
     await expect(emailInput).toHaveValue('new@example.com');
-    await expect(passwordInput).toHaveValue('password123');
+    await expect(passwordInput).toHaveValue('Password123');
   });
 
   test('Verify login form inputs exist and are editable', async ({ page }) => {
@@ -46,10 +46,10 @@ test.describe('Authentication Tests', () => {
     await expect(passwordInput).toBeVisible();
     
     await emailInput.fill('test@example.com');
-    await passwordInput.fill('password123');
+    await passwordInput.fill('Password123');
     
     await expect(emailInput).toHaveValue('test@example.com');
-    await expect(passwordInput).toHaveValue('password123');
+    await expect(passwordInput).toHaveValue('Password123');
   });
 
   test('Verify error message display when wrong credentials are submitted', async ({ page }) => {
@@ -92,20 +92,50 @@ test.describe('Authentication Tests', () => {
   });
 
   // Tier 2: Boundary & Corner Cases (5 cases)
-  test('Test signup with weak password (<6 characters) and verify error', async ({ page }) => {
+  // Polityka haseł z konsoli (Require enforcement, 2026-08-17): 8 znaków, wielka litera,
+  // mała litera, cyfra. Te trzy testy pilnują, żeby ekran mówił to samo, co odrzuca serwer —
+  // przed poprawką ekran resetu obiecywał 6 znaków i zapętlał użytkownika.
+  test('Rejestracja: za słabe hasło wymienia, czego brakuje (polityka 8 + Aa1)', async ({ page }) => {
     await setupFirebaseMocks(page, { dbData: mockDbData });
     await page.goto('/login');
-    
+
     // Switch to register
     await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
-    
+
     await page.fill('input[name="name"]', 'New User');
     await page.fill('input[name="email"]', 'weak@example.com');
     await page.fill('input[name="password"]', '12345');
     await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
-    
-    await expect(page.locator('text=Hasło jest za słabe (wymagane minimum 6 znaków).')).toBeVisible();
+
+    await expect(page.locator('text=Hasło nie spełnia wymagań — brakuje: co najmniej 8 znaków, wielkiej litery i małej litery.')).toBeVisible();
+  });
+
+  test('Rejestracja: hasło bez wielkiej litery odrzucone z konkretną wskazówką', async ({ page }) => {
+    await setupFirebaseMocks(page, { dbData: mockDbData });
+    await page.goto('/login');
+
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
+    await page.fill('input[name="name"]', 'New User');
+    await page.fill('input[name="email"]', 'nouppercase@example.com');
+    await page.fill('input[name="password"]', 'haslo12345');
+    await page.locator('.wp4a-check__box').click();
+    await page.click('button[type="submit"]');
+
+    await expect(page.locator('text=Hasło nie spełnia wymagań — brakuje: wielkiej litery.')).toBeVisible();
+    // Ekran rejestracji zostaje — użytkownik nie jest przerzucany na ekran weryfikacji.
+    await expect(page.locator('text=Sprawdź swoją skrzynkę')).toHaveCount(0);
+  });
+
+  test('Wymagania hasła widoczne przy rejestracji, ukryte przy logowaniu', async ({ page }) => {
+    await setupFirebaseMocks(page, { dbData: mockDbData });
+    await page.goto('/login');
+
+    // Logowanie: podpowiedzi nie ma — stare hasła (sprzed 17.08) muszą działać bez straszenia.
+    await expect(page.locator('.wp4a-hint')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
+    await expect(page.locator('text=Minimum 8 znaków, w tym wielka litera, mała litera i cyfra.')).toBeVisible();
   });
 
   test('Test signup with email already in use and verify error', async ({ page }) => {
@@ -117,7 +147,7 @@ test.describe('Authentication Tests', () => {
     
     await page.fill('input[name="name"]', 'Existing User');
     await page.fill('input[name="email"]', 'existing@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="password"]', 'Password123');
     await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
@@ -149,7 +179,7 @@ test.describe('Authentication Tests', () => {
     await page.goto('/login');
     
     await page.fill('input[name="email"]', 'unverified@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="password"]', 'Password123');
     await page.click('button[type="submit"]');
     
     await expect(page.locator('text=Twój adres email nie został jeszcze zweryfikowany.')).toBeVisible();
@@ -174,7 +204,7 @@ test.describe('Authentication Tests', () => {
     
     await page.fill('input[name="name"]', 'Verify User');
     await page.fill('input[name="email"]', 'verifyresend@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="password"]', 'Password123');
     await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
@@ -200,7 +230,7 @@ test.describe('Authentication Tests', () => {
     
     await page.fill('input[name="name"]', 'Combo User');
     await page.fill('input[name="email"]', 'combo@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="password"]', 'Password123');
     await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
@@ -223,7 +253,7 @@ test.describe('Authentication Tests', () => {
     await page.getByRole('button', { name: 'Rejestracja', exact: true }).click();
     await page.fill('input[name="name"]', 'Real User');
     await page.fill('input[name="email"]', 'realuser@example.com');
-    await page.fill('input[name="password"]', 'securepassword123');
+    await page.fill('input[name="password"]', 'Securepassword123');
     await page.locator('.wp4a-check__box').click();
     await page.click('button[type="submit"]');
     
@@ -252,7 +282,7 @@ test.describe('Authentication Tests', () => {
     
     // Login with clean credentials
     await page.fill('input[name="email"]', 'realuser@example.com');
-    await page.fill('input[name="password"]', 'securepassword123');
+    await page.fill('input[name="password"]', 'Securepassword123');
     await page.click('button[type="submit"]');
     
     // Redirect to dashboard

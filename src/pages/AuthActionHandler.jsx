@@ -4,6 +4,7 @@ import { applyActionCode, verifyPasswordResetCode, confirmPasswordReset } from '
 import { auth } from '../firebase';
 import { XCircle, Key, MailCheck, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BrandStyles } from '../styles/brand';
+import { PASSWORD_HINT, PASSWORD_MIN_LENGTH, validatePassword } from '../utils/passwordPolicy';
 
 export default function AuthActionHandler() {
   const [searchParams] = useSearchParams();
@@ -47,7 +48,7 @@ export default function AuthActionHandler() {
         case 'auth/invalid-action-code': setError('Ten link jest nieprawidłowy lub został już wykorzystany.'); break;
         case 'auth/user-disabled': setError('Twoje konto zostało zablokowane.'); break;
         case 'auth/user-not-found': setError('Nie znaleziono użytkownika przypisanego do tego konta.'); break;
-        case 'auth/weak-password': setError('Twoje nowe hasło jest za słabe. Musi mieć co najmniej 6 znaków.'); break;
+        case 'auth/weak-password': setError(`Twoje nowe hasło nie spełnia wymagań. ${PASSWORD_HINT}`); break;
         default: setError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
       }
     } finally {
@@ -60,8 +61,9 @@ export default function AuthActionHandler() {
     e.preventDefault();
     setError('');
     setIsProcessing(true);
-    if (newPassword.length < 6) {
-      setError('Hasło musi składać się z co najmniej 6 znaków.');
+    const niezgodne = validatePassword(newPassword);
+    if (niezgodne) {
+      setError(niezgodne);
       setIsProcessing(false);
       return;
     }
@@ -136,13 +138,15 @@ export default function AuthActionHandler() {
               <label className="wpb-flabel">Nowe hasło</label>
               <div style={{ position: 'relative' }}>
                 <input className="wpb-input" type={showPassword ? 'text' : 'password'} value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 6 znaków" required minLength={6}
+                  onChange={(e) => setNewPassword(e.target.value)} placeholder="Nowe hasło" required minLength={PASSWORD_MIN_LENGTH}
                   style={{ paddingRight: 44 }} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', display: 'flex', padding: 4 }}>
                   {showPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
                 </button>
               </div>
+              {/* Wymagania widoczne PRZED wysłaniem — Firebase odrzuca hasło bez podania, czego brakuje. */}
+              <p className="wpb-body" style={{ fontSize: 13, color: 'var(--muted)', margin: '8px 0 0' }}>{PASSWORD_HINT}</p>
             </div>
             <button type="submit" disabled={isProcessing} className="wpb-btn wpb-btn--primary wpb-btn--block">
               Zapisz nowe hasło
