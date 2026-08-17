@@ -81,10 +81,14 @@ nie przeglądarką.
 
 ## Znane pułapki
 
-- **App Check zwraca `403`** na produkcji (dobowy throttle, [[Known-Issues]] #13). Dziś
-  nieszkodliwe, bo egzekwowanie jest wyłączone. **Nie włączaj egzekwowania w tym stanie** —
-  odcięłoby to aplikację od Firestore. Zadanie 1 z [[Projects/Instrukcje-wlasciciela]] było
-  z tego powodu skorygowane.
+- **App Check jest EGZEKWOWANY** dla Cloud Firestore i Authentication (potwierdzone
+  2026-08-13, 99% ruchu zweryfikowane). `403` widziany w narzędziach agenta to **poprawne
+  odsiewanie klienta bez tokenu**, a nie awaria produkcji — [[Known-Issues]] #13 zostało
+  z tego powodu sprostowane. ⚠️ Wcześniejsza wersja tego skilla twierdziła odwrotnie
+  („egzekwowanie wyłączone, nie włączaj") i trzy dni pracy stały na tej fałszywej przesłance.
+  Storage i Functions: patrz [[Projects/Instrukcje-wlasciciela]] sekcja 8 — Functions
+  **świadomie** zostają niewymuszane (`stripeWebhook` i `exportIcal` obsługują cudze serwery,
+  a funkcje callable wymuszają App Check własnym `enforceAppCheck: true`).
 - **`permission-denied` na localhoście** to zwykle App Check blokujący nieatestowanego
   klienta, a nie rozjazd reguł. Produkcyjna domena przechodzi atestację reCAPTCHA.
 - **Deklaracja „e2e N/N" starzeje się.** Jest prawdziwa wyłącznie w dniu przebiegu, więc

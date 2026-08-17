@@ -4,8 +4,11 @@
 > Ten plik mówi **JAK** — klik po kliku, komenda po komendzie.
 > Stan planowania nadal żyje w [[Projects/Roadmap]] (jedyne źródło prawdy).
 >
-> **Wersja:** 2026-08-11 — dopisany plan tygodnia 11–17.08 i kolejność wg pilności.
-> (Poprzednia: 2026-08-10, po deployu bloku A — push + reguły + `hosting:app`.)
+> **Wersja:** 2026-08-17 — plan tygodnia przepisany na stan po 13.08 (cztery pozycje zeszły
+> z listy), sekcja 6 przepisana pod decyzję o **działalności nierejestrowanej**, dopisane
+> dwie nowe sekcje krok po kroku: **8** (App Check dla Storage i Functions) i **9**
+> (szablony e-maili Auth).
+> (Poprzednie: 2026-08-11 — plan tygodnia 11–17.08; 2026-08-10 — deploy bloku A.)
 >
 > 📄 **Wolisz Worda?** `npm run docs:docx` generuje czytelną kopię tego dokumentu
 > w `docs/docx/` (do otwarcia w Wordzie, Pages, Dokumentach Google). Kopia jest
@@ -17,37 +20,41 @@
 
 ---
 
-## 🗓️ Plan tygodnia 11–17.08 — od najpilniejszego
+## 🗓️ Co zostało do końca tygodnia (stan 17.08)
 
-> ✅ **2026-08-13, domknięte tego samego dnia: strony gościa działają.** Przyczyną był
-> **wyłączony dostawca „Anonymous"** w Authentication → Sign-in method (nie App Check, jak
-> podejrzewałem po drodze). Właściciel włączył, przewodnik otwiera się na telefonie,
-> wymuszanie App Check przywrócone. Przebieg i trzy warstwy blokad: [[Known-Issues]] #16.
+> ✅ **13.08 zdjął z listy cztery pozycje naraz**: smoke testy 4a–4f (komplet), kopie
+> zapasowe Firestore, logi nocnego purge i App Check dla Firestore. Przy okazji domknięte
+> #16 (strony gościa nie działały przez wyłączonego dostawcę „Anonymous") i pakiet dla
+> prawnika doprowadzony do stanu bieżącego (errata E10).
+> ⚠️ **Od 13.08 wieczorem nie ma ani jednego commita** — 14, 15 i 16.08 przeszły bez pracy
+> nad tymi pozycjami. Dziś jest **poniedziałek 17.08, ostatni dzień tego tygodnia planu**,
+> więc poniższa lista to uczciwy stan, a nie plan sprzed czterech dni.
 
-| # | Zadanie | Sekcja | Czas | Dlaczego tak wysoko / nisko |
+| # | Zadanie | Sekcja | Czas | Status |
 |---|---|---|---|---|
-| ① | **Ponaglić prawnika + przysłać dane firmy** | sekcja **6** | ~5 min | Jedyny twardy bloker launchu i **jedyna pozycja, która nie ruszy się sama**. Pakiet leży u prawnika od 22.07. |
-| ② ✅ | **Kopie zapasowe Firestore (PITR)** — zrobione za Ciebie 13.08 | sekcja **2** | — | Dziś **zero** ścieżki odtworzenia danych, a co noc chodzi funkcja, która kasuje. Najtańsza rzecz o największej asymetrii. |
-| ③ ✅ | **Logi nocnego purge** — sprawdzone 13.08, czysto | sekcja **5** | — | Funkcja kasująca dane chodzi od 22.07 **bez ani jednego spojrzenia w logi**. |
-| ④ ✅ | **Smoke testy 4a–4f** — komplet zdany 13.08 | sekcja **4** | — | X17 wszedł na produkcję **10.08**. Jeśli migracja `guests`→`adults` nie działa na realnych danych, zapis starej rezerwacji **cicho zeruje liczbę osób**. |
-| ⑤ ✅ | **App Check** — potwierdzone i egzekwowane; 403 okazał się fałszywym alarmem | sekcja **1** | — | Ważne (prawnik pyta wprost), ale **nie da się domknąć jednym kliknięciem** — najpierw reCAPTCHA, potem doba throttle. Włączenie egzekwowania dziś odcięłoby aplikację. |
-| ⑥ | **N6.5 — czyszczenie sierot** | sekcja **3** | ~20 min | Dług z przeszłości, nie rośnie — nowe kasacje sprzątają po sobie. |
-| ⑦ | **Decyzja: polityka haseł** | sekcja **7** | ~5 min | Tanie, nie blokuje niczego. Potrzebne jedno zdanie. |
+| ① | **Prawnik (N4)** | **6** | — | ⏸ **Nie czeka na Ciebie.** Ponaglony 13.08, pakiet aktualny. Dane Operatora — decyzja z 17.08, patrz sekcja 6. |
+| ② ✅ | Kopie zapasowe Firestore (PITR + harmonogram) | 2 | — | zrobione za Ciebie 13.08 |
+| ③ ✅ | Logi nocnego purge | 5 | — | sprawdzone 13.08, czysto |
+| ④ ✅ | Smoke testy 4a–4f | 4 | — | komplet zdany 13.08 |
+| ⑤ | **App Check — Storage i Functions** | **8** ⭐ nowa | ~15 min | ⬜ Firestore i Authentication już wymuszane; zostały dwie usługi i **jedna z nich ma zostać wyłączona świadomie** |
+| ⑥ | **N6.5 — czyszczenie sierot w Storage** | 3 | ~20 min | ⬜ potrzebny klucz serwisowy; robimy razem |
+| ⑦ | **Polityka haseł — wprowadzenie w konsoli** | 7 | ~5 min | ⬜ decyzja podjęta 13.08 (8 znaków + litera i cyfra), zostaje samo kliknięcie |
+| ⑧ | **Szablony e-maili Auth** | **9** ⭐ nowa | ~10 min | ⬜ dziś link weryfikacyjny prowadzi na obcą domenę i angielski ekran Google |
 
-**Dzień po dniu**
+**Sugerowana kolejność (dziś i dalej):** ⑦ → ⑧ → ⑤ → ⑥.
+Trzy pierwsze to konsola i po kilka minut każde; N6.5 zostawiam na koniec, bo wymaga klucza
+serwisowego i mojej asysty przy przeglądaniu listy plików.
 
-| Dzień | Ty | Ja (nie czeka na Ciebie) |
-|---|---|---|
-| **wt 11.08** | ① prawnik + dane firmy · ② PITR · ③ logi purge | triage 52 zastanych awarii e2e |
-| **śr 12.08** | ④ smoke 4a + **4b** · ⑤ App Check (403) | triage · luka N6.1 na ekranach błędu |
-| **czw 13.08** | ✅ **④ smoke 4a–4f — komplet** · ✅ #16 (logowanie anonimowe) · ✅ ⑤ App Check | ✅ tor `dev` wdrożony (RODO + #15) · ✅ ② i ③ za Ciebie · ✅ CI + smoke produkcji + hooki · ✅ Sentry (wyłączony) · ✅ Dependabot |
-| **pt 14.08** | ① prawnik · ⑥ N6.5 (potrzebny klucz serwisowy) · ⑦ hasła w konsoli · #10 adres w szablonach maili | X18 (raport PDF) po Twojej stronie decyzji o kolejności |
+**Po mojej stronie (nie czeka na Ciebie):** wdrożenie poprawki druku raportu (X18 część 1 —
+naprawiona 13.08 wieczorem, ale **nie trafiła jeszcze na produkcję**). Dopóki jej nie wypchnę,
+Twój ponowny wydruk kontrolny nie ma sensu — drukowałbyś starą wersję.
 
-Po odesłaniu wyników **N6 zamyka się w całości**, `legal` aktualizuje §9 i erratę pakietu,
-a jedynym otwartym blokerem launchu zostaje **odpowiedź prawnika**.
+Po ⑤–⑧ **N6 zamyka się w całości**, a jedynym otwartym blokerem launchu zostaje
+**odpowiedź prawnika**.
 
 **Świadomie NIE w tym tygodniu:** X3, X6, X7 (czeka na Twoją decyzję o zakresie), X8,
-reszta X9 (indeksowalność SPA, JSON-LD), X11. Wszystko po launchu albo równolegle do niego.
+reszta X9 (indeksowalność SPA, JSON-LD), X11, właściwe X18 (typografia wydruku).
+Wszystko po launchu albo równolegle do niego.
 
 ---
 
@@ -325,52 +332,197 @@ Nigdy tego nie zrobiliśmy — a to funkcja, która **kasuje dane**.
 
 ---
 
-# 6. Prawnik (N4) ⏱️ ~5 min · 🔴 bloker launchu · **kolejność ① — zacznij od tego**
+# 6. Prawnik (N4) i dane Operatora ⏱️ — · 🔴 bloker launchu · **⏸ czeka na prawnika, nie na Ciebie**
 
-Pakiet trafił do prawnika **22.07 — 20 dni temu** (stan na 11.08). To jedyna pozycja na całej liście,
-która **nie ruszy się sama**, a bez niej nie ma publicznego launchu.
+Pakiet jest u prawnika od 22.07, **ponaglony 13.08** i tego samego dnia doprowadzony do stanu
+bieżącego (errata E10). Gdyby zaczął czytać teraz, czyta stan faktyczny. Po Twojej stronie
+nie ma tu w tej chwili żadnego kliknięcia — czekamy na uwagi.
 
-Warto ponaglić i zapytać o dwie rzeczy:
-1. **Kiedy realnie możesz spodziewać się uwag** (potrzebujesz daty, nie „wkrótce" —
-   od tego zależy planowanie reszty).
-2. Czy prawnik potrzebuje czegoś od nas, żeby ruszyć — bo jeśli tak, to lepiej się dowiedzieć
-   teraz niż za kolejne trzy tygodnie.
+### Decyzja właściciela 2026-08-17: start na działalności nierejestrowanej
 
-W międzyczasie możesz uzupełnić miejsca oznaczone `[DO UZUPEŁNIENIA]` w dokumentach
-(`docs/legal/`): **dane rejestrowe firmy, adresy kontaktowe, warunki oferty founding members**.
-To Twoje dane, nie mam ich skąd wziąć — a bez nich dokumentów i tak nie opublikujemy.
-Jak mi je podasz, wpiszę je wszędzie tam, gdzie trzeba.
+**Ustalenie:** aplikacja rusza w ramach **działalności nierejestrowanej**, a rejestracja
+**JDG** następuje dopiero po przekroczeniu progu przychodu. Miejsca `[DO UZUPEŁNIENIA]`
+dotyczące firmy (nazwa, forma prawna, NIP, REGON, KRS) **zostają puste świadomie** —
+to nie jest zaległość, tylko odzwierciedlenie stanu faktycznego.
+
+**Co z tego wynika dla dokumentów** (`docs/legal/`):
+
+- Operator nie jest „firmą" z nazwą i NIP-em, tylko **osobą fizyczną**. Regulamin, Polityka
+  i DPA muszą to nazywać poprawnie — dopisuję to jako pytanie do prawnika, bo od formy
+  Operatora zależy brzmienie kilku paragrafów naraz.
+- ⚠️ **Jedno „do uzupełnienia" zostaje mimo wszystko: kto jest Operatorem.** Obowiązek podania
+  **imienia i nazwiska, adresu do korespondencji i adresu e-mail** nie bierze się z formy
+  działalności, tylko z bycia usługodawcą (UŚUDE art. 5) i administratorem danych (RODO art. 13).
+  Bez tego dokumenty nie wyjdą z etapu projektu — **niezależnie od tego, czy jest JDG, czy nie**.
+  To jedyna rzecz z tej sekcji, którą warto mi podać, gdy uznasz za stosowne.
+- 🛑 **PESEL-u nie publikujemy nigdzie.** W dokumentach dla klientów identyfikatorem jest
+  imię i nazwisko plus adres — nie numer ewidencyjny. (W kodzie pole `taxIdentifier` już dziś
+  bywa PESEL-em i dlatego jest traktowane jak dane wrażliwe.)
+
+### Cztery pytania dopisane do pakietu dla prawnika
+
+Wynikają wprost z tej decyzji i **żadnego z nich nie rozstrzygam sam** — to są pytania
+o prawo, nie o kod:
+
+1. **Status konsumencki:** czy sprzedając abonament jako osoba prowadząca działalność
+   nierejestrowaną, jestem wobec klientów przedsiębiorcą w rozumieniu przepisów
+   konsumenckich (odstąpienie, reklamacje, Omnibus przy „founding members")?
+2. **VAT i faktury:** czy usługa SaaS w tym modelu mieści się w zwolnieniu, jak dokumentować
+   sprzedaż i co z klientami z innych krajów UE — Regulamin §6 ma tu dziś placeholder.
+3. **Próg i moment przejścia:** przy jakim przychodzie i w jakim terminie trzeba
+   zarejestrować JDG — i czy przekroczenie progu w trakcie miesiąca zmienia coś dla
+   umów już zawartych z abonentami.
+4. **Zmiana formy bez zmiany umowy:** czy Regulamin powinien z góry przewidywać przejście
+   Operatora z działalności nierejestrowanej na JDG, żeby nie trzeba było wtedy
+   przeprowadzać zmiany regulaminu dla wszystkich klientów.
+
+### Gdy prawnik się odezwie
+
+Poproś o **datę**, nie o „wkrótce", i o informację, czy czegoś od nas potrzebuje.
+Uwagi przekaż mi w dowolnej postaci — naniosę je na dokumenty i zaktualizuję erratę.
 
 ---
 
-# 7. Decyzja: polityka haseł ⏱️ ~5 min · 🟢 tanie · **kolejność ⑦**
+# 7. Polityka haseł — wprowadzenie decyzji ⏱️ ~5 min · 🟢 · **kolejność ⑦ (zrób jako pierwsze)**
 
-Dziś obowiązuje domyślne minimum Firebase: **6 znaków**, bez wymogu złożoności
-i bez sprawdzania haseł z wycieków. Dla aplikacji, w której gospodarz trzyma dane swoich
-najemców, to niski próg.
+> ✅ **Decyzja zapadła 13.08: 8 znaków + wymóg litery i cyfry.** Odrzucone: 10 znaków ze
+> znakiem specjalnym (koszt w porzuconych rejestracjach i hasłach zapisywanych na kartce)
+> oraz zostawienie domyślnych 6 znaków. **Zostaje samo wprowadzenie w konsoli** — decyzji
+> już nie podejmujesz, tylko ją klikasz.
 
-Podnosisz? Konsola Firebase → **Authentication** → **Settings / Ustawienia** →
-zasady haseł (minimalna długość, wymagane typy znaków).
+Dziś obowiązuje domyślne minimum Firebase: **6 znaków**, bez wymogu złożoności.
+Dla aplikacji, w której gospodarz trzyma dane swoich najemców, to niski próg.
 
-**Uwaga:** zaostrzenie dotyczy **nowych haseł**. Istniejące konta działają dalej —
-to nie jest zmiana, która kogoś wyloguje.
+### Kroki
+
+1. Konsola Firebase → projekt `moje-domki-6c77d` → **Authentication**.
+2. Zakładka **Settings / Ustawienia** → sekcja **Password policy / Zasady haseł**.
+3. Włącz politykę i ustaw:
+   - **minimalna długość: 8**
+   - **wymagaj znaku alfabetycznego (litery)** ✓
+   - **wymagaj cyfry** ✓
+   - wielkich liter i znaków specjalnych **nie** zaznaczamy (świadomie — to była ta odrzucona opcja).
+4. Jeśli zobaczysz wybór trybu egzekwowania (**Require / Wymagaj** kontra **Notify /
+   Powiadamiaj**), wybierz **Require** — „Notify" tylko odnotowuje słabe hasło i wpuszcza dalej.
+5. Zapisz.
+
+⚠️ **Jeśli nie widzisz sekcji zasad haseł** — to znaczy, że projekt nie jest podniesiony do
+Identity Platform (funkcja jest dostępna dopiero tam). Nie klikaj wtedy nic w kwestii
+podniesienia planu: napisz mi, a sprawdzimy, co to zmienia w cenniku Authentication,
+i zdecydujesz na liczbach.
+
+**Uwaga:** zaostrzenie dotyczy **nowych haseł i ich zmian**. Istniejące konta działają dalej —
+to nie jest zmiana, która kogokolwiek wyloguje.
+
+### Gotowe, gdy
+W konsoli widać aktywną politykę 8 znaków z wymogiem litery i cyfry.
 
 ### Odeślij mi
-> „Hasła: podnoszę do N znaków + wymagania … / zostawiam 6 znaków"
+> „Hasła: ustawione 8 + litera i cyfra" albo „nie ma takiej sekcji"
 
-Decyzja trafi do „Otwartych decyzji" w [[Projects/Roadmap]] i do dokumentów `legal`.
+Wtedy `legal` zdejmuje tę pozycję z §9 dokumentu bezpieczeństwa i z erraty pakietu
+(dziś jest tam zapisana jako decyzja z jawnym „wprowadzenie jeszcze przed nami").
+
+---
+
+# 8. App Check — Storage i Functions ⏱️ ~15 min · 🟠 · **kolejność ⑤** *(nowa sekcja, 2026-08-17)*
+
+> **Kontekst:** 13.08 ustaliliśmy stan faktyczny — **Cloud Firestore: wymuszane** (99% ruchu
+> zweryfikowane) i **Authentication: wymuszane**. Zostały dwie usługi: **Storage**
+> (dziś tylko monitorowanie, 100% ruchu zweryfikowane) i **Functions** (niewymuszane).
+> To jest ta „⏸ otwarta decyzja" z N6.4 — poniżej rozpisana tak, żeby dała się kliknąć.
+
+## 8a. Storage — **rekomendacja: włącz**
+
+Metryki z 13.08 pokazują **100% ruchu zweryfikowanego**, czyli włączenie nie powinno niczego
+odciąć. Storage niesie okładki i pliki przewodników pokazywane gościom, więc mimo dobrych
+metryk sprawdzamy efekt od razu po kliknięciu.
+
+1. Konsola Firebase → **App Check** → zakładka **Interfejsy API / APIs**.
+2. Wiersz **Cloud Storage** → **Wymuszaj / Enforce** → potwierdź.
+3. **Natychmiast zweryfikuj** (nie odkładaj tego na później — cofnięcie działa od ręki):
+   otwórz w **oknie prywatnym** link do dowolnego swojego przewodnika gościa i sprawdź,
+   czy **okładka i pliki się ładują**.
+4. Jeśli cokolwiek przestało się pokazywać — wróć do tego samego wiersza i przełącz
+   z powrotem na **Monitorowanie**. Skutek jest natychmiastowy, nic nie trzeba wdrażać.
+
+## 8b. Functions — **rekomendacja: NIE włączaj** ⚠️
+
+Sprawdziłem to dziś w kodzie i wychodzi na to, że **włączenie tu nic nie zyskuje, a może
+położyć płatności**:
+
+- **Wszystkie pięć funkcji wywoływanych z aplikacji już dziś wymusza App Check** — w kodzie,
+  osobno dla każdej (`enforceAppCheck: true` przy `createCheckoutSession`,
+  `createBillingPortalSession`, `syncICalCalendars`, `deleteUserAccount`, `deleteGuide`).
+  Ochrona, o którą chodzi, **jest już włączona** i nie zależy od przełącznika w konsoli.
+- **Dwie pozostałe funkcje są wywoływane przez cudze serwery**, które z definicji nie mają
+  naszego tokenu: `stripeWebhook` (Stripe informuje nas o płatnościach) i `exportIcal`
+  (Booking i Airbnb pobierają kalendarz). Wymuszanie na poziomie usługi celuje właśnie
+  w ruch „bez tokenu" — czyli dokładnie w te dwa wejścia.
+- Cena pomyłki jest niesymetryczna: odcięty webhook Stripe oznacza **subskrypcje, o których
+  aplikacja się nie dowiaduje**, a odcięty `exportIcal` — kalendarze, które przestają się
+  synchronizować z portalami. Bez żadnego zysku, bo to, co dało się zabezpieczyć, już jest.
+
+**Decyzja do podjęcia:** zostawiamy Functions na „niewymuszane" i zapisujemy **dlaczego**
+(żeby za trzy miesiące nikt nie uznał tego za przeoczenie). Jeśli się zgadzasz, napisz jedno
+zdanie — wpiszę to do dokumentów jako świadomy wybór z uzasadnieniem, a nie brak.
+
+### Odeślij mi
+> „App Check: Storage = wymuszane (okładki działają) / Functions = zostawiamy niewymuszane"
+
+Wtedy **N6.4 zamyka się w całości**, a `legal` dopisuje stan trzech usług do §9 i erraty —
+pytanie prawnika 4.1 pkt 5 dostaje pełną, a nie częściową odpowiedź.
+
+---
+
+# 9. Szablony e-maili Auth — markowy adres zamiast obcej domeny ⏱️ ~10 min · 🟠 · **kolejność ⑧** *(nowa sekcja, 2026-08-17)*
+
+> Pełny opis, skąd się to wzięło: [[Zlecenia-wlasciciela]] #10 (zgłoszone przez Ciebie
+> przy smoke 4f: „nie podoba mi się link służący do weryfikacji oraz samo zatwierdzanie konta").
+
+**Co dziś dostaje nowy klient:** link w mailu prowadzi na `moje-domki-6c77d.firebaseapp.com`
+— domenę, która nie ma nic wspólnego z produktem — i ląduje na **domyślnym, angielskim ekranie
+Google** („Verify Email Address"). Dla kogoś, kto właśnie założył konto w WynajemPRO, wygląda
+to jak próba wyłudzenia. **Nasza własna, markowa strona działa na produkcji od 1 lipca**
+(`wynajempro.com/auth/action`) — Firebase po prostu nigdy nie dostał polecenia, żeby z niej
+korzystać.
+
+### Kroki (konsola Firebase → **Authentication** → **Templates / Szablony**)
+
+1. Szablon **„Weryfikacja adresu e-mail"** → ikona **ołówka**.
+2. Na dole edytora: **„Dostosuj adres URL akcji" / „Customize action URL"**.
+3. Wpisz dokładnie: `https://wynajempro.com/auth/action` → **zapisz**.
+4. **Powtórz dla dwóch pozostałych szablonów**: „Resetowanie hasła" i „Zmiana adresu e-mail"
+   — nasza strona obsługuje wszystkie trzy tryby.
+5. W tym samym edytorze popraw **pisownię marki**: w treści i podpisie jest „WynajemPro",
+   a identyfikacja mówi **WynajemPRO** (tak jak w nazwie nadawcy).
+
+### Weryfikacja
+Zarejestruj konto na kolejny alias (`+test2`) i sprawdź, że link prowadzi na `wynajempro.com`
+i otwiera **naszą** stronę, a nie ekran Google. Konto testowe potem usuń.
+
+⚠️ **Bez ryzyka dla starych linków:** maile już wysłane niosą stary adres i nadal zadziałają
+na ekranie Google. Zmiana dotyczy wyłącznie kolejnych wiadomości.
+
+### Odeślij mi
+> „Szablony: action URL ustawiony w 3 miejscach, pisownia poprawiona, `+test2` otwiera naszą stronę"
 
 ---
 
 ## Podsumowanie — lista do odhaczenia (w kolejności wykonania)
 
-- [ ] ① **sekcja 6** — prawnik ponaglony + dane firmy przysłane (🔴 bloker launchu)
+- [~] ① **sekcja 6** — prawnik: ponaglony 13.08, pakiet aktualny → **⏸ czekamy na jego uwagi**.
+      Dane Operatora: decyzja z 17.08 (**działalność nierejestrowana**, JDG po przekroczeniu progu);
+      placeholdery firmowe zostają puste świadomie, ale **imię, nazwisko, adres i e-mail Operatora
+      trzeba będzie podać** przed publikacją dokumentów (🔴 bloker launchu)
 - [x] ② **sekcja 2** — kopie zapasowe: ✅ **zrobione za Ciebie 2026-08-13** (PITR + dzienny harmonogram, 7 dni)
 - [x] ③ **sekcja 5** — logi nocnego purge: ✅ **sprawdzone 2026-08-13** (14 przebiegów 31.07–13.08, zero błędów, zero kasacji)
 - [x] ④ **sekcja 4** — smoke testy 4a–4f: ✅ **KOMPLET ZDANY 2026-08-13**; po drodze naprawione przewijanie dialogów, dopisane X18 (raport PDF), zlecenie #10 (adres w szablonach maili) i dług CSV w Backlogu
-- [ ] ⑤ **sekcja 1** — App Check: najpierw 403, potem metryki (🟠)
-- [ ] ⑥ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
-- [~] ⑦ **sekcja 7** — polityka haseł: decyzja **podjęta 2026-08-13** (8 znaków + litera i cyfra); zostaje wprowadzenie w konsoli (🟢)
+- [x] ⑤ **sekcja 1** — App Check dla Firestore: ✅ **potwierdzone 2026-08-13** (Enforced, 99% zweryfikowane; #13 obalony)
+- [ ] ⑥ **sekcja 8** — App Check dla **Storage** (włącz + sprawdź okładki) i **Functions** (świadomie zostawiamy) 🟠
+- [ ] ⑦ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
+- [ ] ⑧ **sekcja 7** — polityka haseł: decyzja **podjęta 2026-08-13** (8 znaków + litera i cyfra); zostaje wprowadzenie w konsoli (🟢)
+- [ ] ⑨ **sekcja 9** — szablony e-maili Auth: action URL na `wynajempro.com/auth/action` w 3 szablonach + pisownia marki (🟠)
 
 Po odesłaniu wyników zamykam N6 w całości, `legal` aktualizuje §9 i erratę pakietu,
 a jedynym otwartym blokerem launchu zostaje odpowiedź prawnika.
@@ -379,19 +531,21 @@ a jedynym otwartym blokerem launchu zostaje odpowiedź prawnika.
 
 ## Tor równoległy — po mojej stronie (nie czeka na Ciebie)
 
-Nie potrzebuję do tego konsoli ani Twojego konta. Pozycje żyją już w istniejących
-dokumentach — tu tylko ustawiam je w kolejce na ten tydzień:
+Nie potrzebuję do tego konsoli ani Twojego konta.
 
-- **B1. Triage 52 zastanych awarii e2e** (🔴 dług) — pełny przebieg suity 10.08 dał
-  52 czerwone testy (`guest-guide`, `stripe`, `ui-scaling`, `links-buttons`), sprawdzone
-  na `git stash` jako niezależne od tamtych zmian. Suita jest dziś **niewiarygodna**, a to
-  jedyna siatka pod launch. Rozdzielić na: zgniłe pod v2 (→ [[Projects/Roadmap]] X10)
-  i realne regresje (→ naprawa od razu).
-- **B2. Domknięcie luki N6.1** (🟠) — ekrany błędu `/guide/:id` i `/opinie/:id` renderują się
-  bez kredytu, więc gość z wygasłym linkiem po kliknięciu „Akceptuję" nadal nie ma jak
-  wycofać zgody. Fix ~1 linijka na widok; opisane w [[Projects/Roadmap]] N6.1 jako „reszta luki".
-- **B3. Nieświeża powłoka po deployu** (🟡, [[Known-Issues]] #15) — **wymaga Twojej decyzji**:
-  czy wdrażamy `skipWaiting` + komunikat „dostępna nowa wersja, odśwież". Dziś każdy deploy
-  zostawia użytkownika na starej wersji do następnego przeładowania, bez żadnej informacji.
+**Zamknięte 12–13.08:** ~~B1 triage 52 zastanych awarii e2e~~ ✅ (suita 134/134) ·
+~~B2 luka N6.1 na ekranach błędu widoków gościa~~ ✅ wdrożone 13.08 ·
+~~B3 nieświeża powłoka po deployu ([[Known-Issues]] #15)~~ ✅ wdrożone 13.08 (pasek
+„dostępna nowa wersja" — Twoja decyzja, zamiast automatycznego przeładowania).
+
+**Otwarte:**
+
+- **B4. Deploy X18 część 1** (🟠) — poprawka druku raportu jest w repo od 13.08 (21:08),
+  ale **nie ma jej na produkcji**: sprawdziłem 17.08 serwowany chunk `ManagerApp` na
+  `wynajempro.com` — nie zawiera obsługi `afterprint` z nowej wersji. Dopóki tego nie wypchnę,
+  Twój wydruk kontrolny nie sprawdza niczego nowego. **To jest moje najbliższe zadanie.**
+- **B5. Właściwe X18** (🟡, `designer`) — typografia dokumentu, gęstość tabel, sensowna liczba
+  stron przy pełnym roku i wielu obiektach, decyzja o osobnym widoku wydruku zamiast
+  drukowania modalu. Poprawka z 13.08 usunęła **wady mechaniczne**, nie zaprojektowała dokumentu.
 
 **Related:** [[Zlecenia-wlasciciela]] · [[Projects/Roadmap]] · [[Known-Issues]] · [[Activity-Log]]

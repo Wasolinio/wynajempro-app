@@ -4,6 +4,35 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-17
+
+### Decyzja: start na działalności nierejestrowanej — i co to zmienia w pakiecie prawnym
+- 🎯 **Powód**: właściciel rozstrzygnął pozycję, która od 22.07 wisiała jako „dane rejestrowe firmy [DO UZUPEŁNIENIA]". Ustalenie: aplikacja rusza w ramach **działalności nierejestrowanej**, **JDG** dopiero po przekroczeniu progu przychodu.
+- ✅ **Placeholdery firmowe zamknięte jako świadomy stan, nie zaległość**: nazwa, forma prawna, NIP, REGON, KRS **zostają puste** — bo nie istnieją. Zapisane w [[Projects/Roadmap]] N4, [[Projects/Zlecenia-wlasciciela]] #6 i [[Projects/Instrukcje-wlasciciela]] sekcja 6, żeby za miesiąc nikt nie próbował ich „uzupełniać".
+- ⚠️ **Bramka publikacji dokumentów mimo to zostaje zamknięta** i mówię to wprost, bo brzmi jak zła wiadomość: obowiązek podania **imienia, nazwiska, adresu do korespondencji i e-maila** wynika z bycia usługodawcą (UŚUDE art. 5) i administratorem danych (RODO art. 13), a nie z formy działalności. Decyzja skraca listę braków, ale jej nie kasuje.
+- 🛡️ **PESEL nie trafia do żadnego dokumentu publicznego** — przy działalności nierejestrowanej to jedyny „identyfikator podatkowy", więc pokusa jest realna. Ta sama ostrożność, co przy polu `taxIdentifier` w kodzie.
+- ⚖️ **Czego ta decyzja NIE rozstrzyga** — cztery pytania dopisane do pakietu dla prawnika, żadnego nie rozstrzygam sam: status konsumencki sprzedawcy w działalności nierejestrowanej (odstąpienie, reklamacje, Omnibus przy „founding members"), VAT i faktury przy SaaS oraz klienci z UE, próg i moment przejścia na JDG wobec umów już zawartych, oraz czy Regulamin ma z góry przewidywać zmianę formy Operatora — inaczej przy rejestracji JDG trzeba będzie przeprowadzać zmianę regulaminu dla wszystkich klientów.
+
+### Instrukcje właściciela przepisane na stan bieżący + dwie nowe sekcje
+- 🎯 **Powód**: plan tygodnia w [[Projects/Instrukcje-wlasciciela]] pokazywał stan z 11.08, a 13.08 zdjął z listy cztery pozycje naraz. **14, 15 i 16.08 przeszły bez ani jednego commita**, a dziś jest ostatni dzień tygodnia planu — dokument opisywał więc plan sprzed sześciu dni jako aktualny.
+- ⚠️ **Poprawiam własną pomyłkę z tej samej sesji**: pierwszą wersję tych zmian podpisałem datą **15.08**, bo źle odczytałem dzień. Wszystkie wpisy i nagłówki przestemplowane na **2026-08-17** (`date` na maszynie: poniedziałek 17.08, 14:39).
+- ✅ **Sekcja 8 (nowa) — App Check dla Storage i Functions**: rekomendacja **rozdzielona**, bo dwie usługi mają odwrotny bilans ryzyka. Storage: włączyć (100% ruchu zweryfikowane wg metryk z 13.08) z natychmiastowym sprawdzeniem okładek u gościa i instrukcją cofnięcia. Functions: **świadomie zostawić niewymuszane**.
+- 🔥 **Uzasadnienie dla Functions wzięte z kodu, nie z ostrożności**: `grep` po `functions/index.js` pokazał, że **wszystkie pięć funkcji wywoływanych z aplikacji już dziś wymusza App Check per-funkcja** (`enforceAppCheck: true` — `createCheckoutSession`, `createBillingPortalSession`, `syncICalCalendars`, `deleteUserAccount`, `deleteGuide`). Zostają dwa wejścia `onRequest` wołane przez **cudze serwery**, które z definicji nie mają naszego tokenu: `stripeWebhook` (płatności) i `exportIcal` (kalendarze Booking/Airbnb). Wymuszanie na poziomie usługi celuje właśnie w ruch bez tokenu — czyli w te dwa. **Zysk zerowy, koszt pomyłki: subskrypcje, o których aplikacja się nie dowiaduje.**
+- ✅ **Sekcja 9 (nowa) — szablony e-maili Auth**: zlecenie #10 rozpisane klik po kliku (action URL `https://wynajempro.com/auth/action` w trzech szablonach + pisownia „WynajemPro" → **WynajemPRO**), z weryfikacją na aliasie `+test2`.
+- ✅ **Sekcja 7 przepisana z „decyzja" na „wykonanie"**: polityka haseł była rozstrzygnięta 13.08 (8 znaków + litera i cyfra), a instrukcja nadal pytała właściciela, czy podnosi. Dopisana pułapka: jeśli sekcji zasad haseł nie ma w konsoli, projekt nie jest podniesiony do Identity Platform — i **nie należy tego klikać w ciemno**, bo to zmiana cennika Authentication.
+- 📌 **Obie kopie `.docx` przegenerowane** (`npm run docs:docx`) — 28 kB i 18 kB.
+- ⏸ **Kolejność na weekend** (Twoja strona): hasła → szablony maili → App Check Storage → N6.5. Trzy pierwsze to konsola po kilka minut; N6.5 wymaga klucza serwisowego i przeglądu listy plików razem ze mną.
+
+### Poprawka druku raportu (X18) nie dotarła na produkcję — wykryte przy przeglądzie stanu
+- 🔎 **Jak to wyszło**: przy podsumowaniu „na czym skończyliśmy" sprawdziłem, czy commit `5b297a1` (13.08, 21:08) jest na żywo. Pobrany z `wynajempro.com` chunk `ManagerApp-yZo-UEJb.js` (268 kB) **nie zawiera ani jednego wystąpienia `afterprint`**, a nowa wersja `ProfitabilityReportModal.jsx` rejestruje ten listener przy podmianie `document.title`.
+- 🔴 **Skutek**: ostatni deploy `hosting:app` tego dnia poszedł o **16:25**, poprawka powstała o **21:08** — czyli produkcja drukuje nadal wersję z pustą stroną 1 i nazwą pliku z hasła reklamowego. **Wydruk kontrolny właściciela nie miałby dziś czego potwierdzić.**
+- ⚠️ **Wniosek na przyszłość**: „naprawione" i „wdrożone" to dwa różne stany, a wpis z 13.08 kończył się słowem „zostaje deploy" — po czym nastąpił dzień przerwy. Warto, żeby przegląd stanu **zaczynał się od porównania repo z produkcją**, a nie od czytania dziennika.
+- ✅ **DEPLOY WYKONANY 2026-08-17, 14:40** (za zgodą właściciela). Pre-flight: **lint 0**, **build OK** (32 wpisy precache, 1486 KiB), **e2e 134/134 w 44,4 s** (przebieg 17.08). Cel `hosting:app`: `git diff dc32e16..HEAD` po `firestore.rules`, `storage.rules`, `functions/`, indeksach i `firebase.json` — **pusty**, więc `--only hosting:app` jest właściwym i wystarczającym celem. Wynik: 39 plików w `dist`, **4 nowe wysłane**, release complete.
+- ✅ **Weryfikacja live**: serwowany chunk zmienił hash `ManagerApp-yZo-UEJb.js` → **`ManagerApp-Cifm6yoG.js`** i zawiera teraz `afterprint` (1 wystąpienie) oraz trzy wystąpienia „Raport rentowności" — czyli **dokładnie to, czego brakowało przed deployem**. W przeglądarce: `/`, `/kontakt`, `/pomoc` = **200**, service worker zarejestrowany, **zero błędów `Failed to fetch dynamically imported module`**, landing renderuje się poprawnie (zrzut). Przekierowanie 301 ze starej domeny z zachowaniem ścieżki: `moje-domki-6c77d.web.app/pomoc` → `wynajempro.com/pomoc`. Jedyny błąd w konsoli to **App Check 403** — czyli poprawne odsiewanie przeglądarki sterowanej automatem ([[Known-Issues]] #13), nie regresja.
+- ⏸ **Zostaje dowód końcowy po stronie właściciela**: raport jest za logowaniem, więc jedynym potwierdzeniem jest **ponowny wydruk** (Finanse → Raporty → Raport rentowności → Drukuj/PDF). Sprawdź dwie rzeczy: czy **pierwsza strona nie jest pusta** i czy proponowana **nazwa pliku** to „Raport rentowności … ", a nie hasło reklamowe. ⚠️ Otwórz panel po **twardym przeładowaniu** — pasek „dostępna nowa wersja" z 13.08 działa, ale bez odświeżenia zostaniesz na starej powłoce.
+
+---
+
 ## 2026-08-13
 
 ### X18 część pierwsza: druk raportu bez pustych stron i z sensowną nazwą pliku

@@ -133,8 +133,16 @@ i bez tego (rezerwowane `/__/*` nie podlega przekierowaniom).
 > bieżącego — errata urosła do **E10**, a z listy braków zeszły trzy pozycje (kopie zapasowe,
 > egzekwowanie App Check, ostrzeżenie przy usuwaniu konta) i doszła jedna (eksport CSV).
 > Gdyby prawnik zaczął czytać teraz, czyta stan faktyczny, nie lipcowy.
-> ⏸ **Zostaje po Twojej stronie: dane rejestrowe firmy** — bez nich dokumenty nie mogą wyjść
-> z etapu projektu (miejsca `[DO UZUPEŁNIENIA]`: nazwa, adres, NIP, warunki „founding members").
+> ✅ **2026-08-17 — decyzja o formie działalności:** start na **działalności nierejestrowanej**,
+> rejestracja **JDG** dopiero po przekroczeniu progu przychodu. Placeholdery firmowe (nazwa,
+> forma prawna, NIP, REGON, KRS) **zostają puste świadomie** — to stan faktyczny, nie zaległość.
+> ⏸ **Zostaje po Twojej stronie mimo to: kto jest Operatorem** — imię i nazwisko, adres do
+> korespondencji, e-mail. Ten obowiązek nie zależy od formy działalności (UŚUDE art. 5,
+> RODO art. 13), więc bez tego dokumenty nie wyjdą z etapu projektu. 🛑 PESEL nie trafia
+> do żadnego dokumentu publicznego.
+> 📌 Do pakietu dopisane **cztery pytania** wynikające z tej decyzji (status konsumencki,
+> VAT i faktury, próg i moment przejścia na JDG, czy Regulamin ma z góry przewidywać zmianę
+> formy Operatora) — rozpisane w [[Projects/Instrukcje-wlasciciela]] sekcja 6.
 Pakiet gotowy: **`docs/legal/Raport-dla-prawnika-2026-07-22.md`** (zacznij od niego — ma spis
 wszystkich plików i 15 pytań w priorytetach). Do wzięcia: Regulamin, Polityka, DPA,
 Bezpieczeństwo-kont-i-danych, Ocena-linki-guide-opinie, Checklista, Uwagi-N5.
@@ -147,8 +155,10 @@ Bezpieczeństwo-kont-i-danych, Ocena-linki-guide-opinie, Checklista, Uwagi-N5.
    do punktu w czasie (PITR). W repozytorium nie ma tego śladu, a redundancja Google
    **nie chroni przed omyłkowym skasowaniem danych przez aplikację**.
 
-Do uzupełnienia w dokumentach (miejsca oznaczone `[DO UZUPEŁNIENIA]`): dane rejestrowe firmy,
-adresy kontaktowe, wersja i data dokumentów, warunki oferty „founding members".
+Do uzupełnienia w dokumentach (miejsca oznaczone `[DO UZUPEŁNIENIA]`) — **po decyzji z 17.08
+lista jest krótsza**: dane Operatora jako osoby fizycznej (imię i nazwisko, adres do
+korespondencji, e-mail), wersja i data dokumentów, warunki oferty „founding members".
+Pozycje firmowe (nazwa, forma prawna, NIP, REGON, KRS) **odpadają do czasu rejestracji JDG**.
 
 ---
 
