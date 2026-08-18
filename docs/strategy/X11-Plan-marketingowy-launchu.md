@@ -1,8 +1,9 @@
 # X11 — Plan marketingowy launchu
 
-> **Status:** ✅ plan gotowy (2026-08-18) — research konkurencji ze źródłami, potwierdzone ICP,
-> wybrane kanały z testami i sekwencja wejścia. ⏸ Otwarte: kryteria wyjścia z fazy 1 (decyzja
-> właściciela) oraz zdarzenia aktywacyjne po stronie `dev` (sekcja 6) — **warunek wstępny reklamy**.
+> **Status:** ✅ plan gotowy (2026-08-18), z decyzjami właściciela z tego samego dnia: bramka bety
+> **5–10 gospodarzy z pełnym cyklem**, model dostępu **founding members z ceną z góry**.
+> ⏸ Otwarte i blokujące: warunki oferty founding members (3 liczby od właściciela), obsługa dostępu
+> bety po stronie `dev` (7a.3) oraz zdarzenia aktywacyjne (sekcja 6) — **warunek wstępny reklamy**.
 > Nadrzędny dokument strategiczny: [[strategy/Plan-wdrożenia-na-rynek]] (2026-07-03) — ten plik
 > **domyka jego dwie świadome luki**: research konkurencji i potwierdzenie ICP.
 > Stan planowania: [[Projects/Roadmap]] X11.
@@ -220,6 +221,76 @@ zbierania danych, cele dopiero z tego, co wyjdzie.
 
 ---
 
+## 7a. Cichy start — zasady i pułapki (plan właściciela z 2026-08-18)
+
+**Plan właściciela:** działać na grupach facebookowych, dawać dostęp w zamian za feedback
+co 2 tygodnie, cel — **20 osób stale użytkujących aplikację**.
+
+Kierunek dobry i spójny z K1. Trzy rzeczy wymagają jednak rozstrzygnięcia, zanim ruszy.
+
+### 1. Rozdzielić „kryterium wyjścia z bety" od „celu pierwszego etapu"
+
+**20 stale użytkujących jako bramka przed publicznym launchem jest zbyt wysoko postawione.**
+Żeby mieć 20 osób **używających**, trzeba pozyskać wielokrotnie więcej rejestracji — część nie
+przejdzie onboardingu, część odpadnie po tygodniu. Przy 5–10 h tygodniowo w grupach to miesiące
+pracy. W tym czasie prawnik może odpowiedzieć, a my dobrowolnie odkładalibyśmy start sprzedaży,
+płacąc za infrastrukturę.
+
+**✅ ROZSTRZYGNIĘTE przez właściciela 2026-08-18 — zgoda na rozdzielenie:**
+- **Bramka przed publicznym launchem: 5–10 gospodarzy**, z których **każdy przeszedł pełny cykl**
+  (rejestracja → obiekt → rezerwacja → opublikowany przewodnik gościa). To wystarczy, żeby
+  wiedzieć, że onboarding nie jest zepsuty — a o to w becie chodzi.
+- **20 stale użytkujących = cel pierwszego etapu PO launchu**, nie warunek jego rozpoczęcia.
+
+### 2. Darmowy dostęp mierzy użycie, ale NIE mierzy gotowości do zapłaty
+
+To jest najpoważniejsza uwaga do planu. Dwadzieścia zadowolonych osób korzystających za darmo
+**nie jest dowodem, że ktokolwiek zapłaci 29,99 zł**. Klasyczna pułapka bety: produkt „się podoba",
+a przy pierwszej fakturze okazuje się, że wartość była w tym, że nic nie kosztował.
+
+**✅ ROZSTRZYGNIĘTE przez właściciela 2026-08-18: founding members z ceną podaną z góry.**
+Oferta **founding members** (rozstrzygnięta w cenniku 2026-07-04) zamiast bezterminowego „za darmo": dostęp bezpłatny na czas bety, ale **z ceną podaną z góry** i jawną
+datą, od której zaczyna obowiązywać, plus obiecany rabat dla uczestników. Wtedy z tej samej grupy
+dostajesz dwa sygnały: czy używają **i** czy zostają, gdy trzeba zapłacić.
+⚖️ Warunki oferty founding members to jedno z miejsc `[DO UZUPEŁNIENIA]` w Regulaminie §6 —
+przed pierwszym zaproszeniem trzeba je opisać, bo to zobowiązanie wobec konsumenta.
+
+### 3. Nadanie dostępu jest dziś operacją ręczną z kluczem serwisowym
+
+Sprawdzone w `firestore.rules` i `functions/index.js` (2026-08-18):
+
+- Dostęp reguluje `status` (`trialing` / `active`) i `trialEndsAt`. **Klient nie może zmienić
+  żadnego z tych pól** — reguły blokują to jawnie (ochrona przed podniesieniem sobie uprawnień).
+  To zabezpieczenie działa poprawnie i nie należy go osłabiać.
+- Przedłużenie dostępu wymaga więc **Admin SDK**, czyli klucza serwisowego — tego samego, który
+  zgodnie z naszą procedurą kasuje się zaraz po użyciu. **Dla 20 testerów to 20 ręcznych operacji
+  z kluczem**, każda z tym samym ryzykiem, co N6.5.
+- ⚠️ **Pułapka retencji:** gdy `trialEndsAt` minie, konto trafia do ścieżki „porzucone triale"
+  w nocnym purge i po **90 dniach dane testera są kasowane bezpowrotnie**. Tester, który był
+  z nami pół roku i nie zdążył zdecydować o płatności, straci wszystko, co wprowadził.
+  To trzeba **powiedzieć mu wprost przy zaproszeniu** i pilnować dat.
+
+**Rekomendacja:** zanim zaprosisz pierwszą osobę, potrzebny jest prosty sposób nadawania
+i przedłużania dostępu bety — skrypt jednorazowy albo pole `betaUntil` obsługiwane przez funkcję.
+Zadanie dla `dev`, małe, ale blokujące proces. Bez tego 20 zaproszeń to 20 okazji do pomyłki
+na produkcji.
+
+### 4. Feedback co 2 tygodnie — żeby nie skończył się na „fajne, działa"
+
+Kadencja dobra. Bez struktury zbierzesz jednak same uprzejmości. Proponowany szkielet, ten sam
+dla wszystkich, żeby odpowiedzi dawały się porównać:
+
+1. **Co zrobiłeś w aplikacji od ostatniego razu?** (fakty, nie wrażenia)
+2. **Co Cię zirytowało albo czego nie znalazłeś?**
+3. **Co nadal robisz poza aplikacją** — w Excelu, w kalendarzu, w głowie? (to pytanie mówi
+   najwięcej o tym, czego brakuje w produkcie)
+4. Raz na dwa cykle: **czy zapłaciłbyś 29,99 zł miesięcznie? Jeśli nie, w jakiej cenie tak?**
+
+Kanał: formularz `/kontakt` (zgłoszenia lądują w `contact_messages`) — do rozważenia marker
+`?beta=1` na wzór istniejącego `?test=1`, żeby dało się je odsiać od zwykłych zgłoszeń.
+
+---
+
 ## 8. Co dalej — podział pracy
 
 - **Właściciel:** materiały do case study z Rusi (zrzuty, zgoda na liczby), wejście do 2–3 grup
@@ -227,7 +298,15 @@ zbierania danych, cele dopiero z tego, co wyjdzie.
 - **`dev`:** zdarzenia aktywacyjne + `utm_source` z sekcji 6 — **przed** jakąkolwiek reklamą.
 - **`marketing`:** teksty case study i szkielet postów pod K1, po zebraniu pierwszych pytań z grup.
 - **`seo`:** plan treści z pytań zebranych w K1 (K3).
-- **Do decyzji właściciela:** kryteria wyjścia z fazy 1 (ilu gospodarzy, jak długo).
+- ✅ **Rozstrzygnięte 2026-08-18:** bramka wyjścia z bety = **5–10 gospodarzy z pełnym cyklem**
+  (20 stale użytkujących zostaje celem pierwszego etapu **po** launchu); model dostępu =
+  **founding members z ceną podaną z góry**, nie bezterminowo za darmo.
+- ⏸ **Kolejna decyzja właściciela — warunki oferty founding members**: wysokość i typ rabatu,
+  jak długo obowiązuje, do kiedy trwa nabór. Bez tych trzech liczb nie da się wysłać pierwszego
+  zaproszenia, bo to zobowiązanie wobec konsumenta (Regulamin §6, dziś `[DO UZUPEŁNIENIA]`).
+- **`dev` (blokuje zaproszenia):** sposób nadawania i przedłużania dostępu bety bez ręcznego
+  grzebania kluczem serwisowym w produkcji (7a.3).
+- **`legal`:** warunki oferty founding members — dziś `[DO UZUPEŁNIENIA]` w Regulaminie §6.
 
 ---
 
