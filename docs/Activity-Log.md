@@ -15,7 +15,7 @@ Project timeline and key milestones.
 - ✅ **Test sprawdzony w obie strony** — bez tego byłby dekoracją: po cofnięciu poprawki CSS **oblewa** z `raportVisibility: "hidden"`, czyli reprodukuje dokładnie objaw właściciela; po przywróceniu przechodzi.
 - 📌 **Dwie pułapki w samym pisaniu testu**, obie warte zapamiętania: `beforeprint` **nie odpala się** w przeglądarce bezgłowej (trzeba podmienić `window.print`), a fixture rezerwacji musi mieć `type:'booking'`, `date` i `income` — nie `startDate`/`price`. Przy złych nazwach pól raport widzi zero danych, przycisk „Drukuj" jest wyłączony, a test mierzy stan pusty i **niczego nie pilnuje**.
 - ✅ **Weryfikacja**: lint 0, build OK, **e2e 138/138** (18.08, +2 nowe testy). Deploy `hosting:app`; w serwowanym chunku `ManagerApp-BCWw4MzN.js` potwierdzone oba elementy naprawy.
-- ⏸ **Dowód końcowy nadal należy do właściciela** — i tym razem mówię to bez dwuznaczności: dopóki nie wydrukuje raportu ponownie, wiem tylko tyle, że pomiar w przeglądarce się zgadza.
+- ✅ **POTWIERDZONE PRZEZ WŁAŚCICIELA 2026-08-18**: „teraz działa, raport się drukuje". X18 część 1 (mechanika druku) zamknięta — po dwóch podejściach i jednej erracie. Zostaje właściwe X18: zawartość i typografia dokumentu.
 
 ### Domknięcie dnia: klucz serwisowy unieważniony, zgłoszenie do Google wysłane
 - ✅ **Klucz serwisowy skasowany z dysku i unieważniony w konsoli** przez właściciela, tego samego dnia, w którym powstał. To jedyny moment w całym procesie, w którym poza regułami bezpieczeństwa istniał pełny dostęp do bazy — i trwał kilkadziesiąt minut, tyle, ile zajęło N6.5.
