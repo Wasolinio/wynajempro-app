@@ -17,7 +17,7 @@ Project timeline and key milestones.
 - ✅ **Weryfikacja**: lint 0, build OK, **e2e 140/140** (18.08). `report-print.spec.js` urósł do 4 testów: obecność wszystkich przekrojów, rejestr poza wydrukiem domyślnie i w wydruku po włączeniu, widoczność raportu w druku, tytuł dokumentu. **WDROŻONE** (`hosting:app`).
 - 📌 **Znalezisko produktowe → [[Projects/Backlog]]**: wpisy kosztowe nie mają **numeru dokumentu źródłowego**. W rejestrze to jedyna kolumna, której nie umiemy wypełnić, a księgowy patrzy na nią najpierw.
 - ⚖️ **Czego świadomie nie odtwarzamy z tamtego raportu**: drugiego obszaru działalności (usługi dronowe) — aplikacja zna wyłącznie najem; oraz przypisania pozycji do konkretnych faktur PDF, bo model danych tego nie ma.
-- ⏸ **Zostaje partia C** — typografia i układ dokumentu (`designer`). Raport ma teraz więcej treści, więc pytanie „ile to stron i jak gęste" zrobiło się pilniejsze.
+- ✅ **Wydruk potwierdzony przez właściciela na prawdziwych danych 2026-08-18** („wygląda git"). Partie A i B zamknięte. ⏭ **Partia C przekazana `designer`owi** tego samego dnia — typografia i układ dokumentu.
 
 ### Druk raportu naprawiony na serio — kolizja dwóch bloków @media print
 - 🔴 **Zgłoszenie właściciela**: po wczorajszym wdrożeniu raport drukuje **puste kartki**. Nagłówek strony („Raport rentowności 2026 — Szymon Wasiak") i numeracja stron poprawne, treść nie wychodzi wcale. Czyli moja poprawka z 13.08 **pogorszyła stan**: wcześniej była pusta strona 1 i treść na 2–3, teraz nie ma nic.
