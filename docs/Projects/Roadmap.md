@@ -195,6 +195,15 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 **⚠️ Odkrycie 2026-07-03:** duża część istniejącej suity celuje w aplikację sprzed v2 (ui-scaling: selektory Tailwinda, teksty starego landinga — 9 trwale czerwonych testów); pełny bieg to było „33 passed / ~24 failed", nie zielona suita. X10 to de facto przepisanie suity pod v2, nie tylko rozszerzenie. Zalążek: `e2e/panel-v2.spec.js` (smoke zalogowanego panelu na mockach).
 **Postęp 2026-07-04:** `auth.spec` odtworzona w całości (0/12 → **13/13**) przy okazji N1 — naprawiony mock (`firebase-mock.js`: brakujące eksporty auth) + stale selektory pod v2 (zakładka Rejestracja, toggle Pokaż/Ukryj, checkbox regulaminu). Wiarygodne dziś: **auth 13, panel-v2 4, smoke 2, spelling 4**. Do przepisania zostają: `ui-scaling` (pre-v2), `stripe.spec` (m.in. `29.99` vs `29,99`, teksty), `stripe-payment`, `links-buttons`, `ical_token`, `guest-guide*`.
 
+### X19. Własna wysyłka e-maili transakcyjnych (wymuszona blokadą Google, 2026-08-18)
+**Po co:** Google odmawia temu projektowi zmiany szablonów e-mail (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` — [[Activity-Log]] 2026-08-18), więc link weryfikacyjny prowadzi na `moje-domki-6c77d.firebaseapp.com` i domyślną, angielską stronę Google. Nasza markowa strona `/auth/action` działa od 1 lipca i nigdy się nie pokazuje. To problem **zaufania przy pierwszym kontakcie** klienta z produktem, nie estetyki.
+**Mechanizm (obejście blokady, nie walka z nią):** Cloud Function generuje `oobCode` przez Admin SDK (`generateEmailVerificationLink` / `generatePasswordResetLink`), wyciąga z niego sam kod i wysyła **nasz** e-mail z linkiem `https://wynajempro.com/auth/action?mode=…&oobCode=…`. Szablony Google przestają być używane, więc ograniczenie przestaje nas dotyczyć.
+**Gotowe, gdy:** rejestracja i reset hasła wysyłają wiadomość w identyfikacji WynajemPRO, z linkiem na domenę kanoniczną, a klient ląduje na naszej stronie; stare linki Google nadal działają (nic nie unieważniamy).
+**Weryfikacja:** rejestracja na świeży alias → wiadomość dociera (nie do spamu) → link otwiera naszą stronę → konto potwierdzone. Do tego kontrola SPF/DKIM/DMARC dla `wynajempro.com`.
+**Koszt i zależności — świadomie wymienione, bo to nie jest poprawka na godzinę:** dostawca poczty (decyzja właściciela), konfiguracja SPF/DKIM na domenie, obsługa błędów wysyłki, a przede wszystkim **nowy podprocesor → aktualizacja Polityki prywatności i DPA** (`legal`) przed uruchomieniem.
+**Sprzężenia:** wchłania pozycję „Powiadomienia e-mail" z [[Projects/Backlog]] i daje infrastrukturę pod „automatyczne wiadomości do gości".
+**Agent:** `dev` + `legal` (podprocesor) + `marketing` (treść wiadomości). **Status:** ⬜ — **po launchu**, chyba że wsparcie Firebase odmówi zdjęcia blokady, wtedy do przemyślenia wcześniej. Zgłoszenie do Google: `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`.
+
 ### X11. Plan marketingowy launchu
 **Gotowe, gdy:** ICP potwierdzony z właścicielem, komunikacja wartości, wybór 1–2 kanałów na start z metrykami testu. **Agent:** `marketing` + `strategist`. ⬜
 
