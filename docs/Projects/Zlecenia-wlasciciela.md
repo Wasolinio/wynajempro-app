@@ -195,7 +195,12 @@ zamknięta.** Zostaje (zalecenie reviewera): zerknąć w logi nocnego przebiegu 
 ### 6. X7 — szczegóły rezerwacji: co dodać w kolejnym kroku?
 Z roadmapy: przebudowa zrobiona (`ce2b80f`), rozszerzenie **czeka na Twoją decyzję** o zakresie.
 
-### 8. Braki bezpieczeństwa §9 do domknięcia w konsoli (przed launchem) — nowe 2026-07-23
+### 8. ✅ Braki bezpieczeństwa §9 — DOMKNIĘTE 2026-08-18 (nowe 2026-07-23)
+
+> ✅ **Wszystkie trzy pozycje zamknięte**: App Check (Firestore, Authentication, Storage wymuszane),
+> kopie zapasowe Firestore (PITR + harmonogram dzienny), polityka haseł (8 znaków + Aa1).
+> Do kompletu N6 doszło jeszcze **N6.5** — 15 osieroconych plików usuniętych 18.08.
+> **N6 zamknięte w całości**; jedynym otwartym blokerem launchu zostaje odpowiedź prawnika.
 Z oceny 3 dokumentów dla prawnika (`docs/legal/Bezpieczenstwo-kont-i-danych.md` §9).
 Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
 1. ✅ **App Check — egzekwowanie: USTALONE 2026-08-13** (zrzut z konsoli od właściciela).
