@@ -674,6 +674,10 @@ export const DASHBOARD_CSS = `
     max-height:none !important; overflow:visible !important; display:block !important; }
   .wpd-report-print{ position:static !important; max-height:none !important; overflow:visible !important;
     padding:0 !important; background:#fff !important; }
+  /* Pas bezpieczenstwa: gdyby ktos znowu dolozyl regule chowajaca wszystko przez visibility
+     (tak jak blok generatora umow nizej), raport ma zostac widoczny. Sam display:none na
+     reszcie nie wystarczy - visibility dziedziczy sie w dol i nie zwalnia miejsca. */
+  .wpd-report-print, .wpd-report-print *{ visibility:visible !important; }
 
   .wpd-report-noprint{ display:none !important; }
   .wpd-report-onlyprint{ display:block !important; }
@@ -745,7 +749,12 @@ export const DASHBOARD_CSS = `
 
 /* druk — tylko arkusz umowy */
 @media print{
-  body *{ visibility:hidden !important; }
+  /* UWAGA (2026-08-18): ten blok był NIEZAKRESOWANY i ustawiał visibility:hidden na wszystkim
+     przy KAZDYM wydruku w panelu, nie tylko przy umowie. Poniewaz stoi w arkuszu PO bloku
+     raportu, wygrywal z nim przy rownej specyficznosci - i po zdjeciu z raportu reguly
+     przywracajacej visibility raport drukowal sie niewidoczny (puste kartki u wlasciciela).
+     Teraz blok dziala wylacznie wtedy, gdy na ekranie faktycznie jest arkusz umowy. */
+  body:has(.wpd-ctr-sheet) *{ visibility:hidden !important; }
   .wpd-ctr-sheet, .wpd-ctr-sheet *{ visibility:visible !important; }
   .wpd-ctr-sheet{ position:absolute !important; left:0 !important; top:0 !important; width:100% !important;
     border:none !important; border-radius:0 !important; padding:0 !important; background:#fff !important; }

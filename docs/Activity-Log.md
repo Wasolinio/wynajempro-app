@@ -6,6 +6,17 @@ Project timeline and key milestones.
 
 ## 2026-08-18
 
+### Druk raportu naprawiony na serio — kolizja dwóch bloków @media print
+- 🔴 **Zgłoszenie właściciela**: po wczorajszym wdrożeniu raport drukuje **puste kartki**. Nagłówek strony („Raport rentowności 2026 — Szymon Wasiak") i numeracja stron poprawne, treść nie wychodzi wcale. Czyli moja poprawka z 13.08 **pogorszyła stan**: wcześniej była pusta strona 1 i treść na 2–3, teraz nie ma nic.
+- 🔎 **Przyczyna, znaleziona w arkuszu, nie zgadnięta**: `src/pages/dashboard/styles.js` ma **dwa** bloki `@media print`. Drugi, od generatora umów (linia ~747), ustawiał `body *{ visibility:hidden !important }` **bez żadnego zakresu** — obowiązywał więc przy każdym wydruku w panelu. Stoi w arkuszu **po** bloku raportu, więc przy równej specyficzności wygrywał. Do 13.08 neutralizowała go reguła `.wpd-report-print, .wpd-report-print *{ visibility:visible }`, którą usunąłem jako „zbędną sztuczkę".
+- 🛑 **Dlaczego nie wykryłem tego wcześniej — mechanizm, nie wymówka.** Raport jest za logowaniem, więc 13.08 zmierzyłem **odtworzoną strukturę DOM** z wyciętym blokiem `@media print` raportu. Odtworzenie nie zawierało drugiego bloku, bo o nim nie wiedziałem. Pomiar był poprawny i bezużyteczny naraz: mierzył model, nie aplikację.
+- ✅ **Naprawa dwuwarstwowa**: (1) blok generatora umów **zakresowany** przez `body:has(.wpd-ctr-sheet)` — działa wyłącznie wtedy, gdy na ekranie jest arkusz umowy, więc przestaje zatruwać cudze wydruki; (2) w bloku raportu **przywrócone** `visibility:visible` jako pas bezpieczeństwa, gdyby ktoś kiedyś dołożył podobną regułę.
+- 🔥 **Test regresji na PRAWDZIWYM panelu — nowy `e2e/report-print.spec.js`.** Suita e2e potrafi wejść do zalogowanego panelu na mockach, o czym przy poprzedniej próbie zapomniałem. Test otwiera Finanse → Raporty → Raport rentowności, przełącza `emulateMedia({ media: 'print' })` i **mierzy stan realnych elementów**: `visibility` i wymiary raportu, obecność nagłówka wydruku, `display:none` i zerową wysokość powłoki panelu. Drugi test pilnuje tytułu dokumentu (przez podmianę `window.print`, bo przeglądarka bezgłowa nie wysyła `beforeprint`).
+- ✅ **Test sprawdzony w obie strony** — bez tego byłby dekoracją: po cofnięciu poprawki CSS **oblewa** z `raportVisibility: "hidden"`, czyli reprodukuje dokładnie objaw właściciela; po przywróceniu przechodzi.
+- 📌 **Dwie pułapki w samym pisaniu testu**, obie warte zapamiętania: `beforeprint` **nie odpala się** w przeglądarce bezgłowej (trzeba podmienić `window.print`), a fixture rezerwacji musi mieć `type:'booking'`, `date` i `income` — nie `startDate`/`price`. Przy złych nazwach pól raport widzi zero danych, przycisk „Drukuj" jest wyłączony, a test mierzy stan pusty i **niczego nie pilnuje**.
+- ✅ **Weryfikacja**: lint 0, build OK, **e2e 138/138** (18.08, +2 nowe testy). Deploy `hosting:app`; w serwowanym chunku `ManagerApp-BCWw4MzN.js` potwierdzone oba elementy naprawy.
+- ⏸ **Dowód końcowy nadal należy do właściciela** — i tym razem mówię to bez dwuznaczności: dopóki nie wydrukuje raportu ponownie, wiem tylko tyle, że pomiar w przeglądarce się zgadza.
+
 ### Domknięcie dnia: klucz serwisowy unieważniony, zgłoszenie do Google wysłane
 - ✅ **Klucz serwisowy skasowany z dysku i unieważniony w konsoli** przez właściciela, tego samego dnia, w którym powstał. To jedyny moment w całym procesie, w którym poza regułami bezpieczeństwa istniał pełny dostęp do bazy — i trwał kilkadziesiąt minut, tyle, ile zajęło N6.5.
 - ✅ **Zgłoszenie do wsparcia Firebase wysłane** (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, treść w `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`). Zlecenie #10 przechodzi w stan oczekiwania — druga pozycja na cudzym zegarze, obok prawnika.
@@ -84,6 +95,20 @@ Project timeline and key milestones.
 ## 2026-08-13
 
 ### X18 część pierwsza: druk raportu bez pustych stron i z sensowną nazwą pliku
+
+> ⚠️ **ERRATA 2026-08-18.** Ta poprawka **nie naprawiła druku — pogorszyła go**. Po wdrożeniu
+> właściciel wydrukował raport i dostał **całkowicie puste kartki** (nagłówek i tytuł poprawne,
+> treść niewidoczna). Przyczyna: w tym samym arkuszu, **niżej**, stoi drugi blok `@media print`
+> od generatora umów z niezakresowanym `body *{ visibility:hidden }`. Usunięta poniżej jako
+> „zbędna sztuczka" reguła `.wpd-report-print, .wpd-report-print *{ visibility:visible }` była
+> jedyną rzeczą, która to neutralizowała.
+> **Co z tego wpisu przeżywa:** diagnoza pustej strony 1 (`visibility` nie zwalnia miejsca,
+> `position:absolute` wiąże z pozycjonowanym przodkiem), podmiana `document.title` — działa,
+> potwierdzona na wydruku właściciela, oraz notatka o hooku lintującym.
+> **Co upada:** zdanie „zmierzone: 3 strony → 1" i wniosek, że druk jest naprawiony. Pomiar
+> był wykonany na **odtworzonej strukturze DOM**, nie na prawdziwym panelu — i właśnie dlatego
+> nie zawierał drugiego bloku `@media print`. Naprawa i test regresji: wpis z 18.08.
+
 - 🎯 **Powód**: właściciel zgłosił, że PDF raportu wygląda źle, i wskazał objaw — **pusta strona 1, treść na 2 i 3**.
 - 🔎 **Diagnoza przez pomiar, nie przez czytanie kodu**: odtworzyłem strukturę panelu (`#root > .wpd > powłoka + overlay`) z **prawdziwym blokiem `@media print`** wyciętym ze `styles.js` i zmierzyłem geometrię w trybie druku. Wynik: dokument ma 2448 px (3 strony), z czego raport zajmuje 689 px. Winne były **dwie techniki naraz**: `visibility:hidden` na panelu (nie zwalnia miejsca — niewidzialny sidebar dalej ma 2400 px) i `position:absolute; top:0` na raporcie (wiąże go z pozycjonowanym przodkiem w drzewie panelu).
 - 🛑 **Moja pierwsza hipoteza była błędna i mówię to wprost**: napisałem właścicielowi, że treść „spycha się w dół". Pomiar w mojej pierwszej próbie pokazał coś odwrotnego (raport na stronie 1, pusty ogon), a jego wydruk — jeszcze co innego (pusta strona 1). Dopiero to zestawienie pokazało, że **problem nie ma jednej przyczyny do odgadnięcia**, tylko dwie współpracujące sztuczki, których skutek zależy od drzewa DOM. Dlatego naprawa nie celuje w żadną z hipotez, tylko **usuwa obie techniki**.
