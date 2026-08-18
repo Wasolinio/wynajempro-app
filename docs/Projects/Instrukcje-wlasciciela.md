@@ -502,8 +502,23 @@ korzystać.
 3. Wpisz dokładnie: `https://wynajempro.com/auth/action` → **zapisz**.
 4. **Powtórz dla dwóch pozostałych szablonów**: „Resetowanie hasła" i „Zmiana adresu e-mail"
    — nasza strona obsługuje wszystkie trzy tryby.
-5. W tym samym edytorze popraw **pisownię marki**: w treści i podpisie jest „WynajemPro",
-   a identyfikacja mówi **WynajemPRO** (tak jak w nazwie nadawcy).
+5. ⚠️ **Pisowni marki NIE poprawiaj tutaj — korekta z 2026-08-18.** W treści maila nie ma
+   wpisanego „WynajemPro": jest zmienna **`%APP_NAME%`**, którą Firebase podstawia z **publicznej
+   nazwy projektu**. Literówka siedzi więc w ustawieniach projektu (Ustawienia projektu → Ogólne →
+   nazwa widoczna publicznie), a nie w szablonie. W edytorze szablonu nie ruszaj `%APP_NAME%`,
+   `%DISPLAY_NAME%` ani `%LINK%` — skasowanie którejkolwiek zmiennej psuje wiadomość.
+
+> 🛑 **ZABLOKOWANE PRZEZ GOOGLE (2026-08-18) — nie próbuj dalej, to nie jest błąd po Twojej stronie.**
+> Zapis kończy się odpowiedzią **400 `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`** z Identity Toolkit.
+> Wykluczone po drodze: autoryzowane domeny (`wynajempro.com` **jest** na liście — odczyt
+> z publicznego endpointu), uprawnienia (400 to odrzucenie wartości, nie brak roli), rozszerzenia
+> przeglądarki (błąd powtórzył się w incognito). **Odpada też droga przez API**: konsola wysyła
+> dokładnie ten `PATCH .../config?updateMask=notification.sendEmail.callbackUri`, który miałem
+> wykonać kluczem serwisowym — odmowa pochodzi z samego API, więc inny klient jej nie ominie.
+> Google ogranicza edycję szablonów e-mail (powszechnie tłumaczone przeciwdziałaniem phishingowi);
+> warunków zdjęcia blokady nie ma w publicznej dokumentacji.
+> **Co dalej:** zgłoszenie do wsparcia Firebase + docelowo własna wysyłka poczty — patrz
+> [[Activity-Log]] 2026-08-18 i [[Projects/Roadmap]].
 
 ### Weryfikacja
 Zarejestruj konto na kolejny alias (`+test2`) i sprawdź, że link prowadzi na `wynajempro.com`

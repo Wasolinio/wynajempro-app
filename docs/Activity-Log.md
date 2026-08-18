@@ -4,6 +4,17 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-18
+
+### Google odmawia zmiany adresu akcji w mailach Auth — zlecenie #10 zablokowane u źródła
+- 🎯 **Powód**: właściciel wykonywał zlecenie #10 (link weryfikacyjny ma prowadzić na `wynajempro.com/auth/action`, a nie na obcą domenę i angielski ekran Google). Konsola odpowiadała tylko ogólnym „An error occurred updating action URL".
+- 🔎 **Diagnostyka przez odsiew, nie przez zgadywanie**. Odczytałem konfigurację Identity Toolkit publicznym endpointem (klucz webowy z `.env.local`): `authorizedDomains` zawiera **`wynajempro.com`** — czyli najczęstsza przyczyna tego błędu u nas **nie zachodzi**. Powtórka w incognito wykluczyła rozszerzenia przeglądarki. Kod odpowiedzi **400** wykluczył uprawnienia (brak roli daje 403). Dopiero treść odpowiedzi z zakładki Network dała powód: **`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`**.
+- 🛑 **To zamyka również moją drogę awaryjną — mówię to wprost, bo sam ją zaproponowałem.** Chciałem ustawić pole `notification.sendEmail.callbackUri` (potwierdzone w dokumentacji Identity Platform jako „action url in email template") żądaniem `PATCH` z klucza serwisowego. Ślad sieciowy pokazał, że **konsola wysyła dokładnie ten sam PATCH** na `/v2/projects/moje-domki-6c77d/config?updateMask=notification.sendEmail.callbackUri` — i to **API** go odrzuca. Inny klient tego nie ominie, więc plan „zrobię to kluczem przy okazji N6.5" jest martwy.
+- 🔥 **Wniosek**: ograniczenie jest po stronie Google (powszechnie tłumaczone przeciwdziałaniem phishingowi), a **warunków jego zdjęcia nie ma w publicznej dokumentacji** — przeszukane: dokumentacja Firebase i Identity Platform, wątki społeczności. Nie wiem, czy blokada dotyczy wieku projektu, planu, czy oceny ryzyka. Zapisuję to jako niewiedzę, nie jako hipotezę.
+- 📌 **Korekta ustalenia z wczoraj**: pisownia „WynajemPro" w mailu **nie jest** w szablonie — treść używa zmiennej `%APP_NAME%`, którą Google podstawia z publicznej nazwy projektu. Instrukcja mówiła „popraw w tym samym edytorze"; poprawione. Nazwa nadawcy (`WynajemPRO`) i adres (`noreply@wynajempro.com`) są już prawidłowe.
+- ⏸ **Dwie ścieżki do decyzji właściciela**: (1) zgłoszenie do wsparcia Firebase o zdjęcie ograniczenia — tanie, ale na cudzym zegarze i bez gwarancji; (2) **własna wysyłka poczty** — funkcja generuje `oobCode` przez Admin SDK, a my wysyłamy **swój** e-mail z linkiem na `wynajempro.com/auth/action`, całkowicie omijając szablony Google. Druga daje kontrolę nad treścią maila (dziś to szablon Google z `%APP_NAME%`), ale wymaga dostawcy poczty, konfiguracji SPF/DKIM na domenie i **dopisania podprocesora do Polityki i DPA**. Spina się z pozycją „Powiadomienia e-mail" z [[Projects/Backlog]].
+- ⚖️ **Czego to NIE psuje**: weryfikacja adresu **działa** — link dochodzi, konto się potwierdza. Problemem jest zaufanie i marka przy pierwszym kontakcie klienta z produktem, nie sprawność mechanizmu.
+
 ## 2026-08-17
 
 ### Polityka haseł wprowadzona w konsoli — i ogon, który przez nią powstał w aplikacji

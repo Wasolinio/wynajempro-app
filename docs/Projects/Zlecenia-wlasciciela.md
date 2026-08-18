@@ -69,7 +69,18 @@ Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie pryw
 **Potem:** ponów krok 0 i napisz wynik — dopiszę do dziennika i zamknę #16.
 </details>
 
-### 10. 🟠 Podmień adres w szablonach e-maili Auth — markowa strona już czeka (nowe 2026-08-13)
+### 10. 🔴 ZABLOKOWANE PRZEZ GOOGLE — adres w szablonach e-maili Auth (nowe 2026-08-13, blokada 2026-08-18)
+
+> 🛑 **Próba wykonana 2026-08-18 zakończyła się odmową Google**: `400 EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`.
+> To nie jest błąd konfiguracji ani uprawnień — wykluczone: autoryzowane domeny (`wynajempro.com`
+> jest na liście), rola (400 ≠ brak uprawnień), rozszerzenia (powtórzone w incognito), droga przez
+> API (odmowa pochodzi z samego API, więc klucz serwisowy jej nie obejdzie).
+> **Zadanie schodzi z listy „do kliknięcia".** Zostają dwie ścieżki: (1) zgłoszenie do wsparcia
+> Firebase o zdjęcie ograniczenia, (2) własna wysyłka poczty — Cloud Function generuje `oobCode`
+> Admin SDK i wysyła **nasz** mail z linkiem na `wynajempro.com/auth/action`, z pominięciem
+> szablonów Google. Druga ścieżka rozwiązuje przy okazji brandowanie treści maila (dziś podpis
+> bierze się ze zmiennej `%APP_NAME%`) i spina się z pozycją „Powiadomienia e-mail" z Backlogu.
+> Decyzja właściciela przed nami.
 **Zgłoszone przez właściciela przy smoke 4f:** „nie podoba mi się link służący do weryfikacji
 oraz samo zatwierdzanie konta". Oba zarzuty trafione i mają **jedną przyczynę**.
 
