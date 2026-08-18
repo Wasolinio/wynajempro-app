@@ -202,8 +202,10 @@ Powiązane: [[Roadmap]] **N6**. Tylko Ty masz dostęp do tych ustawień:
    **Cloud Firestore: Enforced, 99% ruchu zweryfikowane.** Storage: Monitoring (100%).
    Authentication: Monitoring, 73% — do przywrócenia na Enforce (patrz #9). Functions:
    niewymuszane. To odpowiedź na **pytanie prawnika 4.1 pkt 5**, wiszące od 22.07.
-   ⏸ Zostaje decyzja, czy włączać wymuszanie dla **Storage** i **Functions** — osobno,
-   z weryfikacją po każdym kroku (Storage niesie okładki przewodników dla gości). (= N6.4.)
+   ✅ **DOMKNIĘTE 2026-08-18**: **Storage → Enforced** (100% ruchu było zweryfikowane, po włączeniu
+   właściciel potwierdził, że przewodniki gościa działają z okładkami). **Functions bezprzedmiotowe** —
+   konsola nie ma przełącznika, ochrona siedzi w kodzie (`enforceAppCheck` przy pięciu funkcjach).
+   Stan końcowy: Firestore + Authentication + Storage wymuszane. (= N6.4 zamknięte.)
 2. ✅ **Kopie zapasowe Firestore — WYKONANE 2026-08-13** (agent, firebase CLI, na Twoje zlecenie): PITR
    włączone (okno 7 dni) + dzienny harmonogram z retencją 7 dni. Przed zmianą: PITR wyłączone, zero
    harmonogramów, retencja wersji 1 h. ⚠️ Dotyczy Firestore, **nie** Storage. (= N6.3.)

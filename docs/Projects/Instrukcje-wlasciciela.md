@@ -36,7 +36,7 @@
 | ② ✅ | Kopie zapasowe Firestore (PITR + harmonogram) | 2 | — | zrobione za Ciebie 13.08 |
 | ③ ✅ | Logi nocnego purge | 5 | — | sprawdzone 13.08, czysto |
 | ④ ✅ | Smoke testy 4a–4f | 4 | — | komplet zdany 13.08 |
-| ⑤ | **App Check — Storage i Functions** | **8** ⭐ nowa | ~15 min | ⬜ Firestore i Authentication już wymuszane; zostały dwie usługi i **jedna z nich ma zostać wyłączona świadomie** |
+| ⑤ ✅ | App Check — Storage i Functions | **8** | — | ✅ **18.08**: Storage wymuszany, przewodniki sprawdzone; Functions bez przełącznika w konsoli (ochrona w kodzie) |
 | ⑥ | **N6.5 — czyszczenie sierot w Storage** | 3 | ~20 min | ⬜ potrzebny klucz serwisowy; robimy razem |
 | ⑦ ✅ | Polityka haseł — wprowadzona w konsoli | 7 | — | ✅ **17.08**: 8 znaków + wielka i mała litera + cyfra, tryb „Require"; ekrany aplikacji poprawione i wdrożone |
 | ⑧ | **Szablony e-maili Auth** | **9** ⭐ nowa | ~10 min | ⬜ dziś link weryfikacyjny prowadzi na obcą domenę i angielski ekran Google |
@@ -433,7 +433,14 @@ Wtedy `legal` zdejmuje tę pozycję z §9 dokumentu bezpieczeństwa i z erraty p
 
 ---
 
-# 8. App Check — Storage i Functions ⏱️ ~15 min · 🟠 · **kolejność ⑤** *(nowa sekcja, 2026-08-17)*
+# 8. App Check — Storage i Functions — ✅ WYKONANE 2026-08-18
+
+> ✅ **Zrobione razem 18.08.** Storage przełączony na **Enforce** (przed zmianą: 100% ruchu
+> zweryfikowanego, 0% niezweryfikowanego), a właściciel potwierdził od razu po włączeniu, że
+> przewodniki gościa otwierają się z okładkami i plikami.
+> 📌 **Functions okazały się pozycją bez treści**: konsola nie ma dla nich przełącznika, tylko
+> odnośnik do dokumentacji — wymuszanie ustawia się per funkcja w kodzie i **już je mamy**.
+> Moja wczorajsza „decyzja do podjęcia" była więc decyzją o czymś, czego nie da się kliknąć.
 
 > **Kontekst:** 13.08 ustaliliśmy stan faktyczny — **Cloud Firestore: wymuszane** (99% ruchu
 > zweryfikowane) i **Authentication: wymuszane**. Zostały dwie usługi: **Storage**
@@ -542,7 +549,7 @@ na ekranie Google. Zmiana dotyczy wyłącznie kolejnych wiadomości.
 - [x] ③ **sekcja 5** — logi nocnego purge: ✅ **sprawdzone 2026-08-13** (14 przebiegów 31.07–13.08, zero błędów, zero kasacji)
 - [x] ④ **sekcja 4** — smoke testy 4a–4f: ✅ **KOMPLET ZDANY 2026-08-13**; po drodze naprawione przewijanie dialogów, dopisane X18 (raport PDF), zlecenie #10 (adres w szablonach maili) i dług CSV w Backlogu
 - [x] ⑤ **sekcja 1** — App Check dla Firestore: ✅ **potwierdzone 2026-08-13** (Enforced, 99% zweryfikowane; #13 obalony)
-- [ ] ⑥ **sekcja 8** — App Check dla **Storage** (włącz + sprawdź okładki) i **Functions** (świadomie zostawiamy) 🟠
+- [x] ⑥ **sekcja 8** — App Check: ✅ **Storage wymuszany od 2026-08-18** (okładki przewodników sprawdzone); Functions bez przełącznika w konsoli — ochrona per funkcja w kodzie
 - [ ] ⑦ **sekcja 3** — N6.5: DRY-RUN → przegląd listy → `--fix` → skasowany klucz (🟡)
 - [x] ⑧ **sekcja 7** — polityka haseł: ✅ **WPROWADZONA 2026-08-17** (8 znaków + wielka i mała litera + cyfra, tryb „Require"); ekrany aplikacji zsynchronizowane i wdrożone tego samego dnia
 - [ ] ⑨ **sekcja 9** — szablony e-maili Auth: action URL na `wynajempro.com/auth/action` w 3 szablonach + pisownia marki (🟠)
