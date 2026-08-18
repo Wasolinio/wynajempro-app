@@ -20,6 +20,8 @@ import { setupFirebaseMocks } from './firebase-mock';
   wychodzi z układu.
 */
 
+const ROK = new Date().getFullYear();
+
 const mockUser = { uid: 'uid-test', email: 'test@example.com', displayName: 'Test User', emailVerified: true };
 
 const db = {
@@ -31,6 +33,7 @@ const db = {
   'users/uid-test/settings/properties': { items: [{ name: 'Apartament A', color: 'blue', id: 'prop-1', secretToken: 'token1' }] },
   'users/uid-test/settings/sources': { items: ['Booking.com'] },
   'users/uid-test/settings/categories': { items: ['Media'] },
+  'users/uid-test/settings/recurringCosts': { items: [{ id: 'rc-1', name: 'Internet Starlink', amount: 129, startMonth: `${ROK}-01`, category: 'IT', property: '' }] },
   /*
     Raport czyta WYŁĄCZNIE wpisy `type:'booking'` i pola `date` + `income` — nie `startDate`
     ani `price` (pierwsza wersja tego fixture'u miała złe nazwy, raport widział zero danych,
@@ -39,8 +42,17 @@ const db = {
   */
   'users/uid-test/rentals/rent-1': {
     id: 'rent-1', type: 'booking', property: 'Apartament A', guest: 'Jan Kowalski', source: 'Booking.com',
-    date: `${new Date().getFullYear()}-03-01`, income: 2000, commission: 300,
+    date: `${ROK}-03-01`, income: 2000, commission: 300,
     utilities: 120, tax: 200, isPaid: true, isCompleted: true,
+  },
+  'users/uid-test/rentals/rent-2': {
+    id: 'rent-2', type: 'booking', property: 'Apartament A', guest: 'Anna Nowak', source: 'Airbnb',
+    date: `${ROK}-04-10`, income: 1000, commission: 150, tax: 85, isPaid: true, isCompleted: true,
+  },
+  // Koszt własny z kategorią — sprawdza drugi poziom klasyfikacji.
+  'users/uid-test/rentals/cost-1': {
+    id: 'cost-1', type: 'utility', property: 'Apartament A', category: 'Media',
+    guest: 'Prąd 03/2026', date: `${ROK}-03-20`, utilities: 240,
   },
 };
 
@@ -121,4 +133,57 @@ test('Wydruk raportu: tytuł dokumentu zamiast hasła reklamowego', async ({ pag
     return document.title;
   });
   expect(po).toMatch(/WynajemPRO/);
+});
+
+test('Raport zawiera przekroje z partii A+B (klasyfikacja, źródła, statystyki, rejestr, metodyka)', async ({ page }) => {
+  await otworzRaport(page);
+
+  // Partia A — analityka.
+  await expect(page.getByRole('heading', { name: 'Klasyfikacja kosztów' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Struktura przychodów' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Statystyki operacyjne' })).toBeVisible();
+  // Drugi poziom klasyfikacji: prowizje rozbite na portale.
+  const klasyfikacja = page.locator('.wpd-panel', { has: page.getByRole('heading', { name: 'Klasyfikacja kosztów' }) });
+  await expect(klasyfikacja).toContainText('Prowizje portali');
+  await expect(klasyfikacja).toContainText('Booking.com');
+  await expect(klasyfikacja).toContainText('Airbnb');
+  await expect(klasyfikacja).toContainText('Koszty stałe');
+  // Struktura przychodów zna oba źródła i liczy rezerwacje.
+  const zrodla = page.locator('.wpd-panel', { has: page.getByRole('heading', { name: 'Struktura przychodów' }) });
+  await expect(zrodla).toContainText('Booking.com');
+  await expect(zrodla).toContainText('Airbnb');
+
+  // Partia B — dokument dla księgowego.
+  await expect(page.getByRole('heading', { name: /Rejestr pozycji/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Metodyka i ograniczenia' })).toBeVisible();
+  // Ograniczenie musi być nazwane wprost — to zdanie chroni właściciela przed zawyżoną marżą.
+  await expect(page.locator('.wpd-panel', { has: page.getByRole('heading', { name: 'Metodyka i ograniczenia' }) }))
+    .toContainText('wyższa niż rzeczywista');
+});
+
+test('Rejestr pozycji wchodzi do wydruku dopiero po zaznaczeniu przełącznika', async ({ page }) => {
+  await otworzRaport(page);
+  /* Selektor po KLASIE, nie po roli: w trybie print panel ma display:none, więc nagłówek
+     znika z drzewa dostępności i `getByRole` przestaje go znajdować. */
+  const rejestr = page.locator('.wpd-rpt-register');
+
+  // Na ekranie rejestr jest zawsze — tam długość nie przeszkadza.
+  await expect(rejestr).toBeVisible();
+
+  await page.emulateMedia({ media: 'print' });
+  // Domyślnie POZA wydrukiem: przy pełnym sezonie to kilkanaście stron.
+  expect(await rejestr.evaluate((el) => getComputedStyle(el).display)).toBe('none');
+
+  await page.emulateMedia({ media: 'screen' });
+  /* Input checkboxa jest wizualnie ukryty pod własną stylizacją (.wpd-check), a nakładka
+     dotykowa ::after przechwytuje kliknięcia — ten sam wzorzec co przy zgodzie na regulamin
+     w links-buttons.spec. `dispatchEvent` omija sprawdzanie aktowalności, a React i tak
+     obsłuży zdarzenie na inpucie. */
+  await page.locator('.wpd-dialog__head input[type="checkbox"]').dispatchEvent('click');
+  await page.emulateMedia({ media: 'print' });
+  expect(await rejestr.evaluate((el) => getComputedStyle(el).display)).not.toBe('none');
+
+  // Metodyka jest w wydruku zawsze — bez niej liczby idą do księgowego bez zastrzeżeń.
+  const metodyka = page.locator('.wpd-rpt-method');
+  expect(await metodyka.evaluate((el) => getComputedStyle(el).display)).not.toBe('none');
 });

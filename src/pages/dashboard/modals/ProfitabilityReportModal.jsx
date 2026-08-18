@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BarChart3, X, Printer, FileSpreadsheet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useDialogA11y } from './useDialogA11y';
 import { profitabilityCsv } from '../../../utils/reportExport';
+import { buildReport } from '../../../utils/profitabilityReport';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
-const propNameOf = (p) => (typeof p === 'object' ? p?.name : p) || '';
-const monthIdx = (ym) => { const [y, m] = (ym || '').split('-').map(Number); return (y || 0) * 12 + ((m || 1) - 1); };
+// Udziały podajemy z jednym miejscem po przecinku — przy kosztach rzędu kilkuset złotych
+// zaokrąglenie do pełnych procent gubi różnicę między pozycją 0,4% a 1,4%.
+const proc = (v, miejsca = 1) => (v === null || v === undefined ? '—' : `${(Number(v) * 100).toFixed(miejsca).replace('.', ',')}%`);
 const MABBR = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 
 /* Kolumnowy wykres zysku miesiąc po miesiącu — inline SVG (bez bibliotek).
@@ -49,11 +51,11 @@ function MonthlyProfitChart({ months }) {
   );
 }
 
-function ReportRow({ label, value, color, strong }) {
+function ReportRow({ label, value, color, strong, suffix = ' zł' }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
       <span className="wpd-body" style={{ fontSize: 13, color: strong ? 'var(--ink)' : 'var(--muted)', fontWeight: strong ? 700 : 400 }}>{label}</span>
-      <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: strong ? 700 : 600, color: color || 'var(--ink)' }}>{fmt(value)} zł</span>
+      <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: strong ? 700 : 600, color: color || 'var(--ink)' }}>{fmt(value)}{suffix}</span>
     </div>
   );
 }
@@ -66,68 +68,11 @@ function ReportRow({ label, value, color, strong }) {
 */
 function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedYear, handleYearChange, availableYears, rentals = [], recurringCosts = [], hostProfile }) {
   const dialogA11y = useDialogA11y(showStatsModal, () => setShowStatsModal(false));
+  // Rejestr pozycji potrafi mieć kilkanaście stron przy pełnym sezonie, więc do wydruku
+  // wchodzi TYLKO na życzenie. Na ekranie jest zawsze — tam długość nie przeszkadza.
+  const [rejestrWDruku, setRejestrWDruku] = useState(false);
 
-  const rep = useMemo(() => {
-    const y = Number(selectedYear);
-    const now = new Date();
-    const nowIdx = now.getFullYear() * 12 + now.getMonth();
-    const months = Array.from({ length: 12 }, () => ({ income: 0, commission: 0, media: 0, own: 0, tax: 0, fixed: 0, active: false, profit: 0 }));
-    const byProp = {};
-    const bump = (name) => (byProp[name] || (byProp[name] = { income: 0, cost: 0 }));
-
-    (rentals || []).forEach((r) => {
-      if (!r.date) return;
-      const d = new Date(r.date);
-      if (isNaN(d.getTime()) || d.getFullYear() !== y) return;
-      const mo = d.getMonth();
-      const P = bump(propNameOf(r.property));
-      if (r.type === 'booking') {
-        const inc = Number(r.income) || 0, com = Number(r.commission) || 0, media = Number(r.utilities) || 0, tax = (Number(r.tax) || 0) + (Number(r.vat) || 0);
-        months[mo].income += inc; months[mo].commission += com; months[mo].media += media; months[mo].tax += tax; months[mo].active = true;
-        P.income += inc; P.cost += com + media + tax;
-      } else if (r.type === 'utility') {
-        const amt = Number(r.utilities) || 0; if (amt <= 0) return;
-        months[mo].own += amt; months[mo].active = true; P.cost += amt;
-      }
-    });
-
-    (recurringCosts || []).forEach((c) => {
-      const start = monthIdx(c.startMonth); const end = c.endMonth ? monthIdx(c.endMonth) : Infinity;
-      const from = Math.max(start, y * 12); const to = Math.min(end, y * 12 + 11, nowIdx);
-      for (let mi = from; mi <= to; mi++) {
-        const amt = Number(c.amount) || 0;
-        months[mi % 12].fixed += amt; months[mi % 12].active = true;
-        if (c.property) bump(c.property).cost += amt;
-      }
-    });
-
-    months.forEach((m) => { m.profit = m.income - m.commission - m.media - m.own - m.tax - m.fixed; });
-    const T = months.reduce((a, m) => ({
-      income: a.income + m.income, commission: a.commission + m.commission, media: a.media + m.media,
-      own: a.own + m.own, tax: a.tax + m.tax, fixed: a.fixed + m.fixed,
-    }), { income: 0, commission: 0, media: 0, own: 0, tax: 0, fixed: 0 });
-
-    const variable = T.commission + T.media + T.own + T.tax;
-    const totalCosts = variable + T.fixed;
-    const profit = T.income - totalCosts;
-    const margin = T.income > 0 ? Math.round((profit / T.income) * 100) : 0;
-
-    const buckets = [
-      { name: 'Prowizje portali', amount: T.commission, color: 'var(--cynober)' },
-      { name: 'Media w rezerwacjach', amount: T.media, color: 'var(--granat)' },
-      { name: 'Koszty własne', amount: T.own, color: 'var(--green)' },
-      { name: 'Podatek i VAT', amount: T.tax, color: 'var(--amber-ink)' },
-      { name: 'Koszty stałe', amount: T.fixed, color: 'var(--brick)' },
-    ].filter((b) => b.amount > 0).sort((a, b) => b.amount - a.amount);
-    const maxBucket = Math.max(1, ...buckets.map((b) => b.amount));
-
-    const objRows = Object.entries(byProp)
-      .map(([name, v]) => ({ name, income: v.income, cost: v.cost, profit: v.income - v.cost, margin: v.income > 0 ? Math.round(((v.income - v.cost) / v.income) * 100) : 0 }))
-      .filter((o) => o.income > 0 || o.cost > 0)
-      .sort((a, b) => b.profit - a.profit);
-
-    return { y, months, T, variable, totalCosts, profit, margin, buckets, maxBucket, objRows };
-  }, [rentals, recurringCosts, selectedYear]);
+  const rep = useMemo(() => buildReport(rentals, recurringCosts, selectedYear), [rentals, recurringCosts, selectedYear]);
 
   if (!showStatsModal) return null;
 
@@ -172,9 +117,14 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
             <h2 className="wpd-h2">Raport rentowności</h2>
             <p className="wpd-dialog__sub">Pełne zestawienie przychodów, kosztów i zysku</p>
           </div>
-          <select className="wpd-select" style={{ width: 'auto', marginLeft: 'auto' }} value={selectedYear} onChange={(e) => handleYearChange(e.target.value)}>
+          <select className="wpd-select" style={{ width: 'auto' }} value={selectedYear} onChange={(e) => handleYearChange(e.target.value)}>
             {availableYears.map((y) => <option key={y} value={y}>Rok {y}</option>)}
           </select>
+          <label className="wpd-check" style={{ marginLeft: 'auto', fontSize: 12.5, whiteSpace: 'nowrap' }} title="Rejestr potrafi zająć kilkanaście stron — domyślnie zostaje poza wydrukiem">
+            <input type="checkbox" checked={rejestrWDruku} onChange={(e) => setRejestrWDruku(e.target.checked)} />
+            <span className="wpd-check__box" aria-hidden="true" />
+            <span>Rejestr w wydruku</span>
+          </label>
           <button className="wpd-btn wpd-btn--sm" onClick={drukuj} disabled={empty}><Printer /> Drukuj / PDF</button>
           <button className="wpd-btn wpd-btn--sm" onClick={exportCsv} disabled={empty}><FileSpreadsheet /> CSV</button>
           <button className="wpd-dialog__close" onClick={() => setShowStatsModal(false)}><X /></button>
@@ -219,6 +169,10 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                 </div>
               </div>
 
+              <p className="wpd-mono wpd-rpt-section" style={{ fontSize: 11, color: 'var(--faint)', margin: '-12px 0 18px', letterSpacing: '.03em' }}>
+                Koszty / przychody: {proc(rep.statystyki.kosztyDoPrzychodow)} · pozycji w raporcie: {rep.pozycji} · rezerwacji: {rep.statystyki.rezerwacji}
+              </p>
+
               <div className="wpd-panel wpd-rpt-section" style={{ marginBottom: 18 }}>
                 <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Zysk miesiąc po miesiącu</h2></div>
                 <div style={{ padding: '14px 14px 6px' }}>
@@ -246,6 +200,86 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
               </div>
 
               <div className="wpd-panel wpd-rpt-section" style={{ marginBottom: 18 }}>
+                <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Klasyfikacja kosztów</h2></div>
+                <table className="wpd-table">
+                  <thead>
+                    <tr>
+                      <th>Grupa i kategoria</th>
+                      <th className="wpd-num">Kwota</th>
+                      <th className="wpd-num">Udział w kosztach</th>
+                      <th className="wpd-num">Udział w przychodach</th>
+                      <th className="wpd-num">Pozycji</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rep.grupyKosztow.map((g) => (
+                      <React.Fragment key={g.nazwa}>
+                        <tr>
+                          <td className="wpd-cell-strong"><span className="wpd-dot" style={{ background: g.color }} />{g.nazwa}</td>
+                          <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(g.amount)} zł</td>
+                          <td className="wpd-num wpd-cell-num wpd-cell-strong">{proc(g.udzialKoszt)}</td>
+                          <td className="wpd-num wpd-cell-num">{proc(g.udzialPrzychod)}</td>
+                          <td className="wpd-num wpd-cell-num">{g.count}</td>
+                        </tr>
+                        {/* Kategorie pokazujemy tylko wtedy, gdy wnoszą coś ponad nazwę grupy. */}
+                        {g.kategorie.length > 1 && g.kategorie.map((k) => (
+                          <tr key={g.nazwa + k.nazwa} style={{ opacity: 0.85 }}>
+                            <td style={{ paddingLeft: 26, color: 'var(--muted)' }}>{k.nazwa}</td>
+                            <td className="wpd-num wpd-cell-num">{fmt(k.amount)} zł</td>
+                            <td className="wpd-num wpd-cell-num">{proc(k.udzialKoszt)}</td>
+                            <td className="wpd-num wpd-cell-num">—</td>
+                            <td className="wpd-num wpd-cell-num">{k.count}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                    <tr className="wpd-rpt-total">
+                      <td className="wpd-cell-strong">Razem koszty</td>
+                      <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(rep.totalCosts)} zł</td>
+                      <td className="wpd-num wpd-cell-num wpd-cell-strong">100,0%</td>
+                      <td className="wpd-num wpd-cell-num wpd-cell-strong">{proc(rep.statystyki.kosztyDoPrzychodow)}</td>
+                      <td className="wpd-num wpd-cell-num wpd-cell-strong">{rep.grupyKosztow.reduce((a, g) => a + g.count, 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {rep.zrodlaPrzychodu.length > 0 && (
+                <div className="wpd-panel wpd-rpt-section" style={{ marginBottom: 18 }}>
+                  <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Struktura przychodów</h2></div>
+                  <table className="wpd-table">
+                    <thead>
+                      <tr>
+                        <th>Źródło rezerwacji</th>
+                        <th className="wpd-num">Kwota</th>
+                        <th className="wpd-num">Udział</th>
+                        <th className="wpd-num">Rezerwacji</th>
+                        <th className="wpd-num">Średnia</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rep.zrodlaPrzychodu.map((z) => (
+                        <tr key={z.nazwa}>
+                          <td className="wpd-cell-strong">{z.nazwa}</td>
+                          <td className="wpd-num wpd-cell-num" style={{ color: 'var(--green)' }}>{fmt(z.amount)} zł</td>
+                          <td className="wpd-num wpd-cell-num">{proc(z.udzial)}</td>
+                          <td className="wpd-num wpd-cell-num">{z.count}</td>
+                          <td className="wpd-num wpd-cell-num">{fmt(z.amount / z.count)} zł</td>
+                        </tr>
+                      ))}
+                      <tr className="wpd-rpt-total">
+                        <td className="wpd-cell-strong">Razem przychody</td>
+                        <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(rep.T.income)} zł</td>
+                        <td className="wpd-num wpd-cell-num wpd-cell-strong">100,0%</td>
+                        <td className="wpd-num wpd-cell-num wpd-cell-strong">{rep.statystyki.rezerwacji}</td>
+                        <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(rep.statystyki.srednia)} zł</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="wpd-panel wpd-rpt-section" style={{ marginBottom: 18 }}>
                 <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Miesiąc po miesiącu</h2></div>
                 <table className="wpd-table">
                   <thead>
@@ -256,6 +290,7 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                       <th className="wpd-num">Podatek</th>
                       <th className="wpd-num">Stałe</th>
                       <th className="wpd-num">Zysk netto</th>
+                      <th className="wpd-num">Marża</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -267,6 +302,7 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                         <td className="wpd-num wpd-cell-num" style={{ color: 'var(--granat)' }}>{m.tax > 0 ? `${fmt(m.tax)} zł` : '—'}</td>
                         <td className="wpd-num wpd-cell-num" style={{ color: 'var(--brick)' }}>{m.fixed > 0 ? `${fmt(m.fixed)} zł` : '—'}</td>
                         <td className="wpd-num wpd-cell-num wpd-cell-strong" style={{ color: m.profit < 0 ? 'var(--cynober)' : 'inherit' }}>{m.active ? `${fmt(m.profit)} zł` : '—'}</td>
+                        <td className="wpd-num wpd-cell-num">{m.active && m.margin !== null ? `${m.margin}%` : '—'}</td>
                       </tr>
                     ))}
                     <tr className="wpd-rpt-total">
@@ -276,6 +312,7 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                       <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(rep.T.tax)} zł</td>
                       <td className="wpd-num wpd-cell-num wpd-cell-strong">{fmt(rep.T.fixed)} zł</td>
                       <td className="wpd-num wpd-cell-num wpd-cell-strong" style={{ color: rep.profit >= 0 ? 'var(--green)' : 'var(--cynober)' }}>{fmt(rep.profit)} zł</td>
+                      <td className="wpd-num wpd-cell-num wpd-cell-strong">{rep.margin}%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -308,6 +345,92 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                   </table>
                 </div>
               )}
+
+              <div className="wpd-panel wpd-rpt-section" style={{ marginTop: 18, marginBottom: 18 }}>
+                <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Statystyki operacyjne</h2></div>
+                <div style={{ padding: '12px 18px 16px' }}>
+                  <ReportRow label="Liczba rezerwacji" value={rep.statystyki.rezerwacji} suffix="" />
+                  <ReportRow label="Średnia wartość rezerwacji" value={rep.statystyki.srednia} />
+                  <ReportRow label="Najwyższa rezerwacja" value={rep.statystyki.najwyzsza} />
+                  <ReportRow label="Najniższa rezerwacja" value={rep.statystyki.najnizsza} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                    <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Średnia prowizja portali (od rezerwacji z prowizją)</span>
+                    <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.sredniaProwizja)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                    <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Efektywna stawka podatku (podatek + VAT / przychód)</span>
+                    <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.efektywnaStawkaPodatku)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                    <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Koszty / przychody</span>
+                    <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.kosztyDoPrzychodow)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {rep.rejestr.length > 0 && (
+                <div className={`wpd-panel wpd-rpt-section wpd-rpt-register${rejestrWDruku ? '' : ' wpd-report-noprint'}`} style={{ marginBottom: 18 }}>
+                  <div className="wpd-panel__head">
+                    <h2 className="wpd-h2" style={{ fontSize: 15 }}>Rejestr pozycji ({rep.rejestr.length})</h2>
+                  </div>
+                  <table className="wpd-table">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Typ</th>
+                        <th>Obiekt</th>
+                        <th>Źródło / kategoria</th>
+                        <th>Opis</th>
+                        <th className="wpd-num">Przychód</th>
+                        <th className="wpd-num">Koszty</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rep.rejestr.map((r, i) => {
+                        const koszty = (r.Prowizja || 0) + (r.Podatek || 0) + (r.VAT || 0) + (r.Media || 0) + (r.Koszt || 0);
+                        return (
+                          <tr key={`${r.Data}-${i}`}>
+                            <td className="wpd-mono" style={{ fontSize: 12 }}>{r.Data}</td>
+                            <td>{r.Typ}</td>
+                            <td>{r.Obiekt || '—'}</td>
+                            <td>{r['Źródło / kategoria'] || '—'}</td>
+                            <td style={{ color: 'var(--muted)' }}>{r.Opis || '—'}</td>
+                            <td className="wpd-num wpd-cell-num" style={{ color: 'var(--green)' }}>{r.Przychód > 0 ? `${fmt(r.Przychód)} zł` : '—'}</td>
+                            <td className="wpd-num wpd-cell-num" style={{ color: 'var(--cynober)' }}>{koszty > 0 ? `${fmt(koszty)} zł` : '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <p className="wpd-body" style={{ fontSize: 11.5, color: 'var(--faint)', padding: '10px 18px 14px', margin: 0 }}>
+                    Kolumna „Koszty" przy rezerwacji sumuje prowizję, podatek, VAT i media przypisane do tego pobytu.
+                    Ten sam zestaw pozycji, z kwotami rozbitymi na osobne kolumny, wychodzi w eksporcie CSV.
+                  </p>
+                </div>
+              )}
+
+              <div className="wpd-panel wpd-rpt-section wpd-rpt-method" style={{ marginBottom: 4 }}>
+                <div className="wpd-panel__head"><h2 className="wpd-h2" style={{ fontSize: 15 }}>Metodyka i ograniczenia</h2></div>
+                <div style={{ padding: '12px 18px 16px', fontSize: 12.5, lineHeight: 1.55, color: 'var(--muted)' }}>
+                  <p style={{ margin: '0 0 8px' }}>
+                    <b style={{ color: 'var(--ink)' }}>Zakres.</b> Raport obejmuje wyłącznie pozycje wprowadzone do WynajemPRO z datą w roku {rep.y}
+                    {' '}— {rep.pozycji} pozycji. Przychód wykazano w kwocie brutto, a prowizje portali ujęto jako koszt.
+                  </p>
+                  <p style={{ margin: '0 0 8px' }}>
+                    <b style={{ color: 'var(--ink)' }}>Podatek.</b> Podatek i VAT obciążają wynik w tym zestawieniu, choć nie są kosztem operacyjnym.
+                    Przy ocenie samej opłacalności najmu warto patrzeć na wynik przed podatkiem.
+                  </p>
+                  <p style={{ margin: '0 0 8px' }}>
+                    <b style={{ color: 'var(--ink)' }}>Koszty stałe.</b> Rozliczane za miesiące faktycznie poniesione — w roku bieżącym do miesiąca bieżącego włącznie,
+                    nie za cały rok z góry.
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <b style={{ color: 'var(--ink)' }}>Ograniczenie.</b> Raport widzi tylko to, co zostało wpisane do aplikacji. Jeżeli koszty takie jak sprzątanie,
+                    materiały czy amortyzacja nie są ewidencjonowane, wykazana marża jest <b style={{ color: 'var(--ink)' }}>wyższa niż rzeczywista</b>.
+                    Pozycje nie mają też numerów dokumentów źródłowych — przy rozliczeniu z księgowym trzeba je zestawić z fakturami samodzielnie.
+                  </p>
+                </div>
+              </div>
 
               <p className="wpd-report-onlyprint wpd-rpt-foot">
                 Raport wygenerowany w WynajemPRO {generatedAt}. Wartości orientacyjne — do rozliczenia z księgowym użyj eksportu CSV.
