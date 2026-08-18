@@ -75,8 +75,10 @@ Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie pryw
 > To nie jest błąd konfiguracji ani uprawnień — wykluczone: autoryzowane domeny (`wynajempro.com`
 > jest na liście), rola (400 ≠ brak uprawnień), rozszerzenia (powtórzone w incognito), droga przez
 > API (odmowa pochodzi z samego API, więc klucz serwisowy jej nie obejdzie).
-> **Zadanie schodzi z listy „do kliknięcia".** Zostają dwie ścieżki: (1) zgłoszenie do wsparcia
-> Firebase o zdjęcie ograniczenia, (2) własna wysyłka poczty — Cloud Function generuje `oobCode`
+> **Zadanie schodzi z listy „do kliknięcia".** ✅ **Zgłoszenie do wsparcia Firebase wysłane
+> 2026-08-18** (treść: `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`) — czekamy na
+> odpowiedź; to teraz pozycja na cudzym zegarze, jak prawnik. Dwie ścieżki: (1) zgłoszenie
+> o zdjęcie ograniczenia, (2) własna wysyłka poczty — Cloud Function generuje `oobCode`
 > Admin SDK i wysyła **nasz** mail z linkiem na `wynajempro.com/auth/action`, z pominięciem
 > szablonów Google. Druga ścieżka rozwiązuje przy okazji brandowanie treści maila (dziś podpis
 > bierze się ze zmiennej `%APP_NAME%`) i spina się z pozycją „Powiadomienia e-mail" z Backlogu.

@@ -6,6 +6,12 @@ Project timeline and key milestones.
 
 ## 2026-08-18
 
+### Domknięcie dnia: klucz serwisowy unieważniony, zgłoszenie do Google wysłane
+- ✅ **Klucz serwisowy skasowany z dysku i unieważniony w konsoli** przez właściciela, tego samego dnia, w którym powstał. To jedyny moment w całym procesie, w którym poza regułami bezpieczeństwa istniał pełny dostęp do bazy — i trwał kilkadziesiąt minut, tyle, ile zajęło N6.5.
+- ✅ **Zgłoszenie do wsparcia Firebase wysłane** (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, treść w `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`). Zlecenie #10 przechodzi w stan oczekiwania — druga pozycja na cudzym zegarze, obok prawnika.
+- 🎯 **Bilans 17–18.08**: zamknięte polityka haseł (z naprawą ekranów aplikacji), App Check dla Storage, N6.5, a przez to **całe N6**. Wdrożona poprawka druku raportu. Rozstrzygnięta forma działalności. **Jedynym otwartym blokerem launchu jest odpowiedź prawnika (N4).**
+- ⏸ **Otwarte, drobne**: wydruk kontrolny raportu przez właściciela (dowód dla X18 część 1) oraz właściwe X18 — typografia dokumentu, robota dla `designer`.
+
 ### N6.5 wykonane — 15 osieroconych plików usuniętych, N6 zamknięte w całości
 - 🎯 **Powód**: pliki przewodników usuniętych **przed** wdrożeniem kaskady czyszczącej (22.07) leżały w Storage i były publicznie czytelne pod dawnymi adresami. Dług z przeszłości, który nie rósł — ale też sam nie znikał.
 - ✅ **DRY-RUN**: **15 plików w 8 `guideId`, 1520,5 KB**. Sześć identyfikatorów w starym stylu (`guide_1780145474945` — znacznik czasu sprzed przejścia na `crypto.randomUUID()` przy N5, 10.07), czyli dokładnie ta warstwa długu, o którą chodzi; dwa to nasze artefakty testowe z lipca (`test-final.png`, `test-po-roli.png`, po 0,1 KB). Gwarda wieku pominęła **0**, jeden obiekt z żywym rodzicem nietknięty.

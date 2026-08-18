@@ -1,6 +1,7 @@
 # Zgłoszenie do wsparcia Firebase — odblokowanie edycji szablonów e-mail
 
-> **Status:** ⏸ do wysłania przez właściciela (2026-08-18). Kontekst i diagnostyka:
+> **Status:** ✅ **WYSŁANE przez właściciela 2026-08-18** — czekamy na odpowiedź Google.
+> Odpowiedź wkleić do [[Activity-Log]] i przestawić status zlecenia #10. Kontekst i diagnostyka:
 > [[Activity-Log]] 2026-08-18, [[Projects/Zlecenia-wlasciciela]] #10.
 
 ## Gdzie to wysłać

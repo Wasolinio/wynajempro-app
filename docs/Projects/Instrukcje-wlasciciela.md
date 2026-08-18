@@ -37,9 +37,9 @@
 | ③ ✅ | Logi nocnego purge | 5 | — | sprawdzone 13.08, czysto |
 | ④ ✅ | Smoke testy 4a–4f | 4 | — | komplet zdany 13.08 |
 | ⑤ ✅ | App Check — Storage i Functions | **8** | — | ✅ **18.08**: Storage wymuszany, przewodniki sprawdzone; Functions bez przełącznika w konsoli (ochrona w kodzie) |
-| ⑥ ✅ | N6.5 — czyszczenie sierot w Storage | 3 | — | ✅ **18.08**: 15 plików usuniętych, kontrola po operacji czysta; **zostaje skasować klucz serwisowy** |
+| ⑥ ✅ | N6.5 — czyszczenie sierot w Storage | 3 | — | ✅ **18.08**: 15 plików usuniętych, kontrola czysta, klucz serwisowy skasowany |
 | ⑦ ✅ | Polityka haseł — wprowadzona w konsoli | 7 | — | ✅ **17.08**: 8 znaków + wielka i mała litera + cyfra, tryb „Require"; ekrany aplikacji poprawione i wdrożone |
-| ⑧ | **Szablony e-maili Auth** | **9** ⭐ nowa | ~10 min | ⬜ dziś link weryfikacyjny prowadzi na obcą domenę i angielski ekran Google |
+| ⑧ 🔴 | Szablony e-maili Auth | **9** | — | 🔴 **zablokowane przez Google** (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`); zgłoszenie wysłane 18.08, czekamy na odpowiedź |
 
 **Sugerowana kolejność (dziś i dalej):** ⑦ → ⑧ → ⑤ → ⑥.
 Trzy pierwsze to konsola i po kilka minut każde; N6.5 zostawiam na koniec, bo wymaga klucza
@@ -202,8 +202,8 @@ dla prawnika.
 > operacji: **zero sierot**. Przed kasowaniem: przegląd listy, sprawdzenie, że żaden żywy
 > dokument w bazie nie odwołuje się do tych plików, oraz **kopia zapasowa na Pulpicie**
 > (`kopia-sierot-2026-08-18`) — bo Storage nie ma PITR i operacja jest nieodwracalna.
-> ⏸ **Zostaje Tobie:** skasować plik klucza serwisowego z dysku i unieważnić klucz w konsoli
-> (krok 3d niżej).
+> ✅ **Klucz serwisowy skasowany i unieważniony** przez właściciela tego samego dnia — pozycja
+> zamknięta bez ogona.
 
 > **Uwaga do kolejności:** PITR z sekcji 2 chroni **Firestore, nie Storage** — nie jest więc
 > siatką pod to zadanie. Zabezpieczeniem przy N6.5 jest DRY-RUN, Twój przegląd listy
@@ -558,7 +558,7 @@ na ekranie Google. Zmiana dotyczy wyłącznie kolejnych wiadomości.
 - [x] ④ **sekcja 4** — smoke testy 4a–4f: ✅ **KOMPLET ZDANY 2026-08-13**; po drodze naprawione przewijanie dialogów, dopisane X18 (raport PDF), zlecenie #10 (adres w szablonach maili) i dług CSV w Backlogu
 - [x] ⑤ **sekcja 1** — App Check dla Firestore: ✅ **potwierdzone 2026-08-13** (Enforced, 99% zweryfikowane; #13 obalony)
 - [x] ⑥ **sekcja 8** — App Check: ✅ **Storage wymuszany od 2026-08-18** (okładki przewodników sprawdzone); Functions bez przełącznika w konsoli — ochrona per funkcja w kodzie
-- [x] ⑦ **sekcja 3** — N6.5: ✅ **WYKONANE 2026-08-18** (15 plików, kopia zapasowa na Pulpicie, kontrola po operacji czysta) — ⏸ zostaje **skasować klucz serwisowy i unieważnić go w konsoli**
+- [x] ⑦ **sekcja 3** — N6.5: ✅ **WYKONANE 2026-08-18** (15 plików, kopia zapasowa na Pulpicie, kontrola po operacji czysta, klucz serwisowy skasowany i unieważniony)
 - [x] ⑧ **sekcja 7** — polityka haseł: ✅ **WPROWADZONA 2026-08-17** (8 znaków + wielka i mała litera + cyfra, tryb „Require"); ekrany aplikacji zsynchronizowane i wdrożone tego samego dnia
 - [ ] ⑨ **sekcja 9** — szablony e-maili Auth: action URL na `wynajempro.com/auth/action` w 3 szablonach + pisownia marki (🟠)
 
