@@ -308,9 +308,10 @@ export default function LandingPage() {
               <span className="wp4-label">Kalendarz</span>
               <h3 className="wp4-h3">Koniec z podwójnymi rezerwacjami</h3>
               <p className="wp4-body">
-                Dwukierunkowa synchronizacja iCal w czasie rzeczywistym.
-                Rezerwacja na Booking natychmiast blokuje termin na Airbnb i
-                w panelu.
+                Wklejasz linki iCal z Booking.com i Airbnb. Rezerwacje z portali
+                wpadają do kalendarza automatycznie co rano, a poza tym w każdej
+                chwili przyciskiem „Synchronizacja". Ten sam mechanizm działa
+                w drugą stronę: rezerwacje bezpośrednie blokują terminy w portalach.
               </p>
               <div className="wp4-feature__foot">
                 <span className="wp4-tag wp4-tag--booking">BOOKING</span>
@@ -338,12 +339,14 @@ export default function LandingPage() {
               <span className="wp4-label">Goście</span>
               <h3 className="wp4-h3">Cyfrowy przewodnik gościa premium</h3>
               <p className="wp4-body">
-                Koniec z drukowanymi kartkami. Wi-Fi, kod do drzwi i instrukcje
-                trafiają na telefon gościa automatycznie — przed przyjazdem.
+                Wysyłasz gościowi jeden link albo wieszasz kod QR w obiekcie.
+                Dojazd, zasady i instrukcje widzi od razu, a hasło do Wi-Fi i kod
+                do drzwi odsłaniają się dopiero, gdy potwierdzi regulamin
+                i instrukcję PPOŻ.
               </p>
               <div className="wp4-feature__foot">
-                <span className="wp4-tag wp4-tag--green">KOD WYSŁANY</span>
-                <span className="wp4-label wp4-label--faint">auto · w dniu przyjazdu</span>
+                <span className="wp4-tag wp4-tag--green">KOD PO AKCEPTACJI</span>
+                <span className="wp4-label wp4-label--faint">z zapisanym śladem</span>
               </div>
             </article>
 
@@ -352,8 +355,8 @@ export default function LandingPage() {
               <h3 className="wp4-h3">Ryczałt rozliczony bez stresu</h3>
               <p className="wp4-body">
                 System pilnuje progu 100&nbsp;000&nbsp;zł i sam przełącza stawkę
-                z 8,5% na 12,5%. Koniec z ręcznym liczeniem i strachem przed
-                kontrolą.
+                z 8,5% na 12,5%. To zestawienie dla Ciebie i dla księgowego,
+                nie deklaracja podatkowa.
               </p>
               <div className="wp4-feature__foot">
                 <span className="wp4-tag wp4-tag--amber">RYCZAŁT 8,5%</span>
@@ -374,12 +377,13 @@ export default function LandingPage() {
               Wszystko, czego gość potrzebuje — <em>zanim zapyta</em>
             </h2>
             <p className="wp4-body">
-              Koniec z drukowanymi kartkami i powtarzanymi w kółko pytaniami.
-              Wi-Fi, kod do drzwi, zasady i dojazd trafiają na telefon gościa
-              automatycznie, jeszcze przed przyjazdem.
+              Jedna strona z dojazdem, zasadami, instrukcją PPOŻ i poleconymi
+              miejscami. Wysyłasz link SMS-em albo wieszasz kod QR w domku. Gość
+              otwiera go w przeglądarce, bez zakładania konta i bez instalowania
+              czegokolwiek.
             </p>
             <ul className="wp4-checklist">
-              <li>Kod do zamka wysłany w dniu przyjazdu</li>
+              <li>Hasło Wi-Fi i kod do drzwi odsłaniają się po akceptacji regulaminu</li>
               <li>Instrukcje i regulamin w jednym miejscu</li>
               <li>Mniej telefonów „o której kończy się doba?"</li>
             </ul>
@@ -482,8 +486,8 @@ export default function LandingPage() {
               <span className="wp4-step__num">03</span>
               <h3 className="wp4-h3">Dodaj pierwszą rezerwację</h3>
               <p className="wp4-body">
-                Zaznacz daty. System od razu wyliczy zysk na czysto i zaplanuje
-                wysyłkę kodu PIN dla gościa.
+                Wybierz obiekt, daty i kwotę. Prowizja i podatek policzą się same,
+                a rezerwacja wejdzie do kalendarza i do raportu.
               </p>
             </article>
           </div>
@@ -499,9 +503,9 @@ export default function LandingPage() {
               System szyty na miarę, <em>nie skomplikowany moloch</em>
             </h2>
             <p className="wp4-lead wp4-lead--narrow">
-              Obsługujesz wynajem po godzinach? Zobacz, dlaczego właściciele
-              1–20 obiektów wybierają lekkie narzędzie zamiast oprogramowania
-              hotelowego.
+              Prowadzisz domki albo apartamenty obok pracy, bez recepcji
+              i bez asystentki. Systemy hotelowe liczą sobie za pokój i mają
+              moduły, których nigdy nie otworzysz.
             </p>
           </div>
 
@@ -617,7 +621,7 @@ export default function LandingPage() {
             />
             <FaqItem
               q="Co, gdy będę potrzebować pomocy?"
-              a="Aplikacja jest zaprojektowana tak, by nie wymagać szkoleń. Jeśli jednak utkniesz, nasz polskojęzyczny zespół wsparcia odpowie po ludzku — nie bot."
+              a="Masz centrum pomocy z instrukcjami krok po kroku i formularz kontaktowy. Odpowiadamy po polsku, mailem."
             />
           </div>
         </div>

@@ -445,7 +445,6 @@ export default function LandingScrollDemo() {
                 <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 11, fontSize: 12.5 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}><span style={{ width: 7, height: 7, background: '#5FB389', borderRadius: 2 }} />Airbnb<span style={{ fontFamily: "'IBM Plex Mono',monospace", marginLeft: 'auto', color: '#4F4A3F', fontSize: 10 }}>2 MIN</span></div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}><span style={{ width: 7, height: 7, background: '#5FB389', borderRadius: 2 }} />Booking.com<span style={{ fontFamily: "'IBM Plex Mono',monospace", marginLeft: 'auto', color: '#4F4A3F', fontSize: 10 }}>5 MIN</span></div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}><span style={{ width: 7, height: 7, background: '#C99A2E', borderRadius: 2 }} />Nocowanie<span style={{ fontFamily: "'IBM Plex Mono',monospace", marginLeft: 'auto', color: '#4F4A3F', fontSize: 10 }}>···</span></div>
                 </div>
                 <div style={{ marginTop: 'auto', borderTop: '1px solid #2C2920', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 11 }}>
                   <div style={{ width: 34, height: 34, borderRadius: 3, background: '#D9492B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>KM</div>
