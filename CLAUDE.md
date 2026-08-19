@@ -27,7 +27,8 @@ Pełna zasada: `docs/Team-Playbook.md` → „Dokumenty dla właściciela".
 
 ## Zespół agentów
 Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`, `seo`,
-`marketing`, `support`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.
+`marketing`, `support`, `feedback`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.
+`support` bierze pojedyncze zgłoszenie, `feedback` — syntezę wielu naraz (bety, wzorce, priorytety).
 Wspólna metodologia (obowiązuje wszystkich, także głównego Claude'a): `docs/Team-Playbook.md`.
 
 ## Skille projektu

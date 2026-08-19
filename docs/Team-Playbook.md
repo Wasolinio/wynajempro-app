@@ -12,9 +12,15 @@ na początku zadania i stosuje go bezwzględnie. Definicje agentów: `.claude/ag
 | `designer` | UI/UX, identyfikacja v2 | zmiany wizualne, spójność, dostępność |
 | `seo` | pozycjonowanie | technical SEO, słowa kluczowe, treści pod Google |
 | `marketing` | pozyskanie klientów | kampanie, copy, kanały, lejek |
-| `support` | obsługa klienta | zgłoszenia użytkowników, FAQ/baza wiedzy, onboarding, komunikaty |
+| `support` | obsługa klienta | **pojedyncze** zgłoszenia, FAQ/baza wiedzy, onboarding, komunikaty |
+| `feedback` | głos klienta zbiorczo | synteza feedbacku z bety i zgłoszeń **hurtem**, wzorce z liczbami, kolejność napraw, bramka bety |
 | `legal` | prawo i compliance | RODO, regulaminy, umowy, cookies, subskrypcje |
 | `strategist` | produkt i biznes | roadmapa, cennik, konkurencja, metryki SaaS |
+
+⚠️ **`support` a `feedback` — granica.** `support` obsługuje **jedno** zgłoszenie: odpowiada,
+diagnozuje, eskaluje. `feedback` nie kontaktuje się z klientami w ogóle — czyta **wiele naraz**
+i mówi, co się powtarza i co naprawić najpierw. „Odpowiedz temu użytkownikowi" → `support`.
+„Co wynika z trzech tur feedbacku bety" → `feedback`.
 
 Zadania przekrojowe koordynuje główny Claude i dzieli je między agentów.
 
