@@ -652,6 +652,12 @@ export const DASHBOARD_CSS = `
 /* ── Raport rentowności: ekran + druk A4→PDF (X4 partia 3) ── */
 .wpd-report-onlyprint{ display:none; }
 .wpd-rpt-total td{ border-top:2px solid var(--ink); padding-top:10px; }
+/* Miesiąc bez ruchu — na ekranie wyszarzony. Klasa zamiast stylu w JSX, bo w druku
+   ta sama informacja potrzebuje innej mocy: 0.4 na papierze to ~2,5:1, czyli nieczytelne. */
+/* Miesiac bez ruchu: wygaszony, ale czytelny. 0.4 dawalo ok. 2,55:1 na jasnym tle,
+   czyli ponizej progu dostepnosci, a wiersz niesie nazwe miesiaca. Decyzja wlasciciela
+   2026-08-19: rowna sie wartosci uzytej w druku. */
+.wpd-rpt-idle{ opacity:.62; }
 @media print {
   /* ── DRUK RAPORTU ──
      Poprzednia wersja ukrywała panel przez visibility:hidden i wyrywała raport z układu
@@ -671,7 +677,18 @@ export const DASHBOARD_CSS = `
     padding:0 !important; inset:auto !important; }
   .wpd-dialog{ position:static !important; box-shadow:none !important; border:none !important;
     border-radius:0 !important; width:100% !important; max-width:none !important;
-    max-height:none !important; overflow:visible !important; display:block !important; }
+    max-height:none !important; overflow:visible !important; display:block !important;
+    background:#fff !important; }
+  /* Papier jest papierem (X18 partia C). Zmierzone na wydruku PDF z aplikacji: ogon
+     ostatniej kartki wychodzil w kolorze #f8fafc, czyli w tle <body> (klasa bg-slate-50
+     z czasow Tailwinda) - zimny blekit obcy palecie, drukowany przy wlaczonej opcji
+     "Grafika w tle". Dokument dla ksiegowego ma byc bialy: mniej toneru, wyzszy kontrast
+     i ten sam wynik niezaleznie od ustawien okna drukowania. */
+  html:has(.wpd-report-print), body:has(.wpd-report-print){ background:#fff !important; }
+  /* Powloka panelu tez na bialo, ale TYLKO gdy drukujemy raport. Ten sam arkusz obsluguje
+     wydruk generatora umow (blok nizej) - kazda niezakresowana regula w @media print
+     dotyka i jego, a to on zepsul sie tu juz dwa razy. */
+  body:has(.wpd-report-print) .wpd{ background:#fff !important; min-height:0 !important; }
   .wpd-report-print{ position:static !important; max-height:none !important; overflow:visible !important;
     padding:0 !important; background:#fff !important; }
   /* Pas bezpieczenstwa: gdyby ktos znowu dolozyl regule chowajaca wszystko przez visibility
@@ -681,15 +698,139 @@ export const DASHBOARD_CSS = `
 
   .wpd-report-noprint{ display:none !important; }
   .wpd-report-onlyprint{ display:block !important; }
-  .wpd-rpt-section{ break-inside:avoid; page-break-inside:avoid; margin-bottom:16px !important; }
-  .wpd-rpt-head{ display:flex !important; justify-content:space-between; align-items:flex-end; gap:16px; border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:18px; }
-  .wpd-rpt-head__title{ font-size:20px; font-weight:800; letter-spacing:-0.01em; }
-  .wpd-rpt-head__ent{ font-size:13px; color:var(--muted); margin-top:2px; }
-  .wpd-rpt-head__meta{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; }
-  .wpd-rpt-foot{ margin-top:16px; padding-top:10px; border-top:1px solid var(--hairline); font-size:11px; color:var(--faint); }
-  .wpd-stat{ background:#fff !important; border:1px solid var(--hairline) !important; }
-  .wpd-stat--dark{ background:var(--ink) !important; }
+
+  /* ── Naglowek i stopka dokumentu ──
+     Numeracji stron NIE robimy w CSS: Chrome nie obsluguje pol @page (@bottom-right,
+     counter(page)), wiec reguly te nic by nie zrobily. Numer strony i tytul dokumentu
+     daje wlasna stopka przegladarki, karmiona z document.title podmienianego na czas
+     drukowania (partia A/B) - potwierdzone przez wlasciciela na wydruku 18.08. */
+  .wpd-rpt-head{ display:flex !important; justify-content:space-between; align-items:flex-end; gap:16px; border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:12px; }
+  .wpd-rpt-head__title{ font-size:19px; font-weight:800; letter-spacing:-0.01em; }
+  .wpd-rpt-head__ent{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .wpd-rpt-head__meta{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; }
+  .wpd-rpt-foot{ margin-top:12px; padding-top:8px; border-top:1px solid var(--hairline); font-size:10px; color:var(--faint); break-inside:avoid; }
+
+  /* ── Podzial na strony ──
+     Sekcje trzymamy w calosci, ale panel dluzszy niz strona MUSI moc sie zlamac -
+     inaczej przeskakuje w calosci na nastepna kartke i zostawia po sobie pol strony
+     bieli (tak powstawaly strony 3 i 4 w pomiarze sprzed tej partii). Przy lamaniu
+     naglowek tabeli powtarza sie na kolejnej stronie (display:table-header-group). */
+  .wpd-rpt-section{ break-inside:avoid; page-break-inside:avoid; margin-bottom:9px !important; }
+  .wpd-report-print .wpd-panel__head{ break-after:avoid; page-break-after:avoid; }
+  /* Zestawienie wolno zlamac, prozy i wykresu nie. Tabela trzymana w calosci
+     przeskakuje w CALOSCI na kolejna kartke, gdy zabraknie jej dwoch wierszy miejsca -
+     tak powstawaly pol-puste strony. Zlamana tabela nie gubi nic, bo naglowek kolumn
+     powtarza sie na nastepnej stronie, a pojedynczy wiersz nigdy nie pekla w pol. */
+  .wpd-report-print .wpd-panel:has(table){ break-inside:auto !important; page-break-inside:auto !important; }
+  .wpd-report-print thead{ display:table-header-group; break-after:avoid; }
+  .wpd-report-print tr{ break-inside:avoid; page-break-inside:avoid; }
+  .wpd-report-print .wpd-rpt-total{ break-before:avoid; page-break-before:avoid; }
+  .wpd-report-print p{ orphans:2; widows:2; }
+  /* Metodyka i stopka to jedna mysl: zastrzezenia do liczb plus zdanie o tym, skad
+     te liczby sa. Metodyka ZOSTAJE w calosci (dziedziczy break-inside z .wpd-rpt-section):
+     po zageszczeniu ma juz tylko ok. 1/8 kartki, a rozbicie czterech akapitow zastrzezen
+     miedzy dwa arkusze kosztuje czytelnika wiecej niz ten ogon bieli. Sklejamy za to
+     stopke z metodyka - bez tego jeden wiersz stopki ladowal sam na osobnej kartce. */
+  .wpd-rpt-method{ break-after:avoid; page-break-after:avoid; }
+  .wpd-rpt-foot{ break-before:avoid; page-break-before:avoid; }
+  /* Rejestr pozycji to zalacznik, nie ciag dalszy - zaczyna sie od swiezej kartki
+     i jako jedyny lamie sie swobodnie (przy pelnym sezonie to kilkanascie stron). */
+  .wpd-rpt-register{ break-before:page; page-break-before:always; break-inside:auto !important; page-break-inside:auto !important; }
+
+  /* ── Gestosc: ekran ma powietrze, papier ma tresc ──
+     Wszystko zakresowane przez .wpd-report-print, zeby nie ruszyc ani ekranu, ani
+     wydruku umowy. Skala tekstu w tabelach: 13,5px -> 10,5px (ok. 8 pt), naglowki
+     kolumn 10 -> 8,5px. Osiem punktow to standardowa gestosc zestawien ksiegowych,
+     a laser 600 dpi rysuje ja czysto. */
+  /* Panel na papierze to ramka, nie plama. Na ekranie panel (--surface) jest JASNIEJSZY
+     od tla (--paper); na bieli ta sama plama robi sie ciemniejsza od tla, czyli figura
+     i tlo zamieniaja sie rolami. Do tego tlo znika przy odznaczonej "Grafice w tle",
+     wiec dokument wygladalby inaczej u kazdego. Strukture niesie linia 1 px. */
+  .wpd-report-print .wpd-panel{ background:#fff !important; }
+  .wpd-report-print .wpd-panel__head{ padding:8px 12px !important; }
+  .wpd-report-print .wpd-panel__head .wpd-h2{ font-size:12.5px !important; }
+  .wpd-report-print .wpd-table th{ padding:6px 10px !important; font-size:8.5px !important; letter-spacing:.05em !important; }
+  .wpd-report-print .wpd-table td{ padding:4.5px 10px !important; font-size:10.5px !important; }
+  /* Linia 1 px zostaje, ale --hairline (#DDD5C3) to 1,35:1 na bieli - laser rysuje
+     z tego siwa kreske na granicy widocznosci. W druku linie to odcien --ink, czyli
+     ta sama paleta, tylko mocniejszy ton. Gdy color-mix nie jest wspierany, deklaracja
+     wypada i zostaje --hairline, czyli stan sprzed zmiany. */
+  .wpd-report-print .wpd-panel{ border-color:color-mix(in srgb, var(--ink) 24%, #fff) !important; }
+  .wpd-report-print .wpd-panel__head,
+  .wpd-report-print .wpd-table td{ border-bottom-color:color-mix(in srgb, var(--ink) 24%, #fff) !important; }
+  .wpd-report-print .wpd-table th{ border-bottom-color:color-mix(in srgb, var(--ink) 42%, #fff) !important; }
+  .wpd-report-print .wpd-rpt-total td{ padding-top:7px !important; }
+  /* Liczba nigdy sie nie lamie. Przy pelnym sezonie kwota "11 507 zl" schodzila
+     do drugiej linii i psula rytm calej tabeli. */
+  .wpd-report-print .wpd-table td.wpd-num, .wpd-report-print .wpd-table td.wpd-cell-num,
+  .wpd-report-print .wpd-table td.wpd-mono{ white-space:nowrap !important; }
+  .wpd-report-print .wpd-rpt-idle{ opacity:.62 !important; }
+
+  /* ── Wskazniki na skrocie: cztery karty w jednym rzedzie ──
+     W druku obowiazuje breakpoint mobilny (szerokosc strony < 980px), wiec karty
+     ustawialy sie 2x2 i zjadaly polowe pierwszej kartki. Na A4 miesci sie rzad. */
+  .wpd-report-print .wpd-stats{ grid-template-columns:repeat(4,1fr) !important; gap:8px !important; }
+  /* Linia wskaznikow pod kartami miala ujemny margines gorny dobrany do wysokich kart
+     ekranowych - po splaszczeniu kart wchodzila na ich krawedz. */
+  .wpd-report-print p.wpd-rpt-section{ margin-top:0 !important; }
+  /* Kolor ramki ustawiamy wlasciwosciami jednostronnymi, nie skrotem. Zmierzone na panelu
+     (Chrome, tryb print): ani "border:1px solid var(--hairline) !important", ani
+     "border-color:var(--hairline) !important" nie przebijaly reguly ".wpd-stat--dark
+     { border-color:var(--ink) }" o nizszej specyficznosci - oba sa skrotami, a skrot
+     z var() trafia do kaskady jako wartosc odroczona. Tylko border-*-color dziala
+     przewidywalnie. Warto o tym pamietac przy kazdym nadpisywaniu koloru linii tutaj. */
+  .wpd-report-print .wpd-stat{ background:#fff !important; min-height:0 !important;
+    padding:9px 11px 10px !important; border-width:1px !important; border-style:solid !important;
+    border-top-color:var(--hairline) !important; border-right-color:var(--hairline) !important;
+    border-bottom-color:var(--hairline) !important; border-left-color:var(--hairline) !important; }
+  .wpd-report-print .wpd-stat__label{ font-size:8.5px !important; margin-bottom:7px !important; color:var(--label) !important; }
+  .wpd-report-print .wpd-stat__value{ font-size:21px !important; }
+  .wpd-report-print .wpd-stat__value small{ font-size:12px !important; }
+  .wpd-report-print .wpd-stat__foot{ padding-top:5px !important; font-size:9.5px !important; color:var(--muted) !important; }
+  /* Karta "Zysk netto" na ekranie jest odwrocona (ciemne tlo). Na papierze odwrocenie
+     jest najgorszym z mozliwych wyroznien: przy wylaczonej grafice w tle znika razem
+     z tlem, a przy wlaczonej zjada cala kaselte toneru i daje zielen 3:1 na czerni.
+     Hierarchie niesie wiec ramka z --ink zamiast wypelnienia - linia, nie plama. */
+  .wpd-report-print .wpd-stat--dark{ background:#fff !important;
+    border-top-color:var(--ink) !important; border-right-color:var(--ink) !important;
+    border-bottom-color:var(--ink) !important; border-left-color:var(--ink) !important; }
+  .wpd-report-print .wpd-stat--dark .wpd-stat__label{ color:var(--label) !important; }
+
+  /* ── Kolor tylko tam, gdzie jest duzy ──
+     Wlasciciel drukuje na Brother DCP-L3560CDW, czesto mono. W skali szarosci
+     --green (44%) i --cynober (48%) to praktycznie ten sam ton, a --cynober na bieli
+     daje 4,29:1, czyli ponizej AA dla tekstu tej wielkosci. W tabelach kolor niczego
+     nie rozstrzyga (kolumny sa podpisane, strata ma minus), wiec liczby ida --ink.
+     Kolor zostaje na kartach wskaznikow, gdzie tekst jest duzy i prog wynosi 3:1. */
+  .wpd-report-print .wpd-table td.wpd-cell-num{ color:var(--ink) !important; }
+  .wpd-report-print .wpd-table td.wpd-mono{ color:var(--ink) !important; }
+
+  /* ── Struktura kosztow (paski) ──
+     print-color-adjust:exact tylko tutaj i na kropkach legendy - to jedyne miejsca,
+     w ktorych wypelnienie niesie informacje, a domyslnie odznaczona "Grafika w tle"
+     wycielaby je do bieli. */
+  .wpd-report-print .wpd-hbar{ padding:4px 0 !important; }
+  .wpd-report-print .wpd-hbar__head{ margin-bottom:3px !important; }
+  .wpd-report-print .wpd-hbar__name{ font-size:11px !important; }
+  .wpd-report-print .wpd-hbar__val{ font-size:9.5px !important; }
+  .wpd-report-print .wpd-hbar__track{ height:5px !important; }
+  .wpd-report-print .wpd-hbar__track, .wpd-report-print .wpd-hbar__fill,
+  .wpd-report-print .wpd-dot{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  /* ── Bloki opisowe: statystyki i metodyka ── */
+  .wpd-report-print .wpd-rpt-kv{ padding:1.5px 0 !important; }
+  .wpd-report-print .wpd-rpt-kv span{ font-size:10.5px !important; }
+  .wpd-report-print .wpd-rpt-method > div:last-child{ padding:9px 12px 11px !important;
+    font-size:10.5px !important; line-height:1.45 !important; }
+  .wpd-report-print .wpd-rpt-method p{ margin-bottom:6px !important; }
+  .wpd-report-print .wpd-rpt-register p{ font-size:9.5px !important; padding:7px 12px 9px !important; }
+  .wpd-report-print .wpd-panel > div:not(.wpd-panel__head){ padding:9px 12px 11px !important; }
+
   .wpd-panel{ box-shadow:none !important; }
+  /* Marginesy zostaja symetryczne. Szerszy grzbiet (18 mm) bylby wygodniejszy w segregatorze,
+     ale @page jest regula dokumentu, nie selektorem - ta sama wartosc obowiazuje wydruk
+     generatora umow. Zmiana marginesu innej funkcji nie miesci sie w tej partii;
+     propozycja opisana w raporcie do decyzji wlasciciela. */
   @page { size:A4; margin:14mm; }
 }
 

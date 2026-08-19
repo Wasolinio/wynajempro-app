@@ -4,6 +4,19 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-19
+
+### X18 partia C wdrożona — wydruk z 5 kartek na 3, i czwarta pułapka w bloku druku
+- 🎯 **Powód**: partie A i B dały raportowi treść, ale układ został ekranowy. Zadanie przekazane `designer`owi 18.08; pierwszy przebieg przerwał błąd limitu sesji **na etapie finalnej weryfikacji** — zmiany zostały w drzewie w stanie zielonym, więc agent został **wznowiony**, a nie uruchomiony od zera.
+- ✅ **Efekt zmierzony realnymi PDF-ami z Chromium** (A4, marginesy 14 mm, te same dane po obu stronach; pomiar „przed" na czystym HEAD przez `git stash`): pełny sezon (3 obiekty, 48 rezerwacji, 90 pozycji) **5 → 3 kartki**, z rejestrem **13 → 7**, mały zestaw **4 → 3**.
+- 🔥 **Trzy rzeczy, których nie dało się zobaczyć bez pomiaru na papierze**: (1) wydruk ma szerokość poniżej 980 px, więc **włączał się breakpoint mobilny** i cztery wskaźniki szły w siatkę 2×2, zjadając pół pierwszej kartki; (2) **zielony `#2F6B53` i cynober `#D9492B` po konwersji na szarość dają 92,5 i 101,4 na 255** — 3,5% różnicy, czyli w mono nierozróżnialne, a właściciel drukuje mono; liczby w tabelach przeniesione na `--ink`, kolor został na kartach wskaźników, gdzie każda ma własny podpis; (3) **ciemne tło karty „Zysk netto" znikało** przy odznaczonej „Grafice w tle" w oknie drukowania — zabierało ze sobą najważniejszą liczbę raportu. Zamienione na ramkę; skutek uboczny: wydruk z grafiką tła i bez niej jest **identyczny co do bajtu**.
+- 🛑 **Czwarta awaria czekająca w tym samym pliku, znaleziona i usunięta**: `.wpd{ background:#fff; min-height:0 }` stała w `@media print` **bez zakresowania**, więc obowiązywała także przy wydruku generatora umów. Zawężona do `body:has(.wpd-report-print) .wpd{...}`, strony raportu po zawężeniu identyczne co do bajtu. To ten sam plik, który położył wydruk 13 i 18.08 — trzeci raz z rzędu przyczyną było **coś niezakresowanego w bloku druku**.
+- ✅ **Ekran nietknięty**, i to zweryfikowane dwiema metodami: zrzuty modalu 1440×900 i 390×844 **identyczne co do bajtu**, a różnice w policzonych stylach to wyłącznie dwie nowe klasy z wartościami, które wcześniej stały inline.
+- ⚠️ **Decyzja właściciela przy okazji**: `opacity:.4` na wierszach miesięcy bez ruchu dawało na ekranie ok. **2,55:1**, czyli poniżej progu dostępności, a wiersz niesie nazwę miesiąca. Podniesione do **0,62** — tej samej wartości co w druku.
+- ✅ **Weryfikacja przed wydaniem, powtórzona przez głównego agenta**: lint 0, build OK, **e2e 141/141** (18.08 było 140; doszedł test „gęstość i układ dokumentu"). **DEPLOY `hosting:app` 2026-08-19**; w serwowanym chunku `ManagerApp-rb63obRF.js` potwierdzone: `.wpd-rpt-idle{opacity:.62}`, zakresowane tło `.wpd` w druku i `display:table-header-group` (powtarzanie nagłówków tabel na kolejnych stronach).
+- ⏸ **Rekomendacja: osobny widok wydruku NIE TERAZ** (koszt ok. dnia, efekt osiągnięty bez ruszania routingu; wartość pojawi się przy innym marginesie lub formacie papieru dla raportu). ⚖️ Numeracji „strona X z Y" **nie da się** zrobić żadną z dróg — Chrome ignoruje pola `@page`; potrzebna byłaby paginacja w JS.
+- 📌 **Drobiazg dla następnej osoby piszącej test druku**: `page.pdf()` wywołane od razu po otwarciu modalu łapie klatkę animacji `wpd-dialog-in` i papier wychodzi wyblakły. Liczba stron jest wtedy poprawna, ale zrzuty nieczytelne — trzeba odczekać ok. 900 ms.
+
 ## 2026-08-18
 
 ### Raport rentowności rozbudowany — partie A i B (klasyfikacja, źródła, statystyki, rejestr, metodyka)

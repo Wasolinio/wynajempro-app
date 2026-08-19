@@ -187,3 +187,59 @@ test('Rejestr pozycji wchodzi do wydruku dopiero po zaznaczeniu przełącznika',
   const metodyka = page.locator('.wpd-rpt-method');
   expect(await metodyka.evaluate((el) => getComputedStyle(el).display)).not.toBe('none');
 });
+
+/*
+  X18 partia C — typografia i uklad dokumentu. Test pilnuje decyzji projektowych, ktore
+  latwo cofnac przypadkiem, bo wszystkie zyja w jednym bloku @media print:
+  gestosc tabel, cztery wskazniki w rzedzie, brak koloru przy tekscie tabelarycznym,
+  plaska karta zysku i rejestr od nowej kartki. Mierzone na realnym panelu.
+*/
+test('Wydruk raportu: gęstość i układ dokumentu (partia C)', async ({ page }) => {
+  await otworzRaport(page);
+  /* Szerokość okna MUSI odpowiadać kartce (A4 minus marginesy = 794 px CSS), bo
+     `emulateMedia` przełącza tylko typ nośnika, a zapytania `max-width` dalej patrzą
+     na viewport. Przy domyślnych 1280 px breakpoint mobilny się nie włącza i pomiar
+     układu kart pokazuje stan, którego na papierze nie ma. */
+  await page.setViewportSize({ width: 794, height: 1123 });
+  await page.emulateMedia({ media: 'print' });
+
+  const p = await page.evaluate(() => {
+    const cs = (sel) => getComputedStyle(document.querySelector(sel));
+    /* Komórka z kolorem ustawionym w JSX (przychód = --green). Komórka bez stylu
+       własnego jest czarna także bez reguły druku i niczego by nie pilnowała. */
+    const numer = document.querySelector('.wpd-table td.wpd-cell-num[style*="green"]');
+    return {
+      kolumnyKpi: cs('.wpd-stats').gridTemplateColumns.split(' ').length,
+      kartaZysku: cs('.wpd-stat--dark').backgroundColor,
+      ramkaZysku: cs('.wpd-stat--dark').borderTopColor,
+      tloStrony: getComputedStyle(document.body).backgroundColor,
+      komorkaFont: cs('.wpd-table td').fontSize,
+      naglowekFont: cs('.wpd-table th').fontSize,
+      kwotaKolor: numer ? getComputedStyle(numer).color : 'BRAK',
+      kwotaZawijanie: numer ? getComputedStyle(numer).whiteSpace : 'BRAK',
+      rejestrLamanie: cs('.wpd-rpt-register').breakBefore,
+    };
+  });
+
+  // Cztery wskaźniki w jednym rzędzie: w druku obowiązuje breakpoint mobilny
+  // (szerokość strony < 980px), więc bez tej reguły karty wracają do układu 2x2
+  // i zjadają połowę pierwszej kartki.
+  expect(p.kolumnyKpi).toBe(4);
+  // Karta „Zysk netto" na papierze jest ramką, nie plamą — odwrócenie znika przy
+  // odznaczonej opcji „Grafika w tle" i zabiera ze sobą najważniejszą liczbę raportu.
+  expect(p.kartaZysku).toBe('rgb(255, 255, 255)');
+  // Hierarchię niesie ramka ciemniejsza od zwykłej --hairline — linia, nie plama.
+  expect(p.ramkaZysku).not.toBe('rgb(221, 213, 195)');
+  // Ogon ostatniej kartki wychodził w #f8fafc (tło <body> z czasów Tailwinda).
+  expect(p.tloStrony).toBe('rgb(255, 255, 255)');
+  // Gęstość dokumentu: 13,5px ekranowe -> 10,5px (ok. 8 pt) na papierze.
+  expect(p.komorkaFont).toBe('10.5px');
+  expect(p.naglowekFont).toBe('8.5px');
+  // Kolor przy tekście tabelarycznym: --cynober daje 4,29:1 na bieli, a w skali
+  // szarości zlewa się z --green. Liczby w tabelach idą --ink.
+  expect(p.kwotaKolor).toBe('rgb(23, 21, 15)');
+  // Kwota nigdy nie schodzi do drugiej linii („11 507 zł" łamało rytm tabeli).
+  expect(p.kwotaZawijanie).toBe('nowrap');
+  // Rejestr to załącznik — zaczyna się od świeżej kartki.
+  expect(p.rejestrLamanie).toBe('page');
+});

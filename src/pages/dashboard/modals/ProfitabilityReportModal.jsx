@@ -51,9 +51,11 @@ function MonthlyProfitChart({ months }) {
   );
 }
 
+/* `wpd-rpt-kv` nie ma stylu na ekranie — to wyłącznie zaczep dla arkusza druku,
+   który zagęszcza te wiersze razem z resztą dokumentu (X18 partia C). */
 function ReportRow({ label, value, color, strong, suffix = ' zł' }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+    <div className="wpd-rpt-kv" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
       <span className="wpd-body" style={{ fontSize: 13, color: strong ? 'var(--ink)' : 'var(--muted)', fontWeight: strong ? 700 : 400 }}>{label}</span>
       <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: strong ? 700 : 600, color: color || 'var(--ink)' }}>{fmt(value)}{suffix}</span>
     </div>
@@ -295,7 +297,7 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                   </thead>
                   <tbody>
                     {rep.months.map((m, i) => (
-                      <tr key={i} style={{ opacity: m.active ? 1 : 0.4 }}>
+                      <tr key={i} className={m.active ? undefined : 'wpd-rpt-idle'}>
                         <td className="wpd-cell-strong">{MABBR[i]}</td>
                         <td className="wpd-num wpd-cell-num" style={{ color: 'var(--green)' }}>{m.income > 0 ? `${fmt(m.income)} zł` : '—'}</td>
                         <td className="wpd-num wpd-cell-num" style={{ color: 'var(--cynober)' }}>{(m.commission + m.media + m.own) > 0 ? `${fmt(m.commission + m.media + m.own)} zł` : '—'}</td>
@@ -353,15 +355,15 @@ function ProfitabilityReportModal({ showStatsModal, setShowStatsModal, selectedY
                   <ReportRow label="Średnia wartość rezerwacji" value={rep.statystyki.srednia} />
                   <ReportRow label="Najwyższa rezerwacja" value={rep.statystyki.najwyzsza} />
                   <ReportRow label="Najniższa rezerwacja" value={rep.statystyki.najnizsza} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                  <div className="wpd-rpt-kv" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
                     <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Średnia prowizja portali (od rezerwacji z prowizją)</span>
                     <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.sredniaProwizja)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                  <div className="wpd-rpt-kv" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
                     <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Efektywna stawka podatku (podatek + VAT / przychód)</span>
                     <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.efektywnaStawkaPodatku)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
+                  <div className="wpd-rpt-kv" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '3px 0' }}>
                     <span className="wpd-body" style={{ fontSize: 13, color: 'var(--muted)' }}>Koszty / przychody</span>
                     <span className="wpd-mono" style={{ fontSize: 13.5, fontWeight: 600 }}>{proc(rep.statystyki.kosztyDoPrzychodow)}</span>
                   </div>
