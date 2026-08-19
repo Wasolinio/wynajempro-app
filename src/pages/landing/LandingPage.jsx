@@ -67,7 +67,13 @@ const FaqItem = ({ q, a }) => (
   </details>
 );
 
+/* Wersja treści zgody marketingowej. Zapisywana przy każdym zapisie, żeby dało się
+   wykazać, NA CO dokładnie ktoś się zgodził (RODO art. 7 ust. 1). Zmiana brzmienia
+   klauzuli w formularzu = zmiana tej daty. */
+const ZGODA_WERSJA = '2026-08-19';
+
 export default function LandingPage() {
+  const [consent, setConsent] = useState(false);
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState('');
@@ -109,6 +115,14 @@ export default function LandingPage() {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
+    // Zgoda jest warunkiem zapisu, nie ozdobą: reguła Firestore odrzuci dokument bez
+    // `consent: true`. Blokujemy też tutaj, żeby użytkownik zobaczył zrozumiały
+    // komunikat zamiast błędu uprawnień.
+    if (!consent) {
+      setNote('Zaznacz zgodę, żebyśmy mogli wysyłać Ci wiadomości.');
+      setNoteErr(true);
+      return;
+    }
     setSubmitting(true);
     setNote('');
     try {
@@ -116,10 +130,16 @@ export default function LandingPage() {
         email,
         subscribedAt: serverTimestamp(),
         source: 'landing_v4',
+        // Dowód zgody — RODO art. 7 ust. 1 wymaga, by dało się WYKAZAĆ, że zgoda
+        // została udzielona. Wersja pozwala odtworzyć brzmienie klauzuli z chwili
+        // zapisu, gdyby tekst kiedyś się zmienił.
+        consent: true,
+        consentVersion: ZGODA_WERSJA,
       });
       setNote('Dziękujemy — otrzymasz nasze poradniki.');
       setNoteErr(false);
       setEmail('');
+      setConsent(false);
     } catch (err) {
       console.error('Błąd newslettera', err);
       setNote('Błąd zapisu. Spróbuj ponownie.');
@@ -683,8 +703,30 @@ export default function LandingPage() {
             <button type="submit" className="wp4-btn wp4-btn--primary wp4-btn--lg" disabled={submitting}>
               {submitting ? 'Zapisuję…' : 'Zapisz się'}
             </button>
+
+            <label className="wp4-news__consent">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => { setConsent(e.target.checked); setNote(''); }}
+              />
+              <span>
+                Chcę dostawać e-maile z poradami dla gospodarzy i informacjami
+                o WynajemPRO. Zgodę mogę wycofać w każdej chwili.
+              </span>
+            </label>
           </form>
           {note && <p className={`wp4-news__note${noteErr ? ' wp4-news__note--err' : ''}`} role="status">{note}</p>}
+
+          {/* Klauzula pierwszej warstwy — wymagana w momencie ZBIERANIA danych
+              (RODO art. 13), tak samo jak pod formularzem /kontakt. Sama Polityka
+              pod linkiem nie wystarcza, bo informacja ma być podana przy zbieraniu. */}
+          <p className="wp4-news__clause">
+            Administratorem adresu jest operator serwisu WynajemPRO. Używamy go wyłącznie
+            do wysyłki tych wiadomości, do czasu wycofania zgody — wycofasz ją, odpisując
+            na dowolną wiadomość albo przez <Link to="/kontakt">formularz kontaktowy</Link>.
+            Twoje prawa opisuje <Link to="/prywatnosc">Polityka prywatności</Link>.
+          </p>
 
           <div className="wp4-cta__or">
             <span className="wp4-label wp4-label--ink-faint">lub</span>
@@ -1092,6 +1134,13 @@ const CSS = `
 .wp4-news__field input::placeholder{ color:var(--ink-faint); }
 .wp4-news__field input:focus{ border-color:var(--cynober); }
 .wp4-news__note{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-on); margin:14px 0 0; }
+/* Zgoda i klauzula na ciemnym tle sekcji CTA — kolory z tokenów, nie z palety ad hoc. */
+.wp4-news__consent{ flex-basis:100%; display:flex; align-items:flex-start; gap:10px; justify-content:center;
+  max-width:52ch; margin:4px auto 0; text-align:left; font-size:13.5px; line-height:1.5; color:var(--ink-on); cursor:pointer; }
+.wp4-news__consent input{ margin:2px 0 0; flex:0 0 auto; width:16px; height:16px; accent-color:var(--cynober); cursor:pointer; }
+.wp4-news__clause{ max-width:60ch; margin:14px auto 0; font-size:12px; line-height:1.55; color:var(--ink-faint); text-align:center; }
+.wp4-news__clause a{ color:var(--ink-on); text-decoration:underline; text-underline-offset:2px; }
+.wp4-news__clause a:hover{ color:var(--surface); }
 /* stan błędu: ton cynobru rozjaśniony pod ciemne tło CTA (6.9:1 na --ink) */
 .wp4-news__note--err{ color:#E8836B; }
 .wp4-cta__or{ margin:28px 0 16px; }

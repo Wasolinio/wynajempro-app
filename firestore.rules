@@ -265,9 +265,23 @@ service cloud.firestore {
     // NEWSLETTER SUBSCRIBERS
     // =====================================================================
     match /newsletter_subscribers/{docId} {
-      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt', 'source'])
+      // Zgoda marketingowa jest WARUNKIEM zapisu, nie polem opcjonalnym: bez consent==true
+      // dokument nie powstaje. consentVersion pozwala odtworzyć brzmienie klauzuli z chwili
+      // zapisu — RODO art. 7 ust. 1 wymaga, by dało się wykazać, NA CO ktoś się zgodził.
+      // (2026-08-19: reguła zaostrzona; wcześniej wystarczał sam adres e-mail, a Polityka
+      // deklarowała podstawę „zgoda", której faktycznie nie zbieraliśmy.)
+      allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt', 'source', 'consent', 'consentVersion'])
+                    && request.resource.data.keys().hasAll(['email', 'subscribedAt', 'consent', 'consentVersion'])
                     && request.resource.data.email is string
-                    && request.resource.data.email.matches('.*@.*\\..*');
+                    && request.resource.data.email.matches('.*@.*\\..*')
+                    && request.resource.data.email.size() <= 320
+                    && request.resource.data.subscribedAt == request.time
+                    && request.resource.data.consent == true
+                    && request.resource.data.consentVersion is string
+                    && request.resource.data.consentVersion.size() <= 20
+                    && (!('source' in request.resource.data)
+                        || (request.resource.data.source is string
+                            && request.resource.data.source.size() <= 60));
       allow read, update, delete: if false;
     }
 

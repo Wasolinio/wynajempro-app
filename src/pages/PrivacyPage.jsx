@@ -23,6 +23,7 @@ export default function PrivacyPage() {
           <li><strong>Dane Zarządcze (Menedżera):</strong> Nazwy obiektów, ceny, wpisy w kalendarzu. Są to dane dostarczane dobrowolnie przez użytkownika w celu zarządzania własnym biznesem.</li>
           <li><strong>Dane Przewodników dla Gości:</strong> Imię i nazwisko (opcjonalnie) oraz podpisy akceptacji logowane podczas weryfikacji tożsamości gości przez zewnętrzny udostępniony link. Ochrona tych danych, zebranych za pośrednictwem Aplikacji, jest powierzona również bezpośrednio Menedżerowi, który fizycznie udostępnia klucze i dane dostępowe.</li>
           <li><strong>Dane Płatnicze:</strong> Przetwarzane bezpiecznie przez zewnętrznego operatora Stripe. Administrator WynajemPRO nie przetwarza numerów kart kredytowych, a jedynie identyfikatory transakcji.</li>
+          <li><strong>Zapis do newslettera:</strong> Adres e-mail podany w formularzu na stronie głównej, wraz z datą zapisu i zapisem samej zgody. Przetwarzamy go <strong>wyłącznie na podstawie Twojej zgody</strong> (art. 6 ust. 1 lit. a RODO), w celu wysyłki wiadomości o WynajemPRO i porad dla gospodarzy — do czasu wycofania zgody. Zgodę wycofasz, odpisując na dowolną wiadomość albo przez <a href="/kontakt">formularz kontaktowy</a>; wycofanie nie wpływa na zgodność przetwarzania sprzed wycofania. Zapis do newslettera jest dobrowolny i nie warunkuje korzystania z Aplikacji.</li>
         </ul>
       </section>
 
