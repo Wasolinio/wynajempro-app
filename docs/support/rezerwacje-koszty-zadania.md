@@ -71,9 +71,11 @@ Kliknięcie rezerwacji otwiera jej kartę. U góry masz ścieżkę powrotu („R
 
 W komórce „Goście" u góry stoi łączna liczba osób, a pod nią rozbicie — dla rodziny 2+2 z psem będzie to „4 osoby" i „2 dorosłych · 2 dzieci · 1 zwierzę". Starsze rezerwacje, przy których podałeś tylko liczbę osób, pokazują samo „4 osoby"; rozbicie dopiszesz, otwierając wpis przyciskiem „Edytuj". Rezerwacje z synchronizacji iCal nie mają ani liczby osób, ani rozbicia — portale nie przesyłają tych danych.
 
-Po prawej stronie znajduje się panel „Zadania i przypomnienia" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Domyślnie są to: „Wyślij wskazówki dojazdu" (3 dni przed przyjazdem), „Wyślij kod do drzwi" (1 dzień przed) i „Zleć sprzątanie" (w dniu przyjazdu). Zaległe zadania są wyróżnione.
+Po prawej stronie znajduje się panel „Zadania i przypomnienia" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Na nowych kontach domyślnie są to: „Wyślij wskazówki dojazdu" (3 dni przed przyjazdem), „Wyślij kod do drzwi" (1 dzień przed przyjazdem), „Zleć sprzątanie" (w dniu wyjazdu) i „Wyślij prośbę o opinię" (1 dzień po wyjeździe). Pod każdym zadaniem widnieje jego termin opisany słowami. Zaległe zadania są wyróżnione.
 
-Te same zadania trafiają do „Raportu dnia" i na „Pulpit", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach" w zakładce „Powiadomienia": każdemu ustawisz „Krótka nazwa", „Pełna treść", „Dni przed" i „Ikona", a przycisk „Dodaj przypomnienie" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia".
+Te same zadania trafiają do „Raportu dnia" i na „Pulpit", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach" w zakładce „Powiadomienia": każdemu ustawisz „Krótka nazwa", „Pełna treść", „Kiedy", „Ile dni" i „Ikona", a przycisk „Dodaj przypomnienie" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia".
+
+Lista „Kiedy" ma cztery pozycje: „Przed przyjazdem", „Po przyjeździe", „Przed wyjazdem" i „Po wyjeździe" — dzięki temu ustawisz zarówno czynność przygotowawczą, jak i taką po pobycie, na przykład prośbę o opinię dwa dni po wyjeździe gościa. W polu „Ile dni" wpisujesz zwykłą liczbę, bez minusa; pod spodem aplikacja wypisuje zdaniem, kiedy zadanie się pojawi („Zadanie pojawi się 2 dni po wyjeździe gościa"). Wpisanie „0" oznacza sam dzień przyjazdu albo wyjazdu.
 
 ## Najczęstsze pytania
 

@@ -40,7 +40,7 @@ Profil możesz później zmienić w każdej chwili: kliknij swoje imię i nazwis
 Menu po lewej stronie prowadzi do wszystkich widoków:
 
 - 01 „Pulpit" — dzisiejsze przyjazdy, wyjazdy, zadania i przychód miesiąca,
-- 02 „Kalendarz" — rezerwacje wszystkich obiektów na osi miesiąca,
+- 02 „Kalendarz" — rezerwacje wszystkich obiektów na osi miesiąca (z filtrem obiektu i zakładaniem rezerwacji wprost na wolnym terminie),
 - 03 „Obiekty" — Twoje miejsca na wynajem z podstawowymi statystykami,
 - 04 „Rezerwacje" — lista wszystkich wpisów z wyszukiwarką i filtrami,
 - 05 „Finanse" — przegląd, koszty i opłaty oraz raporty,
@@ -71,6 +71,8 @@ Do tej samej zakładki prowadzi też przycisk „Dodaj obiekt" w widoku „Obiek
 4. Kliknij „Zapisz wpis". Potwierdzeniem jest komunikat „Dodano pomyślnie!".
 
 Rezerwacja pojawi się w widokach „Rezerwacje", „Kalendarz" i w statystykach. Szczegółowy opis wszystkich pól znajdziesz w artykule o rezerwacjach, kosztach i zadaniach.
+
+Szybsza droga prowadzi przez kalendarz: kliknij wolny dzień w wierszu obiektu, żeby założyć rezerwację na tę jedną noc, albo przeciągnij po kilku dniach, żeby od razu zaznaczyć cały pobyt. Formularz otworzy się z wypełnionym obiektem i obiema datami — wystarczy dopisać gościa i kwotę. Terminów już zajętych nie da się zaznaczyć, więc tą drogą nie zrobisz podwójnej rezerwacji. Jeśli wolisz klawiaturę, użyj przycisku z plusem przy nazwie obiektu. Listą „Wszystkie obiekty" u góry zawęzisz kalendarz do jednego miejsca — razem z metrykami pod spodem.
 
 Jeśli korzystasz z Booking.com lub Airbnb, rezerwacje z portali możesz pobierać automatycznie — zobacz artykuł o synchronizacji kalendarzy (iCal).
 

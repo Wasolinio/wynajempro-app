@@ -82,7 +82,7 @@ export const helpArticles = [
         "type": "list",
         "items": [
           "01 „Pulpit\" — dzisiejsze przyjazdy, wyjazdy, zadania i przychód miesiąca,",
-          "02 „Kalendarz\" — rezerwacje wszystkich obiektów na osi miesiąca,",
+          "02 „Kalendarz\" — rezerwacje wszystkich obiektów na osi miesiąca (z filtrem obiektu i zakładaniem rezerwacji wprost na wolnym terminie),",
           "03 „Obiekty\" — Twoje miejsca na wynajem z podstawowymi statystykami,",
           "04 „Rezerwacje\" — lista wszystkich wpisów z wyszukiwarką i filtrami,",
           "05 „Finanse\" — przegląd, koszty i opłaty oraz raporty,",
@@ -136,6 +136,10 @@ export const helpArticles = [
       {
         "type": "p",
         "content": "Rezerwacja pojawi się w widokach „Rezerwacje\", „Kalendarz\" i w statystykach. Szczegółowy opis wszystkich pól znajdziesz w artykule o rezerwacjach, kosztach i zadaniach."
+      },
+      {
+        "type": "p",
+        "content": "Szybsza droga prowadzi przez kalendarz: kliknij wolny dzień w wierszu obiektu, żeby założyć rezerwację na tę jedną noc, albo przeciągnij po kilku dniach, żeby od razu zaznaczyć cały pobyt. Formularz otworzy się z wypełnionym obiektem i obiema datami — wystarczy dopisać gościa i kwotę. Terminów już zajętych nie da się zaznaczyć, więc tą drogą nie zrobisz podwójnej rezerwacji. Jeśli wolisz klawiaturę, użyj przycisku z plusem przy nazwie obiektu. Listą „Wszystkie obiekty\" u góry zawęzisz kalendarz do jednego miejsca — razem z metrykami pod spodem."
       },
       {
         "type": "p",
@@ -484,11 +488,15 @@ export const helpArticles = [
       },
       {
         "type": "p",
-        "content": "Po prawej stronie znajduje się panel „Zadania i przypomnienia\" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Domyślnie są to: „Wyślij wskazówki dojazdu\" (3 dni przed przyjazdem), „Wyślij kod do drzwi\" (1 dzień przed) i „Zleć sprzątanie\" (w dniu przyjazdu). Zaległe zadania są wyróżnione."
+        "content": "Po prawej stronie znajduje się panel „Zadania i przypomnienia\" — lista czynności do wykonania przy tym pobycie, z odhaczaniem i licznikiem postępu. Na nowych kontach domyślnie są to: „Wyślij wskazówki dojazdu\" (3 dni przed przyjazdem), „Wyślij kod do drzwi\" (1 dzień przed przyjazdem), „Zleć sprzątanie\" (w dniu wyjazdu) i „Wyślij prośbę o opinię\" (1 dzień po wyjeździe). Pod każdym zadaniem widnieje jego termin opisany słowami. Zaległe zadania są wyróżnione."
       },
       {
         "type": "p",
-        "content": "Te same zadania trafiają do „Raportu dnia\" i na „Pulpit\", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach\" w zakładce „Powiadomienia\": każdemu ustawisz „Krótka nazwa\", „Pełna treść\", „Dni przed\" i „Ikona\", a przycisk „Dodaj przypomnienie\" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia\"."
+        "content": "Te same zadania trafiają do „Raportu dnia\" i na „Pulpit\", więc nic nie umknie. Szablony zadań zmienisz w „Ustawieniach\" w zakładce „Powiadomienia\": każdemu ustawisz „Krótka nazwa\", „Pełna treść\", „Kiedy\", „Ile dni\" i „Ikona\", a przycisk „Dodaj przypomnienie\" tworzy nowy szablon obowiązujący dla wszystkich rezerwacji. Na koniec kliknij „Zapisz ustawienia\"."
+      },
+      {
+        "type": "p",
+        "content": "Lista „Kiedy\" ma cztery pozycje: „Przed przyjazdem\", „Po przyjeździe\", „Przed wyjazdem\" i „Po wyjeździe\" — dzięki temu ustawisz zarówno czynność przygotowawczą, jak i taką po pobycie, na przykład prośbę o opinię dwa dni po wyjeździe gościa. W polu „Ile dni\" wpisujesz zwykłą liczbę, bez minusa; pod spodem aplikacja wypisuje zdaniem, kiedy zadanie się pojawi („Zadanie pojawi się 2 dni po wyjeździe gościa\"). Wpisanie „0\" oznacza sam dzień przyjazdu albo wyjazdu."
       },
       {
         "type": "h2",
