@@ -1,4 +1,4 @@
-const { initializeApp, cert } = require('firebase-admin/app');
+const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 

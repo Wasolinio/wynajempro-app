@@ -1,8 +1,9 @@
 User-agent: *
 Allow: /
 
-# Panel za logowaniem — zero wartości w wyszukiwarce
+# Panele za logowaniem — zero wartości w wyszukiwarce
 Disallow: /dashboard
+Disallow: /admin
 
 # Ekrany procesu logowania — bez wartości SEO, w SPA dziedziczą meta strony głównej
 Disallow: /login

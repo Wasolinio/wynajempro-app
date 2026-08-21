@@ -303,5 +303,18 @@ service cloud.firestore {
                         || (request.resource.data.source is string && request.resource.data.source.size() <= 50));
       allow read, update, delete: if false;
     }
+
+    // =====================================================================
+    // DZIENNIK DZIAŁAŃ ADMINISTRATORA — admin_audit/{docId}
+    // =====================================================================
+    // Zamknięte dla KAŻDEGO klienta, łącznie z administratorem: dziennik pisze
+    // wyłącznie Admin SDK (funkcja `adminApi`), którego reguły nie obowiązują.
+    // Gdyby panel pisał tu z przeglądarki, wpis dałoby się podrobić albo pominąć —
+    // a dziennik, który da się obejść, nie jest dowodem na nic.
+    // Odczyt również przez `adminApi` (akcja `audit`), nie bezpośrednio.
+    // =====================================================================
+    match /admin_audit/{docId} {
+      allow read, write: if false;
+    }
   }
 }

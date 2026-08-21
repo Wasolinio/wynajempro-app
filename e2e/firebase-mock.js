@@ -37,6 +37,13 @@ export async function setupFirebaseMocks(page, options = {}) {
               window.__mockAuth.currentUser.reload = async () => {};
               window.__mockAuth.currentUser.getIdToken = async () => 'mock-token';
               window.__mockAuth.currentUser.providerData = [{ providerId: 'password' }];
+              // Custom claims w tokenie: panel administratora bramkuje sie claimem 'admin'
+              // i wymusza odswiezenie tokenu (getIdTokenResult(true)). Fixture podaje je
+              // przez pole 'claims' w obiekcie usera; brak pola = brak uprawnien.
+              window.__mockAuth.currentUser.getIdTokenResult = async () => ({
+                token: 'mock-token',
+                claims: window.__mockAuth.currentUser.claims || {},
+              });
             }
           }
           return window.__mockAuth;

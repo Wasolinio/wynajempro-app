@@ -30,6 +30,12 @@ src/
 │   │   ├── views/ ................. Widoki: Pulpit, Rezerwacje, Kalendarz, Obiekty, Finanse, szczegóły rezerwacji
 │   │   └── modals/ ................ Modale V4: dodaj/edytuj wpis, ustawienia, raporty, usuwanie
 │   │
+│   ├── admin/ ..................... PANEL ADMINISTRATORA "/admin" (namespace .wpd + dodatek .wpa)
+│   │   ├── AdminApp.jsx ........... Powłoka: sidebar 01-06, bramka claimu `admin`
+│   │   ├── adminApi.js ............ Klient jedynej funkcji `adminApi` + formatowanie
+│   │   ├── styles.js .............. ADMIN_CSS - dodatek do DASHBOARD_CSS (lista+szczegóły, lejek)
+│   │   └── views/ ................. Przegląd, Konta, Zgłoszenia, Newsletter, Porządek, Dziennik
+│   │
 │   ├── GuestGuideView.jsx ......... Publiczny przewodnik gościa „/guide/:id”
 │   ├── ResetPassword / AuthActionHandler .. Reset hasła / akcje e-mail Firebase
 │   ├── Terms / Privacy / Contact / LegalLayout .. Strony prawne i kontakt
@@ -51,4 +57,9 @@ src/
 
 ⭐ = pliki, od których zacząć przy zmianach logiki/danych.
 
-**Trasy:** patrz nagłówek `App.jsx`. **Reguły backendu:** `firestore.rules`, `storage.rules` (limit uploadu 10 MB). **Funkcje:** `functions/index.js` (Stripe, iCal, usuwanie konta).
+**Trasy:** patrz nagłówek `App.jsx`. **Reguły backendu:** `firestore.rules`, `storage.rules` (limit uploadu 10 MB). **Funkcje:** `functions/index.js` (Stripe, iCal, usuwanie konta) + `functions/admin.js` (panel administratora).
+
+⚠️ **Panel administratora nie czyta Firestore z przeglądarki i nie może.** Reguły zabraniają
+klientowi odczytu `contact_messages` i cudzych kont — i to zostaje. Wszystko, co panel
+pokazuje, przechodzi przez funkcję `adminApi` (Admin SDK, stopniowany dostęp, dziennik).
+Instrukcja dla właściciela: `docs/Panel-administratora.md`.

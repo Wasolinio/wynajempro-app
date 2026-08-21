@@ -26,11 +26,11 @@ export const CANONICAL_ORIGIN = 'https://wynajempro.com';
   • /guide, /opinie — publiczne strony per obiekt/gość udostępniane linkiem przez
     gospodarza (hasło WiFi, kod do drzwi, treści dla konkretnego pobytu). Nie mają
     prawa trafić do wyszukiwarki.
-  • /dashboard — panel za logowaniem.
+  • /dashboard, /admin — panel za logowaniem i panel administratora.
   Lustrzana reguła po stronie serwera dla /guide/** i /opinie/**: nagłówek X-Robots-Tag
   w firebase.json — działa niezależnie od tego, czy bot wykona JavaScript.
 */
-const NOINDEX_PREFIXES = ['/login', '/reset-password', '/auth', '/guide', '/opinie', '/dashboard'];
+const NOINDEX_PREFIXES = ['/login', '/reset-password', '/auth', '/guide', '/opinie', '/dashboard', '/admin'];
 
 // Normalizacja: bez końcowego ukośnika (poza korzeniem), bez query stringu i kotwicy —
 // /blog/, /blog?ref=fb i /blog#top to dla wyszukiwarki ten sam adres kanoniczny /blog.

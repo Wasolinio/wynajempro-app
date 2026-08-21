@@ -37,6 +37,9 @@ const ReviewPageView = lazy(() => import('./pages/ReviewPageView'));
 
 // Część zalogowana (panel zarządzania)
 const ManagerApp = lazy(() => import('./pages/dashboard/ManagerApp'));
+// Panel administratora — osobna paczka, doczytywana wyłącznie po wejściu na /admin.
+// Uprawnienie sprawdza claim w tokenie (tu) i funkcja adminApi (tam, gdzie to działa).
+const AdminApp = lazy(() => import('./pages/admin/AdminApp'));
 
 // Loader wyświetlany podczas doczytywania paczek i sprawdzania sesji.
 // Samowystarczalny (inline <style>), bo renderuje się zanim dociągną się arkusze stron.
@@ -152,6 +155,18 @@ export default function App() {
                     <WynajemProvider>
                       <ManagerApp />
                     </WynajemProvider>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* ── Panel administratora (chroniony logowaniem + claimem "admin") ── */}
+              {/* Bez WynajemProvider: panel administratora nie synchronizuje rezerwacji
+                  właściciela i nie podlega bramce subskrypcji. */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminApp />
                   </ProtectedRoute>
                 }
               />
