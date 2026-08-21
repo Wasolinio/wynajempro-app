@@ -355,8 +355,10 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 **Skąd:** tester przysłał cztery uwagi z panelu (`Obiekty.pages`, dwa zdjęcia ekranu). Pełna analiza
 stanu sprzed zmiany — co robił kod i dlaczego tester zobaczył to, co zobaczył — w
 [[Projects/Feedback-testera-2026-08-21]]. **Agent:** `dev`.
-**Status:** ✅ WSZYSTKIE CZTERY ZAMKNIĘTE W KODZIE 2026-08-21 (lint 0, build OK, e2e 181/181);
-⏸ czeka na `firebase deploy --only hosting:app` i potwierdzenie u testera.
+**Status:** ✅ **WDROŻONE 2026-08-21** — panel (`6942496` + `8d46d72`) i baza wiedzy (`22fd077`)
+na `hosting:app`; lint 0, build OK, **e2e 181/181**, weryfikacja live przez przeglądarkę
+(trasy 200, konsola czysta, nowy kod potwierdzony w bundlu produkcyjnym).
+⏸ Zostaje potwierdzenie u testera i decyzja o domyślnym zestawie szablonów (⚖️ niżej).
 
 - **X20. Zadanie po wyjeździe, a nie tylko przed przyjazdem** („czym są minus 2?").
   Termin zadania liczył się WYŁĄCZNIE od przyjazdu, a jedynym sposobem na cokolwiek po pobycie
