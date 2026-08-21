@@ -33,19 +33,27 @@ const CATEGORY_TAG = {
  */
 
 const LogoMark = ({ size = 24 }) => (
+  /*
+    Znak marki — monogram „W" złożony z dwóch pociągnięć, prawe ramię cynobrowe.
+    Kierunek C z pakietu identyfikacji v2 (decyzja właściciela 2026-08-21); zastąpił
+    trzy paski osi czasu, które do tej pory istniały w DWÓCH różnych wersjach naraz:
+    tu (trzy równe paski w beżu #A0987F) i w identyfikacji (17/17/11 z przesunięciem).
+
+    viewBox 40 × 40 zgodny z plikiem źródłowym `mark-C-litera-w.svg` — geometria
+    przepisana 1:1, bez przeliczania na 24, żeby znak w kodzie i wyeksportowane
+    ikony pochodziły z tych samych liczb.
+  */
   <svg
     width={size}
     height={size}
-    viewBox="0 0 24 24"
+    viewBox="0 0 40 40"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    {/* Atramentowy kafel — miniaturowa oś czasu rezerwacji */}
-    <rect width="24" height="24" rx="4" fill="#17150F" />
-    <rect x="5" y="6.5" width="14" height="3" rx="1.5" fill="#A0987F" />
-    <rect x="5" y="11.5" width="14" height="3" rx="1.5" fill="#D9492B" />
-    <rect x="5" y="16.5" width="14" height="3" rx="1.5" fill="#A0987F" />
+    <rect width="40" height="40" rx="8" fill="#17150F" />
+    <path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 

@@ -20,12 +20,44 @@ import { PASSWORD_HINT, validatePassword } from '../../utils/passwordPolicy';
  * struktura liniami 1px, mono etykiety nad polami, focus cynobrowy, promień 3px.
  */
 
+/**
+ * Rozpoznanie błędów, które wyglądają jak awaria logowania, a są odrzuceniem przez
+ * App Check. Firebase nie zawsze zwraca dedykowany kod — bywa `internal-error`
+ * z App Check w treści — dlatego sprawdzamy i kod, i komunikat.
+ */
+const jakToWyglada = (err) => {
+  const kod = err && err.code ? String(err.code) : '';
+  const tresc = String((err && err.message) || '').toLowerCase();
+  if (kod === 'auth/firebase-app-check-token-is-invalid'
+    || kod === 'auth/internal-error'
+    || kod === 'auth/network-request-failed'
+    || tresc.includes('app check')
+    || tresc.includes('appcheck')) return 'appcheck';
+  return 'inne';
+};
+
 const LogoMark = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="24" height="24" rx="4" fill="#17150F" />
-    <rect x="5" y="6.5" width="14" height="3" rx="1.5" fill="#A0987F" />
-    <rect x="5" y="11.5" width="14" height="3" rx="1.5" fill="#D9492B" />
-    <rect x="5" y="16.5" width="14" height="3" rx="1.5" fill="#A0987F" />
+  /*
+    Znak marki — monogram „W" złożony z dwóch pociągnięć, prawe ramię cynobrowe.
+    Kierunek C z pakietu identyfikacji v2 (decyzja właściciela 2026-08-21); zastąpił
+    trzy paski osi czasu, które do tej pory istniały w DWÓCH różnych wersjach naraz:
+    tu (trzy równe paski w beżu #A0987F) i w identyfikacji (17/17/11 z przesunięciem).
+
+    viewBox 40 × 40 zgodny z plikiem źródłowym `mark-C-litera-w.svg` — geometria
+    przepisana 1:1, bez przeliczania na 24, żeby znak w kodzie i wyeksportowane
+    ikony pochodziły z tych samych liczb.
+  */
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 40 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <rect width="40" height="40" rx="8" fill="#17150F" />
+    <path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -205,6 +237,16 @@ export default function LoginPanel() {
           console.error('Google redirect fallback error:', redirectErr);
           setError('Nie udało się zalogować przez Google. Sprawdź połączenie.');
         }
+      } else if (jakToWyglada(err) === 'appcheck') {
+        // App Check jest WYMUSZANY na `identitytoolkit` (usłudze logowania), a jego token
+        // ma krótki czas życia i odnawia się sam. Gdy odnowienie chwilowo się nie uda —
+        // potknięcie reCAPTCHA, sieć — logowanie jest odrzucane do czasu zdobycia nowego
+        // tokenu. Ponowne kliknięcie tego samego przycisku zwykle NIE pomaga; pomaga
+        // przeładowanie strony, bo wymusza świeży token.
+        // Zdarzyło się właścicielowi 2026-08-21; poprzedni komunikat radził „spróbuj
+        // ponownie", czyli dokładnie to, co nie działa.
+        console.error('Google Auth error (App Check):', err);
+        setError('Zabezpieczenie przed botami odrzuciło logowanie. Odśwież stronę i spróbuj jeszcze raz — to zwykle wystarcza.');
       } else {
         console.error('Google Auth error:', err);
         setError('Błąd podczas logowania przez Google. Spróbuj ponownie.');

@@ -20,19 +20,26 @@ export default defineConfig({
         name: 'WynajemPRO',
         short_name: 'WynajemPRO',
         description: 'Aplikacja menedżera wynajmu krótkoterminowego',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
+        // Ten sam błąd co w index.html: niebieski z szablonu, obcy identyfikacji.
+        // theme_color maluje pasek systemowy i ekran startowy PWA.
+        theme_color: '#17150F',
+        background_color: '#F3EFE5',
         display: 'standalone',
         icons: [
+          // Oba pliki to render wariantu maskable (pełne tło atramentowe, paski
+          // w polu bezpiecznym 80%), więc deklarujemy 'any maskable' — system może
+          // je dociąć do własnego kształtu bez obcinania znaku.
           {
             src: 'icon-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
             src: 'icon-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
