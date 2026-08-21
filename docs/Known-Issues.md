@@ -362,3 +362,34 @@ Klucz reCAPTCHA v3 jest poprawnie wbudowany w bundle (`src/firebase.js:31`, `VIT
 ---
 
 **Related**: [[Development]], [[Features]], [[Architecture]]
+
+---
+
+### 17. Przejściowa awaria App Check blokuje logowanie
+**Severity**: 🟡 MEDIUM (występuje losowo, mija po odświeżeniu)
+**Status**: ⏸ ŁAGODZONE, przyczyna systemowa zostaje
+**Zaobserwowane**: 2026-08-21, konto właściciela, logowanie przez Google.
+
+**Objaw**: „Błąd podczas logowania przez Google" mimo w pełni sprawnego konta
+(niewyłączone, adres potwierdzony, dostawca `google.com`, poprawne claimy, udane
+logowanie kilka godzin wcześniej). **Odświeżenie strony rozwiązuje problem.**
+
+**Przyczyna**: App Check jest w trybie `ENFORCED` dla **`identitytoolkit.googleapis.com`**,
+czyli dla samej usługi logowania (obok `firestore` i `firebasestorage`). Token App Check
+ma krótki czas życia i odnawia się sam; gdy odnowienie chwilowo się nie powiedzie —
+potknięcie reCAPTCHA, sieć — **każde żądanie logowania jest odrzucane** do czasu zdobycia
+nowego tokenu. Przeładowanie strony wymusza świeży token i dlatego pomaga.
+
+**Co zrobiono**: `LoginPanel` rozpoznaje teraz ten przypadek (`auth/firebase-app-check-token-is-invalid`,
+`auth/internal-error`, `auth/network-request-failed`, „app check" w treści) i mówi wprost
+**„Odśwież stronę"**. Poprzedni komunikat radził „spróbuj ponownie", czyli dokładnie to,
+co przy nieważnym tokenie NIE działa — kliknięcie tego samego przycisku odbija dalej.
+
+**Czego NIE rozwiązano**: samego kompromisu. Wymuszanie App Check na logowaniu jest realnym
+zabezpieczeniem przed botami zakładającymi konta, ale czyni z reCAPTCHA **pojedynczy punkt
+awarii dla wejścia do produktu**. Przy jednym użytkowniku to niedogodność; przy stu — zgłoszenia
+„nie mogę się zalogować", których przyczyny nie widać w danych konta.
+
+⚠️ **To jest PIERWSZE miejsce do sprawdzenia przy zgłoszeniu „nie mogę się zalogować"**,
+gdy konto w bazie wygląda poprawnie. Tryby egzekwowania:
+`https://console.firebase.google.com/project/moje-domki-6c77d/appcheck/apis`

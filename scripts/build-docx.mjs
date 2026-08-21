@@ -48,6 +48,7 @@ const WY = join(ROOT, 'docs', 'docx');
 const DOKUMENTY = [
   'docs/Projects/Instrukcje-wlasciciela.md',
   'docs/Projects/Zlecenia-wlasciciela.md',
+  'docs/Panel-administratora.md',
 ];
 
 // Tokeny identyfikacji v2 — te same kolory co w aplikacji, żeby dokument nie wyglądał
