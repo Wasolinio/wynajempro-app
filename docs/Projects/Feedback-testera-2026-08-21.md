@@ -95,8 +95,10 @@ a w ustawieniach i szczegółach rezerwacji jest opisane po polsku, nie liczbą 
 ### X21. „Do posprzątania" liczy sprzątania, nie wyjazdy (uwaga 2)
 
 **Decyzja definicji:** kafel pokazuje **liczbę obiektów, które trzeba dziś posprzątać** =
-wyjazdy dzisiaj **plus** otwarte zadania sprzątania z terminem na dziś, **każdy obiekt liczony raz**
+wyjazdy dzisiaj **plus** otwarte zadania sprzątania, **każdy obiekt liczony raz**
 (wyjazd i przyjazd tego samego dnia w tym samym domku to jedno sprzątanie, nie dwa).
+„Otwarte zadania sprzątania" to dokładnie te, które widać niżej w „Zadaniach na dziś" —
+kafel jest z tej listy wyliczany, więc **nie może już jej przeczyć**; na tym polegała uwaga.
 Podpis kafla wymienia obiekty. Kliknięcie prowadzi do raportu dziennego (tam widać zadania),
 a nie do kalendarza, gdzie sprzątania nie ma.
 
@@ -144,3 +146,28 @@ nowe testy dla kafla sprzątania, kotwicy „po wyjeździe" i obu funkcji kalend
   właściciela — łatwa do cofnięcia, jedna linijka w `src/utils/constants.js`.**
 - **Automatycznej wysyłki nadal nie ma** — zadanie po wyjeździe to przypomnienie dla gospodarza,
   nie e-mail do gościa. Wysyłka to osobny temat ([[Projects/Plan-automatycznych-wiadomosci]], X19).
+
+---
+
+## Stan wykonania (21.08.2026)
+
+Wszystkie cztery uwagi **zamknięte w kodzie tego samego dnia**, w kolejności z planu.
+
+| | Co zrobione | Pliki |
+|---|---|---|
+| X20 | Kotwica `anchor` + wspólny moduł terminów, lista „Kiedy" + „Ile dni" i zdanie kontrolne w Ustawieniach, opis terminu w szczegółach rezerwacji | `src/utils/taskSchedule.js` (nowy), `SettingsModal.jsx`, `BookingDetailView.jsx`, `ManagerApp.jsx`, `constants.js` |
+| X21 | Kafel liczony z tej samej listy, co „Zadania na dziś"; obiekty bez powtórzeń; klik → raport dzienny | `ManagerApp.jsx`, `PulpitView.jsx` |
+| X22 | Klik i przeciągnięcie po wolnych nocach, blokada zajętych, przycisk „+" przy obiekcie dla klawiatury | `CalendarView.jsx`, `ManagerApp.jsx`, `styles.js` |
+| X23 | Filtr obiektu w nagłówku, obejmuje metryki pod kalendarzem | `CalendarView.jsx`, `ManagerApp.jsx` |
+
+**Weryfikacja:** lint 0, build OK, **e2e 181/181** (7 nowych testów w `e2e/tasks-calendar.spec.js` —
+każdy pilnuje jednej uwagi testera, łącznie z blokadą dubla na zajętej nocy).
+
+🐛 **Złapane przez test, nie przez oko:** przy „0 dni" strony kotwicy są nierozróżnialne w danych
+(0 dni przed = 0 dni po = ten sam dzień), więc lista wyboru wracała do „Przed…" i gubiła wybór
+gospodarza w trakcie ustawiania. Wybór trzymany jest teraz lokalnie w formularzu, a `-0` nigdy
+nie trafia do bazy.
+
+⏸ **Zostaje deploy** — `firebase deploy --only hosting:app` (reguł ani funkcji ta tura nie rusza,
+więc to pojedyncze wydanie frontu) i **potwierdzenie u testera**, że kafel i kalendarz zachowują
+się tak, jak prosił.

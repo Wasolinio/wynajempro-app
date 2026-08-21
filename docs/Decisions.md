@@ -303,6 +303,49 @@ wyłącznie po kliknięciu użytkownika. Do tego `registration.update()` co godz
 
 ---
 
+## ADR-015: Termin zadania = kotwica + dni ze znakiem (a nie osobne pole „dni po")
+
+**Date**: 2026-08-21
+**Status**: ACCEPTED
+**Context**: Szablony zadań (`users/{uid}/settings/reminders.items[]`) miały jedno pole terminu —
+`daysBefore` — liczone zawsze od daty przyjazdu. Jedynym sposobem na zadanie po pobycie była
+wartość ujemna, która i tak odliczała od przyjazdu, więc prośba o opinię trafiała w środek
+pobytu gościa. Tester zapytał wprost „czym są minus 2?" (2026-08-21,
+[[Projects/Feedback-testera-2026-08-21]]). Trzeba było wybrać model danych, który doda drugą
+kotwicę **bez migracji zapisanych szablonów** — te żyją na kontach testowych i produkcyjnych.
+
+**Decision**: opcjonalne pole `anchor: 'arrival' | 'departure'` (brak = `'arrival'`) plus
+dotychczasowe `daysBefore` **ze znakiem**: dodatni = przed kotwicą, ujemny = po. Interfejs
+nie pokazuje znaku — składa go z listy „Kiedy" (przed/po × przyjazd/wyjazd) i liczby dni bez
+znaku, a pod spodem wypisuje zdanie kontrolne („Zadanie pojawi się 2 dni po wyjeździe gościa").
+Cała arytmetyka i cały opis słowny w jednym module `src/utils/taskSchedule.js`.
+
+**Rationale**:
+- ✅ Zero migracji: każdy zapisany szablon czyta się dalej tak samo, także ten z „-2"
+- ✅ Zero zmian w regułach — `isValidSettings` wymaga od `reminders` tylko listy `items`
+- ✅ Znak ma jedno znaczenie w całym systemie, a gospodarz go nie widzi
+- ✅ Jedno źródło prawdy terminu — pulpit, szczegóły rezerwacji i ustawienia nie mogą się rozjechać
+- ❌ Dwa pola opisują jedną rzecz: da się zapisać `anchor` bez sensownego `daysBefore` i odwrotnie
+- ❌ Przy „0 dni" strony kotwicy są w danych nieodróżnialne (0 przed = 0 po = ten sam dzień)
+
+**Consequences**:
+- Formularz musi pamiętać wybraną stronę kotwicy **lokalnie** — inaczej przy „0 dni" lista
+  wyboru wraca do „Przed…" i gubi wybór gospodarza w trakcie ustawiania (złapane testem e2e)
+- `templateTiming()` normalizuje `-0` do `0`; do bazy nie trafia ujemne zero
+- Każdy nowy widok zadań bierze termin z `taskSchedule.js`, nigdy nie liczy go u siebie
+
+**Alternatives Considered**:
+- Osobne pole `daysAfter` — odrzucone: dwa pola na tę samą oś, natychmiastowe pytanie,
+  co znaczy wypełnienie obu
+- Jedno pole `offset` z kotwicą zaszytą w `id` szablonu — odrzucone: kotwica przestałaby być
+  edytowalna dla własnych zadań gospodarza
+- Migracja zapisanych szablonów na nowy kształt — odrzucone: ryzyko bez zysku, skoro brak
+  `anchor` daje dokładnie dotychczasowe zachowanie
+
+**Related ADRs**: —
+
+---
+
 ## Decision Template
 
 ```markdown

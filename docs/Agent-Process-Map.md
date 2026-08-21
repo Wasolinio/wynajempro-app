@@ -29,7 +29,10 @@ users/{uid}                         ← profile: status, trialEndsAt, stripeCust
   │                                    booking entries carry: date, property (name), price, etc.
   ├── settings/{docId}              ← config docs, each shaped `{ items: [...] }` (or object):
   │     ├── properties  → { items: [{ id, name, secretToken, ... }] }   ← THE property list
-  │     ├── reminders   → { items: [...] }
+  │     ├── reminders   → { items: [{ id, text, shortName, icon,
+  │     │                            anchor: 'arrival'|'departure',    ← X20, optional (default 'arrival')
+  │     │                            daysBefore }] }                   ← signed: + before anchor, − after
+  │     │                 termin liczy WYŁĄCZNIE src/utils/taskSchedule.js
   │     ├── sources     → { items: [...] }
   │     ├── categories  → { items: [...] }
   │     ├── tax         → { ...taxSettings }
