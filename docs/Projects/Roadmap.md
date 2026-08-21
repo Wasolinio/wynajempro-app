@@ -28,6 +28,74 @@ po domknięciu sekcji NOW.
 
 ---
 
+## 📅 Plan tygodnia 24–30.08.2026
+
+> Ułożony **po zależnościach, nie po dniach** — zgodnie z zasadą „bez zmyślonych liczb".
+> Kolumna „kto" ma znaczenie: część pozycji agent wykonać nie może (konsole zewnętrzne,
+> decyzje prawne, pieniądze), a część czeka wyłącznie na niego.
+> Stan wyjściowy: panel administratora, migracja Stripe i identyfikacja wdrożone 19–21.08
+> ([[Activity-Log]]), `main` zsynchronizowany z GitHubem.
+
+### Ścieżka A — pieniądze. Blokuje przyjęcie pierwszej złotówki
+
+Kolejność jest wymuszona: bez A1 nie da się wykonać A3, a bez A2 checkout wygląda jak
+transakcja bez sprzedawcy.
+
+| # | Co | Kto | Zależność |
+|---|---|---|---|
+| **A1** | **Aktywacja konta Stripe** — dane firmy, rachunek bankowy. Bez tego karta klienta zostanie odrzucona **mimo poprawnego kodu**; na pulpicie „Pay out funds" jest przygaszone | właściciel | blokuje A3 |
+| **A2** | **Branding checkoutu** — ikona, `#D9492B` / `#17150F`, dane publiczne (nazwa, kontakt), adresy Regulaminu i Polityki w Settings → Legal | właściciel | — |
+| **A3** | **Pełny test płatności** — jedyny sposób potwierdzenia, że webhook przestawia status na `active`. Podpisu nie da się sprawdzić inaczej niż prawdziwym zdarzeniem: na koncie produkcyjnym Stripe nie wysyła zdarzeń testowych | oboje | po A1 |
+| **A4** | `consent_collection` — zbieranie akceptacji Regulaminu przy płatności (wartość dowodowa przy umowie z konsumentem) | agent | **po A2** — bez adresu Regulaminu w Stripe tworzenie sesji padnie |
+| **A5** | Sprzątanie w sandboxie: 15 klientów testowych i martwy endpoint webhooka | właściciel | — |
+
+⚠️ **A4 celowo nie zostało zrobione razem z resztą migracji.** Dodanie go przed A2
+zepsułoby płatności, żeby dołożyć do nich checkbox.
+
+### Ścieżka B — RODO. Pięć decyzji, część blokuje zaproszenia do bety
+
+Pełny opis każdej: [[Panel-administratora]] §7, uzasadnienia w
+`docs/legal/Ocena-panelu-administratora-2026-08-19.md`.
+
+| # | Decyzja | Pilność |
+|---|---|---|
+| **B1** | **Okres przechowywania dziennika dostępu.** Wdrożone 12 miesięcy, bo zbiór **bez żadnej granicy narusza art. 5 ust. 1 lit. e od pierwszego wpisu**. To propozycja do potwierdzenia — wariant 24 mies., jeśli dziennik ma służyć obronie przed roszczeniami | mechanizm już kasuje codziennie o 3:15 — decyzja tym pilniejsza |
+| **B2** | **Ścieżka retencji dla kont po „Nadaj dostęp" i „Odbierz".** Oba stany żyją dziś bezterminowo; panel pokazuje je w „Porządku", ale nie kasuje | przed pierwszym testerem bety |
+| **B3** | Wiersz o dzienniku w Polityce prywatności §2 (gotowy projekt w ocenie) | przed deployem — już wdrożone, więc **zaległe** |
+| **B4** | Pola obsługi zgłoszenia (status, notatka) w Polityce §2 | jw. |
+| **B5** | Warunki founding members w Regulaminie §6 — dziś `[DO UZUPEŁNIENIA]`, a to zobowiązanie wobec konsumenta | przed pierwszym zaproszeniem |
+
+**B3–B5 to dokumenty publikowane.** Agent ich nie tyka bez decyzji — przygotuje brzmienia,
+zatwierdza właściciel (docelowo prawnik, bloker N4).
+
+### Ścieżka C — identyfikacja. Reszta pakietu Claude Design
+
+Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
+
+| # | Co | Kto |
+|---|---|---|
+| **C1** | **Z-5** — hero (1440 × 560) i pas CTA (1440 × 280) jako **żywe sekcje HTML** w `LandingPage.jsx`, namespace `.wp4`, nie obrazki | agent |
+| **C2** | Eksport banerów social — 13 formatów (IG post/story, FB cover/post, LinkedIn cover/post, „nowa funkcja", Google Ads ×3, OG danymi) | agent |
+| **C3** | Podmiana placeholderów w wizytówce i sygnaturze e-mail na prawdziwe dane | właściciel podaje dane, agent składa |
+
+### Ścieżka D — weryfikacja i dług
+
+| # | Co | Uwaga |
+|---|---|---|
+| **D1** | **Przejście listy kontrolnej panelu** ([[Panel-administratora]] krok 9) | wciąż nieodhaczone; szczególnie sprawdzenie, czy w dzienniku pojawiają się wpisy |
+| **D2** | **Przegląd dostępności panelu administratora** | agent `designer` przerwany limitem sesji; otwarte: kontrasty klas `.wpa-*`, obsługa klawiaturą wierszy tabeli kont, dostępne nazwy ikon |
+| **D3** | **Przegląd commita `6942496`** (X20–X23 z równoległej sesji) | praca nieprzejrzana przeze mnie; wydzielona osobno, żeby dała się wycofać |
+| **D4** | `invoice.payment_action_required` — 3D Secure przy odnowieniu | dziś degraduje się do `payment_failed` po kilku dniach zamiast od razu informować klienta |
+| **D5** | **Node 20 → 22** | twarda data: **30.10.2026** wyłączenie środowiska, po niej nie da się wdrożyć funkcji |
+| **D6** | Decyzja o App Check na logowaniu ([[Known-Issues]] #17) | wymuszanie chroni przed botami, ale czyni z reCAPTCHA pojedynczy punkt awarii wejścia do produktu |
+
+### Gdyby tydzień miał wystarczyć tylko na jedno
+
+**Ścieżka A.** Reszta to porządek i dług; A to jedyna ścieżka, po której płyną pieniądze —
+a dziś, mimo poprawnego kodu, konto nie jest gotowe ich przyjąć.
+
+---
+
 ## 🔴 NOW — blokery launchu
 
 ### N1. Przywrócenie weryfikacji e-mail
@@ -281,6 +349,45 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 - ✅ **PARTIA C — WYKONANA I WDROŻONA 2026-08-19** (`designer`): **pełny sezon 5 → 3 kartki A4, z rejestrem 13 → 7** (pomiar realnymi PDF-ami z Chromium, te same dane po obu stronach). Trzy znaleziska, których nie dało się zobaczyć na ekranie: (1) **na papierze włączał się breakpoint mobilny** (szerokość < 980 px), przez co cztery wskaźniki szły w siatkę 2×2 i zjadały pół pierwszej kartki; (2) **zielony i cynobrowy są w mono nierozróżnialne** (jasność 92,5 vs 101,4 na 255 — 3,5% różnicy), więc liczby w tabelach idą teraz `--ink`, a kolor został na kartach wskaźników, gdzie każda ma własny podpis; (3) **ciemne tło karty „Zysk netto" znikało** przy odznaczonej „Grafice w tle" w oknie druku, zabierając najważniejszą liczbę raportu — zamienione na ramkę. Efekt uboczny: wydruk z włączoną i wyłączoną grafiką tła jest **identyczny co do bajtu**. 🛑 **Czwarta pułapka w tym samym pliku**: reguła `.wpd{ background:#fff }` stała w `@media print` **bez zakresowania**, więc dotykała też wydruku generatora umów — zawężona do `body:has(.wpd-report-print)`. Ekran nietknięty (zrzuty 1440 i 390 px identyczne co do bajtu). Weryfikacja: lint 0, build OK, **e2e 141/141**. ⚠️ Przy tej okazji decyzja właściciela: **kontrast miesięcy bez ruchu podniesiony także na ekranie** (`opacity` 0.4 → 0.62; 0.4 dawało ok. 2,55:1, poniżej progu dostępności). Historia: partia C w toku od 2026-08-18, właściciel potwierdził wydruk partii A+B („wygląda git"): typografia i układ dokumentu, gęstość tabel, sensowna liczba stron przy pełnym roku i wielu obiektach, decyzja o osobnym widoku wydruku zamiast drukowania modalu. Robota dla `designer`. Raport ma teraz **więcej treści**, więc pytanie o układ zrobiło się pilniejsze, nie mniej pilne.
 - ⏳ **Sprzężone z Backlogiem**: brak pola „numer dokumentu źródłowego" przy koszcie — w rejestrze to jedyna kolumna, której nie umiemy wypełnić.
 - ⏸ **Weryfikacja końcowa należy do właściciela**: raport jest za logowaniem, więc dowodem jest jego ponowny wydruk po deployu.
+
+### X20–X23. Pierwszy feedback testera (2026-08-21)
+
+**Skąd:** tester przysłał cztery uwagi z panelu (`Obiekty.pages`, dwa zdjęcia ekranu). Pełna analiza
+stanu sprzed zmiany — co robił kod i dlaczego tester zobaczył to, co zobaczył — w
+[[Projects/Feedback-testera-2026-08-21]]. **Agent:** `dev`.
+**Status:** ✅ WSZYSTKIE CZTERY ZAMKNIĘTE W KODZIE 2026-08-21 (lint 0, build OK, e2e 181/181);
+⏸ czeka na `firebase deploy --only hosting:app` i potwierdzenie u testera.
+
+- **X20. Zadanie po wyjeździe, a nie tylko przed przyjazdem** („czym są minus 2?").
+  Termin zadania liczył się WYŁĄCZNIE od przyjazdu, a jedynym sposobem na cokolwiek po pobycie
+  była **ujemna liczba w polu „Dni przed"** — która i tak odliczała od przyjazdu, więc prośba
+  o opinię trafiała w środek pobytu gościa. Szablon dostał opcjonalne `anchor: 'arrival'|'departure'`
+  (brak = przyjazd, więc **zapisane szablony działają bez migracji**), a formularz — listę „Kiedy"
+  (przed/po × przyjazd/wyjazd), liczbę dni **bez znaku** i zdanie kontrolne „Zadanie pojawi się
+  2 dni po wyjeździe gościa". Termin liczy jeden moduł `src/utils/taskSchedule.js` (pulpit, szczegóły
+  rezerwacji, ustawienia) — lekcja z X17. Reguł **nie trzeba było ruszać**: `isValidSettings` wymaga
+  od `reminders` tylko listy `items` (`firestore.rules:91`).
+- **X21. „Do posprzątania" liczyło wyjazdy, nie sprzątania.** Jedna linijka (`cleaning:
+  departures.length`) kontra lista zadań pod spodem: na zdjęciu testera kafel mówił **0**, a niżej
+  wisiało „Zleć sprzątanie". Kafel liczy teraz **obiekty do posprzątania dziś** = wyjazdy + otwarte
+  zadania sprzątania z tej samej listy, każdy obiekt **raz** (wyjazd i przyjazd tego samego dnia
+  w tym samym domku to jedno sprzątanie). Kliknięcie prowadzi do raportu dziennego, nie do kalendarza,
+  gdzie sprzątania nie widać.
+- **X22. Rezerwacja prosto z kalendarza.** Klik w wolną noc = rezerwacja na tę noc, przeciągnięcie
+  = cały zakres; formularz otwiera się z obiektem i obiema datami (wyjazd = dzień po ostatniej
+  zaznaczonej nocy, zgodnie z tym, jak rysowane są paski). **Zajęte noce nie są klikalne i zaznaczenie
+  się o nie obcina** — z kalendarza nie da się zrobić dubla. Ścieżka klawiaturowa: przycisk „+" przy
+  nazwie obiektu (31 komórek × N obiektów jako przystanki tabulatora byłoby gorsze od choroby).
+- **X23. Filtr obiektu w kalendarzu** — obejmuje także trzy metryki pod spodem, inaczej po zawężeniu
+  do jednego domku „wolne noce" liczyłyby się z całego portfela.
+- 🐛 **Znalezione przez test, nie przez oko:** przy „0 dni" obie strony kotwicy dają ten sam dzień,
+  więc lista „Kiedy" wracała do „Przed…" i gubiła wybór gospodarza w trakcie ustawiania. Wybór
+  trzymany jest lokalnie w formularzu, a `-0` nie trafia do bazy.
+- ⚖️ **Decyzja produktowa do potwierdzenia:** domyślny zestaw szablonów dla **nowych** kont ma teraz
+  sprzątanie **w dniu wyjazdu** (zamiast przyjazdu) i nowy szablon „Wyślij prośbę o opinię — 1 dzień
+  po wyjeździe" (spina się z modułem Opinie, X13). Kont istniejących **nie ruszamy**. Cofnięcie:
+  jedna linijka w `src/utils/constants.js`.
+- Weryfikacja: 7 nowych testów e2e (`e2e/tasks-calendar.spec.js`), po jednym na uwagę + blokada dubla.
 
 ---
 
