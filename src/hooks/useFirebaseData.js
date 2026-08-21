@@ -11,11 +11,33 @@ export const useFirebaseData = (user, selectedYear) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
 
-  // Używamy React Query jako źródła prawdy.
-  // Zapewniamy pustą/domyślną strukturę początkową na wypadek oczekiwania.
+  /*
+    React Query jest tu wyłącznie POJEMNIKIEM na dane, których prawdziwym źródłem są
+    nasłuchy `onSnapshot` niżej. Zapytania nie chodzą po sieć — ich `queryFn` zwracał
+    wartości domyślne, z komentarzem „zawsze nadpisywane przez onSnapshot".
+
+    ⚠️ To założenie było odwrotne do prawdy. Nadpisanie działa w drugą stronę: gdy React
+    Query uzna dane za nieświeże i odpali `queryFn` PO tym, jak snapshot zapisał prawdziwe
+    wartości, to **wartości domyślne kasują prawdziwe**. Dla `profile` znaczy to zejście do
+    `accountStatus: 'trialing'` i `trialEndsAt: null`, przy których `isAccessLocked()`
+    zwraca `false` — czyli **ekran blokady przestaje się pokazywać kontu bez dostępu**.
+    Zdiagnozowane 2026-08-21 na koncie z odebranym dostępem: zamiast paywalla pokazał się
+    ekran uzupełniania profilu, którego z kolei nie dało się zapisać (reguły słusznie
+    odmawiają zapisu bez subskrypcji) — ślepy zaułek bez żadnego komunikatu.
+
+    Poprawka: `queryFn` przestaje być destrukcyjny — zwraca to, co już leży w pamięci
+    podręcznej, a wartości domyślne tylko wtedy, gdy nie ma jeszcze nic. Do tego
+    `staleTime: Infinity`, bo dane pilnuje nasłuch, a nie odświeżanie React Query.
+  */
+  const zachowaj = (klucz, domyslne) => () => {
+    const obecne = queryClient.getQueryData(klucz);
+    return obecne === undefined ? domyslne : obecne;
+  };
+
   const { data: rentals = [] } = useQuery({
     queryKey: ['rentals', user?.uid, selectedYear],
-    queryFn: () => [], // Zawsze nadpisywane przez onSnapshot
+    queryFn: zachowaj(['rentals', user?.uid, selectedYear], []),
+    staleTime: Infinity,
     enabled: !!user,
   });
 
@@ -28,20 +50,23 @@ export const useFirebaseData = (user, selectedYear) => {
     syncLinks: {} 
   } } = useQuery({
     queryKey: ['settings', user?.uid],
-    queryFn: () => ({ 
-      properties: DEFAULT_PROPERTIES, 
-      sources: DEFAULT_SOURCES, 
-      categories: DEFAULT_CATEGORIES, 
-      templates: DEFAULT_TEMPLATES, 
-      taxSettings: defaultTaxSettings, 
-      syncLinks: {} 
-    }), 
+    queryFn: zachowaj(['settings', user?.uid], {
+      properties: DEFAULT_PROPERTIES,
+      sources: DEFAULT_SOURCES,
+      categories: DEFAULT_CATEGORIES,
+      templates: DEFAULT_TEMPLATES,
+      taxSettings: defaultTaxSettings,
+      syncLinks: {},
+    }),
+    staleTime: Infinity,
     enabled: !!user,
   });
 
   const { data: profile = { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null } } = useQuery({
     queryKey: ['profile', user?.uid],
-    queryFn: () => ({ accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null }),
+    // Najważniejsze z trzech: od tych wartości zależy, czy pokaże się ekran blokady.
+    queryFn: zachowaj(['profile', user?.uid], { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null }),
+    staleTime: Infinity,
     enabled: !!user,
   });
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserCog, ArrowRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { BrandStyles } from '../styles/brand';
@@ -41,7 +42,19 @@ export default function CompleteProfileScreen({ user, onComplete }) {
       }
       if (onComplete) onComplete();
     } catch (err) {
+      // Milczące `console.error` zamieniało nieudany zapis w martwy przycisk: użytkownik
+      // klikał, spinner gasł i NIC się nie działo. Zgłoszone z produkcji 2026-08-21.
+      // Najczęstsza przyczyna to `permission-denied` — reguła zapisu `settings/*` wymaga
+      // aktywnej subskrypcji, więc konto z wygasłym dostępem nie zapisze profilu.
+      // Taki użytkownik musi wiedzieć, że ma opłacić dostęp, a nie poprawiać formularz.
       console.error('Błąd podczas zapisywania profilu:', err);
+      const brakDostepu = err && (err.code === 'permission-denied' || String(err.message || '').includes('permission'));
+      toast.error(
+        brakDostepu
+          ? 'Nie udało się zapisać profilu — Twój dostęp wygasł. Odśwież stronę i opłać subskrypcję, potem wróć do uzupełniania danych.'
+          : 'Nie udało się zapisać profilu. Sprawdź połączenie i spróbuj ponownie.',
+        { duration: 8000 }
+      );
     } finally {
       setIsLoading(false);
     }
