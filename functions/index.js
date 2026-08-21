@@ -1,20 +1,19 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onRequest } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");
 const { getStorage } = require("firebase-admin/storage");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { mergeClaims } = require("./claims");
 
 // Inicjalizacja Firebase Admin
 const app = initializeApp();
 const db = getFirestore(app);
 
-// Sekrety (ustaw przez: firebase functions:secrets:set STRIPE_SECRET_KEY)
-const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
-const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+// Sekrety — definicja w jednym miejscu (functions/params.js), bo dzieli je też admin.js
+const { stripeSecretKey, stripeWebhookSecret, PRICE_ID } = require("./params");
 
 // =============================================================================
 // HELPER: Usuwanie wszystkich dokumentów w subkolekcji (batch delete)
@@ -118,7 +117,7 @@ exports.createCheckoutSession = onCall(
     const email = request.auth.token.email;
 
     // Inicjalizacja Stripe z sekretnym kluczem
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = require("stripe")(stripeSecretKey.value().trim());
 
     try {
       // Sprawdź czy użytkownik ma już klienta Stripe
@@ -143,16 +142,39 @@ exports.createCheckoutSession = onCall(
       // Tworzymy sesję Checkout
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
-        payment_method_types: ["card"],
+        // `payment_method_types` ŚWIADOMIE POMINIĘTE. Wpisane na sztywno "card"
+        // zamrażało listę metod w kodzie; bez tego pola Stripe pokazuje wszystkie
+        // metody włączone w panelu, które nadają się do danego trybu.
+        // ⚠️ Dla `mode: "subscription"` to i tak nie będzie BLIK ani Przelewy24 —
+        // one nie obsługują płatności cyklicznych. Zostają karta i portfele
+        // (Apple Pay, Google Pay, Link), a w przyszłości np. SEPA po włączeniu w panelu.
+        // Gdyby kiedyś pojawił się pakiet roczny płatny jednorazowo, BLIK stanie się
+        // możliwy — i wtedy wystarczy włączyć go w panelu, bez zmiany kodu.
         mode: "subscription",
+        // Polski interfejs wymuszony, a nie zgadywany z przeglądarki: gospodarz
+        // płacący w złotówkach za polski produkt nie ma powodu widzieć angielskiego
+        // formularza tylko dlatego, że ma angielski system.
+        locale: "pl",
         line_items: [
           {
-            price: "price_1TZULu8D7fwsePNBa7aXaP92", // Twój Price ID ze Stripe
+            price: PRICE_ID, // definicja w functions/params.js — jedno źródło prawdy
             quantity: 1,
           },
         ],
         success_url: request.data.successUrl || "https://wynajempro.com/dashboard",
         cancel_url: request.data.cancelUrl || "https://wynajempro.com/dashboard",
+        // Widoczne wprost na liście płatności w panelu Stripe — bez wchodzenia
+        // w metadane widać, którego konta dotyczy wpłata. Przy obsłudze zgłoszenia
+        // („zapłaciłem, a nie mam dostępu") to różnica między jednym spojrzeniem
+        // a grzebaniem w szczegółach zdarzenia.
+        client_reference_id: uid,
+        // Zdanie pod przyciskiem płatności. Najczęstsza obawa przy subskrypcji to
+        // „czy dam radę to anulować" — odpowiadamy na nią w miejscu, w którym się rodzi.
+        custom_text: {
+          submit: {
+            message: "Subskrypcję anulujesz w każdej chwili w panelu — bez okresu wypowiedzenia.",
+          },
+        },
         metadata: {
           firebaseUID: uid,
         },
@@ -190,17 +212,25 @@ exports.stripeWebhook = onRequest(
       return;
     }
 
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = require("stripe")(stripeSecretKey.value().trim());
     const sig = req.headers["stripe-signature"];
 
     let event;
 
     // Weryfikacja podpisu webhooka
     try {
+      // .trim() NIE jest ostrożnością na wyrost — to naprawa realnej awarii.
+      // 2026-08-19 webhook odrzucał 100% zdarzeń ze Stripe, bo w sekrecie siedział
+      // biały znak (najczęściej znak nowej linii doklejony przy wklejaniu albo przez
+      // `echo`). Stripe SDK sygnalizuje to osobnym zdaniem w komunikacie błędu
+      // („The provided signing secret contains whitespace"), ale sam podpisu nie
+      // przepuści. Skutek w produkcji byłby cichy i kosztowny: płatność przechodzi
+      // w Stripe, `status` nigdy nie zmienia się na 'active', klient płaci i dalej
+      // widzi ekran blokady. Obcięcie białych znaków zamyka całą tę klasę awarii.
       event = stripe.webhooks.constructEvent(
         req.rawBody,
         sig,
-        stripeWebhookSecret.value()
+        stripeWebhookSecret.value().trim()
       );
     } catch (err) {
       console.error("⚠️ Weryfikacja podpisu webhooka nie powiodła się:", err.message);
@@ -227,7 +257,7 @@ exports.stripeWebhook = onRequest(
               paidAt: Timestamp.now(),
               scheduledDeletionAt: FieldValue.delete(),
             });
-            await getAuth().setCustomUserClaims(uid, { stripeStatus: 'active' });
+            await mergeClaims(uid, { stripeStatus: "active" });
           } else {
             console.warn("⚠️ checkout.session.completed bez firebaseUID w metadata");
           }
@@ -259,7 +289,7 @@ exports.stripeWebhook = onRequest(
                 stripeSubscriptionId: invoice.subscription,
                 scheduledDeletionAt: FieldValue.delete(),
               });
-              await getAuth().setCustomUserClaims(userDoc.id, { stripeStatus: 'active' });
+              await mergeClaims(userDoc.id, { stripeStatus: "active" });
             }
           }
           break;
@@ -285,7 +315,7 @@ exports.stripeWebhook = onRequest(
               await userDoc.ref.update({
                 status: "past_due",
               });
-              await getAuth().setCustomUserClaims(userDoc.id, { stripeStatus: 'past_due' });
+              await mergeClaims(userDoc.id, { stripeStatus: "past_due" });
             }
           }
           break;
@@ -321,7 +351,7 @@ exports.stripeWebhook = onRequest(
               scheduledDeletionAt: Timestamp.fromDate(deletionDate),
             });
             try {
-              await getAuth().setCustomUserClaims(uid, { stripeStatus: 'canceled' });
+              await mergeClaims(uid, { stripeStatus: "canceled" });
             } catch (claimsErr) {
               // Okno wyścigu z purge: login Auth kasowany PRZED dokumentem —
               // brak użytkownika nie jest błędem dostawy zdarzenia.
@@ -345,7 +375,17 @@ exports.stripeWebhook = onRequest(
                 canceledAt: Timestamp.now(),
                 scheduledDeletionAt: Timestamp.fromDate(deletionDate),
               });
-              await getAuth().setCustomUserClaims(resolvedUid, { stripeStatus: 'canceled' });
+              try {
+                await mergeClaims(resolvedUid, { stripeStatus: "canceled" });
+              } catch (claimsErr) {
+                // Ten sam guard, co na ścieżce głównej (wyżej) — brakowało go tutaj.
+                // Ta gałąź obsługuje subskrypcje BEZ `firebaseUID` w metadanych, czyli
+                // te sprzed dodania `subscription_data.metadata`. Jeśli purge skasował
+                // login przed dokumentem, `mergeClaims` rzuca, webhook zwraca 500,
+                // a Stripe ponawia dostawę dniami — dokładnie incydent opisany wyżej.
+                if (claimsErr.code !== "auth/user-not-found") throw claimsErr;
+                console.log(`ℹ️ Claims pominięte dla ${resolvedUid} — login Auth już usunięty.`);
+              }
             }
           }
           break;
@@ -374,9 +414,9 @@ exports.onUserDocumentCreated = onDocumentCreated("users/{userId}", async (event
   
   if (data.status === 'trialing' && data.trialEndsAt) {
     try {
-      await getAuth().setCustomUserClaims(uid, { 
-        stripeStatus: 'trialing',
-        trialEndsAt: data.trialEndsAt.toMillis()
+      await mergeClaims(uid, {
+        stripeStatus: "trialing",
+        trialEndsAt: data.trialEndsAt.toMillis(),
       });
       console.log(`✅ Custom claim (trialing) ustawiony dla: ${uid}`);
     } catch (error) {
@@ -408,7 +448,7 @@ exports.createBillingPortalSession = onCall(
     }
 
     const uid = request.auth.uid;
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = require("stripe")(stripeSecretKey.value().trim());
 
     try {
       // Pobierz ID klienta Stripe z profilu użytkownika
@@ -514,9 +554,9 @@ exports.deleteExpiredAccountsData = onSchedule(
     // #32: purge kasuje też klienta Stripe (pełny art. 17)
     secrets: [stripeSecretKey],
   },
-  async (event) => {
+  async (_event) => {
     const now = new Date();
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = require("stripe")(stripeSecretKey.value().trim());
     console.log(`🧹 Uruchomiono cykliczne czyszczenie bazy danych: ${now.toISOString()}`);
 
     // 1) Konta anulowane po 30-dniowej karencji (scheduledDeletionAt z webhooka).
@@ -772,7 +812,7 @@ exports.dailyICalSync = onSchedule(
     timeZone: "Europe/Warsaw",
     maxInstances: 1,
   },
-  async (event) => {
+  async (_event) => {
     const logger = require("firebase-functions/logger");
     logger.info("🔄 Rozpoczęto automatyczną synchronizację iCal...");
 
@@ -1081,7 +1121,7 @@ exports.deleteUserAccount = onCall(
       throw new HttpsError("unauthenticated", "Musisz być zalogowany, aby usunąć konto.");
     }
     const uid = request.auth.uid;
-    const stripe = require("stripe")(stripeSecretKey.value());
+    const stripe = require("stripe")(stripeSecretKey.value().trim());
 
     try {
       // 1. Sprawdź, czy użytkownik ma Stripe Customer ID
@@ -1250,3 +1290,15 @@ exports.exportIcal = onRequest(async (req, res) => {
     res.status(500).send("Wystąpił błąd serwera.");
   }
 });
+
+// =============================================================================
+// 12. PANEL ADMINISTRATORA (adminApi)
+// Osobny moduł — bramka uprawnień, stopniowanie dostępu i dziennik są tam opisane.
+// Wystawiane stąd, żeby `firebase deploy --only functions` widział je jak resztę.
+// =============================================================================
+exports.adminApi = require("./admin").adminApi;
+
+// Retencja dziennika dostępu — `admin_audit` to zbiór danych osobowych i nie może
+// rosnąć bez granicy. Okres czeka na potwierdzenie przez prawnika; opis przy stałej
+// AUDIT_RETENTION_MONTHS w admin.js.
+exports.cleanupAdminAudit = require("./admin").cleanupAdminAudit;
