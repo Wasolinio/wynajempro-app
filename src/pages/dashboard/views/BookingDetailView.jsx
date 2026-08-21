@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw, Users } from 'lucide-react';
 import { SourceTag } from '../SourceTag';
 import { plural } from '../../../utils/plural';
+import { taskDueDate, describeTiming } from '../../../utils/taskSchedule';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const initials = (name) => (name || 'Gość').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -68,9 +69,9 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
   const isDone = (t) => !!(r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent));
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const tasks = templates.map((t) => {
-    let due = null;
-    if (s && !isNaN(s.getTime())) { due = new Date(s); due.setHours(0, 0, 0, 0); due.setDate(due.getDate() - (t.daysBefore || 0)); }
-    return { ...t, done: isDone(t), due, overdue: due && due < today && !isDone(t) };
+    // X20: termin liczy `taskSchedule` — kotwicą jest przyjazd albo wyjazd
+    const due = taskDueDate(r, t);
+    return { ...t, done: isDone(t), due, timing: describeTiming(t), overdue: due && due < today && !isDone(t) };
   });
   const doneCount = tasks.filter((t) => t.done).length;
 
@@ -197,7 +198,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 <div className="wpd-row__main">
                   <div className="wpd-row__name" style={t.done ? { textDecoration: 'line-through', color: 'var(--faint)' } : undefined}>{t.text || t.shortName}</div>
                   <div className="wpd-row__meta" style={t.overdue ? { color: 'var(--cynober)' } : undefined}>
-                    {t.due ? `Do: ${fmtShort(t.due)}` : ''}{t.due && t.daysBefore != null ? ' · ' : ''}{t.daysBefore != null ? `${t.daysBefore} dni przed przyjazdem` : ''}{t.overdue ? ' · zaległe' : ''}
+                    {t.due ? `Do: ${fmtShort(t.due)}` : ''}{t.due ? ' · ' : ''}{t.timing}{t.overdue ? ' · zaległe' : ''}
                   </div>
                 </div>
               </div>

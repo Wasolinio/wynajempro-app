@@ -357,7 +357,7 @@ export const DASHBOARD_CSS = `
 .wpd-cal__inner{ min-width:720px; }
 .wpd-cal__headrow, .wpd-cal__row{ display:grid; grid-template-columns:196px 1fr; }
 .wpd-cal__row{ border-top:1px solid var(--hairline); }
-.wpd-cal__label{ padding:14px 18px; border-right:1px solid var(--hairline); }
+.wpd-cal__label{ position:relative; padding:14px 40px 14px 18px; border-right:1px solid var(--hairline); }
 .wpd-cal__objname{ font-weight:600; font-size:14px; }
 .wpd-cal__objsub{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.05em;
   text-transform:uppercase; color:var(--faint); margin-top:3px; }
@@ -365,6 +365,19 @@ export const DASHBOARD_CSS = `
 .wpd-cal__track{ position:relative; display:grid; grid-auto-rows:minmax(48px,auto); align-items:center; }
 .wpd-cal__daycell{ grid-row:1; border-left:1px solid var(--inner); height:100%; }
 .wpd-cal__daycell--today{ background:var(--tint-cynober); border-left-color:#EBD3CB; }
+/* X22: wolna noc zaprasza do rezerwacji — klik zakłada jedną noc, przeciągnięcie zakres.
+   Reguły stoją PO --today, żeby podświetlenie działało także w kolumnie dzisiejszej. */
+.wpd-cal__daycell--free{ cursor:cell; }
+.wpd-cal__daycell--free:hover{ background:var(--inner); }
+.wpd-cal__daycell--sel, .wpd-cal__daycell--sel:hover{ background:rgba(217,73,43,.22); border-left-color:var(--cynober); }
+/* klawiaturowa ścieżka do nowej rezerwacji w obiekcie (komórki siatki są myszkowe) */
+.wpd-cal__add{ position:absolute; top:50%; right:12px; transform:translateY(-50%); width:24px; height:24px;
+  border:1px solid var(--hairline); background:var(--surface); border-radius:3px; color:var(--muted);
+  display:inline-flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity .14s; }
+.wpd-cal__row:hover .wpd-cal__add, .wpd-cal__add:focus-visible{ opacity:1; }
+.wpd-cal__add:hover{ border-color:var(--ink); color:var(--ink); }
+.wpd-cal__add svg{ width:13px; height:13px; }
+@media (hover:none){ .wpd-cal__add{ opacity:1; } }
 .wpd-cal__dnum{ grid-row:1; text-align:center; padding:9px 0 8px; border-left:1px solid var(--inner); }
 .wpd-cal__dnum b{ font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:500; color:var(--muted); display:block; }
 .wpd-cal__dnum span{ font-family:'IBM Plex Mono', monospace; font-size:8.5px; text-transform:uppercase; color:var(--faint); }

@@ -17,6 +17,7 @@ import {
 } from '../../utils/constants';
 import { calculateTaxes } from '../../utils/taxCalculator';
 import { toCount, guestsTotal } from '../../utils/guestCount';
+import { isTaskDue, daysToAnchor, isCleaningTemplate, templateTiming } from '../../utils/taskSchedule';
 
 // Modale w stylu V4 (własne)
 import ProfitabilityReportModal from './modals/ProfitabilityReportModal';
@@ -117,6 +118,7 @@ export default function ManagerApp() {
   const [utilitySortOrder] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [calendarDate, setCalendarDate] = useState(new Date());
+  const [calendarProperty, setCalendarProperty] = useState('all'); // X23: filtr obiektu w kalendarzu
 
   const changeMonth = useCallback((offset) => {
     setCalendarDate((prev) => { const d = new Date(prev); d.setMonth(d.getMonth() + offset); return d; });
@@ -178,24 +180,27 @@ export default function ManagerApp() {
     const today = new Date();
     const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const arrivals = []; const departures = []; const tasks = [];
+    // X21: „Do posprzątania" liczy OBIEKTY do posprzątania dziś, nie wyjazdy. Wyjazd i przyjazd
+    // tego samego dnia w tym samym domku to jedno sprzątanie — stąd zbiór, nie licznik.
+    const cleaningProps = new Set();
     rentals.forEach((r) => {
       if (r.type === 'booking') {
         const propNameStr = typeof r.property === 'object' ? r.property.name : r.property;
         if (r.date === localTodayStr) arrivals.push({ ...r, propNameStr });
-        if (r.endDate === localTodayStr) departures.push({ ...r, propNameStr });
+        if (r.endDate === localTodayStr) {
+          departures.push({ ...r, propNameStr });
+          if (propNameStr) cleaningProps.add(propNameStr); // po gościu zawsze trzeba posprzątać
+        }
         if (r.date) {
-          const arr = new Date(r.date);
-          if (!isNaN(arr.getTime())) {
-            arr.setHours(0, 0, 0, 0);
-            const tm = new Date(); tm.setHours(0, 0, 0, 0);
-            const diffDays = Math.ceil((arr - tm) / 86400000);
-            templates.forEach((t) => {
-              const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
-              if (diffDays <= (t.daysBefore || 0) && diffDays >= -30 && !isCompleted) {
-                tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: diffDays, icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
-              }
-            });
-          }
+          templates.forEach((t) => {
+            const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
+            // X20: termin liczy `taskSchedule` — kotwicą jest przyjazd albo wyjazd
+            if (isCompleted || !isTaskDue(r, t)) return;
+            tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: daysToAnchor(r, t), icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
+            // sprzątanie widoczne na liście zadań musi być widoczne także na kaflu,
+            // inaczej pulpit sam sobie przeczy (uwaga testera 2026-08-21)
+            if (isCleaningTemplate(t) && propNameStr) cleaningProps.add(propNameStr);
+          });
         }
       } else if (r.type === 'reminder' && !r.isCompleted && r.date) {
         const d = new Date(r.date);
@@ -209,7 +214,10 @@ export default function ManagerApp() {
         }
       }
     });
-    return { arrivals, departures, tasks, total: arrivals.length + departures.length + tasks.length, dateStr: localTodayStr };
+    return {
+      arrivals, departures, tasks, cleaningProps: Array.from(cleaningProps),
+      total: arrivals.length + departures.length + tasks.length, dateStr: localTodayStr,
+    };
   }, [rentals, templates]);
 
   const displayedRentals = useMemo(() => rentals.filter((r) => {
@@ -322,7 +330,8 @@ export default function ManagerApp() {
     return {
       monthName, prevName, monthRevenue: cm.income, delta, occupancy,
       arrivals: dailyReport.arrivals.length, departures: dailyReport.departures.length,
-      cleaning: dailyReport.departures.length, cleaningInfo: dailyReport.departures[0]?.propNameStr || null,
+      cleaning: dailyReport.cleaningProps.length,
+      cleaningInfo: dailyReport.cleaningProps.slice(0, 2).join(', ') + (dailyReport.cleaningProps.length > 2 ? ` +${dailyReport.cleaningProps.length - 2}` : '') || null,
       chart: days,
     };
   }, [rentals, properties, currentYearData, dailyReport]);
@@ -348,6 +357,14 @@ export default function ManagerApp() {
   }, []);
 
   const handleDeleteClick = useCallback((id) => setItemToDelete(id), []);
+
+  /* X22: rezerwacja prosto z kalendarza. Zaznaczenie w siatce daje obiekt i obie daty,
+     resztę formularz wypełnia domyślnymi wartościami jak przy „+ Rezerwacja". */
+  const openNewBookingFor = useCallback((property, date, endDate) => {
+    setEditingId(null);
+    setNewRental({ ...getDefaultRentalState(), type: 'booking', property, date, endDate });
+    setShowAddModal(true);
+  }, [getDefaultRentalState]);
 
   const handleRentalChange = (field, value) => {
     const updated = { ...newRental, [field]: value };
@@ -442,8 +459,15 @@ export default function ManagerApp() {
   const removeCategory = (i) => { const u = [...editingCategories]; u.splice(i, 1); setEditingCategories(u); };
   const handleAddCategory = (e) => { e.preventDefault(); if (newCategoryName.trim()) { setEditingCategories([...editingCategories, newCategoryName.trim()]); setNewCategoryName(''); } };
   const updateTemplate = (i, f, v) => { const u = [...editingTemplates]; u[i][f] = v; setEditingTemplates(u); };
+  // X20: „kiedy" i „ile dni" opisują JEDEN termin — zapisujemy oba pola naraz, żeby kotwica
+  // i znak `daysBefore` nie mogły się rozjechać (znak wynika z wyboru z listy, nie z wpisanej liczby).
+  const updateTemplateTiming = (i, when, days) => {
+    const u = [...editingTemplates];
+    u[i] = { ...u[i], ...templateTiming(when, days) };
+    setEditingTemplates(u);
+  };
   const removeTemplate = (i) => { const u = [...editingTemplates]; u.splice(i, 1); setEditingTemplates(u); };
-  const addTemplate = () => setEditingTemplates([...editingTemplates, { id: `task_${Date.now()}`, text: 'Nowe zadanie...', shortName: 'Zadanie', daysBefore: 3, icon: 'CheckSquare' }]);
+  const addTemplate = () => setEditingTemplates([...editingTemplates, { id: `task_${Date.now()}`, text: 'Nowe zadanie...', shortName: 'Zadanie', anchor: 'arrival', daysBefore: 3, icon: 'CheckSquare' }]);
 
   const openSettingsOn = useCallback((tab) => { openSettingsModal(); setSettingsTab(tab); }, [openSettingsModal]);
 
@@ -603,6 +627,7 @@ export default function ManagerApp() {
                 pulpit={pulpit} dailyReport={dailyReport} weekReminders={weekReminders} properties={properties}
                 upcoming={upcomingBookings}
                 onOpenStats={() => setShowStatsModal(true)} onGoCalendar={() => changeView('calendar')}
+                onOpenDailyReport={() => setShowDailyReportModal(true)}
                 onEditRental={openBookingDetail} completeTask={completeTask} getDayName={getDayName}
               />
             )}
@@ -630,6 +655,8 @@ export default function ManagerApp() {
                 calendarDate={calendarDate} rentals={rentals} properties={properties}
                 onPrev={() => changeMonth(-1)} onNext={() => changeMonth(1)} onToday={() => setCalendarDate(new Date())}
                 onEditRental={openBookingDetail}
+                selectedProperty={calendarProperty} onChangeProperty={setCalendarProperty}
+                onCreateBooking={openNewBookingFor}
               />
             )}
             {renderView === 'objects' && (
@@ -682,7 +709,8 @@ export default function ManagerApp() {
         editingCategories={editingCategories} updateCategory={updateCategory} removeCategory={removeCategory}
         handleAddCategory={handleAddCategory} newCategoryName={newCategoryName} setNewCategoryName={setNewCategoryName}
         editingTaxSettings={editingTaxSettings} setEditingTaxSettings={setEditingTaxSettings}
-        editingTemplates={editingTemplates} updateTemplate={updateTemplate} removeTemplate={removeTemplate} addTemplate={addTemplate}
+        editingTemplates={editingTemplates} updateTemplate={updateTemplate} updateTemplateTiming={updateTemplateTiming}
+        removeTemplate={removeTemplate} addTemplate={addTemplate}
         saveSettings={saveSettings} />
       <AccountModal
         showAccountModal={showAccountModal} setShowAccountModal={setShowAccountModal}

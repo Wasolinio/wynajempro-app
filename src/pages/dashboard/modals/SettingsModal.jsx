@@ -5,6 +5,7 @@ import {
 import toast from 'react-hot-toast';
 import { propHex } from '../styles';
 import { useDialogA11y } from './useDialogA11y';
+import { WHEN_OPTIONS, whenValue, whenDays, describeTimingSentence } from '../../../utils/taskSchedule';
 
 /* Ustawienia APLIKACJI — profil gospodarza, subskrypcja i usunięcie konta
    przeniesione do AccountModal (X6, klik w imię w sidebarze). */
@@ -25,11 +26,20 @@ function SettingsModal(props) {
     availableColors, newPropertyColor, setNewPropertyColor,
     editingSources, updateSource, removeSource, handleAddSource, newSourceName, setNewSourceName,
     editingCategories, updateCategory, removeCategory, handleAddCategory, newCategoryName, setNewCategoryName,
-    editingTaxSettings, setEditingTaxSettings, editingTemplates, updateTemplate, removeTemplate, addTemplate,
+    editingTaxSettings, setEditingTaxSettings, editingTemplates, updateTemplate, updateTemplateTiming, removeTemplate, addTemplate,
     saveSettings,
   } = props;
 
   const dialogA11y = useDialogA11y(showSettingsModal, () => setShowSettingsModal(false));
+  /* X20: przy 0 dni „przed" i „po" wypadają w ten sam dzień, więc z samych danych nie da się
+     odtworzyć, co gospodarz wybrał na liście — a lista nie może mu skakać pod palcami
+     w trakcie ustawiania. Wybór trzymamy więc lokalnie, po id szablonu. */
+  const [pickedWhen, setPickedWhen] = React.useState({});
+  const whenFor = (t) => pickedWhen[t.id] ?? whenValue(t);
+  const pickWhen = (idx, t, when) => {
+    setPickedWhen((prev) => ({ ...prev, [t.id]: when }));
+    updateTemplateTiming(idx, when, whenDays(t));
+  };
 
   if (!showSettingsModal) return null;
   const ts = editingTaxSettings;
@@ -218,10 +228,21 @@ function SettingsModal(props) {
                       <input className="wpd-input" value={t.text} onChange={(e) => updateTemplate(idx, 'text', e.target.value)} placeholder="Wyślij kod do drzwi" />
                     </div>
                   </div>
+                  {/* X20: termin składamy z listy „kiedy" i liczby dni BEZ ZNAKU. Dawne pole
+                      „Dni przed" przyjmowało wartości ujemne (jedyny sposób na zadanie po
+                      przyjeździe) i nie mówiło, co robią — pytanie testera z 21.08.2026. */}
                   <div className="wpd-fgrid wpd-fgrid--3" style={{ marginTop: 10, alignItems: 'end' }}>
                     <div className="wpd-field" style={{ margin: 0 }}>
-                      <label className="wpd-flabel">Dni przed</label>
-                      <input className="wpd-input wpd-input--num" type="number" value={t.daysBefore} onChange={(e) => updateTemplate(idx, 'daysBefore', Number(e.target.value))} />
+                      <label className="wpd-flabel">Kiedy</label>
+                      <select className="wpd-select" value={whenFor(t)}
+                        onChange={(e) => pickWhen(idx, t, e.target.value)}>
+                        {WHEN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                    </div>
+                    <div className="wpd-field" style={{ margin: 0 }}>
+                      <label className="wpd-flabel">Ile dni</label>
+                      <input className="wpd-input wpd-input--num" type="number" min="0" step="1" value={whenDays(t)}
+                        onChange={(e) => updateTemplateTiming(idx, whenFor(t), e.target.value)} />
                     </div>
                     <div className="wpd-field" style={{ margin: 0 }}>
                       <label className="wpd-flabel">Ikona</label>
@@ -230,9 +251,10 @@ function SettingsModal(props) {
                         <option value="MessageSquare">Wiadomość</option><option value="Phone">Telefon</option><option value="CheckSquare">Zadanie</option>
                       </select>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <button type="button" className="wpd-iconbtn wpd-iconbtn--del" onClick={() => removeTemplate(idx)}><Trash2 /></button>
-                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
+                    <p className="wpd-fhint" style={{ margin: 0, flex: 1 }}>{describeTimingSentence(t)}</p>
+                    <button type="button" className="wpd-iconbtn wpd-iconbtn--del" title="Usuń przypomnienie" onClick={() => removeTemplate(idx)}><Trash2 /></button>
                   </div>
                 </div>
               ))}

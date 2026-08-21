@@ -25,7 +25,7 @@ const relDay = (dateStr) => {
 */
 export default function PulpitView({
   pulpit, dailyReport, weekReminders, upcoming,
-  onOpenStats, onGoCalendar, onEditRental, completeTask,
+  onOpenStats, onGoCalendar, onOpenDailyReport, onEditRental, completeTask,
 }) {
   const arrivalsSoon = (upcoming || []).slice(0, 5);
   const tasksToday = dailyReport.tasks;
@@ -73,7 +73,8 @@ export default function PulpitView({
           </div>
         </div>
 
-        <div className="wpd-stat" {...clickableProps(onGoCalendar)}>
+        {/* X21: kafel prowadzi do raportu dziennego — w kalendarzu sprzątania nie widać */}
+        <div className="wpd-stat" {...clickableProps(onOpenDailyReport || onGoCalendar)}>
           <div className="wpd-stat__head">
             <p className="wpd-stat__label">Do posprzątania</p>
             <span className="wpd-stat__ic"><Sparkles /></span>

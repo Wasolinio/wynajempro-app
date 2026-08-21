@@ -26,10 +26,17 @@ export const DEFAULT_SOURCES = ['Booking.com', 'Airbnb', 'Facebook', 'Strona www
 
 export const DEFAULT_CATEGORIES = ['Prąd', 'Woda', 'Sprzątanie', 'Środki czystości', 'Naprawy', 'Gaz', 'Internet', 'Inne'];
 
+// X20: `anchor` mówi, OD CZEGO liczymy termin ('arrival' | 'departure'); `daysBefore`
+// zachowuje znak (dodatni = przed kotwicą, ujemny = po). Brak `anchor` = przyjazd,
+// więc szablony zapisane przed X20 działają bez migracji. Logika: `src/utils/taskSchedule.js`.
+// Zestaw poniżej dostają WYŁĄCZNIE nowe konta — zapisanych szablonów nie ruszamy.
 export const DEFAULT_TEMPLATES = [
-  { id: 'directions', text: 'Wyślij wskazówki dojazdu', shortName: 'Dojazd', daysBefore: 3, icon: 'Mail' },
-  { id: 'keycode', text: 'Wyślij kod do drzwi', shortName: 'Kod', daysBefore: 1, icon: 'Key' },
-  { id: 'cleaning', text: 'Zleć sprzątanie', shortName: 'Sprzątanie', daysBefore: 0, icon: 'CheckSquare' }
+  { id: 'directions', text: 'Wyślij wskazówki dojazdu', shortName: 'Dojazd', anchor: 'arrival', daysBefore: 3, icon: 'Mail' },
+  { id: 'keycode', text: 'Wyślij kod do drzwi', shortName: 'Kod', anchor: 'arrival', daysBefore: 1, icon: 'Key' },
+  // sprzątanie po gościu, nie w dniu jego przyjazdu (uwaga testera 2026-08-21)
+  { id: 'cleaning', text: 'Zleć sprzątanie', shortName: 'Sprzątanie', anchor: 'departure', daysBefore: 0, icon: 'CheckSquare' },
+  // spina się z modułem Opinie (X13) — pierwszy domyślny szablon PO pobycie
+  { id: 'review', text: 'Wyślij prośbę o opinię', shortName: 'Opinia', anchor: 'departure', daysBefore: -1, icon: 'MessageSquare' }
 ];
 
 export const defaultTaxSettings = {
