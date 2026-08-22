@@ -222,9 +222,17 @@ export default function LandingPage() {
             <h1 className="wp4-display">
               Wynajem <em>pod kontrolą</em><span className="wp4-accent">.</span>
             </h1>
+            {/* „Zautomatyzuj komunikację z gośćmi" usunięte 2026-08-21: w całym kodzie
+                nie ma ANI JEDNEJ ścieżki wysyłki do gościa — przewodnik to link, który
+                gospodarz udostępnia sam. To była ta sama klasa nieprawdy, co „kod trafia
+                na telefon gościa automatycznie", wycięta 2026-08-19.
+                „Nie wymaga instrukcji obsługi" też odpadło: strona dwa ekrany niżej
+                reklamuje bazę wiedzy z instrukcjami krok po kroku.
+                Zdanie poniżej to zatwierdzone copy z pakietu identyfikacji v2
+                (podtytuł banera OG) — dzięki temu baner i strona mówią jednym głosem. */}
             <p className="wp4-lead">
-              Zautomatyzuj kalendarz, finanse i komunikację z gośćmi w jednym
-              precyzyjnym panelu, który nie wymaga instrukcji obsługi.
+              Kalendarz, finanse i przewodniki gości w jednym panelu.
+              Dla gospodarzy z kilkoma obiektami.
             </p>
             <div className="wp4-hero__actions">
               <Link to="/login" className="wp4-btn wp4-btn--primary wp4-btn--lg">
@@ -500,7 +508,7 @@ export default function LandingPage() {
       <section className="wp4-section wp4-section--alt" id="jak-to-dziala">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Szybki start · 07</span>
+            <span className="wp4-label">Szybki start · 06</span>
             <h2 className="wp4-h2">Od rejestracji do pierwszej rezerwacji w 2 minuty</h2>
           </div>
           <div className="wp4-steps">
@@ -536,7 +544,7 @@ export default function LandingPage() {
       <section className="wp4-section" id="dla-kogo">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Dla kogo · 08</span>
+            <span className="wp4-label">Dla kogo · 07</span>
             <h2 className="wp4-h2">
               System szyty na miarę, <em>nie skomplikowany moloch</em>
             </h2>
@@ -563,7 +571,11 @@ export default function LandingPage() {
               </div>
               <ul className="wp4-checklist wp4-checklist--ink">
                 <li>Czytelny pulpit z gotową listą zadań na dany dzień</li>
-                <li>Automatyczne przewodniki dla gości na każdy obiekt</li>
+                {/* „Automatyczne" usunięte 2026-08-21 — ta sama nieprawda co w hero:
+                    przewodnik tworzysz w kreatorze i sam udostępniasz link albo kod QR.
+                    Automatyczne jest odsłonięcie danych PO akceptacji regulaminu, nie
+                    powstawanie przewodnika. */}
+                <li>Przewodnik dla gości z osobnym linkiem na każdy obiekt</li>
                 <li>Zautomatyzowane podatki i podsumowanie miesiąca jednym kliknięciem</li>
                 <li>Stała, niska cena niezależnie od liczby rezerwacji</li>
               </ul>
@@ -576,7 +588,7 @@ export default function LandingPage() {
       <section className="wp4-section wp4-section--alt" id="cennik">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Cennik · 09</span>
+            <span className="wp4-label">Cennik · 08</span>
             <h2 className="wp4-h2">Zwraca się szybciej niż jedna doba najmu</h2>
             <p className="wp4-lead wp4-lead--narrow">
               Zero prowizji od rezerwacji. Stała opłata, bez limitów obiektów
@@ -587,8 +599,11 @@ export default function LandingPage() {
           <div className="wp4-pricing">
             <div className="wp4-plan wp4-plan--feature">
               <div className="wp4-plan__badge">
+                {/* Tag „OFERTA NA START" usunięty: sugerował promocję, której warunków
+                    nigdzie nie podano — a nieokreślona obietnica ceny wobec konsumenta
+                    jest zobowiązaniem, nie ozdobą. Warunki founding members są wciąż
+                    „[DO UZUPEŁNIENIA]" w Regulaminie §6. */}
                 <span className="wp4-label">Plan Gospodarza</span>
-                <span className="wp4-tag wp4-tag--cynober">OFERTA NA START</span>
               </div>
               <div className="wp4-plan__price">
                 29,99 zł <span className="wp4-plan__per">/ miesiąc</span>
@@ -632,9 +647,8 @@ export default function LandingPage() {
       <section className="wp4-section" id="faq">
         <div className="wp4-container wp4-faq">
           <div className="wp4-faq__head">
-            <span className="wp4-label">FAQ · 10</span>
+            <span className="wp4-label">FAQ · 09</span>
             <h2 className="wp4-h2">Często zadawane pytania</h2>
-            <p className="wp4-body">Wszystko, co musisz wiedzieć przed startem.</p>
           </div>
           <div className="wp4-faq__list">
             <FaqItem
@@ -670,7 +684,7 @@ export default function LandingPage() {
         <div className="wp4-container">
           <div className="wp4-blog__head">
             <div>
-              <span className="wp4-label">Baza wiedzy · 11</span>
+              <span className="wp4-label">Baza wiedzy · 10</span>
               <h2 className="wp4-h2">Ucz się od praktyków</h2>
             </div>
             <Link to="/blog" className="wp4-link wp4-link--strong">
@@ -796,7 +810,6 @@ export default function LandingPage() {
             <span className="wp4-label wp4-label--faint">
               © {new Date().getFullYear()} WynajemPRO · dla polskich gospodarzy
             </span>
-            <span className="wp4-label wp4-label--faint">Identyfikacja v1.0 · 2026</span>
           </div>
         </div>
       </footer>
