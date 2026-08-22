@@ -287,32 +287,42 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ───────────────────────── Wartości / głos marki ───────────────────────── */}
+      {/* ───────────────────────── Skąd to jest, co daje, na jakich warunkach ─────────────────────────
+          Do 2026-08-21 stały tu trzy karty przepisane DOSŁOWNIE z pola `Brand personality`
+          w PRODUCT.md (linia 13): „rzeczowy / spokojny / po imieniu". Czyli rozdział o tym,
+          JAK piszemy, opublikowany dla klienta — stąd wrażenie wypełniacza, które zgłosił
+          właściciel. Karta „konkrety i liczby" powoływała się przy tym na „zysk 33 280 zł",
+          czyli kwotę z makiety w hero: chwaliła się rzeczowością, cytując zmyśloną liczbę.
+          Teraz mówią o czytelniku, a każde twierdzenie ma pokrycie w kodzie. ────────────── */}
       <section className="wp4-values">
         <div className="wp4-container">
           <div className="wp4-values__grid">
             <article>
-              <span className="wp4-label">01 · Rzeczowy</span>
-              <h3 className="wp4-h3">Konkrety i liczby zamiast obietnic</h3>
+              <span className="wp4-label">01 · Z praktyki</span>
+              <h3 className="wp4-h3">Zbudowane przy własnych domkach</h3>
               <p className="wp4-body">
-                „Zysk 33&nbsp;280&nbsp;zł", nie „rosnące przychody". Każda decyzja
-                oparta na realnych danych z Twoich obiektów.
+                Panel wyrósł z arkusza, w którym przestały się mieścić
+                rezerwacje z kilku kanałów naraz. Powstał u gospodarza, który
+                obsługuje swoje domki sam.
               </p>
             </article>
             <article>
-              <span className="wp4-label">02 · Spokojny</span>
-              <h3 className="wp4-h3">Ton narzędzia, nie sprzedawcy</h3>
+              <span className="wp4-label">02 · Dowód przy sporze</span>
+              <h3 className="wp4-h3">Masz ślad, że gość znał zasady</h3>
               <p className="wp4-body">
-                Krótkie zdania, bez wykrzykników i żargonu. Interfejs, który
-                nie wymaga instrukcji obsługi.
+                Gość potwierdza w przewodniku regulamin i instrukcję PPOŻ,
+                a system zapisuje datę razem z treścią dokumentów z tego dnia.
+                Przy sporze o szkodę masz konkretny zapis, a nie ustalenia
+                z pamięci.
               </p>
             </article>
             <article>
-              <span className="wp4-label">03 · Po imieniu</span>
-              <h3 className="wp4-h3">Jeden człowiek, kilka obiektów</h3>
+              <span className="wp4-label">03 · Zanim zapłacisz</span>
+              <h3 className="wp4-h3">Po 14&nbsp;dniach nic się nie pobiera</h3>
               <p className="wp4-body">
-                Mówimy do Ciebie wprost. Zbudowany dla gospodarza, nie dla
-                korporacji z działem operacyjnym.
+                Konto zakładasz e-mailem albo kontem Google i przez dwa tygodnie
+                masz wszystkie funkcje. Potem dostęp się zamyka i czeka na Twoją
+                decyzję, a rachunku nie ma, bo karty nie podajesz przy rejestracji.
               </p>
             </article>
           </div>
