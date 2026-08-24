@@ -53,9 +53,15 @@ Cała kontrola dostępu zostaje w kodzie i jest nietknięta: `enforceAppCheck: t
 wymóg zalogowania, weryfikacji e-maila i aktywnej subskrypcji lub trwającego okresu próbnego
 (audyt N5 🟡3). Bez tego uprawnienia protokół callable nie może działać w ogóle.
 
-📌 **Do sprawdzenia przy diagnozie nawrotu:** czy uprawnienie znika po deployu (wtedy podejrzana
-jest polityka organizacji `constraints/iam.allowedPolicyMemberDomains`), czy zostało zdjęte
-ręcznie. Warto po każdym wydaniu functions przebiec test porównawczy z tabeli wyżej — kod 403
+✅ **NAPRAWIONE 2026-08-24** przez właściciela w konsoli (Cloud Run → syncicalcalendars →
+Zabezpieczenia → „Zezwól na dostęp publiczny"). Ekran potwierdził diagnozę: zaznaczone było
+„Wymagaj uwierzytelnienia". Po zmianie funkcja zwraca **401 z JSON-em protokołu callable**,
+czyli tak samo jak pozostałe pięć.
+
+📌 **Rozstrzygnięte pytanie o nawrót:** uprawnienie **PRZEŻYWA ponowne wdrożenie** — sprawdzone
+tego samego dnia po `firebase deploy --only functions:syncICalCalendars,functions:dailyICalSync`
+(nadal 401). Polityka organizacji nie jest więc podejrzana; przyczyną było najpewniej
+jednorazowe zdjęcie uprawnienia. Warto po każdym wydaniu functions przebiec test porównawczy z tabeli wyżej — kod 403
 z HTML-em zamiast 401 z JSON-em oznacza ten sam problem.
 
 
