@@ -540,6 +540,14 @@ feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest d
   czytany raz na przebieg i porównywany w pamięci. Wtedy synchronizacja co godzinę zużywa
   **444 odczyty/dobę/konto zamiast dzisiejszych 480**, czyli jest tańsza od stanu obecnego
   przy 24× większej częstotliwości. ⚠️ Tego skrótu nie wolno wziąć — kosztuje realne pieniądze.
+- **X29. Blokady terminu nie są importowane.** ✅ **WDROŻONE I ZWERYFIKOWANE NA PRODUKCJI 2026-08-24**
+  ([[Decisions]] ADR-017, commit `660f974`). Defekt ujawniony dopiero przez prawdziwe dane:
+  blokady wchodziły jako `type:'booking'`, więc generowały zadania „wyślij kod do skrytki"
+  dla terminów bez gościa. Pięć tur przeglądu kodu tego nie wychwyciło — nie da się tego
+  zobaczyć w diffie. Weryfikacja na koncie właściciela: mapa stanu 6 → 2 identyfikatory,
+  `znikle: 0`, zero wskrzeszonych dokumentów, suma kontrolna przeliczona bez blokad.
+  ⚖️ Cena zapisana świadomie: nasz kalendarz pokazuje jako wolne terminy zablokowane w portalu.
+
 - **X27. Przechwytywanie maili z portali (cena, prowizja, nazwisko gościa).** ⬜
   **Skąd:** iCal nie przenosi cen i nigdy nie będzie — Airbnb celowo wyciął z eksportu nazwisko
   i kod rezerwacji (grudzień 2019), cena nie była tam nigdy. Jedyna ścieżka do kwot bez umowy
