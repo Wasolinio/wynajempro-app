@@ -20,6 +20,60 @@
 
 ---
 
+## 🔴 PILNE (2026-08-24): przywróć uprawnienie do wywołania synchronizacji
+
+**Objaw:** klikasz „Synchronizacja" w panelu i dostajesz „Wystąpił błąd podczas synchronizacji
+kalendarzy". Pełna diagnoza: [[Known-Issues]] #17.
+
+**Przyczyna:** usługa `syncicalcalendars` w Google Cloud straciła uprawnienie, które pozwala
+aplikacji ją wywołać. Żądanie nie dociera do kodu — odbija się o bramkę. Nie jest to skutek
+ostatniego wydania: pierwsze odrzucenie w logach jest **godzinę przed** nim.
+
+⚠️ **To jedyna rzecz, której nie mogę zrobić za Ciebie** — wymaga uprawnień właściciela projektu
+w Google Cloud, których agent nie ma.
+
+### Krok po kroku (konsola, bez instalowania niczego)
+
+1. Wejdź na **https://console.cloud.google.com/run?project=moje-domki-6c77d**
+   Zaloguj się kontem `wasyl515@gmail.com`, jeśli poprosi.
+2. Upewnij się, że u góry, przy nazwie „Google Cloud", wybrany jest projekt
+   **`moje-domki-6c77d`**. Jeśli nie — kliknij nazwę projektu i wybierz go z listy.
+3. Na liście usług znajdź i kliknij **`syncicalcalendars`** (małymi literami).
+   Jeśli lista jest długa, użyj filtra u góry.
+4. W widoku usługi wybierz zakładkę **„Security"** (albo „Zabezpieczenia”).
+5. W sekcji **„Authentication"** zaznacz **„Allow unauthenticated invocations"**
+   („Zezwalaj na wywołania bez uwierzytelniania”).
+6. Kliknij **„Save"**. Zmiana działa od razu, nie trzeba nic wdrażać ani restartować.
+
+### Gdyby zakładki „Security" nie było
+
+Nowsze wersje konsoli chowają to gdzie indziej. Wtedy:
+
+1. Na **liście** usług Cloud Run zaznacz **kratkę** obok `syncicalcalendars` (nie wchodź w usługę).
+2. Po prawej otworzy się panel **„Permissions"** / „Uprawnienia". Kliknij **„Add principal"**.
+3. W polu **„New principals"** wpisz dokładnie: `allUsers`
+4. W polu **„Role"** wybierz **`Cloud Run Invoker`** (kategoria „Cloud Run”).
+5. **„Save"**. Jeśli pojawi się ostrzeżenie, że zasób stanie się publiczny — potwierdź.
+
+### Czy to bezpieczne
+
+**Tak.** Nazwa `allUsers` brzmi groźnie, ale to uprawnienie znaczy wyłącznie „żądanie dociera
+do funkcji". Dokładnie tak działa **pozostałe pięć** funkcji tej aplikacji (płatności, usuwanie
+konta, panel administratora). Cała kontrola dostępu zostaje w kodzie i pozostaje nietknięta:
+sprawdzenie App Check, wymóg zalogowania, weryfikacji e-maila oraz aktywnej subskrypcji albo
+trwającego okresu próbnego. Bez tego uprawnienia protokół, którego używa aplikacja, nie może
+zadziałać w ogóle.
+
+### Jak sprawdzić, że pomogło
+
+Wróć do panelu i kliknij **„Synchronizacja"**. Zamiast błędu zobaczysz podsumowanie —
+ile rezerwacji doszło, ile się zaktualizowało, ile zniknęło z portalu. Przy pustym kalendarzu
+Booking.com wejdzie z niego zero i **to jest poprawne**, nie usterka.
+
+Potem daj znać — odczytam z logów, co silnik faktycznie zrobił z oboma kanałami.
+
+---
+
 ## 🗓️ Co zostało do końca tygodnia (stan 17.08)
 
 > ✅ **13.08 zdjął z listy cztery pozycje naraz**: smoke testy 4a–4f (komplet), kopie
