@@ -172,15 +172,24 @@ function channelKey(propertyName, sourceName) {
   return `${czytelny}__${skrot}`;
 }
 
-/** Nazwa gościa z SUMMARY. Blokady portali oznaczamy wprost, żeby nie udawały gości. */
+/**
+ * Czy zdarzenie jest BLOKADĄ TERMINU, a nie pobytem gościa.
+ *
+ * Portale opisują je tekstem w SUMMARY, każdy po swojemu — potwierdzone na żywych feedach
+ * 2026-08-24: Airbnb wysyła „Airbnb (Not available)", Booking.com „CLOSED - Not available".
+ */
+function isBlokada(summary) {
+  const lower = (summary || "").trim().toLowerCase();
+  if (!lower) return false;
+  return lower.includes("blocked") || lower.includes("niedostępne") ||
+         lower.includes("not available") || lower.includes("closed");
+}
+
+/** Nazwa gościa z SUMMARY. Zostaje dla rezerwacji sprzed X29, które mają już nazwę blokady. */
 function guestFromSummary(summary, normalizedSource) {
   const clean = (summary || "").trim();
-  const lower = clean.toLowerCase();
   if (!clean) return `Gość ${normalizedSource}`;
-  if (lower.includes("blocked") || lower.includes("niedostępne") ||
-      lower.includes("not available") || lower.includes("closed")) {
-    return `Blokada (${normalizedSource})`;
-  }
+  if (isBlokada(clean)) return `Blokada (${normalizedSource})`;
   return clean;
 }
 
@@ -209,7 +218,7 @@ async function reconcileChannel(db, uid, propertyName, sourceName, url, log = co
   // Tak liczona suma jest odporna z definicji, a nie z założenia o zachowaniu portalu.
   const hash = crypto.createHash("sha1").update(
     events
-      .filter((e) => e.uid)
+      .filter((e) => e.uid && !isBlokada(e.summary))
       .map((e) => `${e.uid}|${formatICalDate(e.dtstart)}|${formatICalDate(e.dtend)}|${e.status || ""}`)
       .sort()
       .join("\n")
@@ -225,6 +234,7 @@ async function reconcileChannel(db, uid, propertyName, sourceName, url, log = co
   }
 
   const feed = new Map();
+  const blokady = new Set();
   let bezUid = 0;
   for (const evt of events) {
     if (!evt.uid) { bezUid++; continue; }            // bez UID nie umiemy śledzić tożsamości
@@ -235,6 +245,20 @@ async function reconcileChannel(db, uid, propertyName, sourceName, url, log = co
     // Dwa zdarzenia o tym samym UID (RECURRENCE-ID albo błąd portalu) zlewałyby się
     // po cichu — jedna zajętość znikałaby bez śladu. Zostawiamy WCZEŚNIEJSZĄ datę
     // (bezpieczniejsza: dłużej blokuje termin) i zapisujemy to w logu.
+    // X29 (decyzja właściciela 2026-08-24): blokad terminu NIE importujemy.
+    //
+    // Uzasadnienie: gospodarz korzystający z tej aplikacji ma zwykle Booking.com i Airbnb
+    // spięte ze sobą BEZPOŚREDNIO, a WynajemPRO jest trzecim kalendarzem na wierzchu —
+    // blokada dochodzi więc do drugiego portalu bez naszego pośrednictwa. U nas robiła
+    // wyłącznie hałas: zapisywała się jako `type: 'booking'`, więc wchodziła do listy
+    // przyjazdów i GENEROWAŁA ZADANIA DLA GOŚCI („wyślij kod do skrytki" dla terminu,
+    // na który nikt nie przyjeżdża). Ujawniło się to przy pierwszym prawdziwym imporcie.
+    //
+    // ⚖️ Cena tej decyzji, zapisana świadomie: nasz kalendarz pokazuje jako wolne terminy,
+    // które gospodarz zablokował w portalu. Kto polega WYŁĄCZNIE na nas, zobaczy
+    // nieprawdziwą dostępność — patrz [[Decisions]] ADR-017.
+    if (isBlokada(evt.summary)) { blokady.add(evt.uid); continue; }
+
     const juzJest = feed.get(evt.uid);
     if (juzJest) {
       log.warn(`[${uid}] ${propertyName}/${normalizedSource}: powtórzony UID ${evt.uid} w feedzie`);
@@ -403,6 +427,12 @@ async function reconcileChannel(db, uid, propertyName, sourceName, url, log = co
   for (const [znanyUid, docId] of Object.entries(known)) {
     if (masoweZniknięcie) break;
     if (feed.has(znanyUid)) continue;
+    // UID, który jest w feedzie, ale jako BLOKADA — porzucamy śledzenie po cichu.
+    // Oznaczenie „zniknęła z portalu" byłoby nieprawdą (nic nie zniknęło) i zasypałoby
+    // gospodarza alertami przy wdrożeniu tej zmiany. Sama rezerwacja zostaje w bazie
+    // do jego decyzji — zasady „nie kasujemy automatycznie" nie łamiemy nawet tutaj.
+    if (blokady.has(znanyUid)) { delete known[znanyUid]; continue; }
+
     // Zakończony pobyt wypada z feedu w normalnym trybie — to nie jest anulowanie.
     const poprz = (state && state.dane && state.dane[znanyUid]) || odtworzoneDane[znanyUid] || {};
     const koniecPobytu = poprz.endDate || poprz.date || "";
@@ -427,6 +457,7 @@ async function reconcileChannel(db, uid, propertyName, sourceName, url, log = co
   for (const [evtUid, d] of feed) dane[evtUid] = { date: d.date, endDate: d.endDate };
   for (const znanyUid of Object.keys(known)) {
     if (feed.has(znanyUid)) continue;
+    if (blokady.has(znanyUid)) { delete known[znanyUid]; continue; }
     const p = (state && state.dane && state.dane[znanyUid]) || odtworzoneDane[znanyUid] || {};
     const koniec = p.endDate || p.date || "";
     // Pobyt zamknięty zostawia NAGROBEK, a nie pustkę.
@@ -540,7 +571,7 @@ async function syncUser(db, uid, syncLinks, log = console) {
 }
 
 module.exports = {
-  syncUser, reconcileChannel,
+  syncUser, reconcileChannel, isBlokada,
   parseICalEvents, formatICalDate, channelKey, guestFromSummary,
   isSafeUrl, fetchWithSafeRedirects, fetchFeed,
 };

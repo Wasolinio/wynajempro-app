@@ -267,7 +267,7 @@ export const helpArticles = [
           "datami przyjazdu i wyjazdu,",
           "przypisanym obiektem,",
           "źródłem (np. „Booking\", „Airbnb\"),",
-          "nazwą z opisu wydarzenia w portalu — Booking.com czasem podaje nazwisko gościa, Airbnb zwykle wysyła tylko „Reserved\"; terminy zablokowane ręcznie w portalu pojawiają się jako „Blokada (Booking)\" lub „Blokada (Airbnb)\"."
+          "nazwą z opisu wydarzenia w portalu — Booking.com czasem podaje nazwisko gościa, Airbnb zwykle wysyła tylko „Reserved\"."
         ]
       },
       {
@@ -285,6 +285,22 @@ export const helpArticles = [
           "gdy gość przesunie lub przedłuży pobyt, ta sama rezerwacja dostaje nowe daty, zamiast pojawić się drugi raz obok starej;",
           "gdy rezerwacja zniknie z portalu (zwykle znaczy to anulowanie), WynajemPRO oznacza ją i pokazuje na pulpicie — ale jej nie kasuje, bo mogą być przy niej Twoje kwoty i notatki. Decyzja należy do Ciebie."
         ]
+      },
+      {
+        "type": "h2",
+        "content": "Czego NIE importujemy: blokad terminu"
+      },
+      {
+        "type": "p",
+        "content": "Terminy zablokowane przez Ciebie ręcznie w portalu (Airbnb pokazuje je jako „niedostępne\", Booking.com jako zamknięte) nie trafiają do WynajemPRO. To świadoma decyzja, nie brak."
+      },
+      {
+        "type": "p",
+        "content": "Powód: gospodarz korzystający z tej aplikacji ma zwykle Booking.com i Airbnb spięte kalendarzami bezpośrednio ze sobą, a WynajemPRO jest trzecim kalendarzem na wierzchu. Blokada założona w jednym portalu dociera więc do drugiego bez naszego pośrednictwa. Gdybyśmy ją dodatkowo wciągali, trafiłaby na listę przyjazdów i wygenerowała zadania w rodzaju „wyślij kod do skrytki\" dla terminu, na który nikt nie przyjeżdża."
+      },
+      {
+        "type": "p",
+        "content": "Co z tego wynika dla Ciebie: kalendarz w WynajemPRO pokaże jako wolne te terminy, które zablokowałeś w portalu. Jeśli chcesz je widzieć także tutaj — na przykład przerwę techniczną albo pobyt własny — dodaj je jako zwykłą rezerwację z kwotą 0 zł. Wtedy zablokują termin również w portalach, bo nasz kalendarz jest do nich wysyłany."
       },
       {
         "type": "h2",

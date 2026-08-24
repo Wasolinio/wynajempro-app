@@ -15,7 +15,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { reconcileChannel, parseICalEvents, formatICalDate, guestFromSummary, channelKey } =
+const { reconcileChannel, parseICalEvents, formatICalDate, guestFromSummary, channelKey, isBlokada } =
   require('./ical-sync');
 
 // ── Podróbka Firestore: tyle, ile dotyka silnik ──────────────────────────────
@@ -461,6 +461,78 @@ test('duży feed przechodzi mimo limitu 500 operacji na batch', async () => {
     () => reconcileChannel(db, 'u1', 'Domek', 'booking', URL_TESTOWY));
   assert.strictEqual(r.dodane, 600);
   assert.strictEqual(rezerwacje(db).length, 600);
+});
+
+test('BLOKADA terminu nie jest importowana', async () => {
+  // Decyzja właściciela 2026-08-24 (X29): blokad nie wciągamy. Gospodarz ma zwykle portale
+  // spięte bezpośrednio, a u nas blokada zapisywała się jako `type: 'booking'`, więc wchodziła
+  // do listy przyjazdów i generowała zadania dla gościa, który nie przyjeżdża.
+  const db = fakeDb();
+  const r = await zFeedem(feed([
+    ['gosc@x', '20261001', '20261005', 'Reserved'],
+    ['blok1@x', '20261010', '20261012', 'Airbnb (Not available)'],
+    ['blok2@x', '20261020', '20261022', 'CLOSED - Not available'],
+  ]), () => reconcileChannel(db, 'u1', 'Domek', 'airbnb', URL_TESTOWY));
+
+  assert.strictEqual(r.dodane, 1, 'wchodzi wyłącznie prawdziwa rezerwacja');
+  const lista = rezerwacje(db);
+  assert.strictEqual(lista.length, 1);
+  assert.strictEqual(lista[0].syncUid, 'gosc@x');
+});
+
+test('blokada zaimportowana PRZED zmianą jest porzucana po cichu, bez oznaczania', async () => {
+  // Przy wdrożeniu tej zmiany gospodarz ma już blokady w bazie. Oznaczenie ich jako
+  // „zniknęły z portalu" byłoby nieprawdą (nic nie zniknęło) i zasypałoby go alertami.
+  const db = fakeDb();
+  const przed = feed([['gosc@x', '20261001', '20261005', 'Reserved']]);
+  // stan sprzed zmiany: blokada była śledzona
+  await zFeedem(przed, () => reconcileChannel(db, 'u1', 'Domek', 'airbnb', URL_TESTOWY));
+  const kluczStanu = [...db._docs.keys()].find((k) => k.startsWith('users/u1/syncState/'));
+  const stan = db._docs.get(kluczStanu);
+  db._docs.set('users/u1/rentals/stara-blokada', {
+    type: 'booking', property: 'Domek', source: 'Airbnb', guest: 'Blokada (Airbnb)',
+    date: '2026-10-10', endDate: '2026-10-12', income: 0,
+    syncUid: 'blok@x', syncStatus: 'active',
+  });
+  db._docs.set(kluczStanu, {
+    ...stan,
+    map: { ...stan.map, 'blok@x': 'stara-blokada' },
+    dane: { ...stan.dane, 'blok@x': { date: '2026-10-10', endDate: '2026-10-12' } },
+    hash: 'wymuszam-pelny-przebieg',
+  });
+
+  const r = await zFeedem(feed([
+    ['gosc@x', '20261001', '20261005', 'Reserved'],
+    ['blok@x', '20261010', '20261012', 'Airbnb (Not available)'],
+  ]), () => reconcileChannel(db, 'u1', 'Domek', 'airbnb', URL_TESTOWY));
+
+  assert.strictEqual(r.znikle, 0, 'blokada nie może zostać oznaczona jako znikła z portalu');
+  const blokada = rezerwacje(db).find((x) => x.syncUid === 'blok@x');
+  assert.notStrictEqual(blokada.syncStatus, 'vanished', 'wpis zostaje bez fałszywego oznaczenia');
+  const nowyStan = db._docs.get(kluczStanu);
+  assert.ok(!('blok@x' in nowyStan.map), 'ale przestajemy ją śledzić');
+});
+
+test('zmiana samej blokady nie wywołuje pełnego przebiegu', async () => {
+  // Suma kontrolna liczona bez blokad — inaczej każde przestawienie blokady w portalu
+  // kosztowałoby pełne uzgodnienie i zapis stanu, mimo że nic nas nie obchodzi.
+  const db = fakeDb();
+  const a = feed([['gosc@x', '20261001', '20261005', 'Reserved'], ['b@x', '20261010', '20261012', 'Airbnb (Not available)']]);
+  const b = feed([['gosc@x', '20261001', '20261005', 'Reserved'], ['b@x', '20261111', '20261113', 'Airbnb (Not available)']]);
+  await zFeedem(a, () => reconcileChannel(db, 'u1', 'Domek', 'airbnb', URL_TESTOWY));
+  const r2 = await zFeedem(b, () => reconcileChannel(db, 'u1', 'Domek', 'airbnb', URL_TESTOWY));
+  assert.strictEqual(r2.pominiete, true, 'sama zmiana blokady ma być pominięta po sumie kontrolnej');
+});
+
+test('rozpoznawanie blokady obejmuje warianty obu portali', () => {
+  // Zmierzone na żywych feedach 2026-08-24.
+  assert.ok(isBlokada('Airbnb (Not available)'));
+  assert.ok(isBlokada('CLOSED - Not available'));
+  assert.ok(isBlokada('Blocked'));
+  assert.ok(isBlokada('Niedostępne'));
+  assert.ok(!isBlokada('Reserved'));
+  assert.ok(!isBlokada('Jan Kowalski'));
+  assert.ok(!isBlokada(''));
 });
 
 test('parser: rozwija złamane linie (RFC 5545) i czyta pola', () => {

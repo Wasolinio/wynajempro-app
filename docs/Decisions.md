@@ -402,6 +402,48 @@ nie wolno wysłać pierwszego zaproszenia, bo to zobowiązanie wobec konsumenta.
 
 ---
 
+## ADR-017: Blokad terminu z portali NIE importujemy
+
+**Data**: 2026-08-24
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Przy pierwszym prawdziwym imporcie X26 na koncie właściciela weszły cztery
+blokady terminu z Airbnb („Airbnb (Not available)"). Zapisują się jako `type: 'booking'`,
+bo muszą blokować kalendarz i trafiać do eksportu — ale przez to **wchodzą do listy
+najbliższych przyjazdów i generują zadania dla gości**: „wyślij instrukcję dojazdu",
+„wyślij kod do skrytki z kluczami" dla terminu, na który nikt nie przyjeżdża. Stary silnik
+zapisywał je tak samo, ale nie zaimportował ani jednej, więc problem nigdy się nie ujawnił.
+
+**Decyzja**: zdarzenia rozpoznane jako blokada terminu są **pomijane przy imporcie**.
+Rozpoznanie po treści `SUMMARY` (`isBlokada`), warianty zmierzone na żywych feedach 2026-08-24:
+Airbnb „Airbnb (Not available)", Booking.com „CLOSED - Not available".
+
+**Uzasadnienie właściciela**: gospodarz korzystający z WynajemPRO ma zwykle Booking.com
+i Airbnb spięte kalendarzami **bezpośrednio ze sobą**, a nasza aplikacja jest trzecim
+kalendarzem na wierzchu. Blokada dociera więc do drugiego portalu bez naszego pośrednictwa —
+wciąganie jej do nas nie dodaje ochrony, tylko hałas.
+
+**Konsekwencje**:
+- ✅ Znika zaśmiecanie listy zadań i przyjazdów pozycjami bez gościa.
+- ✅ Suma kontrolna feedu liczona jest bez blokad, więc przestawienie blokady w portalu
+  nie wywołuje pełnego uzgodnienia i zapisu stanu.
+- ⚖️ **Cena, zapisana świadomie: nasz kalendarz pokazuje jako wolne terminy zablokowane
+  w portalu.** Kto polega WYŁĄCZNIE na WynajemPRO, zobaczy nieprawdziwą dostępność —
+  np. pięciomiesięczna blokada zimowa będzie u nas wyglądać na wolną. Obejście podane
+  w bazie wiedzy: dodać taki termin jako zwykłą rezerwację z kwotą 0 zł (wtedy zablokuje
+  się też w portalach, bo nasz kalendarz jest do nich wysyłany).
+- 🛡️ Blokady zaimportowane PRZED tą zmianą są **porzucane ze stanu po cichu**, bez
+  oznaczania „zniknęła z portalu" — nic nie zniknęło, a alerty byłyby nieprawdą. Same wpisy
+  zostają w bazie do decyzji gospodarza; zasady „nie kasujemy automatycznie" nie łamiemy.
+
+**Alternatywy rozważone**:
+- **Importować, ale oznaczyć nowym polem** (`isBlock`) i pomijać w zadaniach, przyjazdach
+  i szczegółach — poprawne, ale wymaga kolejnej zmiany reguł i dotyka czterech widoków;
+  odrzucone jako droższe od korzyści przy założeniu, że portale i tak są spięte.
+- **Zostawić jak było** — odrzucone: zadania „wyślij kod do skrytki" dla blokady to defekt,
+  który gospodarz zobaczy pierwszego dnia.
+
+---
+
 ## ADR-NNN: [Title]
 
 **Date**: YYYY-MM-DD  
