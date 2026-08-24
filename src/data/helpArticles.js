@@ -1272,7 +1272,7 @@ export const helpArticles = [
           "Czy link iCal jest wklejony we właściwym miejscu: „Ustawienia\" (zębatka) → „Integracje\" → sekcja tego obiektu, którego dotyczy ogłoszenie → pole „Link iCal Booking.com\" lub „Link iCal Airbnb\" — i czy kliknięto „Zapisz ustawienia\".",
           "Czy to na pewno link eksportu z portalu (dla Booking.com zaczyna się od admin.booking.com/hotel/hoteladmin/ical.html, dla Airbnb od airbnb.pl/calendar/ical).",
           "Kliknij „Synchronizacja\" w bocznym menu (na komputerze, nad Twoim imieniem i nazwiskiem) i poczekaj na komunikat. „Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.\" oznacza, że połączenie działa, tylko nie ma nic nowego.",
-          "Pamiętaj, że automatyczna synchronizacja działa raz na dobę, wcześnie rano — świeżą rezerwację z portalu zobaczysz po ręcznym kliknięciu „Synchronizacja\" albo następnego dnia.",
+          "Pamiętaj, że automatyczna synchronizacja działa co godzinę — świeżą rezerwację z portalu zobaczysz po ręcznym kliknięciu „Synchronizacja\" albo przy najbliższym automatycznym przebiegu.",
           "Zaimportowana rezerwacja ma 0 zł i czasem nazwę „Reserved\" — to normalne (portale nie przekazują kwot ani zawsze nazwisk w iCal). Szczegóły w artykule o synchronizacji."
         ]
       },
