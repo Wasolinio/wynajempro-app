@@ -501,9 +501,17 @@ feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest d
   z tury 3 — zamknięta teraz **całą klasą**: nowy test przechodzi po wszystkich artykułach
   i sprawdza `not.toContainText('**')`).
   ✅ **Stan końcowy: e2e 191/191, functions 33/33**, lint 0, build OK, reguły kompilują się.
-  🔴 **Zostaje wyłącznie**: decyzja właściciela o deployu (reguły + functions **osobno** od
-  hostingu) oraz smoke test po wydaniu w parze „jedna operacja przechodzi + jedna odrzucona"
-  (skill `reguly`, krok 6). Kroki 2 i 3 bramki zaliczone 2026-08-22 na kluczu serwisowym.
+  ✅ **WDROŻONE NA PRODUKCJĘ 2026-08-24** — commity `f988499` i `f4e4e0a`, gałąź `x26-ical-sync`.
+  Trzy osobne wydania w kolejności reguły → functions → hosting (reguły muszą dopuszczać nowe
+  pola, zanim silnik zacznie je zapisywać). 12 funkcji zaktualizowanych, `dailyICalSync`
+  potwierdzony z nową konfiguracją. Weryfikacja live przez przeglądarkę: trasy 200, konsola
+  bez błędów ładowania chunków, nowy kod potwierdzony **imiennie w chunkach produkcyjnych**.
+  🛑 **Kontrola negatywna po deployu znalazła błąd, którego nie wyłapało pięć tur przeglądu**:
+  artykuł „Rozwiązywanie problemów" nadal mówił o synchronizacji „raz na dobę" — poprawione
+  i wydane ponownie. Lekcja z 21.08 potwierdziła się drugi raz.
+  ⏸ **Zostaje**: krok 6 bramki reguł (smoke test uprawnień **klientem SDK**, wymaga zalogowanego
+  właściciela — Admin SDK omija reguły i niczego nie dowodzi) oraz obserwacja stabilności `UID`
+  przy pierwszej modyfikacji rezerwacji.
   ⏸ **Świadomie odłożone, wymaga osobnych pozycji**: kolizje niewidoczne dla rezerwacji na kolejny sezon
   (okno roku w `useFirebaseData`), `syncLinks` kluczowane nazwą obiektu (zmiana nazwy rozspaja kanał),
   `isSafeUrl` przepuszczające dziesiętny/szesnastkowy zapis IP (luka odziedziczona, nie regresja).
