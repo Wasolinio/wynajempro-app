@@ -2,6 +2,63 @@
 
 ## Critical Issues
 
+### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
+
+**Objaw:** kliknięcie „Synchronizacja" w panelu kończy się komunikatem „Wystąpił błąd podczas
+synchronizacji kalendarzy". W logach funkcji:
+
+```
+W syncicalcalendars: The request was not authenticated.
+   Empty Authorization header value.
+```
+
+**Diagnoza:** żądanie **nie dociera do kodu funkcji**. Odpowiedź serwuje `Google Frontend`
+(HTML 403, „Your client does not have permission to get URL / from this server"), a nie
+protokół callable. Usługa Cloud Run `syncicalcalendars` **straciła uprawnienie
+`roles/run.invoker` dla `allUsers`**, którego protokół callable wymaga.
+
+**Porównanie, które to rozstrzyga** — wszystkie pozostałe funkcje callable są zdrowe:
+
+| Funkcja | Odpowiedź | Znaczenie |
+|---|---|---|
+| `syncICalCalendars` | **403**, HTML od Google Frontend | odrzucenie na bramce |
+| `createCheckoutSession` | 401, JSON `UNAUTHENTICATED` | dociera do funkcji |
+| `createBillingPortalSession` | 401, JSON | dociera |
+| `deleteUserAccount` | 401, JSON | dociera |
+| `deleteGuide` | 401, JSON | dociera |
+| `adminApi` | 401, JSON | dociera |
+
+⚠️ **To NIE jest skutek wdrożenia X26.** Pierwsze odrzucenie w logach: **2026-08-24 08:29 UTC**,
+czyli **godzinę przed** wydaniem X26 (09:28). W oknie retencji logów nie ma ani jednego
+udanego wywołania tej funkcji przez użytkownika. Ponowne wdrożenie samej funkcji
+(`firebase deploy --only functions:syncICalCalendars`) **nie przywraca** uprawnienia.
+
+**Skutek:** ręczna synchronizacja nie działa. Automatyczna (`dailyICalSync`) **działa**, bo
+wywołuje ją Cloud Scheduler kontem serwisowym, a nie ruchem publicznym.
+
+**Naprawa** — jedna z dwóch, wymaga uprawnień właściciela do projektu Google Cloud:
+
+```
+gcloud run services add-iam-policy-binding syncicalcalendars \
+  --region=us-central1 --member=allUsers --role=roles/run.invoker \
+  --project=moje-domki-6c77d
+```
+
+albo w konsoli: **Cloud Run → syncicalcalendars → Security → Authentication →
+„Allow unauthenticated invocations"**.
+
+🛡️ **Dlaczego to jest bezpieczne, mimo nazwy `allUsers`.** To uprawnienie oznacza wyłącznie
+„żądanie dociera do funkcji", dokładnie tak jak w pięciu pozostałych funkcjach callable.
+Cała kontrola dostępu zostaje w kodzie i jest nietknięta: `enforceAppCheck: true`,
+wymóg zalogowania, weryfikacji e-maila i aktywnej subskrypcji lub trwającego okresu próbnego
+(audyt N5 🟡3). Bez tego uprawnienia protokół callable nie może działać w ogóle.
+
+📌 **Do sprawdzenia przy diagnozie nawrotu:** czy uprawnienie znika po deployu (wtedy podejrzana
+jest polityka organizacji `constraints/iam.allowedPolicyMemberDomains`), czy zostało zdjęte
+ręcznie. Warto po każdym wydaniu functions przebiec test porównawczy z tabeli wyżej — kod 403
+z HTML-em zamiast 401 z JSON-em oznacza ten sam problem.
+
+
 > **None outstanding.** The two "critical bugs" previously listed here were investigated on 2026-06-29 and found to be **false** — both behaviours are already implemented in the code. Kept below as RESOLVED/NOT-A-BUG so nobody re-opens them.
 
 ### 1. iCal Token Not Generated — ❌ NOT A BUG (verified 2026-06-29)
