@@ -14,6 +14,7 @@ import { useWynajem } from '../../context/WynajemContext';
 
 import {
   propColors, availableColors, defaultTaxSettings, defaultHostProfile, ITEMS_PER_PAGE,
+  DEFAULT_PROPERTIES,
 } from '../../utils/constants';
 import { calculateTaxes } from '../../utils/taxCalculator';
 import { toCount, guestsTotal } from '../../utils/guestCount';
@@ -420,12 +421,32 @@ export default function ManagerApp() {
       if (!u.secretToken) u.secretToken = window.crypto?.randomUUID ? window.crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       return u;
     });
+    // Adres eksportu iCal buduje się z `id`. Retrofit robiony tylko w PAMIĘCI tworzył
+    // pułapkę: gospodarz otwiera Ustawienia (zakładka „Integracje" jest domyślna), kopiuje
+    // link, wkleja go do Booking.com i zamyka modal bez zapisu — `id` nigdy nie trafia do
+    // bazy, `exportIcal` nie znajduje obiektu i portal po cichu przestaje widzieć blokady.
+    // Utrwalamy więc uzupełnienie od razu, tak jak samonaprawa `publicContact`
+    // w useFirebaseData. Zapis idzie tylko wtedy, gdy naprawdę czegoś brakowało.
+    // ⚠️ Bramka, bez której ta samonaprawa jest groźniejsza od problemu, który leczy.
+    // `settings.properties` startuje jako DEFAULT_PROPERTIES (trzy obiekty demo), a nasłuch
+    // ustawień ignoruje pusty pierwszy snapshot i ma własny cykl — `loading` pilnuje tylko
+    // rezerwacji. Przy wolnym łączu gospodarz może otworzyć Ustawienia (zakładka „Integracje"
+    // jest domyślna) ZANIM dojdą jego ustawienia. Zapis bez tej bramki nadpisałby wtedy jego
+    // prawdziwą listę obiektów wersją demo, z nowymi tokenami — czyli skasował nazwy i kolory
+    // oraz unieważnił linki eksportu wklejone do portali. Referencja DEFAULT_PROPERTIES
+    // przechodzi nienaruszona przez WynajemContext, więc porównanie tożsamości wystarcza.
+    const ustawieniaWczytane = properties !== DEFAULT_PROPERTIES && properties.length > 0;
+    const wymagalRetrofit = ustawieniaWczytane && properties.some((p) => !p.id || !p.secretToken);
+    if (wymagalRetrofit && user) {
+      setDoc(doc(db, 'users', user.uid, 'settings', 'properties'), { items: retrofitted })
+        .catch((err) => console.error('Nie udało się utrwalić identyfikatorów obiektów:', err));
+    }
     setEditingProperties(retrofitted);
     setEditingSources([...sources]); setEditingCategories([...categories]);
     setEditingTaxSettings(taxSettings); setEditingHostProfile(hostProfile);
     setEditingSyncLinks(JSON.parse(JSON.stringify(syncLinks)));
     setSettingsTab('sync'); setShowSettingsModal(true);
-  }, [templates, properties, sources, categories, taxSettings, hostProfile, syncLinks]);
+  }, [templates, properties, sources, categories, taxSettings, hostProfile, syncLinks, user]);
 
   const saveSettings = useCallback(async () => {
     if (!user) return;
@@ -625,7 +646,7 @@ export default function ManagerApp() {
             {renderView === 'pulpit' && (
               <PulpitView
                 pulpit={pulpit} dailyReport={dailyReport} weekReminders={weekReminders} properties={properties}
-                upcoming={upcomingBookings}
+                upcoming={upcomingBookings} rentals={rentals}
                 onOpenStats={() => setShowStatsModal(true)} onGoCalendar={() => changeView('calendar')}
                 onOpenDailyReport={() => setShowDailyReportModal(true)}
                 onEditRental={openBookingDetail} completeTask={completeTask} getDayName={getDayName}

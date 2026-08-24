@@ -7,6 +7,7 @@ const { getAuth } = require("firebase-admin/auth");
 const { getStorage } = require("firebase-admin/storage");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { mergeClaims } = require("./claims");
+const icalSync = require("./ical-sync");
 
 // Inicjalizacja Firebase Admin
 const app = initializeApp();
@@ -45,10 +46,16 @@ async function cleanupUserData(uid) {
   const rentalsDeleted = await deleteSubcollection(userRef, "rentals");
   const settingsDeleted = await deleteSubcollection(userRef, "settings");
   const checkoutDeleted = await deleteSubcollection(userRef, "checkout_sessions");
+  // X26: `users/{uid}/syncState/*` trzyma UID-y rezerwacji z portali i daty pobytów.
+  // Skasowanie dokumentu użytkownika NIE usuwa jego subkolekcji, więc bez tej linii dane
+  // przeżywałyby żądanie usunięcia konta — ta sama klasa problemu, którą audyt N5 zamknął
+  // dla `guides/*/signatures`.
+  const syncStateDeleted = await deleteSubcollection(userRef, "syncState");
 
   console.log(
     `🧹 Dane użytkownika ${uid} wyczyszczone: ` +
-    `${rentalsDeleted} rezerwacji, ${settingsDeleted} ustawień, ${checkoutDeleted} sesji checkout`
+    `${rentalsDeleted} rezerwacji, ${settingsDeleted} ustawień, ${checkoutDeleted} sesji checkout, ` +
+    `${syncStateDeleted} stanów synchronizacji`
   );
 
   // Czyścimy pola Stripe z profilu, ale zostawiamy sam dokument
@@ -59,7 +66,7 @@ async function cleanupUserData(uid) {
     dataCleanedAt: Timestamp.now(),
   });
 
-  return { rentalsDeleted, settingsDeleted, checkoutDeleted };
+  return { rentalsDeleted, settingsDeleted, checkoutDeleted, syncStateDeleted };
 }
 
 // =============================================================================
@@ -614,27 +621,28 @@ exports.deleteExpiredAccountsData = onSchedule(
 
 // =============================================================================
 // 5. SYNCHRONIZACJA KALENDARZY iCAL (Booking, Airbnb itp.)
-// Pobiera pliki iCal z podanych linków, parsuje zdarzenia VEVENT,
-// sprawdza duplikaty po syncId i dodaje nowe rezerwacje do Firestore.
+//
+// X26 (2026-08-22): logika PRZENIESIONA do `functions/ical-sync.js`. Do tej pory
+// żyła tu w dwóch niemal identycznych kopiach (ręczny przycisk + harmonogram),
+// a kluczem tożsamości rezerwacji były DATY, nie `UID` ze zdarzenia — przez co
+// anulowanie zostawiało zablokowany termin na zawsze, a zmiana dat tworzyła
+// drugą rezerwację obok pierwszej. Pełne uzasadnienie w nagłówku modułu.
+//
+// Tutaj zostają wyłącznie BRAMKI: uwierzytelnienie, weryfikacja e-maila
+// i subskrypcja. To one chronią funkcję przed użyciem jako proxy SSRF przez
+// świeże konto (audyt N5 🟡3) i nie wolno ich osłabiać przy refaktorach.
 // =============================================================================
 exports.syncICalCalendars = onCall(
   { enforceAppCheck: true, maxInstances: 3 },
   async (request) => {
-    // Sprawdzenie uwierzytelnienia
     if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Musisz być zalogowany, aby synchronizować kalendarze."
-      );
+      throw new HttpsError("unauthenticated", "Musisz być zalogowany, aby synchronizować kalendarze.");
     }
 
     // Bramka spójna z regułami rentals (audyt N5 🟡3): bez niej dowolne świeże
     // konto (niezweryfikowane, bez subskrypcji) mogło używać funkcji jako proxy SSRF.
     if (request.auth.token.email_verified !== true) {
-      throw new HttpsError(
-        "permission-denied",
-        "Zweryfikuj adres e-mail, aby synchronizować kalendarze."
-      );
+      throw new HttpsError("permission-denied", "Zweryfikuj adres e-mail, aby synchronizować kalendarze.");
     }
 
     const uid = request.auth.uid;
@@ -646,470 +654,143 @@ exports.syncICalCalendars = onCall(
       const trialAlive = status === "trialing" && u.trialEndsAt &&
         typeof u.trialEndsAt.toDate === "function" && u.trialEndsAt.toDate() > new Date();
       if (status !== "active" && !trialAlive) {
-        throw new HttpsError(
-          "permission-denied",
-          "Synchronizacja wymaga aktywnej subskrypcji lub okresu próbnego."
-        );
+        throw new HttpsError("permission-denied", "Synchronizacja wymaga aktywnej subskrypcji lub okresu próbnego.");
       }
     }
 
     const { syncLinks } = request.data;
-
-    // Walidacja danych wejściowych
     if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Brak linków synchronizacji. Podaj obiekt syncLinks."
-      );
+      throw new HttpsError("invalid-argument", "Brak linków synchronizacji. Podaj obiekt syncLinks.");
     }
 
-    let newBookingsCount = 0;
-
     try {
-      // Iteracja po nieruchomościach i ich linkach
-      for (const [propertyName, links] of Object.entries(syncLinks)) {
-        // Każda nieruchomość może mieć linki: booking, airbnb itp.
-        for (const [sourceName, url] of Object.entries(links)) {
-          if (!url || typeof url !== "string") continue;
-
-          if (!isSafeUrl(url)) {
-            // logujemy sam host — pełny URL iCal bywa nośnikiem sekretu (token w ścieżce)
-            let rejectedHost = "nieparsowalny";
-            try { rejectedHost = new URL(url).host; } catch { /* zostaje */ }
-            console.warn(`⚠️ Odrzucono niebezpieczny URL iCal (host: ${rejectedHost})`);
-            continue;
-          }
-
-          // Pobieranie pliku iCal za pomocą wbudowanego fetch (Node 20+)
-          // Zabezpieczenie przed atakiem OOM (Out Of Memory) DoS - limit 5MB
-          const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
-          let icalText = "";
-          try {
-            const response = await fetchWithSafeRedirects(url);
-            if (!response.ok) {
-              console.warn(`⚠️ Nie udało się pobrać iCal dla ${propertyName}/${sourceName}: HTTP ${response.status}`);
-              continue;
-            }
-            
-            // Opcjonalne wczesne odrzucenie na podstawie nagłówka Content-Length
-            const contentLength = response.headers.get("content-length");
-            if (contentLength && parseInt(contentLength, 10) > MAX_ICAL_SIZE_BYTES) {
-              console.warn(`⚠️ Odrzucono iCal dla ${propertyName}/${sourceName}: Plik za duży (Content-Length > 5MB)`);
-              continue;
-            }
-
-            // Strumieniowe odczytywanie z limitem wielkości (aby zablokować złośliwy streaming bez Content-Length)
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder("utf-8");
-            let bytesRead = 0;
-            
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              
-              bytesRead += value.length;
-              if (bytesRead > MAX_ICAL_SIZE_BYTES) {
-                // Przerywamy połączenie
-                reader.cancel("Osiągnięto limit wielkości pliku (5MB)");
-                throw new Error("Plik iCal przekracza dozwolony limit wielkości (5MB)");
-              }
-              icalText += decoder.decode(value, { stream: true });
-            }
-            // Zdekodowanie reszty
-            icalText += decoder.decode();
-
-          } catch (fetchErr) {
-            console.warn(`⚠️ Błąd pobierania iCal dla ${propertyName}/${sourceName}:`, fetchErr.message);
-            continue;
-          }
-
-          // Parsowanie bloków VEVENT z pliku iCal
-          const events = parseICalEvents(icalText);
-
-          for (const event of events) {
-            // Formatowanie dat do YYYY-MM-DD
-            const startDate = formatICalDate(event.dtstart);
-            const endDate = formatICalDate(event.dtend);
-            if (!startDate || !endDate) continue;
-
-            // Normalizacja nazwy źródła (pierwsza litera wielka)
-            const normalizedSource = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
-
-            // Generowanie unikalnego identyfikatora synchronizacji
-            const syncId = `sync_${sourceName}_${propertyName}_${startDate}_${endDate}`;
-
-            // Sprawdzenie duplikatów — szukamy dokumentu z takim samym syncId
-            const duplicateSnapshot = await db
-              .collection("users")
-              .doc(uid)
-              .collection("rentals")
-              .where("syncId", "==", syncId)
-              .limit(1)
-              .get();
-
-            if (!duplicateSnapshot.empty) continue; // Już istnieje — pomijamy
-
-            // Ustalenie nazwy gościa na podstawie SUMMARY
-            const summary = (event.summary || "").trim();
-            let guest;
-            const lowerSummary = summary.toLowerCase();
-            if (lowerSummary.includes("blocked") || lowerSummary.includes("niedostępne")) {
-              guest = `Blokada (${normalizedSource})`;
-            } else {
-              guest = summary || `Gość ${normalizedSource}`;
-            }
-
-            // Tworzenie nowego dokumentu rezerwacji w Firestore
-            await db
-              .collection("users")
-              .doc(uid)
-              .collection("rentals")
-              .add({
-                type: "booking",
-                property: propertyName,
-                source: normalizedSource,
-                guest: guest,
-                date: startDate,
-                endDate: endDate,
-                income: 0,
-                advancePayment: 0,
-                isAdvancePaid: false,
-                commission: 0,
-                tax: 0,
-                vat: 0,
-                utilities: 0,
-                isPaid: false,
-                completedTasks: {},
-                guestNote: "",
-                syncId: syncId,
-              });
-
-            newBookingsCount++;
-          }
-        }
-      }
-
-      console.log(`✅ Synchronizacja iCal dla ${uid}: dodano ${newBookingsCount} nowych rezerwacji.`);
-      return { newBookingsCount };
+      const wynik = await icalSync.syncUser(db, uid, syncLinks, console);
+      console.log(`✅ Synchronizacja iCal dla ${uid}:`, JSON.stringify(wynik));
+      // `newBookingsCount` zostaje dla zgodności ze starym frontem; reszta pól jest nowa.
+      return {
+        newBookingsCount: wynik.dodane,
+        dodane: wynik.dodane,
+        zmienione: wynik.zmienione,
+        znikle: wynik.znikle,
+        wrocone: wynik.wrocone,
+        bledy: wynik.bledy,
+      };
     } catch (error) {
       console.error("❌ Błąd synchronizacji iCal:", error);
-      throw new HttpsError(
-        "internal",
-        "Wystąpił błąd podczas synchronizacji kalendarzy."
-      );
+      throw new HttpsError("internal", "Wystąpił błąd podczas synchronizacji kalendarzy.");
     }
   }
 );
 
 // =============================================================================
-// 6. AUTOMATYCZNA SYNCHRONIZACJA iCAL — RAZ NA DOBĘ (Scheduled Function)
-// Iteruje po wszystkich aktywnych użytkownikach, pobiera ich syncLinks
-// i wykonuje tę samą logikę synchronizacji co ręczny przycisk.
+// 6. AUTOMATYCZNA SYNCHRONIZACJA iCAL — CO GODZINĘ (Scheduled Function)
+//
+// X26: było „raz na dobę 06:00". Portale odświeżają importowane kalendarze mniej
+// więcej co 3 godziny, a nasza doba dokładała do tego opóźnienia do 24 godzin —
+// byliśmy najsłabszym ogniwem łańcucha.
+//
+// ⚠️ CZĘSTOTLIWOŚĆ JEST BEZPIECZNA KOSZTOWO WYŁĄCZNIE DZIĘKI DOKUMENTOWI STANU
+// w `ical-sync.js`. Przy starym wzorcu (osobne zapytanie na każde zdarzenie feedu)
+// przejście na godzinę ścinało darmowy próg Firebase ze ~104 kont do ~10 —
+// policzone w `docs/strategy/Rentownosc-symulacja-2026-08-22.md`. Niezmieniony feed
+// kosztuje dziś JEDEN odczyt i zero zapisów.
+//
+// Współbieżność jest ograniczona: wcześniej wszyscy użytkownicy szli równolegle
+// przez `Promise.allSettled` w jednym wywołaniu, co przy wzroście cicho przekraczało
+// limit czasu i część kont przestawała się synchronizować bez żadnego sygnału.
 // =============================================================================
+const ROWNOLEGLE_KONTA = 5;
+
 exports.dailyICalSync = onSchedule(
   {
-    schedule: "every day 06:00",
+    schedule: "every 1 hours",
     timeZone: "Europe/Warsaw",
     maxInstances: 1,
+    timeoutSeconds: 540,
+    memory: "512MiB",
   },
   async (_event) => {
     const logger = require("firebase-functions/logger");
     logger.info("🔄 Rozpoczęto automatyczną synchronizację iCal...");
 
-    let totalUsersProcessed = 0;
-    let totalNewBookings = 0;
-    let totalErrors = 0;
+    let kont = 0, dodane = 0, zmienione = 0, znikle = 0, bledy = 0;
 
     try {
-      // Pobierz wszystkich użytkowników z aktywną subskrypcją
-      const activeSnapshot = await db
+      const aktywni = await db
         .collection("users")
         .where("status", "in", ["active", "trialing"])
         .get();
 
-      if (activeSnapshot.empty) {
+      if (aktywni.empty) {
         logger.info("🔄 Brak aktywnych użytkowników do synchronizacji.");
         return;
       }
+      logger.info(`🔄 Znaleziono ${aktywni.size} aktywnych użytkowników.`);
 
-      logger.info(`🔄 Znaleziono ${activeSnapshot.size} aktywnych użytkowników.`);
+      // Porcjami po ROWNOLEGLE_KONTA, nie wszyscy naraz.
+      //
+      // ⚠️ Same porcje bez budżetu czasu dają DETERMINISTYCZNE ZAGŁODZENIE: kolejność
+      // `aktywni.docs` jest w każdym przebiegu ta sama, więc po wyczerpaniu limitu 540 s
+      // ucinane byłyby zawsze TE SAME konta z końca listy — i to bez śladu w logu, bo
+      // timeout funkcji nie przechodzi przez `catch`. Stąd twardy budżet i wpis o tym,
+      // ile kont zostało nietkniętych. Rotacja punktu startu wyrównuje szanse między
+      // przebiegami, żeby ogon listy też bywał obsłużony jako pierwszy.
+      const START = Date.now();
+      const BUDZET_MS = 450000;                       // 450 s z 540 s limitu
+      const offset = (new Date().getHours() * ROWNOLEGLE_KONTA) % Math.max(1, aktywni.docs.length);
+      const kolejka = [...aktywni.docs.slice(offset), ...aktywni.docs.slice(0, offset)];
+      let pominietoZBraku = 0;
 
-      const processPromises = activeSnapshot.docs.map(async (userDoc) => {
-        const uid = userDoc.id;
-
-        try {
-          // Pobierz syncLinks z ustawień użytkownika
-          const syncLinksDoc = await db
-            .collection("users")
-            .doc(uid)
-            .collection("settings")
-            .doc("syncLinks")
-            .get();
-
-          if (!syncLinksDoc.exists) return null;
-
-          const syncLinks = syncLinksDoc.data()?.links;
-          if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) {
-            return null;
+      for (let i = 0; i < kolejka.length; i += ROWNOLEGLE_KONTA) {
+        if (Date.now() - START > BUDZET_MS) { pominietoZBraku = kolejka.length - i; break; }
+        const porcja = kolejka.slice(i, i + ROWNOLEGLE_KONTA);
+        const wyniki = await Promise.allSettled(porcja.map(async (userDoc) => {
+          const uid = userDoc.id;
+          // Ta sama bramka co w ścieżce ręcznej. `status: 'trialing'` utrzymuje się jeszcze
+          // przez TRIAL_RETENTION_DAYS po wygaśnięciu okresu próbnego, więc bez sprawdzenia
+          // `trialEndsAt` porzucone konto kazałoby nam odpytywać wskazane adresy co godzinę
+          // przez ponad trzy miesiące — ryzyko „proxy SSRF przez świeże konto" z audytu
+          // N5 🟡3, tylko pomnożone przez 24 i na ścieżce, która bramki nie miała.
+          const u = userDoc.data() || {};
+          const st = u.status || u.accountStatus || "none";
+          if (st !== "active") {
+            const trialAlive = st === "trialing" && u.trialEndsAt &&
+              typeof u.trialEndsAt.toDate === "function" && u.trialEndsAt.toDate() > new Date();
+            if (!trialAlive) return null;
           }
 
-          // Wykonaj synchronizację — ta sama logika co w ręcznym syncICalCalendars
-          let userNewBookings = 0;
+          const linksDoc = await db.collection("users").doc(uid)
+            .collection("settings").doc("syncLinks").get();
+          if (!linksDoc.exists) return null;
+          const syncLinks = linksDoc.data()?.links;
+          if (!syncLinks || typeof syncLinks !== "object" || Object.keys(syncLinks).length === 0) return null;
+          return icalSync.syncUser(db, uid, syncLinks, logger);
+        }));
 
-          for (const [propertyName, links] of Object.entries(syncLinks)) {
-            for (const [sourceName, url] of Object.entries(links)) {
-              if (!url || typeof url !== "string") continue;
-
-              if (!isSafeUrl(url)) continue;
-
-              // Pobieranie pliku iCal za pomocą wbudowanego fetch (Node 20+) z limitem 5MB
-              const MAX_ICAL_SIZE_BYTES = 5 * 1024 * 1024;
-              let icalText = "";
-              try {
-                const response = await fetchWithSafeRedirects(url);
-                if (!response.ok) {
-                  logger.warn(`⚠️ [${uid}] HTTP ${response.status} dla ${propertyName}/${sourceName}`);
-                  continue;
-                }
-                
-                const contentLength = response.headers.get("content-length");
-                if (contentLength && parseInt(contentLength, 10) > MAX_ICAL_SIZE_BYTES) {
-                  logger.warn(`⚠️ [${uid}] Odrzucono iCal dla ${propertyName}/${sourceName}: Plik za duży (Content-Length > 5MB)`);
-                  continue;
-                }
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let bytesRead = 0;
-                
-                while (true) {
-                  const { done, value } = await reader.read();
-                  if (done) break;
-                  
-                  bytesRead += value.length;
-                  if (bytesRead > MAX_ICAL_SIZE_BYTES) {
-                    reader.cancel("Osiągnięto limit wielkości pliku (5MB)");
-                    throw new Error("Plik iCal przekracza dozwolony limit wielkości (5MB)");
-                  }
-                  icalText += decoder.decode(value, { stream: true });
-                }
-                icalText += decoder.decode();
-
-              } catch (fetchErr) {
-                logger.warn(`⚠️ [${uid}] Błąd pobierania ${propertyName}/${sourceName}: ${fetchErr.message}`);
-                continue;
-              }
-
-              const events = parseICalEvents(icalText);
-
-              for (const evt of events) {
-                const startDate = formatICalDate(evt.dtstart);
-                const endDate = formatICalDate(evt.dtend);
-                if (!startDate || !endDate) continue;
-
-                const normalizedSource = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
-                const syncId = `sync_${sourceName}_${propertyName}_${startDate}_${endDate}`;
-
-                // Sprawdź duplikaty
-                const duplicateSnapshot = await db
-                  .collection("users")
-                  .doc(uid)
-                  .collection("rentals")
-                  .where("syncId", "==", syncId)
-                  .limit(1)
-                  .get();
-
-                if (!duplicateSnapshot.empty) continue;
-
-                // Ustal nazwę gościa
-                const summary = (evt.summary || "").trim();
-                const lowerSummary = summary.toLowerCase();
-                let guest;
-                if (lowerSummary.includes("blocked") || lowerSummary.includes("niedostępne")) {
-                  guest = `Blokada (${normalizedSource})`;
-                } else {
-                  guest = summary || `Gość ${normalizedSource}`;
-                }
-
-                // Dodaj rezerwację
-                await db
-                  .collection("users")
-                  .doc(uid)
-                  .collection("rentals")
-                  .add({
-                    type: "booking",
-                    property: propertyName,
-                    source: normalizedSource,
-                    guest: guest,
-                    date: startDate,
-                    endDate: endDate,
-                    income: 0,
-                    advancePayment: 0,
-                    isAdvancePaid: false,
-                    commission: 0,
-                    tax: 0,
-                    vat: 0,
-                    utilities: 0,
-                    isPaid: false,
-                    completedTasks: {},
-                    guestNote: "",
-                    syncId: syncId,
-                  });
-
-                userNewBookings++;
-              }
-            }
-          }
-
-          if (userNewBookings > 0) {
-            logger.info(`✅ [${uid}] Dodano ${userNewBookings} nowych rezerwacji.`);
-          }
-
-          return { userNewBookings };
-        } catch (userErr) {
-          logger.error(`❌ [${uid}] Błąd synchronizacji: ${userErr.message}`);
-          throw userErr;
-        }
-      });
-
-      const results = await Promise.allSettled(processPromises);
-      
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          if (result.value !== null) {
-            totalUsersProcessed++;
-            totalNewBookings += result.value.userNewBookings;
-          }
-        } else {
-          totalUsersProcessed++;
-          totalErrors++;
+        for (const w of wyniki) {
+          if (w.status === "rejected") { bledy++; continue; }
+          if (!w.value) continue;
+          kont++;
+          dodane += w.value.dodane;
+          zmienione += w.value.zmienione;
+          znikle += w.value.znikle;
+          bledy += w.value.bledy;
         }
       }
 
       logger.info(
-        `🔄 Synchronizacja zakończona: ${totalUsersProcessed} użytkowników, ` +
-        `${totalNewBookings} nowych rezerwacji, ${totalErrors} błędów.`
+        `🔄 Synchronizacja zakończona: ${kont} kont, +${dodane} nowych, ` +
+        `${zmienione} zaktualizowanych, ${znikle} znikłych z portalu, ${bledy} błędów.`
       );
+      if (pominietoZBraku > 0) {
+        logger.warn(`⏱️ Budżet czasu wyczerpany — ${pominietoZBraku} kont nietkniętych w tym przebiegu (obsłuży je kolejny).`);
+      }
     } catch (error) {
       logger.error("❌ Błąd krytyczny automatycznej synchronizacji iCal:", error);
     }
   }
 );
 
-// =============================================================================
-// HELPER: Parsowanie zdarzeń VEVENT z tekstu iCal
-// Wyodrębnia DTSTART, DTEND, SUMMARY i UID z każdego bloku VEVENT.
-// =============================================================================
-function parseICalEvents(icalText) {
-  const events = [];
-  // Normalizacja łamania linii (unfold kontynuacji RFC 5545)
-  const normalized = icalText.replace(/\r\n[ \t]/g, "").replace(/\r/g, "");
-  const blocks = normalized.split("BEGIN:VEVENT");
-
-  for (let i = 1; i < blocks.length; i++) {
-    const block = blocks[i].split("END:VEVENT")[0];
-    const event = {};
-
-    // Wyciąganie wartości z pól iCal (ignorowanie parametrów po średniku)
-    const lines = block.split("\n");
-    for (const line of lines) {
-      const colonIdx = line.indexOf(":");
-      if (colonIdx === -1) continue;
-
-      const key = line.substring(0, colonIdx).split(";")[0].trim().toUpperCase();
-      const value = line.substring(colonIdx + 1).trim();
-
-      switch (key) {
-        case "DTSTART":
-          event.dtstart = value;
-          break;
-        case "DTEND":
-          event.dtend = value;
-          break;
-        case "SUMMARY":
-          event.summary = value;
-          break;
-        case "UID":
-          event.uid = value;
-          break;
-      }
-    }
-
-    // Dodajemy tylko zdarzenia z datą rozpoczęcia
-    if (event.dtstart) {
-      events.push(event);
-    }
-  }
-
-  return events;
-}
-
-// =============================================================================
-// HELPER: Konwersja daty iCal (np. 20250615 lub 20250615T140000Z) na YYYY-MM-DD
-// =============================================================================
-function formatICalDate(dateStr) {
-  if (!dateStr || dateStr.length < 8) return null;
-  // Wyciągamy pierwsze 8 znaków (YYYYMMDD) niezależnie od formatu
-  const raw = dateStr.replace(/[^\d]/g, "").substring(0, 8);
-  if (raw.length < 8) return null;
-  return `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
-}
-
-// =============================================================================
-// HELPER: Walidacja URL pod kątem SSRF (Server-Side Request Forgery)
-// Blokuje prywatne IP, localhost, IPv6 loopback, Cloud Metadata endpoints
-// =============================================================================
-function isSafeUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
-  
-  try {
-    const urlObj = new URL(url);
-    const hn = urlObj.hostname.toLowerCase();
-    
-    // Blokada prywatnych zakresów IPv4
-    if (hn.startsWith('10.') || hn.startsWith('192.168.') || hn.startsWith('127.')) return false;
-    // Blokada 172.16.0.0/12
-    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hn)) return false;
-    // Blokada link-local IPv4
-    if (hn.startsWith('169.254.')) return false;
-    // Blokada specjalnych adresów
-    if (hn === 'localhost' || hn === '0.0.0.0' || hn === '[::]') return false;
-    // Blokada IPv6 loopback i prywatnych zakresów
-    if (hn === '::1' || hn === '[::1]') return false;
-    if (hn.startsWith('fc') || hn.startsWith('fd')) return false;
-    if (hn.startsWith('fe80')) return false;
-    // Blokada Cloud Metadata (GCP, AWS, Azure)
-    if (hn === 'metadata.google.internal' || hn === 'metadata.internal') return false;
-    
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// =============================================================================
-// HELPER: fetch z RĘCZNĄ obsługą przekierowań — każdy hop przechodzi isSafeUrl
-// od nowa. Domyślne redirect:'follow' pozwalało ominąć walidację SSRF przez
-// 302 z bezpiecznego hosta na adres wewnętrzny/metadata (audyt N5 🟡3).
-// =============================================================================
-async function fetchWithSafeRedirects(url, timeoutMs = 15000, maxRedirects = 3) {
-  let current = url;
-  for (let i = 0; i <= maxRedirects; i++) {
-    if (!isSafeUrl(current)) {
-      throw new Error("Adres odrzucony przez walidację SSRF (przekierowanie)");
-    }
-    const response = await fetch(current, { signal: AbortSignal.timeout(timeoutMs), redirect: "manual" });
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location");
-      if (!location) return response;
-      current = new URL(location, current).toString();
-      continue;
-    }
-    return response;
-  }
-  throw new Error("Przekroczono limit przekierowań (3)");
-}
 
 // =============================================================================
 // 7. USUWANIE KONTA UŻYTKOWNIKA I DANYCH (Right to be forgotten)
@@ -1218,8 +899,6 @@ exports.exportIcal = onRequest(async (req, res) => {
   if (!userId || !propertyId || !token) {
     return res.status(400).send("Brak parametrów u (userId), p (propertyId) lub token.");
   }
-
-  // Walidacja formatu userId (Firebase UID: alfanumeryczny, max 128 znaków)
   if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
     return res.status(400).send("Nieprawidłowy format userId.");
   }
@@ -1231,60 +910,93 @@ exports.exportIcal = onRequest(async (req, res) => {
       return res.status(403).send("Brak autoryzacji.");
     }
 
+    // Parametr `p` bywa identyfikatorem ALBO nazwą. Nazwę przyjmujemy wyłącznie dla
+    // zgodności wstecz: adresy wydane przed X26 zawierały nazwę obiektu, więc zmiana
+    // nazwy w panelu ZABIJAŁA feed wklejony wcześniej do Booking.com — po cichu, bo
+    // portal dostawał 403 i przestawał widzieć blokady. Panel wydaje dziś adresy z `id`.
     const property = propsData.items.find(p => p.id === propertyId || p.name === propertyId);
     if (!property || property.secretToken !== token) {
       return res.status(403).send("Nieprawidłowy token.");
     }
 
-    const rentalsRef = db.collection('users').doc(userId).collection('rentals');
-    const snapshot = await rentalsRef
+    // ⚠️ Rezerwacje trzymają w polu `property` NAZWĘ obiektu, nie identyfikator.
+    // Odpytanie po `propertyId` zwróciłoby pusty kalendarz dla adresów z `id`.
+    const propertyName = property.name;
+
+    // Okno czasowe: portalowi potrzebne są terminy, które jeszcze blokują kalendarz.
+    // Bez tego feed rósł bez końca — po kilku sezonach to setki zdarzeń wysyłanych
+    // co kilka godzin do każdego portalu.
+    const okno = new Date();
+    okno.setDate(okno.getDate() - 30);
+    const odDnia = okno.toISOString().slice(0, 10);
+
+    const snapshot = await db.collection('users').doc(userId).collection('rentals')
       .where('type', '==', 'booking')
-      .where('property', '==', propertyId)
+      .where('property', '==', propertyName)
       .get();
 
-    let icalContent = "BEGIN:VCALENDAR\r\n";
-    icalContent += "VERSION:2.0\r\n";
-    icalContent += "PRODID:-//WynajemPRO//ChannelManager//PL\r\n";
-    icalContent += "CALSCALE:GREGORIAN\r\n";
-    icalContent += "METHOD:PUBLISH\r\n";
+    // `\r` USUWAMY, nie escapujemy: reguły sprawdzają dla `properties` wyłącznie „to lista",
+    // więc nazwa obiektu może zawierać cokolwiek wpisane przez API.
+    const esc = (t) => String(t).replace(/\r/g, "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 
-    const formatDateToICal = (dateStr) => {
-      if (!dateStr) return null;
-      const parts = dateStr.split('-');
-      if (parts.length !== 3) return null;
-      return `${parts[0]}${parts[1]}${parts[2]}`;
-    };
+    let ical = "BEGIN:VCALENDAR\r\n";
+    ical += "VERSION:2.0\r\n";
+    // PRODID mówił „ChannelManager". Nie jesteśmy channel managerem — iCal przenosi
+    // samą zajętość, bez cen i wiadomości. Nazwa, którą sobie nadajesz w kodzie,
+    // wycieka do myślenia o produkcie (X26).
+    ical += "PRODID:-//WynajemPRO//Kalendarz obiektu//PL\r\n";
+    ical += "CALSCALE:GREGORIAN\r\n";
+    ical += "METHOD:PUBLISH\r\n";
+    ical += `X-WR-CALNAME:${esc(propertyName)}\r\n`;
+
+    const doIcal = (d) => (d ? d.split('-').join('') : null);
+    const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
+    let wydane = 0;
 
     snapshot.forEach(docSnap => {
       const data = docSnap.data();
       if (!data.date) return;
-      
-      const dtstart = formatDateToICal(data.date);
-      let dtend = formatDateToICal(data.endDate);
-      if (!dtend) {
-        const startDateObj = new Date(data.date);
-        startDateObj.setDate(startDateObj.getDate() + 1);
-        dtend = startDateObj.toISOString().split('T')[0].replace(/-/g, '');
-      }
 
-      if (dtstart && dtend) {
-        icalContent += "BEGIN:VEVENT\r\n";
-        icalContent += `UID:${docSnap.id}@wynajempro.pl\r\n`;
-        const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
-        icalContent += `DTSTAMP:${now}\r\n`;
-        icalContent += `DTSTART;VALUE=DATE:${dtstart}\r\n`;
-        icalContent += `DTEND;VALUE=DATE:${dtend}\r\n`;
-        icalContent += "SUMMARY:Rezerwacja z WynajemPRO\r\n";
-        icalContent += "STATUS:CONFIRMED\r\n";
-        icalContent += "END:VEVENT\r\n";
+      // Rezerwacja, która zniknęła z portalu źródłowego, nie blokuje już terminu
+      // u nas — nie ma powodu blokować go w pozostałych portalach (X26).
+      if (data.syncStatus === 'vanished') return;
+      if (data.endDate && data.endDate < odDnia) return;
+      if (!data.endDate && data.date < odDnia) return;
+
+      const dtstart = doIcal(data.date);
+      let dtend = doIcal(data.endDate);
+      if (!dtend) {
+        const d = new Date(data.date);
+        d.setDate(d.getDate() + 1);
+        dtend = d.toISOString().split('T')[0].replace(/-/g, '');
       }
+      if (!dtstart || !dtend) return;
+
+      ical += "BEGIN:VEVENT\r\n";
+      ical += `UID:${docSnap.id}@wynajempro.pl\r\n`;
+      ical += `DTSTAMP:${now}\r\n`;
+      ical += `DTSTART;VALUE=DATE:${dtstart}\r\n`;
+      ical += `DTEND;VALUE=DATE:${dtend}\r\n`;
+      ical += "SUMMARY:Rezerwacja z WynajemPRO\r\n";
+      ical += "STATUS:CONFIRMED\r\n";
+      ical += "END:VEVENT\r\n";
+      wydane++;
     });
 
-    icalContent += "END:VCALENDAR\r\n";
+    ical += "END:VCALENDAR\r\n";
 
+    // Bez nazwy obiektu. Rozróżnienie względem logów silnika synchronizacji (te nazwę
+    // podają, bo służą diagnostyce konkretnego konta): TEN endpoint jest publiczny,
+    // nieuwierzytelniony i odpytywany przez portale kilka razy dziennie dla każdego
+    // obiektu — nazwa bywa postaci „Apartament Kowalskich, Długa 5".
+    console.log(`📅 exportIcal: ${wydane} zdarzeń, user ${userId}`);
     res.set('Content-Type', 'text/calendar; charset=utf-8');
-    res.set('Content-Disposition', `attachment; filename="kalendarz_${propertyId}.ics"`);
-    res.status(200).send(icalContent);
+    // `private`, nie `public`: token autoryzacyjny siedzi w query stringu, więc klucz cache
+    // pośrednika zawierałby sekret. Zysk wydajnościowy ten sam.
+    res.set('Cache-Control', 'private, max-age=900');
+    const nazwaPliku = (propertyName || 'obiekt').replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0, 60);
+    res.set('Content-Disposition', `attachment; filename="kalendarz_${nazwaPliku}.ics"`);
+    res.status(200).send(ical);
   } catch (error) {
     console.error("Błąd generowania pliku iCal:", error);
     res.status(500).send("Wystąpił błąd serwera.");

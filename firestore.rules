@@ -64,10 +64,15 @@ service cloud.firestore {
       //   4 takie rezerwacje istnieją); obecny kod odcina id przy zapisie
       // + X14: rozbicie liczby gości — 'adults'/'children'/'pets' (opcjonalne, liczby);
       //   'guests' zostaje jako suma OSÓB (dorośli + dzieci) dla zgodności wstecz
+      // + X26: 'syncUid' (UID zdarzenia iCal) i 'syncStatus' — pisze je silnik
+      //   synchronizacji (functions/ical-sync.js) przez Admin SDK, ale MUSZĄ być
+      //   w allowliście: `update` waliduje dokument PO MERGE'U, więc bez nich
+      //   gospodarz nie zapisałby żadnej edycji zsynchronizowanej rezerwacji.
       return data.keys().hasOnly(['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
               'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
               'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-              'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets'])
+              'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets',
+              'syncUid', 'syncStatus'])
           && data.get('type', '') in ['booking', 'utility', 'reminder']
           && data.date is string && data.date.size() <= 30
           && optStr(data, 'endDate', 30)
@@ -76,6 +81,12 @@ service cloud.firestore {
           && optStr(data, 'email', 320) && optStr(data, 'phone', 50)
           && optStr(data, 'guestNote', 5000) && optStr(data, 'text', 5000)
           && optStr(data, 'syncId', 300) && optStr(data, 'id', 100)
+          // X26: `syncUid` to UID zdarzenia z feedu iCal — jedyny stabilny klucz
+          // tożsamości rezerwacji. Bywa długi (Airbnb: hash@airbnb.com), stąd 500.
+          // `syncStatus` przyjmuje 'active' albo 'vanished' — rezerwacji znikłej
+          // z portalu NIE kasujemy automatycznie, tylko oznaczamy.
+          && optStr(data, 'syncUid', 500)
+          && (!('syncStatus' in data) || data.syncStatus in ['active', 'vanished'])
           && optNum(data, 'income') && optNum(data, 'advancePayment')
           && optNum(data, 'commission') && optNum(data, 'utilities')
           && optNum(data, 'tax') && optNum(data, 'vat') && optNum(data, 'guests')
@@ -168,6 +179,19 @@ service cloud.firestore {
         allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
         allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidRental(request.resource.data);
         allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+      }
+
+      // X26: stan synchronizacji iCal — jeden dokument na kanał (obiekt × źródło),
+      // z mapą UID→dokument rezerwacji i sumą kontrolną feedu. Zapisuje WYŁĄCZNIE
+      // backend przez Admin SDK (reguły go nie dotyczą), dlatego brak `allow write`
+      // jest tu celowy, nie przeoczeniem.
+      match /syncState/{docId} {
+        // Sam odczyt. `delete` było tu początkowo („dokument jest odtwarzalny z feedu"),
+        // ale nic w aplikacji go nie używa, a skutek jest realny: skasowanie stanu zmusza
+        // następny przebieg do pełnej kwerendy po rezerwacjach kanału i zapisu dla KAŻDEGO
+        // zdarzenia feedu. Jeden zapis klienta zamieniałby „1 odczyt, 0 zapisów" w „N odczytów
+        // + N zapisów" — dźwignia kosztu sterowana z zewnątrz, bez żadnej korzyści.
+        allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
       }
 
       // Ustawienia użytkownika - wymagają subskrypcji

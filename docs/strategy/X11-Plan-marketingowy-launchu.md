@@ -2,8 +2,13 @@
 
 > **Status:** ✅ plan gotowy (2026-08-18), z decyzjami właściciela z tego samego dnia: bramka bety
 > **5–10 gospodarzy z pełnym cyklem**, model dostępu **founding members z ceną z góry**.
-> ⏸ Otwarte i blokujące: warunki oferty founding members (3 liczby od właściciela), obsługa dostępu
-> bety po stronie `dev` (7a.3) oraz zdarzenia aktywacyjne (sekcja 6) — **warunek wstępny reklamy**.
+> ✅ **Warunki founding members rozstrzygnięte 2026-08-22** ([[Decisions]] ADR-016): cena startowa
+> gwarantowana **12 miesięcy od pierwszej płatności**, dla każdego, kto rozpocznie płatną Subskrypcję
+> do końca naboru; po okresie cena bieżąca z 30-dniowym uprzedzeniem. Wpisane do Regulaminu §6 ust. 5.
+> ⏳ Została **data zakończenia naboru** — pochodna daty launchu (N4).
+> 🔴 **Komunikat nie może brzmieć „rabat"** — patrz ADR-016, obowiązek Omnibus.
+> ⏸ Nadal otwarte i blokujące: obsługa dostępu bety po stronie `dev` (7a.3) oraz zdarzenia
+> aktywacyjne (sekcja 6) — **warunek wstępny reklamy**.
 > Nadrzędny dokument strategiczny: [[strategy/Plan-wdrożenia-na-rynek]] (2026-07-03) — ten plik
 > **domyka jego dwie świadome luki**: research konkurencji i potwierdzenie ICP.
 > Stan planowania: [[Projects/Roadmap]] X11.

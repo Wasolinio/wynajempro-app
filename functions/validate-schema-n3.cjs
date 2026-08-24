@@ -27,13 +27,15 @@ const hasOnly = (d, allowed) => Object.keys(d).every((k) => allowed.includes(k))
 const RENTAL_KEYS = ['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
   'guestNote', 'text', 'date', 'endDate', 'income', 'advancePayment', 'isAdvancePaid',
   'commission', 'utilities', 'tax', 'vat', 'isPaid', 'isCompleted', 'completedTasks',
-  'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets'];
+  'syncId', 'directionsSent', 'keycodeSent', 'id', 'guests', 'adults', 'children', 'pets',
+  // X26 (2026-08-22): pola silnika synchronizacji iCal — patrz firestore.rules isValidRental
+  'syncUid', 'syncStatus'];
 function whyInvalidRental(d) {
   if (!hasOnly(d, RENTAL_KEYS)) return `nieznane pola: ${Object.keys(d).filter((k) => !RENTAL_KEYS.includes(k)).join(',')}`;
   if (!['booking', 'utility', 'reminder'].includes(d.type ?? '')) return `type='${d.type}'`;
   if (!(isStr(d.date) && d.date.length <= 30)) return `date: ${typeof d.date}`;
   if (!optStr(d, 'endDate', 30)) return 'endDate';
-  for (const [k, m] of [['source', 300], ['property', 300], ['category', 300], ['guest', 300], ['email', 320], ['phone', 50], ['guestNote', 5000], ['text', 5000], ['syncId', 300], ['id', 100]]) {
+  for (const [k, m] of [['source', 300], ['property', 300], ['category', 300], ['guest', 300], ['email', 320], ['phone', 50], ['guestNote', 5000], ['text', 5000], ['syncId', 300], ['id', 100], ['syncUid', 500]]) {
     if (!optStr(d, k, m)) return `${k}: ${typeof d[k]}${isStr(d[k]) ? ` (długość ${d[k].length})` : ''}`;
   }
   for (const k of ['income', 'advancePayment', 'commission', 'utilities', 'tax', 'vat', 'guests', 'adults', 'children', 'pets']) {
@@ -42,6 +44,7 @@ function whyInvalidRental(d) {
   for (const k of ['isAdvancePaid', 'isPaid', 'isCompleted', 'directionsSent', 'keycodeSent']) {
     if (!optBool(d, k)) return `${k}: ${typeof d[k]}`;
   }
+  if ('syncStatus' in d && !['active', 'vanished'].includes(d.syncStatus)) return `syncStatus='${d.syncStatus}'`;
   if ('completedTasks' in d && !isMap(d.completedTasks)) return 'completedTasks nie jest mapą';
   return null;
 }

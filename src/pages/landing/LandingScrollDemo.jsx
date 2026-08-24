@@ -19,7 +19,7 @@ const FEATURES = [
   },
   {
     navIdx: '02', label: 'Kalendarz', pageTitle: 'Kalendarz', pageSub: 'REZERWACJE WSZYSTKICH OBIEKTÓW',
-    kicker: '02 / 05', tag: 'KALENDARZ', ta: 'Koniec z ', tem: 'podwójną', tb: ' rezerwacją.',
+    kicker: '02 / 05', tag: 'KALENDARZ', ta: 'Wszystkie portale w ', tem: 'jednym', tb: ' kalendarzu.',
     body: 'Airbnb, Booking i rezerwacje bezpośrednie w jednym kalendarzu — synchronizacja pilnuje terminów za Ciebie.',
   },
   {

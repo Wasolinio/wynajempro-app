@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { auth, db, functions } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { defaultTaxSettings, defaultHostProfile } from '../utils/constants';
+import { plural } from '../utils/plural';
 
 const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
@@ -143,7 +145,7 @@ export const WynajemProvider = ({ children }) => {
   const handleSyncCalendars = useCallback(async () => {
     if (!user) return;
     if (Object.keys(syncLinks).length === 0) {
-      alert('Najpierw dodaj linki iCal w Ustawieniach, aby móc zsynchronizować kalendarze.');
+      toast.error('Najpierw dodaj linki iCal w Ustawieniach, aby móc zsynchronizować kalendarze.');
       return;
     }
     setIsSyncing(true);
@@ -151,12 +153,29 @@ export const WynajemProvider = ({ children }) => {
       if (auth.currentUser) await auth.currentUser.getIdToken(true);
       const syncICalCalendars = httpsCallable(functions, 'syncICalCalendars');
       const result = await syncICalCalendars({ syncLinks });
-      const count = result.data?.newBookingsCount || 0;
-      if (count > 0) alert(`Synchronizacja zakończona! Dodano ${count} nowych rezerwacji.`);
-      else alert('Synchronizacja zakończona! Brak nowych rezerwacji do pobrania.');
+      const d = result.data || {};
+
+      // X26: silnik nie tylko dodaje. Komunikat mówi o wszystkich czterech wynikach
+      // uzgodnienia, bo „zaktualizowano 1" i „zniknęła 1" to dla gospodarza
+      // ważniejsze informacje niż „dodano 0" — a dawny alert pokazywał tylko to ostatnie.
+      const czesci = [];
+      if (d.dodane) czesci.push(`nowe: ${d.dodane}`);
+      if (d.zmienione) czesci.push(`zaktualizowane: ${d.zmienione}`);
+      if (d.wrocone) czesci.push(`przywrócone: ${d.wrocone}`);
+      if (d.znikle) czesci.push(`zniknęły z portalu: ${d.znikle}`);
+
+      if (czesci.length === 0) {
+        toast.success('Kalendarze aktualne — bez zmian.');
+      } else {
+        toast.success(`Synchronizacja zakończona (${czesci.join(', ')}).`);
+      }
+      if (d.bledy) {
+        const kanal = plural(d.bledy, ['kanału', 'kanałów', 'kanałów']);
+        toast.error(`Nie udało się pobrać ${d.bledy} ${kanal} — sprawdź linki w Ustawieniach.`);
+      }
     } catch (err) {
       console.error('Błąd synchronizacji kalendarzy:', err);
-      alert('Wystąpił błąd podczas synchronizacji kalendarzy.');
+      toast.error('Wystąpił błąd podczas synchronizacji kalendarzy.');
     } finally {
       setIsSyncing(false);
     }

@@ -3,11 +3,14 @@ import { test, expect } from '@playwright/test';
 test('Landing Page has spelling corrections', async ({ page }) => {
   await page.goto('/');
 
-  // Verify 'przewodniki' is used instead of 'przewidniki'.
-  // .first() bo od 2026-08-21 słowo pada dwa razy (lead w hero + lista w cenniku),
-  // a luźny lokalizator wywracał się na trybie strict. Test pilnuje pisowni,
-  // nie liczby wystąpień — zawężenie nie osłabia asercji.
-  await expect(page.locator('text=przewodniki').first()).toBeVisible();
+  // Verify 'przewodnik' is used instead of 'przewidnik'.
+  // Do 2026-08-22 asercja szukała liczby MNOGIEJ — jedynym jej wystąpieniem na stronie
+  // był lead w hero („Kalendarz, finanse i przewodniki gości w jednym panelu"). Lead
+  // przepisano po feedbacku testerów i nie mówi już o przewodnikach, więc asercja na
+  // „przewodniki" przestała mieć na czym stanąć. Wszystkie pozostałe wystąpienia
+  // (sekcja 05, karta funkcji, cennik) są w liczbie pojedynczej — test idzie za treścią.
+  // .first(), bo słowo pada w kilku sekcjach; test pilnuje PISOWNI, nie liczby wystąpień.
+  await expect(page.locator('text=przewodnik').first()).toBeVisible();
   
   // Verify 'liczby rezerwacji' is used instead of 'ilości rezerwacji'
   await expect(page.locator('text=niezależnie od liczby rezerwacji')).toBeVisible();

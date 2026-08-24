@@ -73,10 +73,23 @@ test('verify iCal token generation, retrofitting, and link display', async ({ pa
   await page.locator('button:has-text("Integracje")').click();
 
   // New property should be listed at index 2 (third input)
+  //
+  // X26 (2026-08-22): adres eksportu buduje się z ID obiektu, NIE z jego nazwy.
+  // Do tej pory test pilnował `p=Nowy%20Apartament` — czyli utrwalał błąd: adres
+  // wklejony wcześniej do Booking.com umierał po zmianie nazwy obiektu w panelu
+  // (funkcja `exportIcal` zwracała 403 i portal po cichu przestawał widzieć blokady).
+  // Asercja sprawdza teraz to, co ma być prawdą: w adresie jest identyfikator,
+  // a nazwy w nim NIE MA.
   const newPropInput = page.locator('input[readOnly]').nth(2);
   const newPropVal = await newPropInput.inputValue();
-  expect(newPropVal).toContain('p=Nowy%20Apartament');
+  expect(newPropVal).not.toContain('Nowy%20Apartament');
   expect(newPropVal).toContain('token=');
+  const idMatch = newPropVal.match(/[?&]p=([^&]+)/);
+  expect(idMatch).not.toBeNull();
+  expect(decodeURIComponent(idMatch[1]).length).toBeGreaterThan(8);
+
+  // Obiekt z ustalonym wcześniej ID musi trafić do adresu tym właśnie ID.
+  expect(legacyProp2Val).toContain('p=existing-id');
 
   // Save Settings
   await page.locator('button:has-text("Zapisz Ustawienia")').click();

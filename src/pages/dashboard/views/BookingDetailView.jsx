@@ -101,7 +101,11 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
               </div>
               <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 <SourceTag source={r.source} />
-                {r.syncId && <span className="wpd-tag wpd-tag--muted"><RefreshCw style={{ width: 10, height: 10 }} /> iCal</span>}
+                {/* X26: nowy silnik zapisuje `syncUid`, nie `syncId` — bez tego warunku znacznik zniknąłby
+                    ze WSZYSTKICH nowo importowanych rezerwacji, a baza wiedzy nadal obiecuje, że po nim
+                    się je poznaje. `syncId` zostaje dla wpisów sprzed zmiany. */}
+                {(r.syncId || r.syncUid) && <span className="wpd-tag wpd-tag--muted"><RefreshCw style={{ width: 10, height: 10 }} /> iCal</span>}
+                {r.syncStatus === 'vanished' && <span className="wpd-tag wpd-tag--amber">Zniknęła z portalu</span>}
                 <span className={`wpd-tag wpd-tag--${payTone}`}>{payLabel}</span>
               </span>
             </div>

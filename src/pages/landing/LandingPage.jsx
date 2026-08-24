@@ -218,7 +218,7 @@ export default function LandingPage() {
       <section className="wp4-hero">
         <div className="wp4-container wp4-hero__grid">
           <div className="wp4-hero__copy">
-            <span className="wp4-label">System dla mikro-gospodarzy</span>
+            <span className="wp4-label">Dla właścicieli domków i apartamentów</span>
             <h1 className="wp4-display">
               Wynajem <em>pod kontrolą</em><span className="wp4-accent">.</span>
             </h1>
@@ -228,11 +228,26 @@ export default function LandingPage() {
                 na telefon gościa automatycznie", wycięta 2026-08-19.
                 „Nie wymaga instrukcji obsługi" też odpadło: strona dwa ekrany niżej
                 reklamuje bazę wiedzy z instrukcjami krok po kroku.
-                Zdanie poniżej to zatwierdzone copy z pakietu identyfikacji v2
-                (podtytuł banera OG) — dzięki temu baner i strona mówią jednym głosem. */}
+                Zdanie poniżej BYŁO zatwierdzonym copy z pakietu identyfikacji v2
+                (podtytuł banera OG).
+
+                2026-08-22 — przepisane po feedbacku testera (UX designer): „na landingu
+                na samym początku opisane jest jakie aplikacja ma funkcje zamiast prostym
+                jezykiem opisać co to jest i po co to jest". „Kalendarz, finanse
+                i przewodniki gości" to nadal był spis modułów, tylko krótszy niż wersja
+                sprzed 21.08. Teraz pierwsze zdanie mówi CZYM to jest, drugie PO CO.
+                Etykieta nad H1 straciła „mikro-gospodarzy": to nazwa segmentu z dokumentów
+                wewnętrznych, nikt tak o sobie nie mówi ani tego nie wyszukuje — ta sama
+                klasa wycieku co karty przepisane z pola `Brand personality`.
+                Baner OG odbudowany tego samego dnia i zsynchronizowany z tym zdaniem;
+                źródło żyje teraz w repo (`scripts/build-og-image.mjs`, `npm run og:build`),
+                więc po każdej zmianie leadu wystarczy jedna komenda.
+                „Ile zostaje po prowizjach i podatku" ma pokrycie: AnalyticsView liczy
+                `profit = income - cost - tax` i pokazuje to jako „Zysk netto". */}
             <p className="wp4-lead">
-              Kalendarz, finanse i przewodniki gości w jednym panelu.
-              Dla gospodarzy z kilkoma obiektami.
+              WynajemPRO to aplikacja do prowadzenia wynajmu krótkoterminowego.
+              Zbiera rezerwacje z portali w jeden kalendarz i pokazuje, ile
+              naprawdę zostaje po prowizjach i podatku.
             </p>
             <div className="wp4-hero__actions">
               <Link to="/login" className="wp4-btn wp4-btn--primary wp4-btn--lg">
@@ -319,7 +334,7 @@ export default function LandingPage() {
               <h3 className="wp4-h3">Masz ślad, że gość znał zasady</h3>
               <p className="wp4-body">
                 Gość potwierdza w przewodniku regulamin i instrukcję PPOŻ,
-                a system zapisuje datę razem z treścią dokumentów z tego dnia.
+                a WynajemPRO zapisuje datę razem z treścią dokumentów z tego dnia.
                 Przy sporze o szkodę masz konkretny zapis, a nie ustalenia
                 z pamięci.
               </p>
@@ -352,12 +367,20 @@ export default function LandingPage() {
           <div className="wp4-features">
             <article className="wp4-feature">
               <span className="wp4-label">Kalendarz</span>
-              <h3 className="wp4-h3">Koniec z podwójnymi rezerwacjami</h3>
+              {/* X26 (2026-08-22): nagłówek brzmiał „Koniec z podwójnymi rezerwacjami",
+                  a FAQ niżej obiecywało, że im „zapobiegamy". iCal tego nie potrafi
+                  i nie będzie potrafił: portale odświeżają importowane kalendarze mniej
+                  więcej co 3 godziny, więc między sprzedażą a blokadą zawsze jest okno.
+                  Zamiana obietnicy na prawdziwą: wszystkie portale w jednym miejscu
+                  PLUS alarm, gdy terminy zaczną na siebie nachodzić — to drugie
+                  liczy `src/utils/bookingConflicts.js` i pokazuje pulpit. */}
+              <h3 className="wp4-h3">Wszystkie portale w jednym kalendarzu</h3>
               <p className="wp4-body">
-                Wklejasz linki iCal z Booking.com i Airbnb. Rezerwacje z portali
-                wpadają do kalendarza automatycznie co rano, a poza tym w każdej
-                chwili przyciskiem „Synchronizacja". Ten sam mechanizm działa
-                w drugą stronę: rezerwacje bezpośrednie blokują terminy w portalach.
+                Wklejasz linki iCal z Booking.com i Airbnb. Rezerwacje wpadają do
+                kalendarza co godzinę, a poza tym w każdej chwili przyciskiem
+                „Synchronizacja". Ten sam mechanizm działa w drugą stronę: rezerwacje
+                bezpośrednie blokują terminy w portalach. Gdy mimo to dwa portale
+                sprzedadzą ten sam termin, panel mówi o tym na pulpicie.
               </p>
               <div className="wp4-feature__foot">
                 <span className="wp4-tag wp4-tag--booking">BOOKING</span>
@@ -400,7 +423,7 @@ export default function LandingPage() {
               <span className="wp4-label">Podatki</span>
               <h3 className="wp4-h3">Ryczałt rozliczony bez stresu</h3>
               <p className="wp4-body">
-                System pilnuje progu 100&nbsp;000&nbsp;zł i sam przełącza stawkę
+                Aplikacja pilnuje progu 100&nbsp;000&nbsp;zł i sama przełącza stawkę
                 z 8,5% na 12,5%. To zestawienie dla Ciebie i dla księgowego,
                 nie deklaracja podatkowa.
               </p>
@@ -546,7 +569,7 @@ export default function LandingPage() {
           <div className="wp4-section__head">
             <span className="wp4-label">Dla kogo · 07</span>
             <h2 className="wp4-h2">
-              System szyty na miarę, <em>nie skomplikowany moloch</em>
+              Aplikacja szyta na miarę, <em>nie hotelowy moloch</em>
             </h2>
             <p className="wp4-lead wp4-lead--narrow">
               Prowadzisz domki albo apartamenty obok pracy, bez recepcji
@@ -653,14 +676,14 @@ export default function LandingPage() {
           <div className="wp4-faq__list">
             <FaqItem
               q="Czy muszę podpinać kartę, żeby zacząć testy?"
-              a="Nie. Rejestrujesz się podając tylko e-mail i hasło i dostajesz 14 dni pełnego dostępu. Decyzję o płatności podejmujesz dopiero, gdy upewnisz się, że system realnie oszczędza Twój czas."
+              a="Nie. Rejestrujesz się podając tylko e-mail i hasło i dostajesz 14 dni pełnego dostępu. Decyzję o płatności podejmujesz dopiero, gdy upewnisz się, że aplikacja realnie oszczędza Twój czas."
             />
             <FaqItem
               q="Czy aplikacja chroni przed overbookingiem (Booking, Airbnb)?"
-              a="Tak. Obsługujemy synchronizację kalendarzy w standardzie iCal. Rezerwacje z popularnych portali automatycznie blokują terminy w Twoim kalendarzu, zapobiegając podwójnym rezerwacjom."
+              a="Pomaga, ale bądźmy szczerzy co do granic. Synchronizacja iCal ściąga rezerwacje z portali do jednego kalendarza i odsyła Twoje rezerwacje bezpośrednie z powrotem, więc terminy blokują się nawzajem. Nie jest to jednak ochrona natychmiastowa: portale odświeżają importowane kalendarze co kilka godzin i tego opóźnienia nie da się obejść żadnym programem. Dlatego robimy drugą rzecz, o którą sam iCal nie zadba — jesteśmy jedynym miejscem, gdzie leżą rezerwacje ze wszystkich portali naraz, więc gdy dwa terminy zaczną na siebie nachodzić, zobaczysz o tym alarm na pulpicie i zdążysz zareagować."
             />
             <FaqItem
-              q="Czy system wylicza polskie podatki (ryczałt)?"
+              q="Czy aplikacja wylicza polskie podatki (ryczałt)?"
               a="Tak. Aplikacja powstała z myślą o polskich realiach. Wspiera m.in. automatyczne wyliczanie ryczałtu 8,5% wraz z przejściem na próg 12,5% po przekroczeniu 100 000 zł."
             />
             <FaqItem
@@ -777,9 +800,9 @@ export default function LandingPage() {
             <div className="wp4-footer__brand">
               <Logo />
               <p className="wp4-body wp4-footer__about">
-                Narzędzie dla właścicieli nieruchomości na wynajem
-                krótkoterminowy. Automatyzuj, unikaj overbookingu i odzyskaj
-                czas każdego dnia.
+                Aplikacja dla właścicieli nieruchomości na wynajem
+                krótkoterminowy. Jeden kalendarz na wszystkie portale, policzony
+                zysk i przewodnik dla gościa.
               </p>
             </div>
             <div className="wp4-footer__col">

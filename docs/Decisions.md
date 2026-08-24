@@ -349,6 +349,59 @@ Cała arytmetyka i cały opis słowny w jednym module `src/utils/taskSchedule.js
 ## Decision Template
 
 ```markdown
+## ADR-016: Founding members — cena startowa gwarantowana na 12 miesięcy
+
+**Data**: 2026-08-22
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Plan właściciela zakłada rok 1 na możliwie niskiej cenie kosztem zarobku, żeby
+pozyskać maksymalnie wielu klientów, a następnie podwyżkę powiązaną z nowymi funkcjami. Symulacja
+rentowności ([[strategy/Rentownosc-symulacja-2026-08-22]]) pokazała, że plan ma pokrycie
+(podwyżka 29,99 → 49 zł znosi utratę 38,8% klientów bez spadku przychodu), ale że **wieczysta
+gwarancja starej ceny dla pierwszej kohorty kosztuje 27 374 zł rocznie przy 120 klientach,
+bezterminowo**. Regulamin §6 ust. 5 czekał na te warunki jako `[DO UZUPEŁNIENIA]` — bez nich
+nie wolno wysłać pierwszego zaproszenia, bo to zobowiązanie wobec konsumenta.
+
+**Decyzja**: Oferta founding members ma cztery parametry:
+
+| Parametr | Wartość |
+|---|---|
+| **Okres gwarancji** | **12 miesięcy** (nie wieczyście) |
+| **Kto się kwalifikuje** | każdy, kto rozpocznie płatną Subskrypcję do dnia zakończenia naboru |
+| **Start okresu** | od **pierwszej płatności danego klienta** (każdy ma własne 12 miesięcy) |
+| **Po okresie** | przejście na cenę bieżącą, z **uprzedzeniem 30 dni** |
+| **Data zakończenia naboru** | ⏳ **jedyna nieustalona** — pochodna daty launchu (N4, prawnik) |
+
+**Uzasadnienie**:
+- ✅ Zachowuje obietnicę wobec pierwszych klientów, nie zabijając planu podwyżki.
+- ✅ Odcięcie po 12 miesiącach zamyast wieczystego zamrożenia oszczędza ok. 27 tys. zł rocznie
+  przy 120 klientach — i dotyczyłoby to dokładnie tych osób, które zostaną najdłużej.
+- ✅ Liczenie od pierwszej płatności jest sprawiedliwe wobec późnych klientów; kosztem jest to,
+  że podwyżki wchodzą falami przez cały rok, a nie jednego dnia.
+- ✅ 30 dni uprzedzenia jest spójne z §6 ust. 7 Regulaminu (zmiana ceny w trybie zmiany Regulaminu).
+- ❌ Fale podwyżek utrudniają komunikację „jedno wydanie, jedna nowa cena".
+
+**Konsekwencje**:
+- 🔴 **Komunikacja nie może nazywać tego rabatem.** Jeżeli oferta jest prezentowana jako obniżka,
+  włącza się obowiązek podania najniższej ceny z 30 dni przed obniżką (dyrektywa Omnibus, §6 ust. 5).
+  **Rekomendacja do potwierdzenia u prawnika: mówić „cena startowa gwarantowana na 12 miesięcy",
+  a nie „rabat X%"** — jeśli 29,99 zł nigdy nie było poprzedzone wyższą ceną, nie ma obniżki,
+  od której liczy się obowiązek.
+- Stripe musi umieć utrzymać starą cenę dla istniejących subskrypcji przy zmianie cennika
+  (w Stripe to osobny `Price` w tym samym `Product`) — do sprawdzenia przy wdrożeniu podwyżki.
+- Potrzebny ślad w danych: data pierwszej płatności i znacznik founding membera, żeby po roku
+  dało się wyliczyć, komu i kiedy wysłać uprzedzenie.
+
+**Alternatywy rozważone**:
+- **Cena wieczysta** — odrzucona: 27 374 zł/rok bezterminowo przy 120 klientach.
+- **Stały rabat lojalnościowy po okresie** (np. −20% na zawsze) — odrzucona: łagodniejsza, ale
+  nadal bezterminowa (ok. 14 tys. zł/rok przy 120 klientach i cenie 49 zł).
+- **Oferta tylko dla uczestników bety** (5–10 osób) — odrzucona: marnuje ofertę jako mechanizm
+  pozyskania na cały rok 1.
+- **Limit liczbowy zamiast daty** („pierwszych 100") — odrzucona: buduje pilność, ale wymaga
+  publicznego licznika i zamyka nabór w nieprzewidywalnym momencie.
+
+---
+
 ## ADR-NNN: [Title]
 
 **Date**: YYYY-MM-DD  

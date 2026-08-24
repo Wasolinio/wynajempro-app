@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "docs:docx": "node scripts/build-docx.mjs",
     "help:build": "node scripts/build-help-articles.mjs",
+    "og:build": "node scripts/build-og-image.mjs",
     "deploy": "npm run build && firebase deploy",
     "test:prod": "playwright test --config=playwright.prod.config.js",
     "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",

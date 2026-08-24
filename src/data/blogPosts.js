@@ -2,25 +2,32 @@ export const blogPosts = [
   {
     id: 1,
     slug: 'jak-uniknac-podwojnych-rezerwacji',
-    title: 'Jak uniknąć podwójnych rezerwacji (overbooking) dzięki synchronizacji iCal?',
-    excerpt: 'Podwójna rezerwacja to najgorszy koszmar każdego gospodarza. Dowiedz się, jak za darmo zautomatyzować kalendarz między Booking.com a Airbnb.',
+    title: 'Jak uniknąć podwójnych rezerwacji (overbooking) — i czego iCal za Ciebie nie zrobi',
+    excerpt: 'Synchronizacja kalendarzy ogranicza ryzyko podwójnej rezerwacji, ale go nie zeruje. Oto gdzie dokładnie jest luka i co z nią zrobić.',
     date: '2026-06-11',
     readTime: '4 min',
     category: 'Szkolenia',
     blocks: [
       { type: 'h2', content: 'Koszmar podwójnej rezerwacji' },
-      { type: 'p', content: 'Dostajesz powiadomienie o nowej rezerwacji z Booking.com. Cieszysz się, ale po minucie wibruje telefon - kolejna rezerwacja, tym razem z Airbnb. W ten sam weekend, na ten sam apartament. Brzmi znajomo? Overbooking to nie tylko stres, ale też ryzyko ogromnych kar finansowych i zablokowania konta na portalu.' },
-      { type: 'p', content: 'Ręczne blokowanie terminów to przeszłość. Rozwiązaniem, które w 99% przypadków ratuje sytuację, jest synchronizacja poprzez format iCal (iCalendar).' },
-      { type: 'h2', content: 'Czym jest link iCal?' },
-      { type: 'p', content: 'iCal to otwarty standard wymiany danych kalendarzowych. Każdy portal rezerwacyjny (OTA) pozwala na wygenerowanie specjalnego, tajnego linku dla danego obiektu, a także na wklejenie linków z innych portali.' },
-      { type: 'h2', content: 'Jak podłączyć iCal w WynajemPRO?' },
+      { type: 'p', content: 'Dostajesz powiadomienie o nowej rezerwacji z Booking.com. Cieszysz się, ale po minucie wibruje telefon — kolejna rezerwacja, tym razem z Airbnb. W ten sam weekend, na ten sam apartament. Brzmi znajomo? Overbooking to nie tylko stres, ale też ryzyko kar umownych i gorszej pozycji ogłoszenia w portalu.' },
+      { type: 'p', content: 'Standardowym narzędziem jest synchronizacja kalendarzy w formacie iCal. Zanim jednak uznasz sprawę za zamkniętą, warto wiedzieć, gdzie ten mechanizm ma granicę — bo ma ją każdy, kto go używa, niezależnie od aplikacji.' },
+      { type: 'h2', content: 'Czym jest link iCal' },
+      { type: 'p', content: 'iCal to otwarty standard wymiany danych kalendarzowych. Każdy portal rezerwacyjny pozwala wygenerować dla obiektu osobny, tajny link z zajętymi terminami, a także wkleić u siebie linki z innych portali. Format przenosi wyłącznie informację „ten termin jest zajęty" — nie ma w nim cen, nazwiska gościa ani wiadomości.' },
+      { type: 'h2', content: 'Gdzie jest luka' },
+      { type: 'p', content: 'iCal nie działa natychmiast. Portale nie są powiadamiane o zmianie — same, co jakiś czas, pobierają wklejony kalendarz. W praktyce to kilka godzin, a bywa dłużej. Oznacza to, że między sprzedaniem terminu na jednym portalu a zablokowaniem go na drugim zawsze istnieje okno, w którym ktoś może kupić ten sam weekend.' },
+      { type: 'p', content: 'Żaden program tego nie obejdzie, bo opóźnienie leży po stronie portalu. Dlatego uczciwa odpowiedź brzmi: synchronizacja iCal mocno ogranicza ryzyko podwójnej rezerwacji, ale go nie zeruje. Kto obiecuje co innego, obiecuje coś, czego format nie potrafi.' },
+      { type: 'h2', content: 'Jak podłączyć iCal w WynajemPRO' },
       { type: 'list', items: [
-        'Zaloguj się do portalu Booking.com, wejdź w zakładkę Kalendarz i wybierz "Synchronizuj kalendarze". Skopiuj link eksportu.',
-        'Zaloguj się do Airbnb i zrób to samo w zakładce "Zarządzaj kalendarzem".',
-        'Wejdź w Ustawienia -> Kanały rezerwacji w aplikacji WynajemPRO.',
-        'Wklej oba linki. WynajemPRO co kilka minut połączy się z portalem i zaktualizuje Twój główny pulpit oraz zablokuje zajęte terminy na innych platformach.'
+        'W panelu partnera Booking.com otwórz „Ceny i dostępność" → „Kalendarz" → „Synchronizacja kalendarzy" i skopiuj link eksportu.',
+        'W Airbnb otwórz „Kalendarz", wybierz ogłoszenie i w ustawieniach dostępności znajdź „Połącz kalendarze" → „Eksportuj kalendarz".',
+        'W WynajemPRO wejdź w „Ustawienia" → „Integracje" i wklej oba adresy przy właściwym obiekcie.',
+        'Skopiuj też link eksportu z WynajemPRO i wklej go w obu portalach — dzięki temu rezerwacje bezpośrednie blokują terminy w Booking.com i Airbnb.'
       ]},
-      { type: 'p', content: 'Dzięki centralizacji kalendarza w WynajemPRO, nie musisz łączyć Booking bezpośrednio z Airbnb (co często powoduje opóźnienia). Nasz system działa jak HUB, pilnując Twojego biznesu, gdy Ty śpisz.' }
+      { type: 'p', content: 'Kalendarze pobieramy co godzinę, a poza tym w każdej chwili przyciskiem „Synchronizacja". To skraca nasz odcinek opóźnienia do minimum, ale nie skraca odcinka po stronie portalu.' },
+      { type: 'h2', content: 'Co robić z luką, której nie da się zamknąć' },
+      { type: 'p', content: 'Skoro terminu nie da się zablokować natychmiast, drugą najlepszą rzeczą jest dowiedzieć się o kolizji pierwszym — zanim zadzwoni gość. Tu pomaga centralizacja: rezerwacje ze wszystkich portali leżą w jednym kalendarzu, więc widać je razem, czego nie widzi żaden portal z osobna.' },
+      { type: 'p', content: 'WynajemPRO sprawdza to za każdym razem, gdy otwierasz pulpit — jeśli dwie rezerwacje na ten sam obiekt zachodzą na te same noce, zobaczysz alarm z obiema stronami kolizji. To nie jest powiadomienie na telefon; trzeba zajrzeć do panelu. Wyjazd i przyjazd tego samego dnia to nie kolizja — liczymy noce, nie dni.' },
+      { type: 'p', content: 'Przy rezerwacjach z ostatniej chwili warto dodatkowo zablokować termin w portalu ręcznie. To jedyny sposób, żeby zadziałało od razu.' }
     ]
   },
   {

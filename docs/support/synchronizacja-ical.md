@@ -1,6 +1,6 @@
 # Synchronizacja z Booking.com i Airbnb (iCal)
 
-Dzięki synchronizacji iCal rezerwacje z portali same trafiają do WynajemPRO, a Twój kalendarz z WynajemPRO może blokować terminy w portalach. To podstawowa ochrona przed overbookingiem, czyli podwójną rezerwacją tego samego terminu.
+Dzięki synchronizacji iCal rezerwacje z portali same trafiają do WynajemPRO, a Twój kalendarz z WynajemPRO może blokować terminy w portalach. Terminy blokują się więc nawzajem — ale nie natychmiast, bo portale odświeżają importowane kalendarze co kilka godzin. Dlatego WynajemPRO robi jeszcze jedną rzecz: jako jedyne miejsce, w którym leżą rezerwacje ze wszystkich portali naraz, ostrzega Cię na pulpicie, gdy dwa terminy zaczną na siebie nachodzić.
 
 ## Jak to działa
 
@@ -35,10 +35,10 @@ Pilnuj, żeby link z portalu trafił do sekcji tego samego obiektu, którego dot
 
 ## Krok 4. Uruchom synchronizację
 
-- Ręcznie: na komputerze kliknij „Synchronizacja" w bocznym menu panelu (nad Twoim imieniem i nazwiskiem). Po chwili zobaczysz okienko z komunikatem „Synchronizacja zakończona!" i liczbą dodanych rezerwacji.
-- Automatycznie: WynajemPRO synchronizuje kalendarze raz na dobę, wcześnie rano. Nie musisz nic klikać.
+- Ręcznie: na komputerze kliknij „Synchronizacja" w bocznym menu panelu (nad Twoim imieniem i nazwiskiem). Po chwili zobaczysz krótki komunikat z podsumowaniem — ile rezerwacji doszło, ile się zaktualizowało i ile zniknęło z portalu. Gdy nic się nie zmieniło, zobaczysz „Kalendarze aktualne — bez zmian".
+- Automatycznie: WynajemPRO synchronizuje kalendarze co godzinę. Nie musisz nic klikać.
 
-Nad Twoim imieniem w bocznym menu widnieje lista kanałów („Booking.com", „Airbnb") ze statusem: „OK" oznacza, że dla któregoś obiektu jest wklejony link do tego portalu, a „—" że nie ma żadnego. Najpewniejsze sprawdzenie, czy połączenie naprawdę działa, to i tak kliknięcie „Synchronizacja" i komunikat, który się wtedy pojawi. To, co jest wklejone przy każdym obiekcie, zobaczysz w „Ustawienia" → „Integracje". Na telefonie ręcznej synchronizacji nie ma — uruchamiasz ją z widoku na komputerze albo czekasz na poranną automatyczną.
+Nad Twoim imieniem w bocznym menu widnieje lista kanałów („Booking.com", „Airbnb") ze statusem: „OK" oznacza, że dla któregoś obiektu jest wklejony link do tego portalu, a „—" że nie ma żadnego. Najpewniejsze sprawdzenie, czy połączenie naprawdę działa, to i tak kliknięcie „Synchronizacja" i komunikat, który się wtedy pojawi. To, co jest wklejone przy każdym obiekcie, zobaczysz w „Ustawienia" → „Integracje". Na telefonie ręcznej synchronizacji nie ma — uruchamiasz ją z widoku na komputerze albo czekasz na automatyczną.
 
 ## Co się importuje
 
@@ -51,7 +51,11 @@ Każdy zajęty termin z portalu staje się wpisem typu rezerwacja z:
 
 Zaimportowane rezerwacje poznasz po oznaczeniu „iCal" w szczegółach rezerwacji.
 
-WynajemPRO pamięta, co już zaimportował — kolejne synchronizacje nie tworzą duplikatów i nie nadpisują Twoich zmian. Możesz więc spokojnie dopisać do zaimportowanej rezerwacji kwotę, prowizję czy notatkę o gościu.
+WynajemPRO rozpoznaje każdą rezerwację po jej własnym identyfikatorze z portalu, nie po datach. Dzięki temu:
+
+- kolejne synchronizacje nie tworzą duplikatów ani nie nadpisują Twoich zmian — możesz spokojnie dopisać kwotę, prowizję czy notatkę o gościu;
+- gdy gość przesunie lub przedłuży pobyt, ta sama rezerwacja dostaje nowe daty, zamiast pojawić się drugi raz obok starej;
+- gdy rezerwacja zniknie z portalu (zwykle znaczy to anulowanie), WynajemPRO oznacza ją i pokazuje na pulpicie — ale jej nie kasuje, bo mogą być przy niej Twoje kwoty i notatki. Decyzja należy do Ciebie.
 
 ## Czego synchronizacja nie przenosi
 
@@ -59,7 +63,7 @@ Format iCal przenosi wyłącznie terminy. Z tego wynikają ograniczenia — po s
 
 - Kwoty: zaimportowane rezerwacje mają przychód 0 zł. Uzupełnij go, edytując wpis (pole „Przychód brutto" i „Prowizja portalu") — wtedy statystyki finansowe będą kompletne.
 - Dane kontaktowe gościa: e-mail i telefon musisz przepisać z panelu portalu, jeśli ich potrzebujesz.
-- Anulacje: gdy gość odwoła rezerwację w portalu, wpis w WynajemPRO nie znika sam. Usuń go ręcznie (ikona kosza w widoku „Rezerwacje").
+- Powód anulowania: portal podaje wyłącznie to, że termin zniknął z kalendarza. WynajemPRO oznaczy taką rezerwację jako zniknioną z portalu, ale nie dowie się, czy gość odwołał pobyt, czy gospodarz przesunął blokadę.
 - Wiadomości i szczegóły pobytu (uwagi, skład osobowy) — pozostają w portalu. Zaimportowana rezerwacja nie ma więc żadnych danych o gościach; uzupełnisz je ręcznie przy edycji wpisu, w sekcji „Goście" (pola „Dorośli", „Dzieci" i „Zwierzęta").
 
 ## Eksport: pokaż portalom swoje rezerwacje
@@ -75,7 +79,7 @@ Link eksportu traktuj jak hasło — każdy, kto go zna, może podejrzeć zajęt
 ## Najczęstsze pytania
 
 **Jak często odświeżają się rezerwacje?**
-W WynajemPRO: przy każdym kliknięciu „Synchronizacja" oraz automatycznie raz na dobę, wcześnie rano. W drugą stronę (import Twojego kalendarza przez portale) odświeżanie zależy od portalu i trwa zwykle od kilku do kilkunastu godzin — dlatego przy rezerwacji z ostatniej chwili warto zablokować termin w portalu ręcznie.
+W WynajemPRO: przy każdym kliknięciu „Synchronizacja" oraz automatycznie co godzinę. W drugą stronę (import Twojego kalendarza przez portale) odświeżanie zależy od portalu i trwa zwykle kilka godzin — tego opóźnienia nie da się obejść żadnym programem, bo leży ono po stronie portalu. Dlatego przy rezerwacji z ostatniej chwili warto zablokować termin w portalu ręcznie.
 
 **Dlaczego zaimportowana rezerwacja ma 0 zł?**
 Bo iCal nie przenosi cen — żaden system nie odczyta kwoty z tego formatu. Kliknij rezerwację, wybierz „Edytuj" i wpisz kwotę oraz prowizję portalu.
@@ -86,8 +90,14 @@ Tak Airbnb opisuje rezerwacje w swoim kalendarzu iCal. Nazwisko możesz dopisać
 **Przy rezerwacji z portalu nie widzę komórki „Goście". Dlaczego?**
 Bo iCal nie przenosi składu osobowego — z portalu przychodzi sam termin. Otwórz rezerwację, kliknij „Edytuj" i wpisz liczby w sekcji „Goście" („Dorośli", „Dzieci", „Zwierzęta"). Po zapisaniu komórka „Goście" pojawi się w szczegółach rezerwacji.
 
-**Gość odwołał pobyt na Booking.com, a rezerwacja dalej widnieje w panelu. Czemu?**
-Synchronizacja tylko dodaje nowe terminy — nie usuwa istniejących wpisów. Odwołaną rezerwację usuń ręcznie ikoną kosza.
+**Gość odwołał pobyt na Booking.com. Co się stanie z rezerwacją w panelu?**
+Przy najbliższej synchronizacji WynajemPRO zauważy, że portal przestał ją podawać, oznaczy ją jako zniknioną z portalu i pokaże na pulpicie w sekcji do sprawdzenia. Od tej chwili nie wysyłamy już tego terminu do pozostałych portali, więc zwalnia się on w Booking.com i Airbnb. W Twoim kalendarzu rezerwacja zostaje — widoczna, z oznaczeniem „Zniknęła z portalu" — dopóki sam nie zdecydujesz, co z nią zrobić. Samej rezerwacji nie kasujemy za Ciebie — mogłaby mieć wpisaną zaliczkę, prowizję albo notatkę, których nie da się odzyskać. Jeśli anulowanie potwierdzasz, usuń ją ikoną kosza w widoku „Rezerwacje".
+
+**Gość zmienił daty pobytu. Czy rezerwacja się zaktualizuje?**
+Zależy od portalu i tego, jak zapisze zmianę. Jeśli poda ją jako tę samą rezerwację, WynajemPRO tylko poprawi daty i wszystko, co przy niej wpisałeś, zostaje. Jeśli portal potraktuje zmianę jako skasowanie starej i założenie nowej — a tak działa Airbnb przy blokadach terminów — zobaczysz dwie pozycje: starą oznaczoną „Zniknęła z portalu" i nową z właściwymi datami. Wtedy przepisz kwoty do nowej i skasuj starą. Celowo nie zgadujemy za Ciebie, że to ta sama rezerwacja: gdybyśmy się pomylili, przenieślibyśmy kwoty i nazwisko poprzedniego gościa na pobyt kogoś zupełnie innego.
+
+**Co znaczy alarm „Termin sprzedany dwa razy" na pulpicie?**
+Że dwie rezerwacje na ten sam obiekt zachodzą na te same noce — najczęściej jedna z Booking.com, druga z Airbnb. WynajemPRO nie potrafi temu zapobiec, bo portale dowiadują się o blokadzie z kilkugodzinnym opóźnieniem, ale potrafi to wychwycić. Alarm liczy się przy każdym otwarciu pulpitu — nie wysyłamy powiadomień na telefon ani mailem, więc trzeba zajrzeć do panelu. Kliknij którąkolwiek z wymienionych rezerwacji, żeby otworzyć jej szczegóły. Wyjazd i przyjazd tego samego dnia to nie kolizja — alarm liczy noce, nie dni.
 
 **Kliknąłem „Synchronizacja" i widzę prośbę o dodanie linków iCal. Dlaczego?**
 Taki komunikat („Najpierw dodaj linki iCal w Ustawieniach…") pojawia się, gdy w „Ustawieniach" → „Integracje" nie ma jeszcze zapisanego żadnego linku. Wklej adres z portalu i kliknij „Zapisz ustawienia", potem spróbuj ponownie.

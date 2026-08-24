@@ -1,9 +1,10 @@
-import React from 'react';
-import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles, AlertTriangle, Unlink } from 'lucide-react';
 import { SourceTag } from '../SourceTag';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
 import { useCountUp } from '../useCountUp';
+import { znajdzKolizjeAktualne, znajdzZnikle } from '../../../utils/bookingConflicts';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const up = (s) => (s || '').toUpperCase();
@@ -24,7 +25,7 @@ const relDay = (dateStr) => {
   4 karty metryk + panel najbliższych przyjazdów + ciemny wykres 7 dni + zadania na dziś.
 */
 export default function PulpitView({
-  pulpit, dailyReport, weekReminders, upcoming,
+  pulpit, dailyReport, weekReminders, upcoming, rentals,
   onOpenStats, onGoCalendar, onOpenDailyReport, onEditRental, completeTask,
 }) {
   const arrivalsSoon = (upcoming || []).slice(0, 5);
@@ -32,8 +33,81 @@ export default function PulpitView({
   // liczby kart wjeżdżają jak w Analityce — wspólny progress, finiszują razem
   const { progress } = useCountUp();
 
+  // X26: kolizje i rezerwacje znikłe z portalu. Liczone z danych, które panel
+  // i tak trzyma w pamięci — zero odczytów bazy. iCal nie potrafi ZAPOBIEC
+  // podwójnej sprzedaży terminu (portale odświeżają kalendarze co kilka godzin),
+  // ale my jako jedyni widzimy wszystkie portale naraz, więc potrafimy DONIEŚĆ.
+  const kolizje = useMemo(() => znajdzKolizjeAktualne(rentals), [rentals]);
+  const znikle = useMemo(() => znajdzZnikle(rentals), [rentals]);
+
+  const dzien = (d) => (d || '').split('-').reverse().slice(0, 2).join('.');
+
   return (
     <>
+      {(kolizje.length > 0 || znikle.length > 0) && (
+        <div className="wpd-alerts">
+          {kolizje.length > 0 && (
+            <div className="wpd-alert wpd-alert--pilny" role="alert">
+              <span className="wpd-alert__ic"><AlertTriangle /></span>
+              <div className="wpd-alert__body">
+                <p className="wpd-alert__title">
+                  {kolizje.length} {plural(kolizje.length, ['termin sprzedany dwa razy', 'terminy sprzedane dwa razy', 'terminów sprzedanych dwa razy'])}
+                </p>
+                <ul className="wpd-alert__list">
+                  {kolizje.slice(0, 3).map((k, i) => (
+                    <li key={i} className="wpd-alert__row">
+                      <b>{k.property}</b> · <span className="wpd-alert__when">{dzien(k.odDnia)}–{dzien(k.doDnia)}</span>
+                      {' — '}
+                      {/* `onEditRental` to `openBookingDetail` — bierze CAŁY OBIEKT i sam
+                          wyciąga `id`. Przekazanie samego identyfikatora dawało `undefined`
+                          i przycisk nie robił nic (recenzja kodu 2026-08-22). Pokryte
+                          testem, który te przyciski klika. */}
+                      <button type="button" className="wpd-alert__act" onClick={() => onEditRental && onEditRental(k.a)}>
+                        {k.a.guest || 'rezerwacja'} ({k.a.source || 'ręczna'})
+                      </button>
+                      {' × '}
+                      <button type="button" className="wpd-alert__act" onClick={() => onEditRental && onEditRental(k.b)}>
+                        {k.b.guest || 'rezerwacja'} ({k.b.source || 'ręczna'})
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {kolizje.length > 3 && (
+                  <p className="wpd-alert__more">…i jeszcze {kolizje.length - 3}. Pełna lista w kalendarzu.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {znikle.length > 0 && (
+            <div className="wpd-alert wpd-alert--uwaga" role="status">
+              <span className="wpd-alert__ic"><Unlink /></span>
+              <div className="wpd-alert__body">
+                <p className="wpd-alert__title">
+                  {znikle.length} {plural(znikle.length, ['rezerwacja zniknęła z portalu', 'rezerwacje zniknęły z portalu', 'rezerwacji zniknęło z portalu'])}
+                </p>
+                <ul className="wpd-alert__list">
+                  {znikle.slice(0, 3).map((r) => (
+                    <li key={r.id} className="wpd-alert__row">
+                      <b>{r.property}</b> · <span className="wpd-alert__when">{dzien(r.date)}–{dzien(r.endDate || r.date)}</span>
+                      {' — '}
+                      <button type="button" className="wpd-alert__act" onClick={() => onEditRental && onEditRental(r)}>
+                        {r.guest || 'rezerwacja'} ({r.source || 'iCal'})
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <p className="wpd-alert__more">
+                  Portal przestał ją podawać — zwykle znaczy to anulowanie. Termin jest już wolny,
+                  a rezerwacji nie kasujemy za Ciebie, bo mogą być przy niej Twoje kwoty.
+                  Jeśli w zbliżonym terminie widzisz nową rezerwację <b>z tego samego portalu</b>,
+                  porównaj daty i gościa — może to być ta sama po zmianie dat.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* ── Karty metryk ── */}
       <div className="wpd-stats">
         <div className="wpd-stat" {...clickableProps(onOpenStats)}>

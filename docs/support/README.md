@@ -5,7 +5,7 @@ Krótkie, praktyczne instrukcje do wszystkich części systemu. Każdy artykuł 
 ## Artykuły
 
 - [Pierwsze kroki w WynajemPRO](pierwsze-kroki.md) — zajrzyj tu zaraz po założeniu konta: rejestracja, profil gospodarza, pierwszy obiekt i pierwsza rezerwacja.
-- [Synchronizacja z Booking.com i Airbnb (iCal)](synchronizacja-ical.md) — gdy chcesz, żeby rezerwacje z portali same trafiały do panelu, a Twój kalendarz chronił Cię przed overbookingiem.
+- [Synchronizacja z Booking.com i Airbnb (iCal)](synchronizacja-ical.md) — gdy chcesz, żeby rezerwacje z portali same trafiały do panelu i żeby panel ostrzegał Cię przy nachodzących terminach.
 - [Rezerwacje, koszty i zadania](rezerwacje-koszty-zadania.md) — gdy dodajesz lub edytujesz wpisy, oznaczasz płatności albo pilnujesz zadań przy pobycie.
 - [Finanse, podatki i raporty](finanse-i-raporty.md) — gdy chcesz wiedzieć, ile naprawdę zarabiasz: przegląd okresowy, koszty zmienne i stałe, ustawienia podatków oraz raport rentowności do wydruku lub pliku CSV.
 - [Przewodnik gościa](przewodnik-goscia.md) — gdy tworzysz cyfrowy informator z Wi-Fi, kodem do drzwi i dojazdem, chcesz wiedzieć, jak chronione są dane dostępowe, i zdecydować, jakie dane kontaktowe widzi gość.

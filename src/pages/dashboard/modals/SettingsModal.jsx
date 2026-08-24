@@ -14,8 +14,12 @@ const TABS = [
   ['tax', 'Podatki'], ['sync', 'Integracje'], ['reminders', 'Powiadomienia'],
 ];
 
-const exportUrl = (uid, name, token) =>
-  `https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${uid}&p=${encodeURIComponent(name)}&token=${token || ''}`;
+// X26: drugim parametrem jest ID obiektu, nie nazwa. Adres wydany po nazwie ginął
+// przy zmianie nazwy obiektu w panelu — Booking.com zaczynał dostawać 403 i po cichu
+// przestawał widzieć blokady terminów. Funkcja `exportIcal` przyjmuje nadal oba,
+// żeby adresy wklejone do portali przed tą zmianą działały bez ruszania ich.
+const exportUrl = (uid, propertyId, token) =>
+  `https://us-central1-moje-domki-6c77d.cloudfunctions.net/exportIcal?u=${uid}&p=${encodeURIComponent(propertyId)}&token=${token || ''}`;
 
 /* Ustawienia systemu — styl V4. Kontrakt propsów 1:1 z oryginałem. */
 function SettingsModal(props) {
@@ -203,8 +207,8 @@ function SettingsModal(props) {
                     <div className="wpd-field" style={{ marginTop: 4 }}>
                       <label className="wpd-flabel"><CalendarIcon style={{ width: 11, height: 11, display: 'inline', verticalAlign: '-1px' }} /> Eksportuj kalendarz (iCal)</label>
                       <div className="wpd-codebox">
-                        <input readOnly value={exportUrl(user?.uid, p.name, p.secretToken)} />
-                        <button type="button" className="wpd-btn wpd-btn--sm" onClick={() => { navigator.clipboard.writeText(exportUrl(user?.uid, p.name, p.secretToken)); toast.success('Link iCal skopiowany!'); }}><Copy /> Kopiuj</button>
+                        <input readOnly value={exportUrl(user?.uid, p.id || p.name, p.secretToken)} />
+                        <button type="button" className="wpd-btn wpd-btn--sm" onClick={() => { navigator.clipboard.writeText(exportUrl(user?.uid, p.id || p.name, p.secretToken)); toast.success('Link iCal skopiowany!'); }}><Copy /> Kopiuj</button>
                       </div>
                     </div>
                   </div>

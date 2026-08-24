@@ -159,6 +159,31 @@ export const DASHBOARD_CSS = `
 
 /* ── Panele ── */
 .wpd-panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px; }
+
+/* ── Alerty synchronizacji (X26) ──
+   Kolizja terminów i rezerwacje znikłe z portalu. Dwa poziomy pilności: cynober =
+   dwa portale sprzedały ten sam termin (realny overbooking), bursztyn = rzecz do
+   sprawdzenia. Markery to ikony liniowe, nie emoji — zasada identyfikacji v2. */
+.wpd-alerts{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+.wpd-alert{ display:flex; gap:12px; padding:14px 16px; border-radius:4px;
+  border:1px solid var(--hairline); background:var(--surface); align-items:flex-start; }
+.wpd-alert--pilny{ border-color:var(--cynober); background:var(--tint-cynober); }
+.wpd-alert--uwaga{ border-color:var(--amber); background:var(--tint-amber); }
+.wpd-alert__ic{ flex:0 0 auto; margin-top:1px; }
+.wpd-alert__ic svg{ width:17px; height:17px; }
+.wpd-alert--pilny .wpd-alert__ic{ color:var(--cynober); }
+.wpd-alert--uwaga .wpd-alert__ic{ color:var(--amber-ink); }
+.wpd-alert__body{ flex:1 1 auto; min-width:0; }
+.wpd-alert__title{ font-weight:700; font-size:14px; letter-spacing:-.01em; margin:0 0 4px; }
+.wpd-alert__list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+.wpd-alert__row{ font-size:13px; line-height:1.45; color:var(--muted); }
+.wpd-alert__row b{ color:var(--ink); font-weight:600; }
+.wpd-alert__when{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--faint);
+  letter-spacing:.02em; }
+.wpd-alert__more{ font-size:12px; color:var(--faint); margin-top:6px; }
+.wpd-alert__act{ background:none; border:0; padding:0; font:inherit; font-size:13px; font-weight:600;
+  color:var(--cynober); cursor:pointer; text-align:left; }
+.wpd-alert__act:hover{ text-decoration:underline; }
 .wpd-panel__head{ display:flex; align-items:center; gap:10px; padding:16px 20px;
   border-bottom:1px solid var(--hairline); }
 .wpd-h2{ font-weight:700; font-size:17px; letter-spacing:-.02em; margin:0; }

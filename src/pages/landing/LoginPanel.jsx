@@ -549,7 +549,7 @@ export default function LoginPanel() {
             </>
           ) : (
             <>
-              <span className="wp4a-label wp4a-label--ink">Dla mikro-gospodarzy</span>
+              <span className="wp4a-label wp4a-label--ink">Dla właścicieli domków i apartamentów</span>
               <h2 className="wp4a-aside-title">
                 Zarządzaj wynajmem z <em>jednego miejsca</em>
               </h2>
@@ -558,7 +558,7 @@ export default function LoginPanel() {
                 i odzyskali wolny czas.
               </p>
               <ul className="wp4a-checklist">
-                <li>Ochrona przed overbookingiem (iCal)</li>
+                <li>Wszystkie portale w jednym kalendarzu (iCal)</li>
                 <li>Automatyczne wyliczanie zysków i podatków</li>
                 <li>Poranny raport operacyjny dla gospodarza</li>
               </ul>

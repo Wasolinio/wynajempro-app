@@ -28,6 +28,19 @@ test('Lista: wszystkie artykuły z kafelkiem i linkiem', async ({ page }, testIn
   await page.screenshot({ path: testInfo.outputPath('pomoc-lista.png'), fullPage: true });
 });
 
+test('Żaden artykuł pomocy nie pokazuje surowego markdownu', async ({ page }) => {
+  // Generator obsługuje wąski podzbiór markdowna, a `HelpArticlePage` wstawia elementy list
+  // i odpowiedzi FAQ jako CZYSTY TEKST — więc `**pogrubienie**` w środku zdania trafia na
+  // stronę razem z gwiazdkami. Ten defekt pojawił się już DWA razy (recenzje X26, tura 3 i 5),
+  // za każdym razem w innym zdaniu. Asercja zamyka całą klasę zamiast łatać pojedyncze miejsca.
+  for (const article of helpArticles) {
+    await page.goto(`/pomoc/${article.slug}`);
+    await dismissCookies(page);
+    await expect(page.getByRole('heading', { name: article.title, level: 1 })).toBeVisible();
+    await expect(page.locator('main')).not.toContainText('**');
+  }
+});
+
 test('Artykuł: lead, sekcje, FAQ i powrót do listy', async ({ page }) => {
   const article = helpArticles[0];
   await page.goto(`/pomoc/${article.slug}`);

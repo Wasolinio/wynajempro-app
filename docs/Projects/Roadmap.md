@@ -89,10 +89,31 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 | **D5** | **Node 20 → 22** | twarda data: **30.10.2026** wyłączenie środowiska, po niej nie da się wdrożyć funkcji |
 | **D6** | Decyzja o App Check na logowaniu ([[Known-Issues]] #17) | wymuszanie chroni przed botami, ale czyni z reCAPTCHA pojedynczy punkt awarii wejścia do produktu |
 
+### Ścieżka E — zlecenia właściciela z 23.08. Wchodzą do tygodnia od 24.08
+
+> Pięć pozycji dorzuconych w trakcie tygodnia. E1 ma termin zewnętrzny (odpowiedź czeka
+> na nas, nie my na nią), E3 jest gotowe do wdrożenia, reszta wymaga najpierw ustaleń.
+
+| # | Co | Kto | Zależność / uwaga |
+|---|---|---|---|
+| **E1** | **Odpowiedź supportu Firebase — obsłużyć** | oboje | ⚠️ **najpilniejsze w ścieżce:** właściciel przekazuje treść odpowiedzi, agent czyta i proponuje działanie |
+| **E2** | **Raport zasadności założenia JDG dla domków letniskowych** — liczony na danych z konta właściciela w aplikacji | agent, dane od właściciela | wymaga UID i zgody na odczyt danych finansowych konta (poziom 2/3 wg `docs/support/Proces-obslugi-zgloszen.md`). Podkładka metodyczna: [[strategy/Rentownosc-symulacja-2026-08-22]]. **Nie jest to porada podatkowa** — wynik do potwierdzenia u księgowego |
+| **E3** | **Nowa zakładka w panelu: Zadania + eksport** | `dev` + `designer` | design gotowy (`design_handoff_identyfikacja_v2`), czeka **wyłącznie na wdrożenie**. Do ustalenia przed startem: format eksportu (CSV/PDF/iCal) i zakres zadania |
+| **E4** | **System popupowych patch notów** — komunikat „co nowego" po wdrożeniu zmian | `dev` + `designer` | do zaprojektowania od zera: źródło treści (plik w repo vs Firestore), wersjonowanie „widziane/niewidziane" per konto, żeby nie wyskakiwało dwa razy |
+| **E5** | **Firmowe sociale — zagospodarowanie i prowadzenie** | `marketing` | cel: **więcej testerów bety i więcej feedbacku**. Zależność: **po C2** (eksport banerów social). Do decyzji właściciela: które kanały i kto publikuje — agent przygotowuje, publikuje właściciel |
+
+**Otwarte pytania (blokują start E2, E3 i E5):**
+1. **E2** — czy dane liczymy z konta produkcyjnego właściciela, i za jaki okres?
+2. **E3** — co dokładnie eksportujemy z zakładki Zadania i do jakiego formatu?
+3. **E5** — które kanały (IG / FB / LinkedIn / TikTok) i kto naciska „publikuj"?
+
 ### Gdyby tydzień miał wystarczyć tylko na jedno
 
 **Ścieżka A.** Reszta to porządek i dług; A to jedyna ścieżka, po której płyną pieniądze —
 a dziś, mimo poprawnego kodu, konto nie jest gotowe ich przyjąć.
+
+Wyjątek: **E1** wypada zrobić obok A, bo to jedyna pozycja z terminem po stronie kogoś
+innego niż my — wątek supportu Firebase można przegapić.
 
 ---
 
@@ -390,6 +411,166 @@ na `hosting:app`; lint 0, build OK, **e2e 181/181**, weryfikacja live przez prze
   po wyjeździe" (spina się z modułem Opinie, X13). Kont istniejących **nie ruszamy**. Cofnięcie:
   jedna linijka w `src/utils/constants.js`.
 - Weryfikacja: 7 nowych testów e2e (`e2e/tasks-calendar.spec.js`), po jednym na uwagę + blokada dubla.
+
+### X24–X28. Druga tura feedbacku testerów (2026-08-22)
+
+**Skąd:** właściciel przyniósł `FEedback.pages` — trzy uwagi od trzech różnych osób (znajomy
+UX designer, testerka od podatków, tester od iCal). **Agent:** główny Claude, tryb `/brainstorm`.
+**Decyzja właściciela 2026-08-22 (X25):** nie wybieramy, na jakim typie gospodarza nam zależy —
+moduł podatkowy dostanie **tryb prosty i tryb szczegółowy**, bo po to są testy, żeby zbierać
+feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest domyślny po rejestracji**.
+
+- **X24. Landing: co to jest i po co, plus jedno nazewnictwo.** ✅ **ZROBIONE 2026-08-22**,
+  szczegóły i uzasadnienia w [[Activity-Log]]. Lead w hero przepisany ze spisu modułów na
+  „czym to jest / po co to jest"; nazewnictwo rozdzielone na role (**aplikacja** = produkt,
+  **panel** = ekran w środku, **system** = tylko o konkurencji); `<title>` i `meta description`
+  poprawione; „mikro-gospodarz" wycięty. Baner OG odbudowany i — co ważniejsze — dostał
+  **źródło w repo** (`scripts/build-og-image.mjs`, `npm run og:build`), bo poprzedni eksport
+  był jednorazowy i nie było czym go odtworzyć. Weryfikacja: lint 0, build OK, **e2e 181/181**,
+  sprawdzone na żywo na 1280 i 375 px. ⚠️ **Niewdrożone** — czeka na X25 i X26, żeby nie
+  wydawać landingu trzy razy w tygodniu.
+- **X25. Moduł podatkowy: tryb prosty i szczegółowy.** ⬜
+  **Skąd:** „Nie wystarczający panel do rozliczeń podatkowych. A kto by się rozliczał ryczałtem
+  w tym biznesie? Masz tam jeszcze ZUS i wszystkie inne koszty, choćby import usług. No i VAT."
+  🔥 **Zarzut jest w większości nieprawdziwy, i to jest gorsza wiadomość niż gdyby był prawdziwy.**
+  `src/utils/taxCalculator.js` obsługuje ryczałt z progiem 100 000 zł (8,5% → 12,5%), skalę 12/32%
+  z kwotą wolną, stawkę liniową, działalność nierejestrowaną, VAT 8%, ZUS społeczny i prowizje
+  jako koszt. Testerka tego nie zobaczyła, bo **widok „Podatki" (`TaxSummaryPanel`) poszedł do
+  `/_legacy` commitem `fb8a00e` i nie dostał zastępnika w panelu v2** — mówi o tym komentarz
+  na górze samego `taxCalculator.js`. Liczby wychodzą dziś wyłącznie jako pozycja kosztowa
+  w Analytics. To nie jest brak funkcji, to funkcja bez twarzy.
+  ⚖️ **Czego naprawdę brakuje** (i tu testerka ma rację): **ZUS zdrowotny nie istnieje w kodzie**
+  (jest tylko `zusSocial`, i tylko w trybie `general`) — przy ryczałcie jest ryczałtowy wg progów
+  przychodu 60k/300k i potrafi przekroczyć sam podatek; **import usług** — prowizja Booking.com
+  to odwrotne obciążenie, obowiązek VAT-UE i VAT-9M **nawet u niepłatnika VAT**, a kod traktuje
+  ją wyłącznie jako koszt. **Gotowe, gdy:** jest widok podatkowy z trybem prostym i szczegółowym,
+  zdrowotna liczy się dla ryczałtu, a prowizje portali unijnych są rozpoznawane jako import usług.
+- **X26. iCal: obietnica przycięta do tego, co architektura dowozi.** ✅ **KOD GOTOWY 2026-08-22**,
+  ⏸ **czeka na bramkę reguł i decyzję o deployu** — szczegóły i uzasadnienia w [[Activity-Log]].
+  Zrobione: nowy silnik `functions/ical-sync.js` (klucz na `UID` zamiast dat, uzgadnianie zamiast
+  dopisywania, znikłe **oznaczane, nie kasowane**), synchronizacja **co godzinę** przy koszcie
+  **niższym niż przed zmianą** (dokument stanu na kanał), **wykrywanie kolizji** na pulpicie
+  (`src/utils/bookingConflicts.js`), naprawiony adres eksportu (ID zamiast nazwy — zmiana nazwy
+  obiektu zabijała feed w Booking.com), okno czasowe eksportu, `PRODID` bez „ChannelManager",
+  obietnica przepisana w **sześciu** miejscach. Weryfikacja: **e2e 190/190**, **functions 33/33**,
+  lint 0, build OK. ✅ Bramki reguł 2 i 3 zaliczone na produkcji (47 dokumentów przechodzi
+  walidację; ruleset w konsoli identyczny z repo). 🛑 Autoprzegląd wyłapał dwa błędy tej zmiany
+  — duplikowanie kanału po utracie dokumentu stanu i limit 500 operacji na batch — oba
+  naprawione i pokryte testami (regresja sprawdzona w obie strony).
+  ✅ **Przegląd `code-reviewer` wykonany 2026-08-22** — **trzy blokery** (dane `syncState` przeżywające
+  usunięcie konta, masowe oznaczanie jako znikłe po awarii portalu → overbooking, patch odtwarzający
+  zniekształconą rezerwację) plus kilkanaście uwag. Wszystkie blokery i większość ważnych naprawione,
+  pokryte testami sprawdzonymi w obie strony. Weryfikacja po poprawkach: **e2e 189/189**, **functions 25/25**.
+  ✅ **Drugi przegląd wykonany** — znalazł **bloker w poprawkach z pierwszej tury** (utrwalanie
+  retrofitu mogło nadpisać listę obiektów wersją demo i unieważnić tokeny linków eksportu) oraz
+  trzy usterki wprowadzone tymi poprawkami. Wszystkie naprawione i pokryte testami sprawdzonymi
+  w obie strony. Po poprawkach: **e2e 190/190**, **functions 29/29**.
+  ✅ **Trzeci przegląd wykonany** — znowu bloker wprowadzony przez poprawkę z poprzedniej tury
+  (rezerwacja oznaczona `vanished` nie wracała do `active` po utracie stanu → sprzedany termin
+  zwalniał się w portalach) plus dwa ważne: bezpiecznik liczący przebiegi zamiast czasu (trzy
+  kliknięcia „Synchronizacja" zwijały go do kilkunastu sekund) i duplikat po przycięciu mapy.
+  Wszystkie naprawione, testy sprawdzone w obie strony. Stan: **e2e 190/190**, **functions 31/31**.
+  📌 **Trzy tury, w każdej bloker w poprawkach z poprzedniej — wszystkie dotyczyły trwałego stanu
+  synchronizacji, nie logiki uzgadniania.** Przy takich zmianach planuj wiele tur z góry.
+  ✅ **Czwarta tura wykonana** — znowu bloker w poprawce z poprzedniej: przycinanie zostawiało
+  UID bez daty, więc zakończony pobyt dostawał fałszywe `vanished`, a dokument skasowany
+  wcześniej przez gospodarza był wskrzeszany **bez pola `date`**, czyli łamiąc `isValidRental`.
+  Rozwiązane nagrobkiem (`{ endDate, zamkniety }`); dwa nowe testy, oba sprawdzone w obie strony.
+  Stan: **e2e 190/190**, **functions 33/33**.
+  📌 **Cztery tury, w każdej bloker w poprawce z poprzedniej — ani jeden w logice uzgadniania,
+  wszystkie w trwałym stanie synchronizacji.** Przy takim stanie każdy scenariusz jego
+  uszkodzenia (przepadł / nieaktualny / przycięty / niepełny) wymaga własnego testu.
+  ✅ **Weryfikacja na ŻYWYCH feedach (2026-08-24, konto właściciela)** — [[Activity-Log]]:
+  potwierdzone `DTEND` wykluczające (wykrywanie kolizji liczy noce poprawnie), brak pola `STATUS`
+  u Airbnb (zniknięcie z feedu to JEDYNY sygnał anulowania), skasowanie i założenie wpisu widoczne
+  w feedzie w ciągu minut, pusty kalendarz Booking.com jako stan normalny.
+  🔥 **`DTSTAMP` zmienia się przy każdym pobraniu** — suma kontrolna z surowego tekstu nigdy by się
+  nie powtórzyła, więc poprawka z trzeciej tury recenzji okazała się **warunkiem działania**, a nie
+  optymalizacją; bez niej rachunek kosztów z symulacji byłby nieprawdziwy.
+  ⏳ **Jedyne otwarte założenie: stabilność `UID` przy MODYFIKACJI rezerwacji.** Nie da się sprawdzić
+  bez ruszania rezerwacji prawdziwego gościa (Airbnb nie pozwala edytować blokad — trzeba kasować
+  i zakładać na nowo, co testuje co innego). ⚖️ **Nie blokuje wdrożenia**: przy obu wynikach nowy
+  silnik zachowuje się lepiej od starego, a wykrywanie anulowań nie zależy od tego założenia.
+  Domknięcie: przy pierwszej naturalnej modyfikacji porównać `UID` ze stanem sprzed zmiany.
+  🛡️ **Heurystyka „zniknęła + pojawiła się = ta sama" świadomie odrzucona** — nie do odróżnienia od
+  „anulowanie + nowa rezerwacja na ten sam termin"; zamiast niej podpowiedź w alercie i w bazie wiedzy.
+  ✅ **Piąta tura wykonana — łańcuch „naprawa psuje coś obok" urwany.** Zero nowych usterek
+  w logice; recenzent stwierdził wprost, że **szóstej tury silnika nie potrzeba**. Poprawione
+  dwa teksty: zdanie w alercie, które podawało otwarte założenie jako prawdopodobne i kazało
+  kasować rezerwację, oraz pogrubienie renderujące się dosłownie na `/pomoc` (regresja poprawki
+  z tury 3 — zamknięta teraz **całą klasą**: nowy test przechodzi po wszystkich artykułach
+  i sprawdza `not.toContainText('**')`).
+  ✅ **Stan końcowy: e2e 191/191, functions 33/33**, lint 0, build OK, reguły kompilują się.
+  🔴 **Zostaje wyłącznie**: decyzja właściciela o deployu (reguły + functions **osobno** od
+  hostingu) oraz smoke test po wydaniu w parze „jedna operacja przechodzi + jedna odrzucona"
+  (skill `reguly`, krok 6). Kroki 2 i 3 bramki zaliczone 2026-08-22 na kluczu serwisowym.
+  ⏸ **Świadomie odłożone, wymaga osobnych pozycji**: kolizje niewidoczne dla rezerwacji na kolejny sezon
+  (okno roku w `useFirebaseData`), `syncLinks` kluczowane nazwą obiektu (zmiana nazwy rozspaja kanał),
+  `isSafeUrl` przepuszczające dziesiętny/szesnastkowy zapis IP (luka odziedziczona, nie regresja).
+  ⚠️ Reguły i functions wdraża się **osobno** od hostingu.
+  <!-- opis pierwotny zostaje poniżej — to on tłumaczy, po co ta praca powstała -->
+  **Skąd:** „icall to proszenie sie o problemy i bledy z synchronizacja. Icall synchronizuje tylko
+  dostepnosc i to co pare godzic, ale nic nie robi z cena. Wiadomosci tez pewnie nie ogarniesz."
+  ⚖️ **Fakty testera są bezbłędne, wniosek („to nie jest żadne rozwiązanie") jest prawdziwy tylko
+  wtedy, gdy sprzedajemy to jako channel managera.** I tu jest problem: `functions/index.js:1247`
+  przedstawia nas światu jako `PRODID:-//WynajemPRO//ChannelManager//PL`, a `keywords` w `index.html`
+  zawierają frazę „channel manager".
+  🔴 **Poważniejsze od nazewnictwa:** FAQ na landingu (`LandingPage.jsx:661`) obiecuje, że rezerwacje
+  z portali „automatycznie blokują terminy… **zapobiegając podwójnym rezerwacjom**", a `og:description`
+  otwiera się od „Koniec z overbookingiem" — podczas gdy `dailyICalSync` (`functions/index.js:811`)
+  chodzi **raz na dobę, o 6:00**. To jest codzienne 24-godzinne okno na overbooking przy obietnicy
+  jego wyeliminowania, złożonej na piśmie, w produkcie płatnym. **Gotowe, gdy:** zapadła decyzja
+  o częstotliwości synchronizacji, a copy w FAQ, `og:description` i `keywords` mówi to, co system
+  faktycznie robi. **Blokowało deploy X24** — landing nie mógł jechać na produkcję z tą obietnicą
+  w środku. ✅ Zdjęte 2026-08-22: obietnica poprawiona w sześciu miejscach, kod gotowy. Landing
+  i tak czeka teraz na wspólne wydanie z regułami i functions, bo mówi o alarmie, którego bez
+  wdrożenia silnika jeszcze nie ma.
+  🔥 **Ograniczenie kosztowe ustalone 2026-08-22** ([[strategy/Rentownosc-symulacja-2026-08-22]]):
+  oczywista naprawa („synchronizujmy co godzinę") przy dzisiejszym wzorcu odczytu — **osobne
+  zapytanie do Firestore na każde zdarzenie w feedzie** — ścina darmowy zapas Firebase
+  z ~104 kont do **~10**. Rozwiązanie: jeden **dokument stanu na kanał** (mapa `UID → daty`)
+  czytany raz na przebieg i porównywany w pamięci. Wtedy synchronizacja co godzinę zużywa
+  **444 odczyty/dobę/konto zamiast dzisiejszych 480**, czyli jest tańsza od stanu obecnego
+  przy 24× większej częstotliwości. ⚠️ Tego skrótu nie wolno wziąć — kosztuje realne pieniądze.
+- **X27. Przechwytywanie maili z portali (cena, prowizja, nazwisko gościa).** ⬜
+  **Skąd:** iCal nie przenosi cen i nigdy nie będzie — Airbnb celowo wyciął z eksportu nazwisko
+  i kod rezerwacji (grudzień 2019), cena nie była tam nigdy. Jedyna ścieżka do kwot bez umowy
+  partnerskiej to maile, które portal i tak wysyła gospodarzowi. Gospodarz ustawia przekazywanie
+  na `rezerwacje+{token}@wynajempro.com`, funkcja parsuje i uzupełnia rezerwację.
+  ✅ **Koszt infrastruktury: 0 zł** (Cloudflare Email Routing) — potwierdzone w symulacji rentowności.
+  ⚠️ **Bezpieczeństwo:** na adres przyjmujący pocztę może napisać każdy. Bez weryfikacji **SPF/DKIM
+  oryginalnej wiadomości** dałoby się wstrzykiwać fałszywe rezerwacje do cudzego kalendarza.
+  ⚖️ Ryzyko to czas, nie pieniądze: szablony maili się zmieniają, trzeba dwóch portali × dwóch
+  języków, i czujki „od 14 dni nic nie przyszło z Bookinga". **Dodatek do iCal, nie zamiennik.**
+- **X28. Decyzje ekonomiczne wynikające z symulacji.** ⏸ **czeka na właściciela**
+  Pełny model: [[strategy/Rentownosc-symulacja-2026-08-22]]. Trzy rzeczy do rozstrzygnięcia:
+  **(1) cennik** — 29,99 zł wymaga 246 płacących na 5 000 zł/mc na rękę, 49 zł wymaga 148;
+  **(2) moment przejścia na JDG** — sufit nierejestrowanej to 43 200 zł/rok **niezależnie od ceny**,
+  a ZUS preferencyjny pokrywa się już przy 33 kontach; **(3) Channex** — próg wyjścia na zero
+  to 22 konta, warunek wyzwalający ustalony na **~40 płacących**.
+  🔥 **Zaktualizowane 2026-08-22 po informacji właściciela o etacie.** Właściciel jest zatrudniony
+  na UoP w innym miejscu — przy zbiegu tytułów JDG **nie rodzi składek społecznych**, zostaje sama
+  zdrowotna (498,35 zł/mc do 60 tys. przychodu rocznie). Próg wyjścia na zero na JDG: **28 kont**.
+  ⚠️ Rezygnacja z etatu unieważnia ten rachunek.
+  **Plan właściciela:** rok 1 na możliwie niskiej cenie kosztem zarobku → maksymalna liczba
+  klientów → potem nowe funkcje i podwyżka dająca klientowi realną wartość. Model to potwierdza:
+  podwyżka 29,99 → 49 zł znosi utratę **38,8% klientów** bez spadku przychodu.
+  ✅ **ROZSTRZYGNIĘTE 2026-08-22 — founding members** ([[Decisions]] ADR-016, Regulamin §6 ust. 5):
+  cena startowa gwarantowana **12 miesięcy** (nie wieczyście), **od pierwszej płatności** danego
+  klienta; kwalifikuje się **każdy, kto rozpocznie płatną Subskrypcję do dnia zakończenia naboru**;
+  po okresie przejście na cenę bieżącą z **30-dniowym uprzedzeniem**. Odrzucono wieczyste zamrożenie
+  (27 374 zł/rok przy 120 klientach) i stały rabat lojalnościowy (ok. 14 tys. zł/rok).
+  🔴 **Komunikacja nie może nazywać tego rabatem** — nazwanie obniżką włącza obowiązek Omnibus
+  (najniższa cena z 30 dni). Obowiązuje sformułowanie „cena startowa gwarantowana na 12 miesięcy".
+  ⏳ **Została jedna liczba: data zakończenia naboru** — pochodna daty launchu, czyli N4 (prawnik).
+  ⏸ **Do wdrożenia przed pierwszą sprzedażą:** znacznik founding membera i data pierwszej płatności
+  w danych (inaczej po roku nie da się ustalić, komu wysłać uprzedzenie), oraz sprawdzenie, że Stripe
+  utrzyma starą cenę istniejącym subskrypcjom przy zmianie cennika (osobny `Price` w tym samym `Product`).
+  🔴 **Drugie:** sufit nierejestrowanej (120 kont) wypada **w trakcie roku 1**. JDG rejestrować
+  z zapasem, przy ok. 100 kontach — przekroczenie limitu kwartalnego to problem zgodności.
+- ⏸ **Zgłoszone przy okazji, decyzja właściciela:** `LoginPanel.jsx:557` obiecuje „Dołącz do
+  gospodarzy, którzy zautomatyzowali pracę, podatki i odzyskali wolny czas" — istniejącą
+  społeczność użytkowników, przed launchem.
 
 ---
 
