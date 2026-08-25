@@ -618,3 +618,63 @@ aplikacji. Karta progu dopisuje, z którego wariantu wynika jej liczba.
 ⚠️ **Czego to nie rozstrzyga**: czy dana nieruchomość faktycznie jest współwłasnością i czy
 oświadczenie zostało skutecznie złożone — to wie tylko gospodarz. Aplikacja liczy zgodnie
 z odpowiedzią, nie sprawdza jej. Tak samo jak przy `rentalBasis` (ADR-018).
+
+---
+
+## ADR-022: Mikrorachunek i tytuły przelewów skreślone, nie odłożone
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Mikrorachunek podatkowy i generator tytułów przelewu istniały w panelu
+usuniętym commitem `fb8a00e` i od ADR-013 wisiały w planach jako „wrócą później".
+Kod zniknął rok temu, obietnica została.
+
+**Decyzja**: **skreślamy je z planu**, zamiast przenosić na kolejną turę.
+
+Uzasadnienie właściciela jest metodyczne, nie oszczędnościowe: **niech odezwie się popyt.**
+Funkcja, o którą przez całą betę nikt nie zapytał, jest kandydatem na pracę wykonaną
+dla samego domknięcia listy. Numer mikrorachunku gospodarz i tak zna — generuje go raz
+na stronie podatki.gov.pl i wkleja do bankowości, gdzie zostaje na stałe. Tytuł przelewu
+przy ryczałcie to „PIT-28" i rok. Obie rzeczy są jednorazowe, a my planowaliśmy je jako
+funkcję cykliczną.
+
+**To jest hipoteza do sprawdzenia, nie porzucenie.** Jeśli któryś z testerów o nie zapyta,
+wracają — i wtedy będziemy wiedzieć, że są potrzebne, zamiast zgadywać. Jeśli nikt nie
+zapyta przez całą betę, to jest odpowiedź.
+
+**Zapisane, żeby nie wróciło z rozpędu**: brak tych funkcji nie jest zaległością do
+odhaczenia przy najbliższym sprzątaniu backlogu. Ich powrót wymaga sygnału od użytkownika.
+
+**Co zostaje w module poza tym**: VAT-UE / import usług od prowizji portali. To jedyna
+rzecz, której nie da się rozstrzygnąć samodzielnie z tekstu ustawy — patrz ADR-023.
+
+---
+
+## ADR-023: VAT od prowizji portali — mówimy, czego nie liczymy
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED
+**Kontekst**: Pytanie Q8 z analizy prawnej brzmiało: czy pokazywanie w panelu wiersza
+„VAT należny 8%" bez słowa o prowizjach nie tworzy wrażenia, że obraz VAT-u jest kompletny.
+
+Sedno sprawy: Booking i Airbnb to spółki z siedzibą w innych państwach UE. Prowizja jest
+usługą nabytą od podatnika unijnego, a to u polskiego gospodarza stanowi **import usług** —
+podatek rozlicza nabywca, odwrotnym obciążeniem, **także wtedy, gdy korzysta ze zwolnienia
+podmiotowego**. Pociąga to za sobą rejestrację VAT-UE i comiesięczne deklaracje. Nasz panel
+liczy VAT wyłącznie od noclegów i o prowizjach milczy.
+
+**Decyzja**: **nie liczymy tego, ale mówimy wprost, że tego nie liczymy.**
+
+Zdanie „VAT od prowizji portali (import usług) jest poza zakresem aplikacji" trafia
+do nagłówka eksportu CSV — czyli tam, gdzie plik ogląda księgowa, która potrafi z tego
+zdania zrobić użytek. To była najtańsza część odpowiedzi na Q8 i nie wymagała doradcy:
+powiedzenie, czego narzędzie nie robi, jest stwierdzeniem faktu o narzędziu, a nie
+kwalifikacją sytuacji podatkowej użytkownika.
+
+**Czego świadomie NIE robimy**: nie liczymy kwoty tego VAT-u i nie mówimy gospodarzowi,
+że ma obowiązek rejestracji VAT-UE. Pierwsze jest funkcją do zbudowania, drugie byłoby
+kwalifikacją jego sytuacji prawnej — czyli tym, przed czym ostrzega §2 analizy.
+
+**Kiedy wrócić**: gdy tester zapyta albo gdy pojawi się gospodarz, u którego prowizje
+są na tyle duże, że kwota ma znaczenie. Wtedy potrzebna jest interpretacja indywidualna
+KIS (ORD-IN, 40 zł), bo pytanie dotyczy praktyki, nie brzmienia przepisu.

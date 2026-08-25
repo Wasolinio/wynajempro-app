@@ -86,6 +86,35 @@ Przycisk „Drukuj / PDF" otwiera okno drukowania przeglądarki. Raport jest prz
 
 Przycisk „CSV" pobiera plik `raport_wynajempro_<rok>.csv` z pojedynczymi wierszami: rezerwacje, koszty jednorazowe i koszty stałe rozpisane na miesiące. Kolumny to: Data, Typ, Obiekt, Źródło / kategoria, Opis, Przychód, Prowizja, Podatek, VAT, Media, Koszt, a na końcu wiersz „SUMA". Plik otwiera się w Excelu i Arkuszach Google z polskimi znakami i przecinkiem dziesiętnym. Potwierdzeniem pobrania jest komunikat „Pobrano plik CSV dla księgowego".
 
+## Zakładka „Podatki"
+
+Odpowiada na jedno pytanie: ile odłożyć, żeby nie zabrakło. Kwota na górze to podatek
+i składki za miesiące, które już minęły w wybranym roku, liczone narastająco. Nie odejmujemy
+tego, co zapłacone w zaliczkach i składkach — to obciążenie za cały ten okres, nie kwota
+pozostała do zapłaty.
+
+Panel ma dwa tryby. „Podsumowanie" pokazuje jedną liczbę i to, z czego się składa.
+„Szczegóły dla księgowego" rozbija rachunek pozycja po pozycji i dokłada rozkład miesięczny.
+Tryb przełączasz nad treścią albo na stałe w Ustawieniach.
+
+Przy ryczałcie zobaczysz też pasek progu 100 000 zł. Powyżej progu stawka rośnie z 8,5%
+do 12,5% od nadwyżki, więc warto wiedzieć z wyprzedzeniem, jak blisko jesteś. Liczymy
+wyłącznie przychód z rezerwacji wprowadzonych do aplikacji.
+
+### Zestawienie dla księgowej
+
+Przycisk „Pobierz dla księgowej" w pasku nad panelem zapisuje plik CSV, który otworzysz
+w Excelu, Arkuszach Google albo Numbers. W środku są: wszystkie rezerwacje roku z kwotami
+i prowizjami, koszty eksploatacyjne, rozkład miesięczny i podsumowanie roku — te same liczby,
+które widzisz na ekranie.
+
+Plik ma w nagłówku Twoje ustawienia podatkowe i zastrzeżenie, że to szacunek, a nie deklaracja.
+Dzięki temu księgowa wie, na czym oparte są kwoty, nawet jeśli dostanie sam plik.
+
+Czego w nim nie ma: przychodów i kosztów spoza aplikacji, zapłaconych już zaliczek i składek
+oraz VAT-u od prowizji portali (import usług) — tego aplikacja nie liczy i mówi o tym wprost
+w pliku.
+
 ## Ustawienia podatkowe
 
 Podatek i VAT liczą się automatycznie przy każdej rezerwacji — na podstawie Twoich ustawień. Skonfiguruj je raz:

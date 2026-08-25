@@ -111,3 +111,24 @@ test('Oświadczenie małżeńskie podnosi próg do 200 000 zł', async ({ page }
   // Całość rozlicza jedno z małżonków, więc nic nie odejmujemy.
   await expect(page.getByText(/Część małżonka/)).toHaveCount(0);
 });
+
+test('Eksport CSV: przycisk działa i plik niesie zastrzeżenie', async ({ page }) => {
+  await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'business' });
+
+  const pobranie = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Pobierz dla księgowej/ }).click();
+  const plik = await pobranie;
+
+  expect(plik.suggestedFilename()).toMatch(/^wynajempro-podatki-\d{4}-\d{4}-\d{2}-\d{2}\.csv$/);
+
+  const strumien = await plik.createReadStream();
+  const kawalki = [];
+  for await (const k of strumien) kawalki.push(k);
+  const tresc = Buffer.concat(kawalki).toString('utf8');
+
+  expect(tresc.charCodeAt(0), 'BOM — bez niego Excel rozsypuje polskie znaki').toBe(0xFEFF);
+  expect(tresc).toContain('Nie jest deklaracją, wyliczeniem podatku ani poradą podatkową');
+  expect(tresc).toContain('VAT od prowizji portali (import usług) jest poza zakresem aplikacji');
+  expect(tresc).toContain('REZERWACJE');
+  expect(tresc).toContain('RAZEM DO ODŁOŻENIA');
+});

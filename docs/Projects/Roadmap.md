@@ -436,8 +436,12 @@ feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest d
   liniowego i działalności nierejestrowanej (ADR-020) oraz podział odliczenia wg art. 11 ust. 3.
   Domknięte 2026-08-25 w trzech wydaniach: współwłasność małżeńska w trzech stanach (ADR-021)
   i **układ z projektu Claude Design zamiast widoku tymczasowego** (commit `75cce5d`).
-  ⏳ **Poza zakresem tej tury, do osobnych zadań**: mikrorachunek i tytuły przelewów,
-  eksport CSV dla księgowej, VAT-UE od prowizji portali (czeka na Q8 do prawnika).
+  ✅ **Eksport CSV dla księgowej wdrożony 2026-08-25** — przycisk „Pobierz dla księgowej"
+  w pasku panelu, `src/utils/taxExport.js`, 10 testów.
+  ❌ **Mikrorachunek i tytuły przelewów SKREŚLONE** ([[Decisions]] ADR-022) — nie wrócą,
+  dopóki nikt się o nie nie upomni. To jest hipoteza do sprawdzenia na testerach, nie zaległość.
+  ⏳ **Zostaje**: VAT-UE / import usług od prowizji portali — jedyna rzecz w module, której
+  nie da się rozstrzygnąć samodzielnie z tekstu ustawy.
   **Skąd:** „Nie wystarczający panel do rozliczeń podatkowych. A kto by się rozliczał ryczałtem
   w tym biznesie? Masz tam jeszcze ZUS i wszystkie inne koszty, choćby import usług. No i VAT."
   🔥 **Zarzut jest w większości nieprawdziwy, i to jest gorsza wiadomość niż gdyby był prawdziwy.**

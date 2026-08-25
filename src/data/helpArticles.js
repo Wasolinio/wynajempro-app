@@ -738,6 +738,90 @@ export const helpArticles = [
       },
       {
         "type": "h2",
+        "content": "Zakładka „Podatki\""
+      },
+      {
+        "type": "p",
+        "content": "Odpowiada na jedno pytanie: ile odłożyć, żeby nie zabrakło. Kwota na górze to podatek"
+      },
+      {
+        "type": "p",
+        "content": "i składki za miesiące, które już minęły w wybranym roku, liczone narastająco. Nie odejmujemy"
+      },
+      {
+        "type": "p",
+        "content": "tego, co zapłacone w zaliczkach i składkach — to obciążenie za cały ten okres, nie kwota"
+      },
+      {
+        "type": "p",
+        "content": "pozostała do zapłaty."
+      },
+      {
+        "type": "p",
+        "content": "Panel ma dwa tryby. „Podsumowanie\" pokazuje jedną liczbę i to, z czego się składa."
+      },
+      {
+        "type": "p",
+        "content": "„Szczegóły dla księgowego\" rozbija rachunek pozycja po pozycji i dokłada rozkład miesięczny."
+      },
+      {
+        "type": "p",
+        "content": "Tryb przełączasz nad treścią albo na stałe w Ustawieniach."
+      },
+      {
+        "type": "p",
+        "content": "Przy ryczałcie zobaczysz też pasek progu 100 000 zł. Powyżej progu stawka rośnie z 8,5%"
+      },
+      {
+        "type": "p",
+        "content": "do 12,5% od nadwyżki, więc warto wiedzieć z wyprzedzeniem, jak blisko jesteś. Liczymy"
+      },
+      {
+        "type": "p",
+        "content": "wyłącznie przychód z rezerwacji wprowadzonych do aplikacji."
+      },
+      {
+        "type": "h3",
+        "content": "Zestawienie dla księgowej"
+      },
+      {
+        "type": "p",
+        "content": "Przycisk „Pobierz dla księgowej\" w pasku nad panelem zapisuje plik CSV, który otworzysz"
+      },
+      {
+        "type": "p",
+        "content": "w Excelu, Arkuszach Google albo Numbers. W środku są: wszystkie rezerwacje roku z kwotami"
+      },
+      {
+        "type": "p",
+        "content": "i prowizjami, koszty eksploatacyjne, rozkład miesięczny i podsumowanie roku — te same liczby,"
+      },
+      {
+        "type": "p",
+        "content": "które widzisz na ekranie."
+      },
+      {
+        "type": "p",
+        "content": "Plik ma w nagłówku Twoje ustawienia podatkowe i zastrzeżenie, że to szacunek, a nie deklaracja."
+      },
+      {
+        "type": "p",
+        "content": "Dzięki temu księgowa wie, na czym oparte są kwoty, nawet jeśli dostanie sam plik."
+      },
+      {
+        "type": "p",
+        "content": "Czego w nim nie ma: przychodów i kosztów spoza aplikacji, zapłaconych już zaliczek i składek"
+      },
+      {
+        "type": "p",
+        "content": "oraz VAT-u od prowizji portali (import usług) — tego aplikacja nie liczy i mówi o tym wprost"
+      },
+      {
+        "type": "p",
+        "content": "w pliku."
+      },
+      {
+        "type": "h2",
         "content": "Ustawienia podatkowe"
       },
       {

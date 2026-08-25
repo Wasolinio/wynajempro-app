@@ -151,7 +151,7 @@ sugerować odejmowania. To jest realne ryzyko wprowadzenia w błąd.
 
 Świadomie poza zakresem tej tury, żeby nie projektować pod funkcje, których nie ma:
 
-- **Mikrorachunek podatkowy i tytuły przelewów** — istniały w usuniętym panelu, wrócą później.
+- ~~**Mikrorachunek podatkowy i tytuły przelewów**~~ — **skreślone 2026-08-25** ([[Decisions]] ADR-022). Nie wrócą, dopóki nikt się o nie nie upomni.
 - **VAT-UE / import usług od prowizji portali** — to realny obowiązek wielu gospodarzy i najbardziej
   wartościowa brakująca funkcja, ale wymaga przejścia przez analizę prawną, zanim wejdzie do kodu.
 - **Eksport CSV dla księgowego** — planowany, jeszcze nieistniejący.

@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Landmark, TriangleAlert, Info, Receipt, Plus, CalendarSync } from 'lucide-react';
+import { Landmark, TriangleAlert, Info, Receipt, Plus, CalendarSync, Download } from 'lucide-react';
 import { podsumowaniePodatkowe, podsumowanieMiesieczne, domyslnyTryb } from '../../../utils/taxSummary';
 import { monthNames, STAWKI_PODATKOWE } from '../../../utils/constants';
+import { zestawieniePodatkoweCSV, nazwaPliku, BOM } from '../../../utils/taxExport';
 
 /*
   PANEL PODATKOWY (X25) — czwarta podzakładka Finansów.
@@ -91,6 +92,24 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
   // Gdy nie ma VAT-u, „Brutto" i „Przychód" są identyczne w każdym wierszu. Dwie takie
   // same kolumny obok siebie w materiale dla księgowej wyglądają jak błąd.
   const kolumnaBrutto = p.vatNalezny > 0;
+
+  // Eksport dla księgowej. Plik składa się z TEGO SAMEGO podsumowania, które widać
+  // na ekranie — `taxExport` nie liczy niczego po swojemu. Rozjazd między ekranem
+  // a plikiem byłby gorszy niż brak pliku.
+  const pobierzCSV = () => {
+    const csv = zestawieniePodatkoweCSV(p, rentals, miesiaceWszystkie, monthNames, rok);
+    // BOM przed treścią — bez niego Excel rozsypuje polskie znaki mimo poprawnego UTF-8.
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nazwaPliku(rok);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Zwolnienie adresu po kliknięciu — inaczej blob wisi w pamięci do przeładowania.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
 
   const przelacznik = (
     <div className="wpd-seg" role="tablist" aria-label="Poziom szczegółowości">
@@ -280,9 +299,15 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
     <div className="wpd-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
         {przelacznik}
-        <span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)' }}>
-          {p.liczbaRezerwacji} {rezerwacje(p.liczbaRezerwacji)} · stawki {p.rokStawek}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)' }}>
+            {p.liczbaRezerwacji} {rezerwacje(p.liczbaRezerwacji)} · stawki {p.rokStawek}
+          </span>
+          <button className="wpd-btn wpd-btn--sm" onClick={pobierzCSV}
+            title="Zestawienie w formacie do otwarcia w arkuszu">
+            <Download /> Pobierz dla księgowej
+          </button>
+        </div>
       </div>
 
       {alerty}
