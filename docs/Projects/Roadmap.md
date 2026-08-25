@@ -434,9 +434,10 @@ feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest d
   czwarta podzakładka Finansów. Po drodze: analiza prawna zablokowała makietę i wymusiła pole
   „Jak wynajmujesz" ([[Decisions]] ADR-018), kwotę wolną domyślnie 0 (ADR-019), usunięcie podatku
   liniowego i działalności nierejestrowanej (ADR-020) oraz podział odliczenia wg art. 11 ust. 3.
-  Domknięte 2026-08-25 drugim wydaniem: współwłasność małżeńska w trzech stanach (ADR-021).
-  ⏳ **Zostaje**: układ z projektu Claude Design zamiast widoku tymczasowego, mikrorachunek
-  i tytuły przelewów, eksport CSV, VAT-UE od prowizji portali (czeka na Q8 do prawnika).
+  Domknięte 2026-08-25 w trzech wydaniach: współwłasność małżeńska w trzech stanach (ADR-021)
+  i **układ z projektu Claude Design zamiast widoku tymczasowego** (commit `75cce5d`).
+  ⏳ **Poza zakresem tej tury, do osobnych zadań**: mikrorachunek i tytuły przelewów,
+  eksport CSV dla księgowej, VAT-UE od prowizji portali (czeka na Q8 do prawnika).
   **Skąd:** „Nie wystarczający panel do rozliczeń podatkowych. A kto by się rozliczał ryczałtem
   w tym biznesie? Masz tam jeszcze ZUS i wszystkie inne koszty, choćby import usług. No i VAT."
   🔥 **Zarzut jest w większości nieprawdziwy, i to jest gorsza wiadomość niż gdyby był prawdziwy.**

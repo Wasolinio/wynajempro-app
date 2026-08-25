@@ -6,6 +6,15 @@ Project timeline and key milestones.
 
 ## 2026-08-25
 
+### PANEL PODATKOWY DOSTAŁ UKŁAD Z PROJEKTU — X25 zamknięte
+- ✅ **Commit `75cce5d`**, wydanie `hosting:app`. Widok tymczasowy wymieniony **w całości** na układ z handoffu Claude Design, z tekstami przepuszczonymi wcześniej przez humanizera. Marker `WIDOK TYMCZASOWY` zniknął z produkcyjnego chunku — kontrola negatywna to potwierdza.
+- ✅ **Silnik bez zmiany reguł, trzy nowe wyjścia.** `pasma` — faktyczny podział podstawy na 8,5% i 12,5%, liczony tym samym współczynnikiem co podatek (sprawdzone: pasma sumują się do kwoty z rachunku **co do grosza**). `widelki` — przedział progu zdrowotnej do etykiety. `stawkiPrzeterminowane` — warunek na rok BIEŻĄCY, nie na wybrany, więc łapie przypadek, którego `stawkiAktualne` nie widzi: jest luty następnego roku i nikt nie zaktualizował stałych.
+- 🔥 **`min-width:0` po raz czwarty i piąty.** `.wpd-panel`, `.wpd-cell` i `.wpd-kvgrid` rozpychały stronę do **405 px w oknie 375 px**. To ten sam idiom, który poprawialiśmy rano przy `.wpd-tabs` i `.wpd-stat`: element siatki ma domyślnie `min-width:auto` i rośnie do najszerszej treści zamiast ją zawinąć. ⚖️ **Wniosek na przyszłość**: w tym design systemie `min-width:0` należy dopisywać do KAŻDEGO kontenera, który bywa elementem siatki — nie po awarii, tylko przy tworzeniu klasy.
+- 📌 **Cztery usterki językowo-liczbowe, wszystkie widoczne dopiero na ekranie**: Intl nie grupuje liczb czterocyfrowych, więc „8200 zł" stało w kolumnie obok „108 200,00 zł" (`useGrouping: 'always'`); „2 rezerwacji" zamiast „2 rezerwacje" (dodana polska odmiana z wyjątkiem dla 12–14); procent progu z kropką zamiast przecinka; pozycje zerowe w karcie kosztów pokazywały „0,00 zł".
+- 📌 **Karta z pytaniem o podstawę wynajmu była wypierana przez kartę progu** — obie są potrzebne, więc pytanie zeszło pod rząd kart. Przy `rentalBasis === null` gospodarz widzi i próg, i powód, dla którego kwota jest bez składki zdrowotnej.
+- ✅ **Weryfikacja live**: trasy 200, kontrola pozytywna na chunku `ManagerApp-Hh6_0r4W.js` (hero, karta dwóch stawek, karta dla księgowej, rozkład miesięczny, karta pytania, odmiana rzeczownika, grupowanie liczb) i negatywna (`WIDOK TYMCZASOWY`, „płatnikiem VAT", „Wiążąc", „próg do 300 000" — wszystkie nieobecne). **e2e 203/203**, lint 0.
+- ⏳ **Poza X25 zostaje**: mikrorachunek podatkowy i tytuły przelewów, eksport CSV dla księgowej, VAT-UE od prowizji portali (czeka na Q8 do prawnika). Wszystkie trzy były świadomie poza zakresem tej tury od początku.
+
 ### X25 domknięte — współwłasność małżeńska, drugie wydanie tego samego dnia
 - ✅ **Commit `da9726d`**, wydanie `hosting:app`. Domyka jedyny punkt, który został otwarty po lekturze ustaw: **art. 12 ust. 13**, próg 200 000 zł dla małżonków.
 - ⚖️ **Poproszono o jeden checkbox „rozliczenie małżeńskie". Zrobione inaczej, świadomie.** Dwa powody, oba wynikają z brzmienia przepisu:
