@@ -39,14 +39,96 @@ export const DEFAULT_TEMPLATES = [
   { id: 'review', text: 'Wyślij prośbę o opinię', shortName: 'Opinia', anchor: 'departure', daysBefore: -1, icon: 'MessageSquare' }
 ];
 
+// =============================================================================
+// STAWKI PODATKOWE I SKŁADKI — STAN PRAWNY NA ROK 2026
+//
+// ⚠️ TE KWOTY ZMIENIAJĄ SIĘ CO ROKU. Wpisane na sztywno zgniją w styczniu i to
+// BEZ ŻADNEGO SYGNAŁU — wyliczenia dalej będą wychodzić, tylko będą nieprawdziwe.
+// Dlatego rok jest polem, a nie komentarzem: widok podatkowy pokazuje go gospodarzowi
+// i ostrzega, gdy `rok` nie zgadza się z bieżącym. Aktualizacja stawek to pozycja
+// w [[Projects/Roadmap]] na grudzień.
+//
+// ŹRÓDŁA (sprawdzone 2026-08-24):
+//   • zdrowotna przy ryczałcie — progi 60 tys. / 300 tys. przychodu rocznie, podstawa
+//     liczona od przeciętnego wynagrodzenia 9 228,64 zł (obwieszczenie GUS 22.01.2026)
+//   • od 2026 ryczałtowiec odlicza 50% ZAPŁACONEJ zdrowotnej od przychodu
+//   • ryczałt od najmu: 8,5% do 100 000 zł przychodu, 12,5% od nadwyżki
+//
+// ⚖️ To są dane do wyliczenia SZACUNKU dla gospodarza i jego księgowego, nie deklaracja
+// podatkowa. Tak też ma o tym mówić interfejs.
+// =============================================================================
+export const STAWKI_PODATKOWE = {
+  rok: 2026,
+
+  // Data, na którą stawki sprawdzono U ŹRÓDŁA — nie data renderu i nie data builda.
+  // Panel pokazuje ją w stopce, żeby „STAWKI 2026" nie sugerowało świeżości, której nie ma.
+  // Rejestr weryfikacji z linkami: docs/legal/Rejestr-stawek-podatkowych.md.
+  // ⚠️ Aktualizować DO 31 STYCZNIA każdego roku, razem z wartościami poniżej.
+  zweryfikowano: '2026-08-25',
+
+  // Art. 12 ust. 1 pkt 4 ustawy o ryczałcie. Ta sama stawka i ten sam próg obejmują
+  // lit. a (najem prywatny, przez art. 6 ust. 1a) ORAZ lit. c (usługi związane
+  // z zakwaterowaniem, PKWiU dział 55) — dlatego jedna gałąź obsługuje obie podstawy
+  // wynajmu z ADR-018. Odczytane z tekstu ustawy 2026-08-25.
+  //
+  // ⚠️ CZEGO TU JESZCZE NIE MA: art. 12 ust. 13 podnosi próg do **200 000 zł** dla
+  // małżonków ze wspólnością majątkową, którzy złożyli oświadczenie z ust. 6
+  // (opodatkowanie całości przychodu przez jednego z nich). Bez oświadczenia przychód
+  // dzieli się między małżonków po połowie i każde ma własne 100 000 zł. W obu układach
+  // nasz sztywny próg ostrzega WCZEŚNIEJ, niż powinien. Kierunek bezpieczny, ale
+  // nieprawdziwy — wymaga pola w ustawieniach, patrz [[Rejestr-stawek-podatkowych]].
+  ryczaltNajem: {
+    prog: 100000,
+    stawkaDoProgu: 0.085,
+    stawkaPowyzejProgu: 0.125,
+  },
+
+  // Składka zdrowotna przy ryczałcie — progowa wg PRZYCHODU ROCZNEGO.
+  // Aplikacja zna przychód narastająco, więc nie musi o nią pytać gospodarza.
+  zdrowotnaRyczalt: {
+    progi: [
+      { doPrzychodu: 60000, miesiecznie: 498.35 },
+      { doPrzychodu: 300000, miesiecznie: 830.58 },
+      { doPrzychodu: Infinity, miesiecznie: 1495.04 },
+    ],
+    odliczenieOdPrzychodu: 0.5,   // od 2026: 50% zapłaconej składki
+  },
+
+  skala: {
+    kwotaWolna: 30000,
+    prog: 120000,
+    stawkaDoProgu: 0.12,
+    stawkaPowyzejProgu: 0.32,
+  },
+
+  vatNoclegi: 0.08,
+};
+
 export const defaultTaxSettings = {
   taxForm: 'lump_sum',
+
+  // Najem prywatny czy działalność gospodarcza. Ryczałt ma dla obu tę samą stawkę
+  // i ten sam próg, ale SKŁADKI już nie: przy najmie prywatnym nie ma zdrowotnej
+  // i nie ma odliczenia 50% (art. 11 ust. 1a odsyła do art. 6 ust. 1, czyli do
+  // działalności). Wcześniej aplikacja doliczała jedno i drugie każdemu ryczałtowcowi.
+  //
+  // ŚWIADOMIE BEZ WARTOŚCI DOMYŚLNEJ. Każde domyślne jest zgadywaniem cudzego
+  // statusu podatkowego, a pomyłka kosztuje ~10 tys. zł zawyżenia albo ~424 zł
+  // niedopłaty rocznie. `null` znaczy „nie wiemy" i panel ma o to zapytać.
+  rentalBasis: null,     // null | 'private' | 'business'
+
   autoThreshold: true,
   rate: 8.5,
   isVatPayer: false,
   zusHealth: 0,
   zusSocial: 0,
-  taxFreeAmount: 30000,
+
+  // Kwota wolna jest JEDNA na podatnika i na wszystkie źródła (art. 27 ust. 1 PIT).
+  // Grupa docelowa wynajmuje obok etatu, więc kwotę wolną konsumuje im pracodawca —
+  // domyślne 30 000 odejmowało ją drugi raz i zaniżało podatek nawet o 3 600 zł.
+  // Zero myli się w stronę zawyżenia, a panel istnieje po to, żeby nie zabrakło.
+  taxFreeAmount: 0,
+
   includeZusInCosts: true,
 };
 

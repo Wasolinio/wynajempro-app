@@ -91,12 +91,13 @@ Przycisk „CSV" pobiera plik `raport_wynajempro_<rok>.csv` z pojedynczymi wiers
 Podatek i VAT liczą się automatycznie przy każdej rezerwacji — na podstawie Twoich ustawień. Skonfiguruj je raz:
 
 1. Kliknij ikonę zębatki („Ustawienia") i przejdź do zakładki „Podatki".
-2. Wybierz formę opodatkowania: „Ryczałt" albo „Zasady ogólne (skala)".
-3. Dla ryczałtu domyślnie włączona jest opcja „Automatyczny próg (8,5% do 100k, 12,5% powyżej)" — system sam pilnuje progu 100 000 zł przychodu i przełącza stawkę. Możesz ją wyłączyć i wpisać stałą stawkę w polu „Stała stawka ryczałtu (%)".
-4. Dla zasad ogólnych ustaw „Kwota wolna od podatku (rocznie)" — domyślnie 30 000 zł; system stosuje skalę 12% i 32% powyżej 120 000 zł dochodu.
-5. Jeśli rozliczasz VAT, zaznacz „Jestem czynnym płatnikiem VAT (podatek liczony od kwoty netto)" — od przychodu z noclegów zostanie wydzielony VAT 8%, a podatek dochodowy policzy się od kwoty netto.
-6. Możesz też podać miesięczne składki: „Składka ZUS zdrowotna (mies.)" i „Składka ZUS społeczna (mies.)" oraz zdecydować, czy „Uwzględniaj składki ZUS w kosztach obniżających podatek".
-7. Kliknij „Zapisz ustawienia".
+2. W „Jak wynajmujesz" zaznacz, czy to najem prywatny, czy działalność gospodarcza. Od tego zależy, czy doliczamy składkę zdrowotną — przy najmie poza działalnością jej nie ma. Dopóki nie odpowiesz, nie doliczamy jej wcale.
+3. Wybierz formę opodatkowania: „Ryczałt" albo „Zasady ogólne (skala)".
+4. Dla ryczałtu domyślnie włączona jest opcja „Automatyczny próg (8,5% do 100k, 12,5% powyżej)" — system sam pilnuje progu 100 000 zł przychodu i przełącza stawkę. Możesz ją wyłączyć i wpisać stałą stawkę w polu „Stała stawka ryczałtu (%)".
+5. Dla zasad ogólnych ustaw „Kwota wolna od podatku (rocznie)" — domyślnie 0. Jeśli kwotę wolną uwzględnia już Twój pracodawca, zostaw 0, żeby nie odjąć jej dwa razy. System stosuje skalę 12% i 32% powyżej 120 000 zł dochodu.
+6. Jeśli masz status czynnego podatnika VAT, zaznacz „Czynny podatnik VAT" — od przychodu z noclegów wydzielimy VAT 8%, a podatek dochodowy policzymy od kwoty netto.
+7. Możesz też podać miesięczne składki: „Składka ZUS zdrowotna (mies.)" i „Składka ZUS społeczna (mies.)" oraz zdecydować, czy „Uwzględniaj składki ZUS w kosztach obniżających podatek".
+8. Kliknij „Zapisz ustawienia".
 
 Od tej pory każda nowa lub edytowana rezerwacja dostaje wyliczony podatek i VAT automatycznie — zobaczysz je w „Rozliczeniu" w szczegółach rezerwacji oraz w sumach zakładek „Przegląd" i „Koszty i opłaty".
 

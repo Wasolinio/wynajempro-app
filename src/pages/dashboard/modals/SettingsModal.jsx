@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { propHex } from '../styles';
 import { useDialogA11y } from './useDialogA11y';
 import { WHEN_OPTIONS, whenValue, whenDays, describeTimingSentence } from '../../../utils/taskSchedule';
+import { domyslnyTryb } from '../../../utils/taxSummary';
 
 /* Ustawienia APLIKACJI — profil gospodarza, subskrypcja i usunięcie konta
    przeniesione do AccountModal (X6, klik w imię w sidebarze). */
@@ -127,6 +128,29 @@ function SettingsModal(props) {
           {/* PODATKI */}
           {settingsTab === 'tax' && (
             <>
+              {/* X25: podstawa wynajmu przed formą opodatkowania — od niej zależy,
+                  czy w ogóle doliczamy składkę zdrowotną i odliczenie 50%. Bez wartości
+                  domyślnej: zgadywanie cudzego statusu podatkowego kosztuje realne pieniądze
+                  w obie strony (analiza prawna 2026-08-24, §B1). */}
+              <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
+                <p className="wpd-fieldset__title">Jak wynajmujesz</p>
+                <div className="wpd-fgrid">
+                  <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
+                    <input type="radio" checked={ts.rentalBasis === 'private'} onChange={() => setTs({ rentalBasis: 'private' })} />
+                    Najem prywatny — wynajmuję poza działalnością gospodarczą
+                  </label>
+                  <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
+                    <input type="radio" checked={ts.rentalBasis === 'business'} onChange={() => setTs({ rentalBasis: 'business' })} />
+                    Działalność gospodarcza — mam wpis w CEIDG
+                  </label>
+                </div>
+                <p className="wpd-fhint" style={{ marginTop: 8 }}>
+                  Nie wiemy, która opcja jest Twoja — zależy to od tego, jak faktycznie wynajmujesz.
+                  Od tej odpowiedzi zależy, czy doliczamy do wyliczenia składkę zdrowotną.
+                  Jeśli masz wątpliwości, zapytaj księgową.
+                </p>
+              </div>
+
               <div className="wpd-fgrid" style={{ marginBottom: 14 }}>
                 <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
                   <input type="radio" checked={ts.taxForm === 'lump_sum'} onChange={() => setTs({ taxForm: 'lump_sum' })} /> Ryczałt
@@ -136,9 +160,10 @@ function SettingsModal(props) {
                 </label>
               </div>
               <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
+                <p className="wpd-fieldset__title">Status VAT</p>
                 <label className="wpd-checkrow">
                   <input type="checkbox" checked={!!ts.isVatPayer} onChange={(e) => setTs({ isVatPayer: e.target.checked })} />
-                  Jestem czynnym płatnikiem VAT (podatek liczony od kwoty netto)
+                  Czynny podatnik VAT — podatek liczony od kwoty netto
                 </label>
                 <label className="wpd-checkrow">
                   <input type="checkbox" checked={!!ts.includeZusInCosts} onChange={(e) => setTs({ includeZusInCosts: e.target.checked })} />
@@ -151,6 +176,11 @@ function SettingsModal(props) {
                   <div className="wpd-field">
                     <label className="wpd-flabel">Kwota wolna od podatku (rocznie)</label>
                     <input className="wpd-input wpd-input--num" type="number" value={ts.taxFreeAmount} onChange={(e) => setTs({ taxFreeAmount: Number(e.target.value) })} />
+                    <p className="wpd-fhint">
+                      Jeśli masz etat, kwotę wolną uwzględnia już pracodawca — wtedy zostaw tu 0,
+                      żeby nie odjąć jej dwa razy. Kwota wolna jest jedna na wszystkie Twoje dochody,
+                      nie osobna dla wynajmu.
+                    </p>
                   </div>
                 </div>
               )}
@@ -169,15 +199,70 @@ function SettingsModal(props) {
                   )}
                 </div>
               )}
-              <div className="wpd-fgrid">
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Składka ZUS zdrowotna (mies.)</label>
-                  <input className="wpd-input wpd-input--num" type="number" value={ts.zusHealth} onChange={(e) => setTs({ zusHealth: Number(e.target.value) })} />
+              {/* X25: pola ZUS pokazujemy TYLKO tam, gdzie faktycznie coś robią.
+                  Wcześniej oba stały tu zawsze, a przy ryczałcie — czyli formie domyślnej —
+                  `zusHealth` nie było używane w ŻADNYM wyliczeniu w całej aplikacji, a
+                  `zusSocial` wchodziło wyłącznie przy zasadach ogólnych. Gospodarz wpisywał
+                  kwoty i miał prawo sądzić, że są liczone. To gorsze niż brak funkcji. */}
+              {ts.taxForm === 'lump_sum' ? (
+                <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
+                  <p className="wpd-fieldset__title">Składka zdrowotna</p>
+                  {ts.rentalBasis === 'business' ? (
+                    <p className="wpd-fhint">
+                      Przy ryczałcie w działalności zależy od progu Twojego rocznego przychodu,
+                      a ten aplikacja zna — więc liczymy ją sami i pokazujemy w Finansach,
+                      w zakładce Podatki. Nie musisz jej tutaj wpisywać.
+                    </p>
+                  ) : ts.rentalBasis === 'private' ? (
+                    <p className="wpd-fhint">
+                      Przy najmie prywatnym nie doliczamy jej do wyliczenia — najem poza
+                      działalnością nie jest tytułem do ubezpieczenia zdrowotnego.
+                    </p>
+                  ) : (
+                    <p className="wpd-fhint">
+                      Nie doliczamy jej, dopóki nie wiemy, czy wynajmujesz w ramach działalności.
+                      Odpowiedź wyżej, w „Jak wynajmujesz".
+                    </p>
+                  )}
+                  <div className="wpd-field" style={{ marginTop: 8 }}>
+                    <label className="wpd-flabel">Składka ZUS społeczna (mies.)</label>
+                    <input className="wpd-input wpd-input--num" type="number" value={ts.zusSocial}
+                      onChange={(e) => setTs({ zusSocial: Number(e.target.value) })} />
+                    <p className="wpd-fhint">Wpisz 0, jeśli nie płacisz społecznych (np. przy zbiegu z umową o pracę).</p>
+                  </div>
                 </div>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Składka ZUS społeczna (mies.)</label>
-                  <input className="wpd-input wpd-input--num" type="number" value={ts.zusSocial} onChange={(e) => setTs({ zusSocial: Number(e.target.value) })} />
+              ) : (
+                <div className="wpd-fgrid">
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Składka ZUS zdrowotna (mies.)</label>
+                    <input className="wpd-input wpd-input--num" type="number" value={ts.zusHealth} onChange={(e) => setTs({ zusHealth: Number(e.target.value) })} />
+                  </div>
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Składka ZUS społeczna (mies.)</label>
+                    <input className="wpd-input wpd-input--num" type="number" value={ts.zusSocial} onChange={(e) => setTs({ zusSocial: Number(e.target.value) })} />
+                  </div>
                 </div>
+              )}
+
+              {/* Wybór trybu — drugie miejsce obok samego widoku podatków. Tutaj, bo
+                  gospodarz szuka w ustawieniach trwałych preferencji; tam, bo przełącza
+                  się w chwili, gdy faktycznie potrzebuje szczegółów (decyzja 2026-08-24). */}
+              <div className="wpd-fieldset" style={{ marginTop: 14 }}>
+                <p className="wpd-fieldset__title">Widok podatków</p>
+                <p className="wpd-fhint">Domyślnie wynika z Twojej formy opodatkowania. Możesz to zmienić na stałe.</p>
+                <label className="wpd-checkrow">
+                  <input type="radio" checked={(ts.viewMode || domyslnyTryb(ts)) === 'prosty'}
+                    onChange={() => setTs({ viewMode: 'prosty' })} />
+                  Podsumowanie — jedna liczba: ile odłożyć
+                </label>
+                <label className="wpd-checkrow">
+                  <input type="radio" checked={(ts.viewMode || domyslnyTryb(ts)) === 'szczegolowy'}
+                    onChange={() => setTs({ viewMode: 'szczegolowy' })} />
+                  Szczegóły dla księgowego — rozbicie kwot i rozkład miesięczny
+                </label>
+                <p className="wpd-fhint wpd-mono" style={{ marginTop: 8 }}>
+                  Domyślnie: ryczałt → Podsumowanie, zasady ogólne → Szczegóły
+                </p>
               </div>
             </>
           )}

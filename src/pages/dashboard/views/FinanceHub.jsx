@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { LineChart, Receipt, FileBarChart, ArrowRight, FileSpreadsheet } from 'lucide-react';
+import { LineChart, Receipt, FileBarChart, ArrowRight, FileSpreadsheet, Landmark } from 'lucide-react';
 import AnalyticsView from './AnalyticsView';
 import CostsView from './CostsView';
+import TaxesView from './TaxesView';
 
 /*
   Finanse (X4, partia 1) — fuzja dawnych pulpitów Finanse (05) i Analityka (06)
@@ -14,12 +15,15 @@ import CostsView from './CostsView';
 const TABS = [
   { key: 'overview', label: 'Przegląd', icon: LineChart },
   { key: 'costs', label: 'Koszty i opłaty', icon: Receipt },
+  // X25: podzakładka „Podatki" — miejsce wskazane wprost w ADR-013 jako punkt powrotu
+  // widoku usuniętego commitem `fb8a00e`.
+  { key: 'taxes', label: 'Podatki', icon: Landmark },
   { key: 'reports', label: 'Raporty', icon: FileBarChart },
 ];
 
 export default function FinanceHub({
   rentals, properties, user, categories, recurringCosts, selectedYear, setSelectedYear, onOpenReport,
-  openEditModal, handleDeleteClick,
+  openEditModal, handleDeleteClick, taxSettings, trybPodatkow, onZmienTrybPodatkow,
 }) {
   const [tab, setTab] = useState('overview');
 
@@ -52,6 +56,13 @@ export default function FinanceHub({
           rentals={rentals} properties={properties} user={user}
           categories={categories} recurringCosts={recurringCosts} selectedYear={selectedYear}
           openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
+        />
+      )}
+
+      {tab === 'taxes' && (
+        <TaxesView
+          rentals={rentals} taxSettings={taxSettings} selectedYear={selectedYear}
+          tryb={trybPodatkow} onZmienTryb={onZmienTrybPodatkow}
         />
       )}
 

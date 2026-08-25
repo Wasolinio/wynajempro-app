@@ -276,7 +276,10 @@ test.describe('UI Scaling Tests', () => {
     await page.locator('button', { hasText: /^Podatki$/ }).first().click({ force: true });
     
     // Verify Tax setting inputs exist (e.g. Lump Sum threshold or VAT options)
-    const vatText = page.locator('text=Jestem czynnym płatnikiem VAT');
+    // X25: etykieta zmieniona z „Jestem czynnym płatnikiem VAT" — „płatnik" i „podatnik"
+    // to dwie różne role prawne (art. 8 Ordynacji podatkowej), a pierwsza osoba wymuszała
+    // rodzaj gramatyczny. Test asercjonował stary, błędny napis.
+    const vatText = page.locator('text=Czynny podatnik VAT');
     await expect(vatText).toBeVisible({ timeout: 10000 });
     
     // Close modal

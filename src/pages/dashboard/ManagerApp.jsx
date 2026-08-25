@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
@@ -137,6 +137,20 @@ export default function ManagerApp() {
   const [editingSyncLinks, setEditingSyncLinks] = useState({});
   const [editingTaxSettings, setEditingTaxSettings] = useState(defaultTaxSettings);
   const [editingHostProfile, setEditingHostProfile] = useState(defaultHostProfile);
+
+  // X25: wybrany poziom szczegółowości widoku podatków. Trzymany w `settings/tax`,
+  // bo to trwała preferencja gospodarza, a nie stan sesji. Reguły dopuszczają nowe pole
+  // w tym dokumencie bez zmiany (`isValidSettings` sprawdza dla `tax` wyłącznie `rate`),
+  // więc nie wymagało to osobnego wydania reguł.
+  const [trybPodatkow, setTrybPodatkow] = useState(null);
+  useEffect(() => { setTrybPodatkow(taxSettings?.viewMode || null); }, [taxSettings]);
+  const zmienTrybPodatkow = useCallback(async (nowy) => {
+    setTrybPodatkow(nowy);
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'tax'), { ...taxSettings, viewMode: nowy }, { merge: true });
+    } catch (err) { console.error('Nie udało się zapisać trybu widoku podatków:', err); }
+  }, [user, taxSettings]);
 
   const [detailId, setDetailId] = useState(null);
   const openBookingDetail = useCallback((r) => { setDetailId(r.id); }, []);
@@ -693,6 +707,8 @@ export default function ManagerApp() {
                 selectedYear={selectedYear} setSelectedYear={setSelectedYear}
                 onOpenReport={() => setShowStatsModal(true)}
                 openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
+                taxSettings={taxSettings}
+                trybPodatkow={trybPodatkow} onZmienTrybPodatkow={zmienTrybPodatkow}
               />
             )}
             {renderView === 'guides' && (

@@ -469,3 +469,106 @@ wciąganie jej do nas nie dodaje ochrony, tylko hałas.
 ---
 
 **Related**: [[Architecture]], [[Tech-Stack]]
+
+---
+
+## ADR-018: Podstawa wynajmu jest pytaniem, nie domyślną wartością
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Analiza prawna panelu podatkowego ([[Analiza-panel-podatkowy-2026-08-24]] §B1)
+wykazała, że `taxSummary.js` traktował `taxForm === 'lump_sum'` jako jedną sytuację, podczas
+gdy ryczałt obejmuje **dwie różne sytuacje podatkowe**: najem prywatny (art. 6 ust. 1a ustawy
+o ryczałcie) i usługi zakwaterowania w działalności gospodarczej (art. 6 ust. 1). Stawka
+i próg 100 000 zł są dla obu identyczne — ale składki nie. Najem prywatny nie jest tytułem
+do ubezpieczenia zdrowotnego, a odliczenie 50% składki z art. 11 ust. 1a odsyła wprost
+do ust. 1, czyli wyłącznie do działalności.
+
+Aplikacja doliczała jedno i drugie każdemu ryczałtowcowi. Przy przychodzie 84 600 zł oznaczało
+to **9 966,96 zł zawyżenia rocznie** u gospodarza na najmie prywatnym i jednocześnie **ok. 424 zł
+zaniżenia samego podatku** fałszywym odliczeniem — pomyłkę w obie strony naraz, niewykrywalną
+dla użytkownika, bo nikt go o rozróżnienie nie pytał.
+
+**Decyzja**: nowe pole `rentalBasis` (`null | 'private' | 'business'`) w ustawieniach
+podatkowych, **świadomie bez wartości domyślnej**. Każda wartość domyślna byłaby zgadywaniem
+cudzego statusu podatkowego, a koszt pomyłki jest wymierny w obie strony.
+
+Dopóki `rentalBasis === null`, składki zdrowotnej **nie doliczamy i nie stosujemy odliczenia**.
+Wynik jest wtedy zaniżony zamiast zawyżonego, a panel mówi wprost, czego nie policzył
+i dlaczego. Lepszy brak liczby niż liczba nieprawdziwa.
+
+**Czego świadomie NIE robimy**: nie twierdzimy, że gospodarz „nie płaci składki zdrowotnej".
+Panel mówi wyłącznie „nie doliczamy" — o tym, co robi aplikacja. Zdanie o obowiązku byłoby
+kwalifikacją sytuacji prawnej konkretnego podatnika, czyli czynnością z art. 2 ust. 1 pkt 1
+ustawy o doradztwie podatkowym.
+
+**Konsekwencje**: istniejące konta mają `rentalBasis` puste i przy pierwszym wejściu w panel
+zobaczą pytanie zamiast wiersza zdrowotnej. To jest zamierzone — dotychczasowa liczba była
+dla części z nich nieprawdziwa.
+
+---
+
+## ADR-019: Domyślna kwota wolna wynosi 0
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED (decyzja właściciela, zgodna z rekomendacją legala)
+**Kontekst**: `defaultTaxSettings.taxFreeAmount` wynosiło 30 000 zł. Kwota wolna jest jednak
+**jedna na podatnika i na wszystkie źródła przychodu** (art. 27 ust. 1 ustawy o PIT), a grupa
+docelowa WynajemPRO — wprost z briefu produktu — wynajmuje **obok etatu**. U takiego gospodarza
+kwotę wolną konsumuje pracodawca przez PIT-2, więc aplikacja odejmowała ją **drugi raz**
+i zaniżała podatek o **3 600 zł** (zmierzone na przykładzie, nie oszacowane).
+
+**Decyzja**: wartość domyślna 0. Zero myli się w stronę zawyżenia, a panel istnieje po to,
+żeby gospodarzowi nie zabrakło. Pole zostaje edytowalne — gospodarz bez etatu wpisuje 30 000
+i dostaje wynik jak wcześniej. Przy polu stoi podpowiedź wyjaśniająca, kiedy zostawić zero.
+
+**Pułapka, którą to ujawniło**: `podatekDochodowy()` czytał wartość przez
+`Number(settings.taxFreeAmount) || kwotaWolna`. Zero jest w JavaScripcie fałszywe, więc
+**świadomie wpisane 0 wracało do 30 000**. Sama zmiana wartości domyślnej nie zrobiłaby nic —
+gospodarz z etatem dalej miałby zaniżony podatek, a pole sugerowałoby, że zadziałało.
+Zamienione na sprawdzenie `Number.isFinite`. Zapis obowiązuje wszędzie, gdzie zero jest
+poprawną odpowiedzią użytkownika, a nie brakiem odpowiedzi.
+
+---
+
+## ADR-020: Podatek liniowy i działalność nierejestrowana usunięte z aplikacji
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Obie formy były zadeklarowane w projekcie panelu podatkowego i obsługiwane
+w kodzie, ale **żadna nie była liczona zgodnie z prawem**. `podatekDochodowy()` przepuszczał
+je do gałęzi domyślnej, która liczyła `podstawa × rate%`, gdzie `rate` wynosi domyślnie 8,5% —
+czyli stawkę ryczałtu.
+
+- **Podatek liniowy** to **19% od DOCHODU** (art. 30c ust. 1 ustawy o PIT), a więc po odjęciu
+  kosztów — czego ta gałąź nie robiła (`podstawa = przychod`). Błąd rzędu dziesięciu punktów
+  procentowych podstawy, w kierunku zaniżenia.
+- **Działalność nierejestrowana** to **przychód z innych źródeł** (art. 20 ust. 1ba PIT),
+  opodatkowany **według skali** (art. 27 ust. 1 PIT), z możliwością odliczenia kosztów,
+  rozliczany w PIT-36. Ryczałt 8,5% nie ma tu zastosowania w żadnym wariancie.
+
+Do tego panel milczał o dwóch rzeczach krytycznych dla użytkownika nierejestrowanego:
+limit od 1 stycznia 2026 jest **kwartalny** (225% minimalnego wynagrodzenia = **10 813,50 zł**),
+a najem krótkoterminowy z usługami prawdopodobnie w ogóle się w tej formie nie mieści.
+
+**Decyzja**: obie formy usunięte z `taxSummary.js`, `taxCalculator.js`, `TaxesView.jsx`
+oraz z dokumentów projektowych. Aplikacja obsługuje **dwie formy**: ryczałt i zasady ogólne.
+
+**Koszt usunięcia był zerowy** — `SettingsModal.jsx` nigdy tych form nie oferował, więc żadne
+konto nie mogło ich wybrać. Istniały wyłącznie jako martwe gałęzie kodu i obietnice
+w dokumentacji.
+
+**Zmiana zachowania przy nieznanej formie**: `podatekDochodowy()` zwraca teraz `null` zamiast
+liczby policzonej stawką z ustawień, a `podsumowaniePodatkowe()` wystawia `formaZnana: false`
+i `lacznieDoZaplaty: null`. `calculateTaxes()` zostawia pole podatku puste. Uzasadnienie:
+liczba policzona „jakąś" stawką wygląda tak samo wiarygodnie jak prawdziwa. Puste pole
+gospodarz zauważy; błędna kwota wygląda dobrze.
+
+⚠️ **Pułapka przy tej zmianie**: `null + liczba` daje w JavaScripcie liczbę, więc brak podatku
+przeszedłby po cichu jako „0 zł podatku" w sumie `lacznieDoZaplaty`. Stąd jawna flaga
+`formaZnana` zamiast polegania na arytmetyce.
+
+**Powrót do tematu**: obie formy mogą wrócić jako osobne zadania, po odpowiedzi na pytanie Q5
+do doradcy podatkowego (czy najem krótkoterminowy z usługami mieści się w działalności
+nierejestrowanej) i z własną ścieżką liczenia — dla nierejestrowanej: skala plus koszty plus
+licznik limitu kwartalnego zamiast progu 100 000 zł.

@@ -1,0 +1,277 @@
+[ikona]
+Wynajem | PRO
+Panel podatkowy · X25 · mockup
+Finanse → Podatki · czwarta podzakładka
+Ile odłożyć, | żeby nie zabrakło .
+Panel odpowiada na jedno pytanie i dopiero potem na resztę. Poniżej oba tryby, próg ryczałtu, cztery stany wyjątkowe i widok telefonu.
+Dane przykładowe
+Ryczałt 8,5% · 3 obiekty
+Rok
+2026 · stan na sierpień
+Źródło liczb
+taxSummary.js
+Rama
+Istniejące zakładki .wpd-*
+### ══ 01 PODSUMOWANIE ══
+Tryb „Podsumowanie”
+01
+Domyślny przy ryczałcie i działalności nierejestrowanej. Jedna liczba czyta się z odległości, wszystko poniżej tylko ją uzasadnia.
+Rys. 1 — Podsumowanie · stan normalny
+Pierwsza sekunda: kwota i to, z czego się składa.
+Finanse
+Przychody, koszty i podatki
+2024
+2025
+2026
+Przegląd
+Koszty i opłaty
+Podatki
+Raporty
+Podsumowanie
+Szczegóły dla księgowego
+47 rezerwacji · stawki 2026
+Do odłożenia za 2026
+13 082 | zł
+Podatek za osiem minionych miesięcy plus składka zdrowotna. Tyle powinno czekać na koncie, kiedy przyjdzie zapłacić.
+Podatek ryczałtowy 8,5%
+6 930 zł
+Zdrowotna 769 zł × 8 miesięcy
+6 152 zł
+Składki społeczne
+nie masz ich w ustawieniach
+Próg ryczałtu · 100 000 zł
+84,6% progu
+Zostało | 15 400 zł przychodu
+0 | 50 000 | 100 000 zł
+Do progu stawka wynosi 8,5%. Od nadwyżki powyżej 100 000 zł — 12,5%. Przy 84 600 zł przychodu masz jeszcze cztery miesiące sezonu.
+Przychód i co go zjadło
+Przychód brutto
+84 600 zł
+Prowizje portali
+9 460 zł
+Media i eksploatacja
+5 620 zł
+[ikona]
+Przy ryczałcie płacisz od przychodu — prowizje i media nie obniżają podatku. Pokazujemy je, żebyś wiedział, ile zjadły.
+Zostaje Ci po prowizjach, kosztach i odłożeniu podatków
+56 438 zł
+To szacunek z Twoich danych — nie deklaracja podatkowa ani porada. Kwoty potwierdź z księgową, zanim złożysz zeznanie.
+Stawki 2026 · wyliczone 24.08.2026
+### ══ 02 PRZEŁĄCZNIK ══
+Przełącznik trybów
+02
+Ten sam segmentowany przełącznik w dwóch miejscach: w panelu, gdzie gospodarz akurat potrzebuje szczegółów, i w ustawieniach konta, gdzie szuka trwałych preferencji. Nie pytamy o tryb przy pierwszym uruchomieniu.
+Rys. 2 — Przełącznik w panelu i w ustawieniach
+Wybór zapisuje się i wraca jednym kliknięciem.
+W panelu · nad treścią
+Podsumowanie
+Szczegóły dla księgowego
+Podsumowanie
+Szczegóły dla księgowego
+.wpd-seg · aktywny na atramencie na 375 px dwie kolumny pełnej szerokości
+Podsumowanie
+Szczegóły
+Ustawienia konta → Podatki
+Widok podatków
+Domyślnie wynika z Twojej formy opodatkowania. Możesz to zmienić na stałe.
+Podsumowanie | Jedna liczba: ile odłożyć.
+Szczegóły dla księgowego | Rozbicie kwot i rozkład miesięczny.
+Domyślnie: ryczałt i nierejestrowana → Podsumowanie zasady ogólne i liniowy → Szczegóły
+### ══ 03 SZCZEGÓŁY ══
+Tryb „Szczegóły dla księgowego”
+03
+Materiał do rozmowy przez telefon. Kwota główna zostaje na górze, ale ustępuje miejsca rachunkowi i rozkładowi miesięcznemu.
+Rys. 3 — Szczegóły · rachunek roku i miesiące
+Liczby monospace’em, wyrównane w kolumnie.
+Podsumowanie
+Szczegóły dla księgowego
+Rok 2026 · stawki 2026
+Przychód
+84 600 zł
+Podstawa
+81 524 zł
+Podatek
+6 930 zł
+Łącznie do zapłaty
+13 082 zł
+Rachunek roku 2026
+Przychód brutto ze 47 rezerwacji
+84 600,00
+Odliczenie 50% składki zdrowotnej
+− 3 076,00
+Podstawa opodatkowania
+81 524,00
+Ryczałt 8,5% od podstawy
+6 929,54
+Zdrowotna — próg do 300 000 zł · 769,43 × 8
+6 155,44
+Składki społeczne — nie masz ich w ustawieniach
+pomijamy
+Łącznie do zapłaty
+13 084,98
+Do rozmowy z księgową
+Forma opodatkowania | Ryczałt 8,5%
+Próg | 100 000 zł
+VAT należny 8% | nie jesteś płatnikiem
+Rok stawek | 2026
+Miesięcy w wyliczeniu | 8 z 12
+Prowizje i media · poza rachunkiem ryczałtu
+Prowizje portali | 9 460 zł
+Media i eksploatacja | 5 620 zł
+Nie wchodzą do podstawy — ryczałt liczy się od przychodu. Trzymamy je osobno, żeby rachunek powyżej się zgadzał.
+Rozkład miesięczny · 2026
+{{ miesiaceHint }}
+Miesiąc
+Rezerwacje
+Brutto
+Przychód
+Prowizje
+Media
+{{ m.nazwa }}
+{{ m.rez }}
+{{ m.brutto }}
+{{ m.przychod }}
+{{ m.prowizje }}
+{{ m.media }}
+Razem
+47
+84 600
+84 600
+9 460
+5 620
+To szacunek z Twoich danych — nie deklaracja podatkowa ani porada. Kwoty potwierdź z księgową, zanim złożysz zeznanie.
+Stawki 2026 · wyliczone 24.08.2026
+### ══ 04 STANY ══
+Stany wyjątkowe
+04
+Ostrzeżenia siedzą nad kwotą, nie przy każdej liczbie. Wysoka waga dostaje cynober, uwaga bursztyn.
+Rys. 4 — Rok bez rezerwacji
+Zera nie mówią nic. Mówimy, co zrobić.
+[ikona]
+Za 2026 nie ma jeszcze żadnej rezerwacji
+Podatek policzy się sam, gdy dodasz pierwszą rezerwację albo podłączysz kalendarz Airbnb lub Booking.
+Dodaj rezerwację
+Podłącz kalendarz
+2025 masz rozliczony — przełącz rok wyżej
+Rys. 5 — Stawki z innego roku
+Wysoka waga: wyliczenie wygląda poprawnie, a nie jest.
+[ikona]
+Rozliczenie 2027 liczymy stawkami z 2026
+Kwoty podatku i składek zmieniają się co roku. Dopóki nie wejdą stawki na 2027, traktuj te liczby jako orientacyjne — kierunek jest dobry, kwota nie.
+Do odłożenia za 2027
+4 210 | zł
+Stawki 2026
+Rys. 6 — Rozjazd z kwotami przy rezerwacjach
+Obie liczby na wierzchu, jedna wskazana jako wiążąca.
+[ikona]
+Dwie różne kwoty podatku za 2026
+Przy 12 rezerwacjach zapisano podatek policzony innymi ustawieniami — najczęściej dlatego, że zmieniłeś formę opodatkowania w trakcie roku.
+Z bieżących ustawień
+Wiążąca
+6 930 zł
+Ryczałt 8,5% od całego roku, liczony raz — tę kwotę pokazujemy w panelu.
+Zapisane przy rezerwacjach
+8 415 zł
+Suma z 12 rezerwacji, w tym starsze — różnica 1 485 zł.
+Możesz przeliczyć stare rezerwacje bieżącymi ustawieniami — kwoty przy nich się wtedy zgodzą.
+Przelicz 12 rezerwacji →
+Rys. 7 — Próg przekroczony
+Nadwyżka wychodzi z paska cynobrem.
+Próg ryczałtu · 100 000 zł
+108,2% progu
+Powyżej progu o | 8 200 zł
+100 000 zł
+nadwyżka
+Od nadwyżki płacisz 12,5% zamiast 8,5%. Każde kolejne 1 000 zł przychodu w tym roku to 125 zł podatku — warto to wiedzieć, ustalając ceny na wrzesień.
+Podatek po dwóch stawkach
+Do progu · 8,5% od 100 000 zł
+8 500 zł
+Nadwyżka · 12,5% od 8 200 zł
+1 025 zł
+Podatek za rok
+9 525 zł
+Rys. 8 — Zasady ogólne · bez progu i bez automatycznej zdrowotnej
+Elementy znikają, nie pokazują się puste.
+Rachunek roku 2026 · skala podatkowa
+Przychód | 84 600,00
+Prowizje portali | − 9 460,00
+Media i eksploatacja | − 5 620,00
+Dochód · podstawa | 69 520,00
+Podatek 12% po kwocie wolnej 30 000 zł | 4 742,40
+Zdrowotna z Twoich ustawień · 314,10 × 8 | 2 512,80
+Łącznie do zapłaty | 7 255,20
+Tu koszty obniżają podatek
+Przy zasadach ogólnych prowizje i media wchodzą do rachunku i zmniejszają podstawę. Dlatego są w kolumnie z odejmowaniem, a przy ryczałcie stoją osobno.
+Czego tu nie ma
+Paska progu 100 000 zł — próg dotyczy tylko ryczałtu. Automatycznej zdrowotnej — przy skali zależy od dochodu, więc bierzemy ją z ustawień.
+### ══ 05 375 PX ══
+Telefon · 375 px
+05
+Kolejność zostaje: kwota, próg, rachunek. Karty schodzą w jedną kolumnę, tabela przewija się u siebie — strona nie rusza się w poziomie.
+Rys. 9 — Oba tryby na 375 px
+Przełącznik pełnej szerokości pod zakładkami.
+Przegląd
+Koszty
+Podatki
+Raporty
+Podsumowanie
+Szczegóły
+Do odłożenia za 2026
+13 082 | zł
+Podatek 6 930 zł i zdrowotna 6 152 zł za osiem miesięcy.
+Próg 100 000 zł
+84,6%
+Zostało | 15 400 zł
+Powyżej progu stawka rośnie do 12,5% od nadwyżki.
+Przychód brutto | 84 600 zł
+Prowizje portali | 9 460 zł
+Media | 5 620 zł
+[ikona]
+Przy ryczałcie nie obniżają podatku.
+To szacunek z Twoich danych, nie deklaracja ani porada. Kwoty potwierdź z księgową.
+Podsumowanie
+Szczegóły
+Podstawa
+81 524 zł
+Łącznie
+13 082 zł
+Rachunek roku
+Przychód | 84 600,00
+Odliczenie 50% zdrowotnej | − 3 076,00
+Ryczałt 8,5% | 6 929,54
+Zdrowotna 769,43 × 8 | 6 155,44
+Łącznie | 13 084,98
+Miesiące
+przewiń w poziomie →
+Miesiąc
+Brutto
+Prowizje
+Media
+{{ m.nazwa }}
+{{ m.brutto }}
+{{ m.prowizje }}
+{{ m.media }}
+Razem
+84 600
+9 460
+5 620
+### ══ 06 MIKROCOPY ══
+Mikrocopy
+06
+Teksty użyte na rysunkach, do przeniesienia w kod. Treści prawne uzgadniamy osobno — poniżej propozycja jednego zdania w jednym miejscu.
+Miejsce | Tekst
+Etykieta kwoty głównej | Do odłożenia za 2026
+Zdanie pod kwotą | Podatek za osiem minionych miesięcy plus składka zdrowotna. Tyle powinno czekać na koncie, kiedy przyjdzie zapłacić.
+Brak składek społecznych | Składki społeczne — nie masz ich w ustawieniach.
+Przed progiem | Zostało 15 400 zł przychodu do progu 100 000 zł.
+Po progu | Powyżej progu o 8 200 zł. Od nadwyżki płacisz 12,5% zamiast 8,5%.
+Prowizje przy ryczałcie | Przy ryczałcie płacisz od przychodu — prowizje i media nie obniżają podatku. Pokazujemy je, żebyś wiedział, ile zjadły.
+Rok bez rezerwacji | Za 2026 nie ma jeszcze żadnej rezerwacji. Podatek policzy się sam, gdy dodasz pierwszą rezerwację albo podłączysz kalendarz Airbnb lub Booking.
+Stawki z innego roku | Rozliczenie 2027 liczymy stawkami z 2026. Dopóki nie wejdą stawki na 2027, traktuj te liczby jako orientacyjne.
+Rozjazd | Dwie różne kwoty podatku za 2026. Wiążąca jest ta z bieżących ustawień — najczęściej zmieniłeś formę opodatkowania w trakcie roku.
+Zastrzeżenie · raz, na końcu | To szacunek z Twoich danych — nie deklaracja podatkowa ani porada. Kwoty potwierdź z księgową, zanim złożysz zeznanie.
+Miejsce zostawione, nierysowane
+Pod rachunkiem roku zostaje pasmo na mikrorachunek podatkowy i tytuł przelewu, obok nagłówka rachunku — miejsce na eksport CSV. VAT-UE od prowizji portali czeka na analizę prawną. Nic z tego nie jest tu narysowane jako gotowe.
+[ikona]
+WynajemPRO
+Panel podatkowy · mockup · 24.08.2026

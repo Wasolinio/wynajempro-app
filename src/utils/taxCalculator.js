@@ -78,10 +78,19 @@ export function calculateTaxes(rentalObj, allRentals, settings, editingId) {
 
     taxAmt = Math.max(0, progressiveTax(newProfit) - progressiveTax(oldProfit));
 
-  // ===== STAWKA LINIOWA / NIEREJESTROWANA =====
-  } else {
+  // ===== RYCZAŁT ZE STAŁĄ STAWKĄ (automatyczny próg wyłączony) =====
+  // Ta gałąź obsługiwała kiedyś także podatek liniowy i działalność nierejestrowaną,
+  // licząc obie stawką z ustawień (domyślnie 8,5%) — bez podstawy prawnej: liniowy
+  // to 19% od dochodu (art. 30c ust. 1 PIT), a nierejestrowana idzie według skali
+  // jako przychód z innych źródeł (art. 20 ust. 1ba PIT). Usunięte 2026-08-25, ADR-020.
+  } else if (settings.taxForm === 'lump_sum') {
     const rate = (Number(settings.rate) || 8.5) / 100;
     taxAmt = taxBase * rate;
+
+  // Nieznana forma — zostawiamy pole podatku puste zamiast wpisywać liczbę policzoną
+  // stawką wziętą z powietrza. Puste pole gospodarz zauważy; błędna kwota wygląda dobrze.
+  } else {
+    return { vat: vatAmt > 0 ? vatAmt.toFixed(2) : '', tax: '' };
   }
 
   return {

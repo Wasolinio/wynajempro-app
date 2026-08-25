@@ -191,9 +191,12 @@ export const DASHBOARD_CSS = `
 
 /* ── Karty statystyk ── */
 .wpd-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+/* min-width:0 — element siatki ma domyślnie min-width:auto, więc dłuższy tekst w karcie
+   rozpycha kolumnę zamiast się zawinąć. Na telefonie dawało to stronę szerszą niż okno. */
 .wpd-stat{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px;
   padding:18px 20px 20px; min-height:128px; display:flex; flex-direction:column; cursor:pointer;
-  transition:border-color .14s; }
+  min-width:0; transition:border-color .14s; }
+.wpd-stat__label, .wpd-stat__value, .wpd-stat__sub{ overflow-wrap:anywhere; }
 .wpd-stat:hover{ border-color:var(--ink); }
 .wpd-stat__head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
 .wpd-stat__head .wpd-stat__label{ margin:0; }
@@ -508,8 +511,13 @@ export const DASHBOARD_CSS = `
   text-transform:uppercase; color:var(--faint); margin-top:3px; }
 
 /* ── Ustawienia (taby + listy) ── */
+/* min-width:0 + max-width:100% to nie ozdoba: bez nich kontener flex rośnie do sumy
+   szerokości zakładek zamiast je przewijać i rozpycha stronę w poziomie. Ujawniła to
+   dopiero CZWARTA zakładka Finansów (Podatki, X25) — przy trzech mieściło się na styk,
+   przy czterech strona miała 406 px w oknie 375 px. Ten sam idiom stoi przy .wpd-seg,
+   gdzie komentarz od dawna powoływał się na .wpd-tabs jako wzór; wzór go nie miał. */
 .wpd-tabs{ display:flex; gap:4px; overflow-x:auto; padding-bottom:14px; margin-bottom:18px;
-  border-bottom:1px solid var(--hairline); }
+  min-width:0; max-width:100%; border-bottom:1px solid var(--hairline); }
 .wpd-tab{ flex:0 0 auto; border:1px solid transparent; background:transparent; cursor:pointer;
   font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--muted); padding:8px 12px; border-radius:3px; white-space:nowrap; transition:.14s; }
