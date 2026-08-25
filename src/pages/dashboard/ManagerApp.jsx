@@ -709,6 +709,8 @@ export default function ManagerApp() {
                 openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
                 taxSettings={taxSettings}
                 trybPodatkow={trybPodatkow} onZmienTrybPodatkow={zmienTrybPodatkow}
+                onDodajRezerwacje={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}
+                onOtworzUstawienia={openSettingsOn}
               />
             )}
             {renderView === 'guides' && (

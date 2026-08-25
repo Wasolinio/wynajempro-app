@@ -24,6 +24,7 @@ const TABS = [
 export default function FinanceHub({
   rentals, properties, user, categories, recurringCosts, selectedYear, setSelectedYear, onOpenReport,
   openEditModal, handleDeleteClick, taxSettings, trybPodatkow, onZmienTrybPodatkow,
+  onDodajRezerwacje, onOtworzUstawienia,
 }) {
   const [tab, setTab] = useState('overview');
 
@@ -63,6 +64,7 @@ export default function FinanceHub({
         <TaxesView
           rentals={rentals} taxSettings={taxSettings} selectedYear={selectedYear}
           tryb={trybPodatkow} onZmienTryb={onZmienTrybPodatkow}
+          onDodajRezerwacje={onDodajRezerwacje} onOtworzUstawienia={onOtworzUstawienia}
         />
       )}
 

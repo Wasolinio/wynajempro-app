@@ -31,7 +31,7 @@ async function otworzPodatki(page, tax) {
   await page.goto('/dashboard');
   await page.locator('.wpd-nav__item', { hasText: 'Finanse' }).click();
   await page.locator('.wpd-tab', { hasText: 'Podatki' }).click();
-  await expect(page.locator('.wpd-stat--dark')).toBeVisible();
+  await expect(page.locator('.wpd-seg')).toBeVisible();
 }
 
 test('Zastrzeżenie prawne stoi dokładnie raz i mówi o zapłacie, nie tylko o zeznaniu', async ({ page }) => {
@@ -41,7 +41,7 @@ test('Zastrzeżenie prawne stoi dokładnie raz i mówi o zapłacie, nie tylko o 
 
   const zastrzezenie = page.getByText(/nie jest deklaracją, wyliczeniem podatku ani poradą podatkową/);
   await expect(zastrzezenie).toHaveCount(1);
-  await expect(page.getByText(/zanim zapłacisz podatek lub złożysz deklarację/)).toBeVisible();
+  await expect(page.getByText(/zanim zapłacisz\s+podatek albo złożysz deklarację/)).toBeVisible();
   await expect(page.getByText(/Nie odejmujemy zapłaconych\s+już zaliczek/)).toBeVisible();
 
   expect(bledy, `błędy konsoli: ${bledy.join(' | ')}`).toHaveLength(0);
@@ -50,16 +50,18 @@ test('Zastrzeżenie prawne stoi dokładnie raz i mówi o zapłacie, nie tylko o 
 test('Najem prywatny: bez składki zdrowotnej i bez odliczenia 50%', async ({ page }) => {
   await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', viewMode: 'szczegolowy' });
 
-  await expect(page.getByText('nie doliczamy')).toBeVisible();
+  await expect(page.getByText('Składka zdrowotna · najem prywatny')).toBeVisible();
   await expect(page.getByText(/Odliczenie 50%/)).toHaveCount(0);
-  await expect(page.getByText('Składka zdrowotna · miesięcznie')).toHaveCount(0);
+  // Nigdy „0 zł" w wierszu składki — zero czytałoby się jak twierdzenie o obowiązku.
+  const rachunek = page.locator('.wpd-panel').filter({ hasText: 'Rachunek roku' });
+  await expect(rachunek.getByText('0,00 zł', { exact: true })).toHaveCount(0);
 });
 
 test('Brak odpowiedzi o podstawę wynajmu odsyła do ustawień, nie pokazuje zera', async ({ page }) => {
   await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true });
 
-  await expect(page.getByText('brak odpowiedzi')).toBeVisible();
-  await expect(page.getByText(/uzupełnij „Jak wynajmujesz"/)).toBeVisible();
+  await expect(page.getByText('Zanim doliczymy składkę zdrowotną')).toBeVisible();
+  await expect(page.getByText('Uzupełnij w ustawieniach →')).toBeVisible();
   await expect(page.getByText(/Odliczenie 50%/)).toHaveCount(0);
 });
 
@@ -67,7 +69,10 @@ test('Działalność: odliczenie 50% jest i zgadza się z podstawą', async ({ p
   await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'business', viewMode: 'szczegolowy' });
 
   await expect(page.getByText(/Odliczenie 50% zapłaconej składki zdrowotnej/)).toBeVisible();
-  await expect(page.getByText('Składka zdrowotna · miesięcznie')).toBeVisible();
+  await expect(page.getByText(/art\. 11 ust\. 1a ustawy o ryczałcie/)).toBeVisible();
+  // Etykieta nazywa PRZEDZIAŁ, nie samą górną granicę (§B6).
+  await expect(page.getByText(/przychód do 60\s?000 zł/)).toBeVisible();
+  await expect(page.getByText(/próg do 300\s?000 zł/)).toHaveCount(0);
 });
 
 test('Panel podatkowy mieści się na 375 px', async ({ page }) => {
@@ -87,9 +92,14 @@ test('Współwłasność bez oświadczenia: panel tłumaczy, skąd połowa', asy
   });
 
   // Rezerwacja w atrapie ma 40 000 zł; do opodatkowania wchodzi połowa.
+  // W szczegółach: rachunek tłumaczy podział.
   await expect(page.getByText(/Część małżonka · rozlicza ją u siebie/)).toBeVisible();
   await expect(page.getByText('Twój przychód do opodatkowania')).toBeVisible();
-  await expect(page.getByText('Próg ryczałtu 100 000 zł · Twoja część')).toBeVisible();
+  await expect(page.getByText(/art\. 12 ust\. 5 i 6 ustawy o ryczałcie/)).toBeVisible();
+
+  // W podsumowaniu: karta progu mówi, że to Twoja część, a próg zostaje 100 000 zł.
+  await page.getByRole('tab', { name: 'Podsumowanie' }).click();
+  await expect(page.getByText(/Próg ryczałtu · 100\s?000 zł · Twoja część/)).toBeVisible();
 });
 
 test('Oświadczenie małżeńskie podnosi próg do 200 000 zł', async ({ page }) => {
@@ -97,7 +107,7 @@ test('Oświadczenie małżeńskie podnosi próg do 200 000 zł', async ({ page }
     taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', spouseRental: 'calosc',
   });
 
-  await expect(page.getByText('Próg ryczałtu 200 000 zł · oświadczenie małżeńskie')).toBeVisible();
+  await expect(page.getByText(/Próg ryczałtu · 200\s?000 zł · oświadczenie małżeńskie/)).toBeVisible();
   // Całość rozlicza jedno z małżonków, więc nic nie odejmujemy.
   await expect(page.getByText(/Część małżonka/)).toHaveCount(0);
 });

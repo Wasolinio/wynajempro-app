@@ -158,7 +158,12 @@ export const DASHBOARD_CSS = `
 .wpd-alink svg{ width:14px; height:14px; }
 
 /* ── Panele ── */
-.wpd-panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px; }
+/* min-width:0 — panel bywa elementem siatki (Finanse, panel podatkowy), a element
+   siatki ma domyślnie min-width:auto i rozciąga się do szerokości najszerszej treści
+   zamiast ją zawinąć. Bez tego panel z siatką klucz–wartość w środku rozpychał stronę
+   na telefonie o 30 px. Ten sam idiom co przy .wpd-stat, .wpd-cell i .wpd-tabs. */
+.wpd-panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px;
+  min-width:0; }
 
 /* ── Alerty synchronizacji (X26) ──
    Kolizja terminów i rezerwacje znikłe z portalu. Dwa poziomy pilności: cynober =
@@ -565,7 +570,8 @@ export const DASHBOARD_CSS = `
   text-transform:uppercase; color:var(--faint); margin-top:3px; }
 .wpd-cells{ display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--hairline); }
 .wpd-cells--4{ grid-template-columns:repeat(4,1fr); }
-.wpd-cell{ padding:14px 18px; border-right:1px solid var(--hairline); }
+.wpd-cell{ padding:14px 18px; border-right:1px solid var(--hairline); min-width:0; }
+.wpd-cell__val{ overflow-wrap:anywhere; }
 .wpd-cell:last-child{ border-right:none; }
 .wpd-cell__label{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.07em;
   text-transform:uppercase; color:var(--label); margin-bottom:5px; }
@@ -587,8 +593,9 @@ export const DASHBOARD_CSS = `
   color:var(--green-dot); }
 .wpd-guide__pin--empty{ color:var(--on-side-label); letter-spacing:.22em; }
 .wpd-guide__note{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--on-side-faint); margin:10px 0 0; }
-.wpd-kvgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-.wpd-kv{ border:1px solid var(--hairline); border-radius:4px; padding:11px 13px; background:var(--surface); }
+.wpd-kvgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; min-width:0; }
+.wpd-kv{ border:1px solid var(--hairline); border-radius:4px; padding:11px 13px; background:var(--surface);
+  min-width:0; overflow-wrap:anywhere; }
 .wpd-kv__k{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--label); margin-bottom:4px; }
 .wpd-kv__v{ font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500; color:var(--ink); }
@@ -1016,6 +1023,102 @@ export const DASHBOARD_CSS = `
   .wpd-top{ padding:0 16px; }
   .wpd-search{ width:140px; }
   .wpd-top__title h1{ font-size:21px; }
+}
+
+/* ═══ PANEL PODATKOWY (X25) ═══════════════════════════════════════════════════
+   Klasy dopisane pod projekt z 2026-08-24. Wszystko liniami 1px, bez cieni
+   i gradientów. Liczby monospace'em i tabularnie, żeby kwoty zgadzały się
+   w kolumnie — to nie estetyka, tylko czytelność rachunku dla księgowej. */
+
+.wpd-hero{ background:var(--ink); border-radius:4px; padding:32px; display:grid;
+  grid-template-columns:1.25fr 1fr; gap:32px; }
+.wpd-hero__label{ font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--on-side-faint); margin:0 0 16px; }
+.wpd-hero__value{ font-weight:800; font-size:76px; line-height:.95; letter-spacing:-.04em;
+  color:var(--paper); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.wpd-hero__suffix{ font-weight:700; font-size:38px; margin-left:6px; }
+.wpd-hero__lead{ font-size:15px; line-height:1.6; color:#C7BFB0; max-width:380px; margin:16px 0 0; }
+.wpd-hero__side{ border-left:1px solid var(--side-line); padding-left:28px; min-width:0; }
+.wpd-hero__row{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  padding:11px 0; border-bottom:1px solid var(--side-line); }
+.wpd-hero__row:last-child{ border-bottom:none; }
+.wpd-hero__k{ font-size:13.5px; color:#C7BFB0; min-width:0; }
+.wpd-hero__v{ font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500;
+  color:var(--paper); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.wpd-hero__v--muted{ font-size:12px; color:var(--on-side-faint); text-transform:uppercase;
+  letter-spacing:.06em; white-space:normal; text-align:right; }
+.wpd-hero__tag{ display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+  font-weight:600; letter-spacing:.08em; text-transform:uppercase; background:var(--cynober);
+  color:#fff; padding:3px 7px; border-radius:3px; margin-bottom:12px; }
+
+/* Próg ryczałtu — ma się czytać z odległości, dlatego „ile zostało" jest większe niż procent. */
+.wpd-prog__head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.wpd-prog__label{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--label); margin:0; min-width:0; }
+.wpd-prog__pct{ font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600;
+  color:var(--amber-ink); white-space:nowrap; }
+.wpd-prog__pct--over{ color:var(--cynober); }
+.wpd-prog__lead{ font-weight:700; font-size:27px; letter-spacing:-.02em; margin:12px 0 14px; }
+.wpd-prog__lead strong{ font-family:'IBM Plex Mono', monospace; font-weight:600;
+  font-variant-numeric:tabular-nums; }
+.wpd-prog__track{ height:18px; background:var(--inner-2); border-radius:3px; overflow:hidden;
+  display:flex; }
+.wpd-prog__fill{ background:var(--amber); height:100%; }
+.wpd-prog__fill--over{ background:var(--ink); }
+.wpd-prog__over{ background:var(--cynober); height:100%; }
+.wpd-prog__scale{ display:flex; justify-content:space-between; margin-top:6px;
+  font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--label); }
+.wpd-prog__note{ font-size:13.5px; line-height:1.6; color:var(--muted); margin:14px 0 0; }
+.wpd-prog__src{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--label);
+  margin:8px 0 0; }
+
+/* Rozjazd — dwie kwoty obok siebie, jedna wskazana jako ta z panelu. */
+.wpd-compare{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.wpd-compare__card{ background:var(--surface); border:1px solid var(--hairline);
+  border-radius:4px; padding:22px; min-width:0; }
+.wpd-compare__card--main{ border-color:var(--ink); }
+.wpd-compare__tag{ display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:10px;
+  font-weight:600; letter-spacing:.08em; background:var(--ink); color:#fff; padding:4px 8px;
+  border-radius:3px; margin-bottom:10px; }
+.wpd-compare__val{ font-weight:800; font-size:34px; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.wpd-compare__val--faint{ color:var(--faint); }
+.wpd-compare__desc{ font-size:13px; line-height:1.55; color:var(--muted); margin:8px 0 0; }
+
+/* Stopka zastrzeżenia — jedno miejsce w panelu, nie powtarzamy przy liczbach. */
+.wpd-taxfoot{ display:flex; justify-content:space-between; align-items:flex-start; gap:24px;
+  flex-wrap:wrap; padding:14px 16px; background:var(--surface); border:1px solid var(--hairline);
+  border-radius:4px; }
+.wpd-taxfoot__txt{ font-size:13px; line-height:1.6; color:var(--muted); max-width:640px; margin:0; }
+.wpd-taxfoot__meta{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--label); white-space:nowrap; }
+
+/* Wiersz podrzędny rachunku — podstawa prawna albo zastrzeżenie do pozycji wyżej. */
+.wpd-settle__sub{ font-family:'IBM Plex Mono', monospace; font-size:10px; line-height:1.5;
+  color:var(--faint); margin:-6px 0 10px; }
+
+@media (max-width:900px){
+  .wpd-hero{ grid-template-columns:1fr; gap:24px; padding:24px; }
+  .wpd-hero__side{ border-left:none; border-top:1px solid var(--side-line);
+    padding-left:0; padding-top:12px; }
+  .wpd-compare{ grid-template-columns:1fr; }
+}
+@media (max-width:600px){
+  /* Cztery komórki KPI nie mieszczą się na telefonie nawet po zawinięciu. Copy §2.1
+     przewiduje dwie: podstawę i kwotę do odłożenia — reszta jest w rachunku niżej. */
+  .wpd-cells--4{ grid-template-columns:repeat(2,1fr); }
+  .wpd-cells--4 .wpd-cell:nth-child(1),
+  .wpd-cells--4 .wpd-cell:nth-child(3){ display:none; }
+  .wpd-cells--4 .wpd-cell__val{ font-size:19px; }
+  .wpd-hero{ padding:20px; }
+  .wpd-hero__value{ font-size:44px; }
+  .wpd-hero__suffix{ font-size:22px; }
+  .wpd-hero__lead{ font-size:13px; line-height:1.55; }
+  .wpd-prog__lead{ font-size:19px; }
+  .wpd-prog__track{ height:14px; }
+  .wpd-compare__val{ font-size:26px; }
+  .wpd-taxfoot{ border:none; background:none; padding:0; }
+  .wpd-taxfoot__txt{ font-size:12px; color:var(--faint); }
 }
 
 /* ── Wąski telefon: nagłówek panelu bez zawijania i ucinania (zgłoszenie właściciela) ── */

@@ -56,6 +56,22 @@ export function zdrowotnaRyczalt(przychodRoczny) {
 }
 
 /**
+ * Widełki przychodu, w których mieści się gospodarz — do etykiety składki zdrowotnej.
+ * Etykieta musi nazywać PRZEDZIAŁ od–do, a nie samą górną granicę: „próg do 300 000 zł"
+ * przy przychodzie 84 600 zł czyta się jak pierwszy próg i ukrywa, że przekroczenie
+ * 300 000 zł podnosi składkę o 80%.
+ */
+export function widelkiZdrowotnej(przychodRoczny) {
+  const progi = STAWKI_PODATKOWE.zdrowotnaRyczalt.progi;
+  const i = progi.findIndex((p) => przychodRoczny <= p.doPrzychodu);
+  if (i < 0) return null;
+  return {
+    od: i === 0 ? 0 : progi[i - 1].doPrzychodu,
+    do: Number.isFinite(progi[i].doPrzychodu) ? progi[i].doPrzychodu : null,
+  };
+}
+
+/**
  * Współwłasność małżeńska przy najmie prywatnym — art. 12 ust. 5, 6 i 13 ustawy o ryczałcie.
  *
  * Zwraca dwie rzeczy naraz, bo są nierozłączne: jaką CZĘŚĆ przychodu rozlicza ten gospodarz
@@ -229,6 +245,24 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   const doProgu = Math.max(0, progRyczaltu - przychod);
   const procentProgu = Math.min(100, (przychod / progRyczaltu) * 100);
 
+  // FAKTYCZNY podział na pasma — do karty „Podatek po dwóch stawkach". Liczony z tego
+  // samego współczynnika co podatek, więc kwoty w karcie sumują się do kwoty w rachunku.
+  // Wpisanie tam „8,5% od 100 000 zł" na sztywno byłoby nieprawdą u każdego, kto ma
+  // odliczenie zdrowotnej: podstawa jest niższa od przychodu, więc podział wypada gdzie indziej.
+  const dzieliNaPasma = ustawienia.taxForm === 'lump_sum' && ustawienia.autoThreshold
+    && przychod > progRyczaltu;
+  const wspolczynnik = przychod > 0 ? podstawa / przychod : 0;
+  const pasma = dzieliNaPasma ? {
+    doProgu: {
+      podstawa: progRyczaltu * wspolczynnik,
+      podatek: progRyczaltu * wspolczynnik * S.ryczaltNajem.stawkaDoProgu,
+    },
+    nadwyzka: {
+      podstawa: (przychod - progRyczaltu) * wspolczynnik,
+      podatek: (przychod - progRyczaltu) * wspolczynnik * S.ryczaltNajem.stawkaPowyzejProgu,
+    },
+  } : null;
+
   return {
     rok,
     rokStawek: S.rok,
@@ -257,6 +291,14 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
     wariantMalzenski,
     udzialPodatkowy: udzial,
     przychodCalosc,
+
+    pasma,
+    widelki: zdrowotnaZProgu ? widelkiZdrowotnej(przychod) : null,
+
+    // Stawki w aplikacji są przeterminowane — niezależnie od oglądanego roku.
+    // `stawkiAktualne` łapie tylko „liczę rok przyszły starymi stawkami"; ten warunek
+    // łapie częstszy przypadek: jest luty następnego roku i nikt nie zaktualizował stałych.
+    stawkiPrzeterminowane: dzisiaj.getFullYear() > S.rok,
 
     rozjazd: (zRozliczonym.length > 0 && Math.abs(podatek - zapisanyPodatek) > 1)
       ? { wyliczony: podatek, zapisany: zapisanyPodatek, rezerwacji: zRozliczonym.length }
