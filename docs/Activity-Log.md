@@ -6,6 +6,13 @@ Project timeline and key milestones.
 
 ## 2026-08-25
 
+### Złoty zestaw dla silnika podatkowego + `main` zrównane z produkcją
+- ✅ **`npm run test:podatki` — 16 testów w `src/utils/taxSummary.test.mjs`**. Analiza prawna postawiła je na PIERWSZYM miejscu wśród zabezpieczeń, przed bramką CI i przed rejestrem stawek. Pokrywają: stawki i progi wprost z ustaw, najem prywatny bez zdrowotnej, działalność przed progiem i po progu, proporcjonalny podział odliczenia z art. 11 ust. 3, skalę z kwotą wolną 0 i 30 000, trzy układy współwłasności małżeńskiej, nieznaną formę bez liczby, VAT 8%, rozjazd, rok jako napis, przeterminowane stawki, widełki zdrowotnej.
+- ⚖️ **Kwoty w testach są policzone RĘCZNIE z tekstów przepisów, nie skopiowane z wyjścia kodu.** Test, którego oczekiwania pochodzą z tego, co kod właśnie zwrócił, potwierdza wyłącznie, że kod się nie zmienił — nie że liczy dobrze. Zapisane w nagłówku pliku, żeby następna aktualizacja stawek nie poszła drogą na skróty.
+- 📌 **Dwa testy pilnują błędów, które realnie wystąpiły dziś**: rok podany jako napis (panel podaje go tak i bez konwersji filtr nie trafiał nigdy) oraz suma pasm równa podatkowi (bez tego karta „Podatek po dwóch stawkach" pokazywałaby liczby niezgadzające się z rachunkiem obok).
+- ✅ **`import { STAWKI_PODATKOWE } from './constants.js'`** — z rozszerzeniem. Vite radzi sobie z jednym i drugim, Node bez rozszerzenia nie umie. Dzięki temu złoty zestaw uruchamia **prawdziwy moduł**, a nie kopię przerobioną skryptem — a to właśnie kopia potrafi oskarżyć poprawny kod.
+- ✅ **`main` scalone z `x26-ical-sync`** (fast-forward, 14 commitów, zero konfliktów) i wypchnięte. Produkcja stała na gałęzi funkcyjnej od X26, więc `main` przestał być obrazem tego, co wydane. **Dowód zgodności**: `main` buduje się do chunku `ManagerApp-Hh6_0r4W.js` — dokładnie tego, który stoi na produkcji.
+
 ### PANEL PODATKOWY DOSTAŁ UKŁAD Z PROJEKTU — X25 zamknięte
 - ✅ **Commit `75cce5d`**, wydanie `hosting:app`. Widok tymczasowy wymieniony **w całości** na układ z handoffu Claude Design, z tekstami przepuszczonymi wcześniej przez humanizera. Marker `WIDOK TYMCZASOWY` zniknął z produkcyjnego chunku — kontrola negatywna to potwierdza.
 - ✅ **Silnik bez zmiany reguł, trzy nowe wyjścia.** `pasma` — faktyczny podział podstawy na 8,5% i 12,5%, liczony tym samym współczynnikiem co podatek (sprawdzone: pasma sumują się do kwoty z rachunku **co do grosza**). `widelki` — przedział progu zdrowotnej do etykiety. `stawkiPrzeterminowane` — warunek na rok BIEŻĄCY, nie na wybrany, więc łapie przypadek, którego `stawkiAktualne` nie widzi: jest luty następnego roku i nikt nie zaktualizował stałych.

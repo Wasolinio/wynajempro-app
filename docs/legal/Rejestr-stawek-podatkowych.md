@@ -5,6 +5,13 @@ podatkowym, która **zgnije sama, bez żadnego sygnału**. Wyliczenie policzone 
 stawkami wygląda dokładnie tak samo jak poprawne. Ten rejestr jest dowodem należytej
 staranności — data i źródło każdej weryfikacji.
 
+**Bramka techniczna:** `npm run test:podatki` — złoty zestaw 16 testów w
+`src/utils/taxSummary.test.mjs`. Kwoty w nim są **wyliczone ręcznie z tekstów ustaw**,
+nie skopiowane z wyjścia kodu, więc cicha zmiana w `constants.js` wywala test zamiast
+przejść niezauważona. Pierwszy test sprawdza wprost wszystkie stawki i progi.
+⚠️ Po zaktualizowaniu stawek trzeba **przeliczyć oczekiwania w teście ręcznie** — jeśli
+dopasujesz je do tego, co kod zwrócił, test przestaje cokolwiek pilnować.
+
 **Rytm:** sprawdzać **do 31 stycznia** każdego roku. Wtedy znane są już wszystkie wartości:
 GUS podaje przeciętne wynagrodzenie za IV kwartał w drugiej połowie stycznia, a od niego
 zależy składka zdrowotna ryczałtowców.

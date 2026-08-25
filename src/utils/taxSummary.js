@@ -20,7 +20,9 @@
 // Czysta logika — bez Reacta i bez Firebase, żeby dało się to przetestować bez atrapy.
 // =============================================================================
 
-import { STAWKI_PODATKOWE } from './constants';
+// `.js` w ścieżce — Vite rozwiąże jedno i drugie, ale Node bez rozszerzenia nie umie.
+// Dzięki temu złoty zestaw (`taxSummary.test.mjs`) uruchamia PRAWDZIWY moduł, a nie kopię.
+import { STAWKI_PODATKOWE } from './constants.js';
 
 /** Rezerwacje z danego roku, wyłącznie te, które liczą się do przychodu. */
 function rezerwacjeRoku(rentals, rok) {

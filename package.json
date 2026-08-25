@@ -16,7 +16,8 @@
     "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",
     "test:e2e:ui": "cross-env VITE_USE_EMULATORS=true playwright test --ui",
     "test:e2e:debug": "cross-env VITE_USE_EMULATORS=true playwright test --debug",
-    "test:e2e:local": "cross-env VITE_USE_EMULATORS=true playwright test"
+    "test:e2e:local": "cross-env VITE_USE_EMULATORS=true playwright test",
+    "test:podatki": "node --test src/utils/taxSummary.test.mjs"
   },
   "dependencies": {
     "@sentry/react": "^10.70.0",
