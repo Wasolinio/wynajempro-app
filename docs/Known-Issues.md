@@ -2,7 +2,7 @@
 
 ## Critical Issues
 
-### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-25)
+### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-13 → 2026-08-25, ZAMKNIĘTE)
 
 **Objaw:** każdy zakończony przebieg `ci.yml` po pushu na `main` kończy się `failure`.
 Sprawdzone przez API GitHuba 2026-08-25: przebiegi **#16 (13.08), #24 (21.08), #27 (22.08),
@@ -244,6 +244,28 @@ to dzięki nim przebieg #36 w ogóle zostawił artefakt.
 📌 **Wniosek metodyczny, wart więcej niż sama naprawa:** trzy razy z rzędu uznałem hipotezę
 za obaloną, bo „lokalnie przechodzi" — a lokalnie było inne środowisko. Dopóki nie
 odtworzysz warunku z CI u siebie, „u mnie działa" nie jest dowodem na nic.
+
+
+---
+
+## ✅ ZAMKNIĘTE 2026-08-25 — CI zielone pierwszy raz od założenia
+
+**Przebieg #42 (`67f95eb`): `success`.** Wszystkie kroki zielone, w tym `Testy e2e`;
+krok „Raport z nieudanego przebiegu" **pominięty**, bo nie było czego raportować.
+**Zero adnotacji** — ostrzeżenie o wycofywanym Node 20 zniknęło razem z podbiciem akcji
+do v7 (PR-y dependabota #1–#3, scalone tego samego dnia).
+
+**Czas: 6 min 33 s całego jobu, e2e 4 min 26 s** — wobec 21 min 32 s przy czerwonym
+przebiegu #36 i 13,7 min przy #33. Czerwona suita była wolna, bo każda porażka czeka pełne
+okno asercji, a przy `retries: 2` robi to trzy razy.
+📌 e2e w CI (4:26) zgadza się z przebiegiem lokalnym (4,2 min) — runner nie jest wolniejszy,
+co domyka sprawę: **powolność nigdy nie była przyczyną**, choć przez trzy podejścia
+wyglądała na główną podejrzaną.
+
+**Bilans usterki:** czerwone od 2026-08-13 do 2026-08-25, dwanaście dni. Przyczyna okazała
+się jedna, nie dwie: **brak zmiennych `VITE_FIREBASE_*` na runnerze**. Objawiała się w dwóch
+postaciach — brak `apiKey` wywracał start aplikacji (22 testy), brak `measurementId` psuł
+jedną asercję zgód (6 testów).
 
 ### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
 
