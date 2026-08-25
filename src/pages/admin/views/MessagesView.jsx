@@ -141,9 +141,15 @@ export default function MessagesView({ onDataChanged }) {
             )}
           </div>
         </div>
+        {/* Stopka MUSI mówić o stanie faktycznym. Wcześniej zdanie „testowe są ukryte,
+            dopóki ich nie włączysz" renderowało się bezwarunkowo — więc po włączeniu
+            przełącznika panel dalej twierdził, że ukrywa, i utwierdzał w przekonaniu,
+            że coś nie działa (zgłoszenie właściciela 2026-08-25). */}
         <p className="wpd-fhint" style={{ marginTop: 12 }}>
-          {fmtNum(rows.length)} na liście. Zgłoszenia testowe ({counts.tests}) są ukryte, dopóki ich
-          nie włączysz — testu nie diagnozuje się jak awarii.
+          {fmtNum(rows.length)} na liście.
+          {counts.tests > 0 && (includeTests
+            ? ` Zgłoszenia testowe (${fmtNum(counts.tests)}) są WŁĄCZONE i widać je razem z resztą.`
+            : ` Zgłoszenia testowe (${fmtNum(counts.tests)}) są ukryte, dopóki ich nie włączysz — testu nie diagnozuje się jak awarii.`)}
         </p>
       </div>
 

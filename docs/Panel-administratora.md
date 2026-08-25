@@ -183,16 +183,29 @@ Wejdź na **`wynajempro.com/admin`**. Nie musisz się wylogowywać — panel sam
 
 Przejdź listę:
 
-- [ ] Przegląd pokazuje liczby, a nie zera i nie błąd.
-- [ ] Liczby zgadzają się z tym, co wypisał krok 3.
-- [ ] Konta: wyszukiwarka znajduje Twoje własne konto.
+- [x] Przegląd pokazuje liczby, a nie zera i nie błąd. ✅ 2026-08-25
+- [x] Liczby zgadzają się z tym, co wypisał krok 3. ✅ 2026-08-25 — „4 łącznie" potwierdzone niezależnym odczytem Firestore (3 × `active`, 1 × `trialing`).
+- [x] Konta: wyszukiwarka znajduje Twoje własne konto. ✅ 2026-08-25
 - [ ] Konta: kliknięcie konta pokazuje szczegóły; „Pokaż ustawienia" pokazuje profil,
       a identyfikator podatkowy jest **zamaskowany** (widoczne trzy ostatnie znaki).
-- [ ] Zgłoszenia: widać zgłoszenia z formularza, a testowe są **ukryte** do czasu kliknięcia
-      przycisku „Testowe".
-- [ ] Dziennik: są w nim wpisy z tego, co przed chwilą klikałeś — **to jest dowód, że
+      ✅ 2026-08-25 — ⚖️ konto właściciela nie ma NIP-u (działalność nierejestrowana), więc panel
+      pokazał „—", co jest poprawne dla pustej wartości, ale **nie ćwiczy maskowania**.
+      Domknięte inaczej: `functions/admin-data.test.cjs` 9/9 (m.in. `'90010112345'` → `'••••••••345'`,
+      krótki identyfikator nie odsłania się przez zaokrąglenie) + e2e `admin-panel.spec.js:299`.
+      Maskowanie widoczne na żywo na innym polu: linki iCal jako `…(15 zn.)`.
+- [x] Zgłoszenia: widać zgłoszenia z formularza, a testowe są **ukryte** do czasu kliknięcia
+      przycisku „Testowe". ✅ 2026-08-25 — sprawdzone end-to-end wysyłką z `/kontakt?test=1`.
+      🛑 Przy okazji znaleziona i naprawiona myląca stopka: mówiła „testowe są ukryte" **bezwarunkowo**,
+      także po włączeniu przełącznika. Test payloadu tego nie łapał — kłamał sam tekst.
+- [x] Dziennik: są w nim wpisy z tego, co przed chwilą klikałeś — **to jest dowód, że
       audyt działa**. Pusty dziennik po klikaniu po kontach oznacza problem.
-- [ ] Telefon: `/admin` na telefonie ma u góry przewijany pasek z sześcioma sekcjami.
+      ✅ 2026-08-25 — 63 wpisy, poziom 1 i poziom 2 jako **osobne** wpisy, `USERS.LIST` z `poczatekOkna: true`
+      (dławienie 15-minutowe działa), same UID-y bez adresów e-mail. Wpisy sięgają 22.08, więc audyt
+      działa od wdrożenia, nie od dnia sprawdzenia.
+- [~] ~~Telefon: `/admin` na telefonie ma u góry przewijany pasek z sześcioma sekcjami.~~
+      ⛔ **SKREŚLONE decyzją właściciela 2026-08-25**: „nie będę korzystał z panelu admina na telefonie".
+      Sprawdzanie ekranu, z którego się nie korzysta, to praca bez pokrycia. Kod mobilny zostaje w aplikacji.
+      **Nie wracać do tego przy kolejnych przeglądach.**
 
 **Gdyby panel pokazał „Brak uprawnień":** token został wydany przed nadaniem uprawnienia —
 wyloguj się i zaloguj ponownie. Jeśli dalej to samo, sprawdź krok 6 poleceniem `--list`.

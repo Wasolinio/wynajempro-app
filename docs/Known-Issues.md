@@ -2,6 +2,50 @@
 
 ## Critical Issues
 
+### 19. „Konta płacące" i MRR liczą konta nadane ręcznie — metryka pokazuje przychód, którego nie ma (2026-08-25, OTWARTE)
+
+**Objaw:** Przegląd panelu administratora pokazuje **„Konta płacące: 3 · MRR 90 zł"**, podczas
+gdy **Stripe nie jest jeszcze aktywowany** (A1 wstrzymane decyzją właściciela 2026-08-25),
+więc realny przychód wynosi **0 zł**.
+
+**Przyczyna, potwierdzona w kodzie i w danych produkcyjnych:**
+```js
+// functions/admin-data.js
+const activeCount = byStatus.active || 0;   // liczba kont ze status === 'active'
+paying: activeCount,                         // „Konta płacące"
+revenue: mrr ? await mrr(activeCount) : null // MRR = cena ze Stripe × activeCount
+```
+`stripeMrr()` pobiera ze Stripe **wyłącznie cenę cennikową** (`prices.retrieve(PRICE_ID)`)
+i mnoży ją przez liczbę kont ze statusem `active` w Firestore. **Nie pyta Stripe'a o żadną
+subskrypcję.** Odczyt produkcji 2026-08-25: 4 konta (3 × `status: 'active'`, 1 × `trialing`),
+**żadne z aktywnych nie ma `stripeSubscriptionId`**; jedyne konto ze `stripeCustomerId`
+jest w stanie `trialing`. Czyli 3 × 29,99 zł = 89,97 ≈ 90 zł — liczba wzięta z cennika,
+nie z płatności.
+
+🔴 **Dlaczego to jest pilne teraz, a nie kiedyś:** testerów bety zaprasza się przyciskiem
+„Nadaj dostęp", który ustawia dokładnie `status: 'active'`. **Każdy zaproszony tester będzie
+więc liczony jako klient płacący.** Przy dziesięciu testerach panel pokaże „10 kont płacących,
+MRR 300 zł" przy zerowym realnym przychodzie — i to w jedynym miejscu, w którym właściciel
+patrzy na wyniki biznesu. Bramka wyjścia z bety mówi o 5–10 gospodarzach, więc rozjazd
+wystąpi na pewno, i to zaraz.
+
+⚖️ **Dlaczego to nie jest tylko kosmetyka:** decyzja o launchu i o cenie ma się opierać na
+tym, czy ktoś **zapłacił**. Metryka, która liczy nadania dostępu jako sprzedaż, mierzy
+dokładnie to, co [[Projects/Roadmap]] X11 wskazał jako pułapkę — „20 zadowolonych darmowych
+użytkowników to zero dowodu, że ktoś zapłaci 29,99 zł".
+
+**Kierunki naprawy (do decyzji, nie wdrożone):**
+1. **Liczyć subskrypcje ze Stripe'a**, nie konta z Firestore — `stripe.subscriptions.list({status:'active'})`.
+   Najwierniejsze, ale wiąże Przegląd z dostępnością Stripe'a (dziś awaria Stripe'a świadomie
+   nie wywraca przeglądu — patrz `try/catch` w `stripeMrr`).
+2. **Rozdzielić dwie liczby w interfejsie**: „konta z dostępem" (dziś 3) i „konta opłacone"
+   (liczone po `stripeSubscriptionId`). Tańsze, nie dotyka Stripe'a, a usuwa fałsz.
+3. **Minimum**: dopóki Stripe nie jest aktywny, nie pokazywać MRR wcale albo opisać go wprost
+   jako wartość cennikową × liczba kont z dostępem.
+
+📌 Znalezione przy przechodzeniu listy kontrolnej D1 — czyli dokładnie tam, gdzie miało być
+znalezione.
+
 ### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-13 → 2026-08-25, ZAMKNIĘTE)
 
 **Objaw:** każdy zakończony przebieg `ci.yml` po pushu na `main` kończy się `failure`.

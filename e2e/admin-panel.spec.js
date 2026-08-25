@@ -356,8 +356,17 @@ test('Zgłoszenia: testowe są ukryte domyślnie, przełącznik je włącza', as
     status: 'new', includeTests: false,
   });
 
+  // Stopka MUSI mówić o stanie faktycznym. Wcześniej zdanie „testowe są ukryte" stało
+  // bezwarunkowo, więc po włączeniu przełącznika panel dalej twierdził, że ukrywa —
+  // i utwierdzał w przekonaniu, że coś nie działa (zgłoszenie właściciela 2026-08-25).
+  // Test payloadu tego nie łapał, bo żądanie było poprawne; kłamał wyłącznie tekst.
+  await expect(page.locator('.wpd-fhint')).toContainText('są ukryte');
+
   await page.getByRole('button', { name: /Testowe \(4\)/ }).click();
   await expect.poll(async () => (await wywolania(page, 'messages')).some((c) => c.includeTests === true)).toBe(true);
+
+  await expect(page.locator('.wpd-fhint')).toContainText('są WŁĄCZONE');
+  await expect(page.locator('.wpd-fhint')).not.toContainText('są ukryte');
 });
 
 test('Zgłoszenia: treść, odpowiedź mailto i zamknięcie sprawy', async ({ page }) => {
