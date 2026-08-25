@@ -429,7 +429,13 @@ feedback od różnych pozycji biznesowych. Otwarte zostaje, **który tryb jest d
   był jednorazowy i nie było czym go odtworzyć. Weryfikacja: lint 0, build OK, **e2e 181/181**,
   sprawdzone na żywo na 1280 i 375 px. ⚠️ **Niewdrożone** — czeka na X25 i X26, żeby nie
   wydawać landingu trzy razy w tygodniu.
-- **X25. Moduł podatkowy: tryb prosty i szczegółowy.** ⬜
+- **X25. Moduł podatkowy: tryb prosty i szczegółowy.** ✅ **WDROŻONE 2026-08-25** (commit `b1bbf16`,
+  e2e 200/200, weryfikacja live pozytywna i negatywna na chunkach produkcyjnych). Panel wrócił jako
+  czwarta podzakładka Finansów. Po drodze: analiza prawna zablokowała makietę i wymusiła pole
+  „Jak wynajmujesz" ([[Decisions]] ADR-018), kwotę wolną domyślnie 0 (ADR-019), usunięcie podatku
+  liniowego i działalności nierejestrowanej (ADR-020) oraz podział odliczenia wg art. 11 ust. 3.
+  ⏳ **Zostaje**: układ z projektu Claude Design zamiast widoku tymczasowego, próg 200 000 zł dla
+  małżonków (art. 12 ust. 13), mikrorachunek i tytuły przelewów, eksport CSV, VAT-UE od prowizji.
   **Skąd:** „Nie wystarczający panel do rozliczeń podatkowych. A kto by się rozliczał ryczałtem
   w tym biznesie? Masz tam jeszcze ZUS i wszystkie inne koszty, choćby import usług. No i VAT."
   🔥 **Zarzut jest w większości nieprawdziwy, i to jest gorsza wiadomość niż gdyby był prawdziwy.**
