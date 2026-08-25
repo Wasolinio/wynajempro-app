@@ -6,6 +6,14 @@ Project timeline and key milestones.
 
 ## 2026-08-25
 
+### Widget zadań zwinięty domyślnie — przestaje zasłaniać treść panelu
+- 🎯 **Zgłoszenie właściciela**: widget „Zadania na dziś" zasłaniał kartę „Przychód i co go zjadło" w panelu podatkowym. Przyczyna była systemowa, nie podatkowa: `position: fixed` w prawym dolnym rogu **zasłania cokolwiek tam jest, na KAŻDYM widoku i przy każdym przewinięciu** — panel podatkowy tylko najdobitniej to pokazał.
+- ✅ **Rozwiązanie: stan zwinięty jako domyślny.** Pigułka `164×40 px` zamiast panelu `300×196 px` — dziewięciokrotnie mniejsza powierzchnia. Kliknięcie rozwija, chevron zwija. **Pomiar, nie ocena okiem**: w stanie zwiniętym **zero kolizji** z kartami `.wpd-panel`; rozwinięty zasłania 27 033 px² karty, ale to już świadome kliknięcie użytkownika.
+- 🛡️ **Licznik zostaje widoczny w obu stanach** (pigułka pokazuje „Zadania na dziś · N" plus cynobrową kropkę). Zwinięcie miało odebrać powierzchnię, nie informację — inaczej byłoby to ukrycie funkcji pod pozorem poprawki.
+- ✅ **Stan zwinięcia PAMIĘTANY** (`localStorage`, klucz `wpd_taskwidget_rozwiniety`). Naprawia to drugą, niezgłoszoną irytację: dotąd „×" chowało widget **wyłącznie do przeładowania**, więc wybór właściciela znikał przy każdym wejściu do panelu. Zweryfikowane testem: stan przeżywa `page.reload()`.
+- ⚖️ **Świadomie NIE zapamiętujemy „×".** Ukrycie na stałe, bez widocznej drogi powrotu, byłoby pułapką — za miesiąc nikt nie wie, jak przywrócić widget, i wygląda to jak zniknięcie funkcji. Po przeładowaniu wraca **zwinięty**, czyli nierzucający się w oczy. Do zmiany, jeśli właściciel zechce — ale wtedy trzeba dołożyć sposób przywrócenia.
+- ✅ **Weryfikacja**: e2e **204/204** (`CI=true`, 4,3 min), lint 0, pomiar kolizji w obu stanach, zrzuty obu stanów obejrzane.
+
 ### CI zielone pierwszy raz od założenia — bramka wreszcie coś znaczy
 - ✅ **Przebieg #42 (`67f95eb`): `success`.** Wszystkie kroki zielone, `Testy e2e` włącznie; krok raportu **pominięty**, bo nie było czego raportować. **Zero adnotacji** — ostrzeżenie o wycofywanym Node 20 zniknęło razem z podbiciem akcji do v7. Pierwszy zielony przebieg **od 2026-08-13**, czyli od dnia, w którym CI powstało.
 - ✅ **Scalone trzy PR-y dependabota**, pojedynczo i z kontrolą scalalności po każdym (po pierwszym scaleniu GitHub przez chwilę raportuje `UNKNOWN` — trzeba odczekać na przeliczenie, nie wymuszać): `3dfcafa` upload-artifact, `67563f6` checkout, `67f95eb` setup-node, wszystkie v4 → v7. 🛡️ **Sprawdzone imiennie po scaleniu, bo wszystkie trzy ruszały ten sam plik co ja i powstały 13.08, nie znając moich zmian**: `timeout-minutes: 30` (linia 28) i `if: failure() || cancelled()` (linia 60) przeżyły.
