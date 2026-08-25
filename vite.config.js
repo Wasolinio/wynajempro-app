@@ -4,6 +4,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Rozgrzewka serwera deweloperskiego ([[Known-Issues]] #18).
+  // PO CO: `vite dev` transformuje moduły dopiero na żądanie. Lokalnie graf jest ciepły
+  // w `node_modules/.vite` i trwa to milisekundy, ale na runnerze CI jest zimny przy KAŻDYM
+  // przebiegu — pierwsze wejście na trasę publiczną nie mieściło się w oknie asercji
+  // i testy widziały pusty `#root`. Rozgrzewka każe Vite przemielić graf od razu po starcie,
+  // zamiast czekać na pierwszego klienta.
+  server: {
+    warmup: {
+      clientFiles: ['./src/main.jsx', './src/App.jsx', './src/pages/**/*.jsx'],
+    },
+  },
   plugins: [
     react(),
     VitePWA({

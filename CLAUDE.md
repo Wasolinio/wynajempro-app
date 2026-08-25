@@ -25,6 +25,16 @@ artefakt (w `.gitignore`). Dokument cykliczny dopisz do listy `DOKUMENTY` w skry
 i **regeneruj przy każdej aktualizacji**, żeby kopia się nie rozjechała.
 Pełna zasada: `docs/Team-Playbook.md` → „Dokumenty dla właściciela".
 
+## Zadania dla właściciela — instrukcja ZAWSZE w czacie
+Kiedy coś musi zrobić właściciel (kliknąć w konsoli, wysłać maila, potwierdzić u kogoś),
+**pełną treść i kroki wklej wprost w odpowiedzi w czacie** — gotowe do skopiowania, po kolei,
+bez odsyłania do pliku. Właściciel nie ma szukać po folderach ani otwierać dokumentów, żeby
+dowiedzieć się, co ma zrobić.
+Plik w `docs/` nadal powstaje — jest archiwum i źródłem prawdy — ale jest **kopią zapasową
+instrukcji, nie jej miejscem**. Kolejność: najpierw czat, potem plik.
+Zasada z 2026-08-25, prośba właściciela: „zadania dla mnie rozwiązujemy tak, że piszesz mi
+instrukcję tutaj i działamy razem".
+
 ## Zespół agentów
 Wyspecjalizowani agenci w `.claude/agents/`: `dev`, `code-reviewer`, `designer`, `seo`,
 `marketing`, `support`, `feedback`, `legal`, `strategist`. Zadania z tych obszarów deleguj do właściwego agenta.

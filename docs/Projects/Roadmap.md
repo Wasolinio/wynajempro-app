@@ -36,18 +36,31 @@ po domknięciu sekcji NOW.
 > Stan wyjściowy: panel administratora, migracja Stripe i identyfikacja wdrożone 19–21.08
 > ([[Activity-Log]]), `main` zsynchronizowany z GitHubem.
 
-### Ścieżka A — pieniądze. Blokuje przyjęcie pierwszej złotówki
+### Ścieżka A — pieniądze. ⏸ WSTRZYMANA do wznowienia przez właściciela (2026-08-25)
+
+> ⏸ **DECYZJA WŁAŚCICIELA 2026-08-25: cała ścieżka A odłożona do zakończenia testów przez
+> testerów.** Wznawia **wyłącznie właściciel** — agent nie startuje A1–A5 z własnej inicjatywy
+> i nie przypomina o nich co sesję. Dotyczy wszystkich pięciu pozycji: A1 i A2 są jego,
+> A3 wspólne, A4 moje (i tak zablokowane przez A2), A5 porządkowe.
+>
+> 📌 **Co ta decyzja robi z resztą planu — warto wiedzieć, bo nie jest neutralna.** Skoro
+> pieniądze czekają na testerów, to **beta staje się ścieżką krytyczną**, a beta ma własne
+> blokery (niżej: deploy panelu administratora i warunki founding members w Regulaminie §6).
+> Odłożenie A nie zwalnia tygodnia — przesuwa go na ścieżki B i E.
+>
+> ⚖️ **Czego decyzja nie zmienia:** kod płatności jest gotowy i przetestowany, wstrzymane jest
+> wyłącznie uruchomienie. Wznowienie to konfiguracja w konsolach Stripe'a, nie praca w repo.
 
 Kolejność jest wymuszona: bez A1 nie da się wykonać A3, a bez A2 checkout wygląda jak
 transakcja bez sprzedawcy.
 
 | # | Co | Kto | Zależność |
 |---|---|---|---|
-| **A1** | **Aktywacja konta Stripe** — dane firmy, rachunek bankowy. Bez tego karta klienta zostanie odrzucona **mimo poprawnego kodu**; na pulpicie „Pay out funds" jest przygaszone | właściciel | blokuje A3 |
-| **A2** | **Branding checkoutu** — ikona, `#D9492B` / `#17150F`, dane publiczne (nazwa, kontakt), adresy Regulaminu i Polityki w Settings → Legal | właściciel | — |
-| **A3** | **Pełny test płatności** — jedyny sposób potwierdzenia, że webhook przestawia status na `active`. Podpisu nie da się sprawdzić inaczej niż prawdziwym zdarzeniem: na koncie produkcyjnym Stripe nie wysyła zdarzeń testowych | oboje | po A1 |
-| **A4** | `consent_collection` — zbieranie akceptacji Regulaminu przy płatności (wartość dowodowa przy umowie z konsumentem) | agent | **po A2** — bez adresu Regulaminu w Stripe tworzenie sesji padnie |
-| **A5** | Sprzątanie w sandboxie: 15 klientów testowych i martwy endpoint webhooka | właściciel | — |
+| **A1** | ⏸ **Aktywacja konta Stripe** — dane firmy, rachunek bankowy. Bez tego karta klienta zostanie odrzucona **mimo poprawnego kodu**; na pulpicie „Pay out funds" jest przygaszone | właściciel | blokuje A3 · **czeka na wznowienie** |
+| **A2** | ⏸ **Branding checkoutu** — ikona, `#D9492B` / `#17150F`, dane publiczne (nazwa, kontakt), adresy Regulaminu i Polityki w Settings → Legal | właściciel | **czeka na wznowienie** |
+| **A3** | ⏸ **Pełny test płatności** — jedyny sposób potwierdzenia, że webhook przestawia status na `active`. Podpisu nie da się sprawdzić inaczej niż prawdziwym zdarzeniem: na koncie produkcyjnym Stripe nie wysyła zdarzeń testowych | oboje | po A1 |
+| **A4** | ⏸ `consent_collection` — zbieranie akceptacji Regulaminu przy płatności (wartość dowodowa przy umowie z konsumentem) | agent | **po A2** — bez adresu Regulaminu w Stripe tworzenie sesji padnie |
+| **A5** | ⏸ Sprzątanie w sandboxie: 15 klientów testowych i martwy endpoint webhooka | właściciel | **czeka na wznowienie** |
 
 ⚠️ **A4 celowo nie zostało zrobione razem z resztą migracji.** Dodanie go przed A2
 zepsułoby płatności, żeby dołożyć do nich checkbox.
@@ -96,7 +109,7 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 
 | # | Co | Kto | Zależność / uwaga |
 |---|---|---|---|
-| **E1** | **Odpowiedź supportu Firebase — obsłużyć** | oboje | ⚠️ **najpilniejsze w ścieżce:** właściciel przekazuje treść odpowiedzi, agent czyta i proponuje działanie |
+| **E1** | **Odpowiedź supportu Firebase — obsłużyć** | ✅ zrobione, czeka na Google | **Zamknięte po naszej stronie 2026-08-25.** Odpowiedź wysłana (prosimy o ręczne ustawienie Action URL), nazwa publiczna poprawiona. Decyzja w [[Decisions]] ADR-024. ⏳ Zostaje ręczny przegląd po stronie Google, bez terminu — sygnałem odpowiedź Caspera, wtedy test na świeżym aliasie |
 | **E2** | **Raport zasadności założenia JDG dla domków letniskowych** — liczony na danych z konta właściciela w aplikacji | agent, dane od właściciela | wymaga UID i zgody na odczyt danych finansowych konta (poziom 2/3 wg `docs/support/Proces-obslugi-zgloszen.md`). Podkładka metodyczna: [[strategy/Rentownosc-symulacja-2026-08-22]]. **Nie jest to porada podatkowa** — wynik do potwierdzenia u księgowego |
 | **E3** | **Nowa zakładka w panelu: Zadania + eksport** | `dev` + `designer` | design gotowy (`design_handoff_identyfikacja_v2`), czeka **wyłącznie na wdrożenie**. Do ustalenia przed startem: format eksportu (CSV/PDF/iCal) i zakres zadania |
 | **E4** | **System popupowych patch notów** — komunikat „co nowego" po wdrożeniu zmian | `dev` + `designer` | do zaprojektowania od zera: źródło treści (plik w repo vs Firestore), wersjonowanie „widziane/niewidziane" per konto, żeby nie wyskakiwało dwa razy |
@@ -108,6 +121,11 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 3. **E5** — które kanały (IG / FB / LinkedIn / TikTok) i kto naciska „publikuj"?
 
 ### Gdyby tydzień miał wystarczyć tylko na jedno
+
+> ⏸ **NIEAKTUALNE od 2026-08-25** — właściciel wstrzymał ścieżkę A do zakończenia testów.
+> Odpowiedź na to pytanie brzmi teraz: **odblokowanie zaproszeń do bety** (deploy panelu
+> administratora + warunki founding members w Regulaminie §6), bo to od testerów zależy
+> wznowienie A. Poniższe zostaje w pierwotnym brzmieniu jako zapis ówczesnego rozumowania.
 
 **Ścieżka A.** Reszta to porządek i dług; A to jedyna ścieżka, po której płyną pieniądze —
 a dziś, mimo poprawnego kodu, konto nie jest gotowe ich przyjąć.
@@ -291,7 +309,9 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 **Weryfikacja:** rejestracja na świeży alias → wiadomość dociera (nie do spamu) → link otwiera naszą stronę → konto potwierdzone. Do tego kontrola SPF/DKIM/DMARC dla `wynajempro.com`.
 **Koszt i zależności — świadomie wymienione, bo to nie jest poprawka na godzinę:** dostawca poczty (decyzja właściciela), konfiguracja SPF/DKIM na domenie, obsługa błędów wysyłki, a przede wszystkim **nowy podprocesor → aktualizacja Polityki prywatności i DPA** (`legal`) przed uruchomieniem.
 **Sprzężenia:** wchłania pozycję „Powiadomienia e-mail" z [[Projects/Backlog]] i daje infrastrukturę pod „automatyczne wiadomości do gości".
-**Agent:** `dev` + `legal` (podprocesor) + `marketing` (treść wiadomości). **Status:** ⬜ — **po launchu**, chyba że wsparcie Firebase odmówi zdjęcia blokady, wtedy do przemyślenia wcześniej. Zgłoszenie do Google: `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`.
+**Agent:** `dev` + `legal` (podprocesor) + `marketing` (treść wiadomości). **Status:** ⬜ — **po launchu**. Zgłoszenie do Google: `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`.
+- 🛡️ **Rozstrzygnięte 2026-08-25 — X19 NIE przyspiesza.** Wsparcie Firebase odmówiło zdjęcia blokady szablonów (polityka antyspamowa), ale zaproponowało **ręczne ustawienie Action URL** — i to bierzemy. Ta jedna zmiana po stronie Google zabiera X19 całą pilność: link zaczyna prowadzić na `wynajempro.com/auth/action`, więc problem zaufania przy pierwszym kontakcie znika bez pisania kodu, bez nowego podprocesora i bez ruszania Polityki prywatności przed launchem.
+- ⚖️ **Co zostaje dla X19** (i dlaczego pozycja nie znika): treść maila dalej jest z szablonu Google — nadawca `noreply@moje-domki-6c77d.firebaseapp.com`, brak kontroli nad układem, literówka marki tylko częściowo do obejścia. Plus reszta uzasadnienia: powiadomienia e-mail i automatyczne wiadomości do gości. Warunek wejścia bez zmian — **najpierw `legal` (podprocesor, DPA), potem SPF/DKIM/DMARC, dopiero potem kod.**
 
 ### X11. Plan marketingowy launchu
 **Gotowe, gdy:** ICP potwierdzony z właścicielem, komunikacja wartości, wybór 1–2 kanałów na start z metrykami testu. **Agent:** `marketing` + `strategist`. **Status:** ✅ **PLAN GOTOWY 2026-08-18** — `docs/strategy/X11-Plan-marketingowy-launchu.md`
@@ -302,6 +322,7 @@ Przeniesione ze starego Milestone 4, bez fikcyjnego celu „80%": auth (z przywr
 - 🔴 **BLOKER dla reklamy, wykryty przy pisaniu planu**: w kodzie mierzymy wyłącznie `login`, `sign_up` i `page_view` — **nie mierzymy aktywacji**. Bez zdarzeń `first_property_added`, `first_booking_added`, `first_guide_published`, `checkout_started`/`subscription_active` oraz `utm_source` przy rejestracji reklama kupuje rejestracje-widma. Zadanie dla `dev`, sprzężone z X10.
 - ✅ **Decyzje właściciela 2026-08-18 po przeglądzie jego planu bety** (chciał 20 stale użytkujących i dostęp za feedback): **bramka wyjścia z bety = 5–10 gospodarzy z pełnym cyklem** (rejestracja → obiekt → rezerwacja → przewodnik), a 20 stale użytkujących zostaje **celem pierwszego etapu po launchu**; **model dostępu = founding members z ceną podaną z góry** zamiast bezterminowo za darmo. Uzasadnienie drugiej decyzji: darmowy dostęp mierzy użycie, ale **nie mierzy gotowości do zapłaty** — 20 zadowolonych darmowych użytkowników to zero dowodu, że ktoś zapłaci 29,99 zł.
 - 🔴 **Blokery zaproszeń do bety** (wykryte przy tej analizie, oba przed pierwszym zaproszeniem): (1) **nadanie i przedłużenie dostępu bety jest dziś operacją ręczną z kluczem serwisowym** — reguły słusznie zabraniają klientowi zmiany `status` i `trialEndsAt`, więc dla 20 testerów to 20 operacji z Admin SDK na produkcji; potrzebny skrypt albo pole obsługiwane funkcją (`dev`). 🔄 **Bloker (1) rozwiązany w kodzie 2026-08-19, czeka na wdrożenie**: panel administratora `/admin` ma przyciski przedłużenia trialu i nadania dostępu bety, które ustawiają dokument i claim naraz, z wpisem do dziennika — zaproszenie testera przestaje wymagać klucza serwisowego. ⚠️ Domknięte dopiero po deployu funkcji i reguł (decyzja właściciela) — patrz [[Activity-Log]] 2026-08-19 i [[Panel-administratora]]. Bloker (2) bez zmian; (2) **warunki oferty founding members** — wysokość rabatu, czas obowiązywania, koniec naboru — dziś `[DO UZUPEŁNIENIA]` w Regulaminie §6, a to zobowiązanie wobec konsumenta.
+- ✅ **BLOKER (1) DOMKNIĘTY — potwierdzone na produkcji 2026-08-25.** `npx firebase functions:list` pokazuje **`adminApi` i `cleanupAdminAudit` wdrożone** (v2, us-central1), czyli deploy z 19.08 jednak się odbył. Zapis „czeka na wdrożenie" wisiał nieaktualny sześć dni. ⚖️ **Czego NIE potwierdziłem:** interfejsu `/admin` (trasa jest za logowaniem, a do panelu administratora się nie loguję) ani zgodności wdrożonych reguł z repo. To domyka **D1** — przejście listy kontrolnej z [[Panel-administratora]] krok 9, w szczególności sprawdzenie, czy nadanie dostępu bety realnie zapisuje wpis w dzienniku. **Do czasu D1 mechanizm zapraszania testerów jest prawdopodobny, nie potwierdzony.** Bloker (2) — warunki founding members — bez zmian.
 - ⚠️ **Pułapka retencji do zakomunikowania testerom**: po upływie `trialEndsAt` konto wchodzi w ścieżkę „porzucone triale" nocnego purge i po **90 dniach** (`TRIAL_RETENTION_DAYS`) dane są kasowane bezpowrotnie.
 
 ### X12. Nawigacja mobilna panelu — dolny pasek (decyzja właściciela 2026-07-03)

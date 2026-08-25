@@ -678,3 +678,43 @@ kwalifikacją jego sytuacji prawnej — czyli tym, przed czym ostrzega §2 anali
 **Kiedy wrócić**: gdy tester zapyta albo gdy pojawi się gospodarz, u którego prowizje
 są na tyle duże, że kwota ma znaczenie. Wtedy potrzebna jest interpretacja indywidualna
 KIS (ORD-IN, 40 zł), bo pytanie dotyczy praktyki, nie brzmienia przepisu.
+
+## ADR-024: Nie budujemy własnej wysyłki poczty przed launchem
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED
+**Kontekst**: Google zablokował temu projektowi edycję szablonów e-mail Auth
+(`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, [[Activity-Log]] 2026-08-18), przez co link
+weryfikacyjny prowadził na `moje-domki-6c77d.firebaseapp.com` — domenę, która nie ma nic
+wspólnego z produktem, do którego klient przed chwilą się zapisał. Nasza markowa strona
+`/auth/action` działała od 1 lipca i nigdy się nie pokazywała.
+
+Wsparcie Firebase odpowiedziało 2026-08-25 dwiema ścieżkami: (1) Admin SDK generuje link
+akcji, my wysyłamy własny mail własnym SMTP-em — pełna kontrola nad treścią; (2) **support
+ustawia nam Action URL ręcznie**, blokada szablonów zostaje.
+
+**Decyzja**: **bierzemy ręczne ustawienie Action URL. Własna wysyłka poczty (X19) zostaje
+po launchu.** Odpowiedź do Google wysłana przez właściciela 2026-08-25.
+
+Powód jest kosztowy, nie techniczny. Admin SDK to nie „to samo, tylko ładniej" — to **nowy
+podprocesor danych osobowych**, a za nim aktualizacja Polityki prywatności, DPA, konfiguracja
+SPF/DKIM/DMARC i własne ryzyko dostarczalności: świeży nadawca domenowy trafia do spamu
+łatwiej niż Google. Wzięcie tego na siebie na tydzień przed startem zamieniłoby problem
+„link wygląda podejrzanie" na problem „mail w ogóle nie dochodzi" — drugi jest gorszy,
+bo cichy. Ręczny Action URL rozwiązuje sedno za zero linijek kodu i zero pracy `legal`.
+
+**Czego świadomie NIE załatwiamy**: treść maila i nadawca `noreply@moje-domki-6c77d.firebaseapp.com`
+zostają z szablonu Google. Zmienia się wyłącznie to, dokąd prowadzi link. Literówkę marki
+w podpisie obeszliśmy inaczej — `%APP_NAME%` bierze się z *Nazwy publicznej* projektu,
+pola spoza zablokowanego edytora (poprawione przez właściciela 2026-08-25).
+
+⚠️ **Warunek na przyszłość**: Action URL jest ustawieniem **na cały projekt**, wspólnym dla
+wszystkich szablonów. `AuthActionHandler` nie obsługuje dziś trybu `recoverEmail`
+(odpowiada „funkcja niedostępna") ani `verifyAndChangeEmail`. Dziś nikt tam nie trafi, bo
+aplikacja nie ma ekranu zmiany adresu e-mail — ale **ta funkcja nie może powstać wcześniej
+niż obsługa obu trybów**, inaczej zmiana adresu poprowadzi klienta w ślepy zaułek.
+
+**Kiedy wrócić**: przy X19 — po launchu, gdy dojdą powiadomienia e-mail i automatyczne
+wiadomości do gości. Wtedy własna wysyłka nadpisze Action URL i te ścieżki się zejdą.
+Kolejność wejścia bez zmian: najpierw `legal` (podprocesor, DPA), potem SPF/DKIM/DMARC,
+dopiero potem kod.

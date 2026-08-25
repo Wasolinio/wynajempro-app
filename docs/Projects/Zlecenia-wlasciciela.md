@@ -69,20 +69,19 @@ Otwórz **prawdziwy** link do swojego przewodnika **na telefonie**, w oknie pryw
 **Potem:** ponów krok 0 i napisz wynik — dopiszę do dziennika i zamknę #16.
 </details>
 
-### 10. 🔴 ZABLOKOWANE PRZEZ GOOGLE — adres w szablonach e-maili Auth (nowe 2026-08-13, blokada 2026-08-18)
+### 10. ⏳ CZEKA NA GOOGLE — adres w szablonach e-maili Auth (nowe 2026-08-13, blokada 2026-08-18, odpowiedź 2026-08-25)
 
-> 🛑 **Próba wykonana 2026-08-18 zakończyła się odmową Google**: `400 EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`.
-> To nie jest błąd konfiguracji ani uprawnień — wykluczone: autoryzowane domeny (`wynajempro.com`
-> jest na liście), rola (400 ≠ brak uprawnień), rozszerzenia (powtórzone w incognito), droga przez
-> API (odmowa pochodzi z samego API, więc klucz serwisowy jej nie obejdzie).
-> **Zadanie schodzi z listy „do kliknięcia".** ✅ **Zgłoszenie do wsparcia Firebase wysłane
-> 2026-08-18** (treść: `docs/support/Zgloszenie-Firebase-szablony-2026-08-18.md`) — czekamy na
-> odpowiedź; to teraz pozycja na cudzym zegarze, jak prawnik. Dwie ścieżki: (1) zgłoszenie
-> o zdjęcie ograniczenia, (2) własna wysyłka poczty — Cloud Function generuje `oobCode`
-> Admin SDK i wysyła **nasz** mail z linkiem na `wynajempro.com/auth/action`, z pominięciem
-> szablonów Google. Druga ścieżka rozwiązuje przy okazji brandowanie treści maila (dziś podpis
-> bierze się ze zmiennej `%APP_NAME%`) i spina się z pozycją „Powiadomienia e-mail" z Backlogu.
-> Decyzja właściciela przed nami.
+> ✅ **STAN NA 2026-08-25 — po naszej stronie zrobione, piłka u Google.** Wsparcie Firebase
+> (Casper, `Case 10420421`) ograniczenia szablonów **nie zdejmie** — to polityka antyspamowa,
+> nie usterka naszego projektu — ale **ustawi Action URL ręcznie**. Właściciel wysłał prośbę
+> tego samego dnia; prosimy o `https://wynajempro.com/auth/action`. ⏳ Google zastrzega ręczny
+> przegląd **bez terminu**, więc pozycja zostaje na cudzym zegarze, obok prawnika.
+> ✅ **Literówka marki naprawiona osobno i już działa** (krok 5 niżej) — okazała się do obejścia
+> polem spoza zablokowanego edytora. ⚖️ Treść maila i nadawca `noreply@…firebaseapp.com`
+> zostają bez zmian; to dopiero X19, po launchu — uzasadnienie w [[Decisions]] ADR-024.
+> **Następny ruch: gdy przyjdzie odpowiedź Caspera** → test na świeżym aliasie (rejestracja,
+> link, nasz ekran, konto zweryfikowane, do tego reset hasła).
+
 **Zgłoszone przez właściciela przy smoke 4f:** „nie podoba mi się link służący do weryfikacji
 oraz samo zatwierdzanie konta". Oba zarzuty trafione i mają **jedną przyczynę**.
 
@@ -106,9 +105,14 @@ z niepoprawnym kodem pokazuje markowy ekran „Wystąpił problem" z przyciskiem
 3. Wpisz: `https://wynajempro.com/auth/action` → zapisz.
 4. **Powtórz dla pozostałych szablonów**: „Resetowanie hasła" i „Zmiana adresu e-mail" —
    nasza strona obsługuje wszystkie trzy tryby.
-5. Przy okazji, w tym samym edytorze, popraw **pisownię marki**: w treści maila jest
-   „WynajemPro" (temat i podpis „Zespół aplikacji WynajemPro"), a identyfikacja mówi
-   **WynajemPRO** — tak jak w nazwie nadawcy.
+5. ~~Przy okazji, w tym samym edytorze, popraw **pisownię marki**~~ — edytor jest zablokowany,
+   ale **jest droga obok** (ustalone 2026-08-25): podpis w mailu to zmienna `%APP_NAME%`, która
+   bierze się z **Ustawienia projektu → Ogólne → Nazwa publiczna**, a to pole blokada szablonów
+   **nie obejmuje**. ✅ **Potwierdzone w konsoli 2026-08-25:** pole zawiera `WynajemPro` (małe „o"),
+   podczas gdy *Project name* wyżej ma już poprawne `WynajemPRO` — stąd rozjazd w mailach.
+   ✅ **POPRAWIONE PRZEZ WŁAŚCICIELA 2026-08-25** (ołówek przy *Public-facing name* → `WynajemPRO`). 📌 To samo pole zasila
+   nazwę w okienku logowania Google, więc poprawia się przy okazji i tam; po zmianie warto raz
+   zalogować się przez Google. Działa na przyszłe maile, już wysłane niosą starą nazwę.
 
 **Weryfikacja:** zarejestruj konto na kolejny alias (`+test2`) i sprawdź, że link prowadzi na
 `wynajempro.com` i otwiera **naszą** stronę, a nie ekran Google.

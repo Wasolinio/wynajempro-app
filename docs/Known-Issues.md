@@ -2,6 +2,163 @@
 
 ## Critical Issues
 
+### 18. CI na `main` czerwone od dnia założenia — przyczyna ustalona, naprawa do decyzji (2026-08-25, OTWARTE)
+
+**Objaw:** każdy zakończony przebieg `ci.yml` po pushu na `main` kończy się `failure`.
+Sprawdzone przez API GitHuba 2026-08-25: przebiegi **#16 (13.08), #24 (21.08), #27 (22.08),
+#31 i #33 (25.08)** — wszystkie czerwone, wszystkie na tym samym kroku. `ESLint` i
+`Build produkcyjny` przechodzą za każdym razem; pada wyłącznie **`Testy e2e`**.
+**CI nie było zielone ani razu od momentu powstania 13.08.**
+
+**Czego to NIE jest — sprawdzone, nie założone:**
+- ❌ nie jest zepsutym produktem: ta sama suita na tym samym commicie (`475a435`) przechodzi
+  lokalnie **204/204 w 1,2 min**;
+- ❌ nie są to flagi CI: powtórka z `CI=true` (czyli `workers: 1`, `retries: 2`) też daje
+  **204/204, w 4,2 min**;
+- ❌ nie jest to rozjazd zależności: `node_modules` zgadza się z `package-lock.json`
+  (sprawdzone imiennie: firebase 12.12.0, react 19.2.5, lucide-react 1.14.0, vite 8.0.8,
+  @playwright/test 1.61.0, react-router-dom 7.18.2);
+- ❌ nie jest to awaria produkcji: przepływ „Smoke produkcji" jest **zielony** (#263–265,
+  25.08 co godzinę).
+
+**Log z CI (przekazany przez właściciela 2026-08-25) — co naprawdę pada:** **27 czerwonych,
+177 zielonych, 13,7 min**. Wszystkie czerwone to **strony publiczne**: `cookie-consent` (6),
+`help-center` (7), `landing-demo` (4), `smoke` (1), `spelling` (4), `ui-scaling` (5).
+Zero czerwonych w panelu (`tax-panel`, `tax-settings`, `panel-v2`, `auth`, `update-prompt`).
+
+**Objaw jest ostrzejszy niż „testy się sypią":**
+```
+Locator: locator('text=Wynajem').first()
+Expected: visible
+Error: element(s) not found
+```
+oraz `locator('div.wpc-bar')` — również „not found". 🔥 **To nie jest rozjazd układu, tylko
+brak elementów w DOM — na CI strona publiczna po prostu się nie wyrenderowała.** Mocne
+potwierdzenie: w `smoke.spec.js` test **`has title` PRZESZEDŁ**, a `has logo text` padł.
+Tytuł siedzi statycznie w `index.html`, cała reszta to React — czyli **serwer oddał HTML,
+ale aplikacja się nie zamontowała**.
+
+**Hipotezy sprawdzone i ODRZUCONE 2026-08-25:**
+- ❌ **czcionki Linuksa / rozjazd układu** — „element not found" to brak w DOM, nie inna szerokość;
+- ❌ **brak mocków Firebase** — `cookie-consent`, `help-center` i `ui-scaling` **wołają**
+  `setupFirebaseMocks`, a mimo to padają; `landing-demo`, `smoke` i `spelling` nie wołają
+  i też padają. Mocki nie są linią podziału;
+- ❌ **`VITE_USE_EMULATORS: 'true'` w `webServer` bez działających emulatorów** — kusząca,
+  bo `src/firebase.js:52-54` woła `connectAuthEmulator` bez `try`, ale lokalnie ten sam
+  układ (świeży serwer, brak emulatorów, `reuseExistingServer` wyłączone przez `CI=true`)
+  daje **204/204**;
+- ❌ **plik jako całość** — w `ui-scaling.spec.js` część testów pada (74, 96, 169, 179, 247),
+  a część z tego samego pliku przechodzi (84, 106, 145, 190, 205, 221, 264, 295).
+
+**Artefakt `playwright-report` pobrany i rozebrany 2026-08-25 — przyczyna ustalona.**
+
+**27 czerwonych rozpada się na DWIE różne usterki, nie jedną:**
+
+**(A) 21 testów — pusta strona.** `help-center` (7), `landing-demo` (4), `spelling` (4),
+`ui-scaling` (5), `smoke` (1). Objawy z pliku `error-context.md`: brak sekcji „Page snapshot",
+`element(s) not found`, przekroczenia czasu, `Cannot read properties of null (reading
+'getBoundingClientRect')`.
+
+**Dowód rozstrzygający — ze śladu `trace.zip`, snapshot DOM w chwili porażki:**
+```
+["BODY", {...}, ["DIV", {"id": "root"}]]
+```
+🔥 **`#root` jest PUSTY — bez jednego dziecka.** Do tego ze śladu: zero `pageerror`, zero
+nieudanych żądań sieciowych, konsola ma tylko `[vite] connected` i komunikat React DevTools,
+a cztery kolejne snapshoty DOM są identyczne (żadnej zmiany przez cały czas testu).
+
+**Co z tego wynika — i dlaczego to NIE jest zawieszony `Suspense`:** `App.jsx:133` ma
+`<Suspense fallback={<Loader />}>`, a `Loader` (`App.jsx:48`) renderuje **widoczny** spinner
+z tłem `#F3EFE5`. Gdyby wisiał leniwy import trasy, w `#root` siedziałby ten spinner.
+Skoro `#root` jest pusty, **`createRoot().render()` z `main.jsx` w ogóle nie zdążyło się
+wykonać** — moduł czekał na swoje statyczne importy (`App.jsx` ciągnie firebase, konteksty
+i style). Komunikat React DevTools tego nie podważa: drukuje go `react-dom` przy załadowaniu
+modułu, nie przy renderze.
+
+**Przyczyna:** w CI serwerem testowym jest **`vite dev`** (`playwright.config.js:21`), który
+transformuje moduły na żądanie i przy odkryciu nowych zależności potrafi przeładować stronę.
+Lokalnie graf jest ciepły (`node_modules/.vite`), więc trwa milisekundy; na runnerze jest
+zimny przy każdym przebiegu i przekracza 5-sekundowe okno asercji. Stąd rozrzut po plikach
+zamiast równego padania — decyduje to, która paczka akurat była zimna. 📌 Aplikacja ma zresztą
+w `main.jsx` obsługę `vite:preloadError` z przeładowaniem strony, czyli ta klasa problemu była
+już kiedyś widziana.
+
+**(B) 6 testów `cookie-consent` — zupełnie inna sprawa.** Tu strona **wyrenderowała się
+poprawnie** (snapshot pokazuje pełny nagłówek landingu: `img`, „Wynajem", „PRO", nawigację).
+Padają na `expect(received).toBe(expected) — Expected: true, Received: false`, czyli na
+asercji logicznej. **To trzeba diagnozować osobno** i nie wolno tego wrzucić do jednego worka
+z (A) — inaczej naprawa serwera testowego „wyleczy" 21 testów i zostawi 6 czerwonych o
+nieznanej przyczynie.
+
+**Propozycja naprawy (A) — do decyzji właściciela:**
+1. **Zalecane: w CI testować produkcyjny build** — `webServer.command` warunkowo:
+   `vite preview` na zbudowanym `dist` zamiast `vite dev`. Znika transformacja na żądanie,
+   a przy okazji **testujemy to, co realnie dostaje klient**, a nie wersję deweloperską.
+   ⚠️ **Koszt, który trzeba znać z góry:** w buildzie produkcyjnym **rejestruje się service
+   worker**, a `update-prompt.spec.js` jest napisany wprost na założeniu, że w trybie
+   deweloperskim SW nie istnieje — te testy trzeba będzie przejrzeć.
+2. **Lżejsze obejście:** zostać przy `vite dev`, ale rozgrzać optymalizator (`optimizeDeps.entries`
+   obejmujące trasy publiczne) i podnieść czas asercji. Tańsze, ale leczy objaw.
+
+🔴 **Dlaczego to jest pilne mimo że produkt działa:** bramka, która miała pilnować jakości,
+jest czerwona niezależnie od zawartości commita, więc **prawdziwa regresja przeszłaby
+niezauważona**. To ta sama pułapka, przed którą ostrzega komentarz w `ci.yml` („suita miała
+50 czerwonych ze 133 i nikt tego nie widział"), tylko piętro wyżej: testy się puszczają,
+ale wynik jest zawsze czerwony, więc przestaje cokolwiek znaczyć.
+
+📌 **Jak zdobyto dowody, na przyszłość:** endpoint logów CI wymaga autoryzacji (`403` bez
+tokena), a `gh` nie jest zainstalowany na maszynie właściciela (brak Homebrew). Zadziałała
+droga bez instalowania czegokolwiek: **właściciel pobrał artefakt `playwright-report`
+z dołu strony przebiegu** (sekcja „Artifacts"), a agent rozpakował go lokalnie i przeczytał
+`error-context.md` oraz `trace.zip`. Ta sama droga zadziała przy kolejnym czerwonym CI.
+
+📌 **Przy okazji, do naprawy niezależnie:** CI zgłasza, że `actions/checkout@v4`,
+`actions/setup-node@v4` i `actions/upload-artifact@v4` celują w wycofywany Node 20 i są
+wymuszane na Node 24. Naprawiają to otwarte PR-y dependabota **#1, #2, #3**.
+
+---
+
+## Naprawa wdrożona 2026-08-25 — czeka na dowód z CI
+
+**🛑 Wariant zalecany (produkcyjny build w CI) ODPADŁ — sprawdzony i cofnięty.**
+Przełączenie `webServer` na `npm run build && vite preview` wywróciło `admin-panel`
+natychmiast: testy lądowały na ekranie logowania zamiast w panelu. Przyczyna jest
+fundamentalna — **cała atrapa `e2e/firebase-mock.js` przechwytuje osiem adresów
+`**/node_modules/.vite/deps/firebase_*.js`, które istnieją WYŁĄCZNIE pod serwerem
+deweloperskim**. W buildzie moduły siedzą w paczkach z haszem, żadna trasa nie łapie, rusza
+prawdziwy SDK. Dotknęłoby to `auth`, `panel-v2`, `admin-panel`, `tax-*`, `guest-guide`,
+`review-pages` i `cookie-consent`. ⚠️ **Ostrzeżenie wpisane wprost w `playwright.config.js`**,
+żeby nikt nie stracił godziny na ten sam pomysł. Przejście na build wymaga najpierw
+przepisania atrapy tak, by nie zależała od adresów Vite — osobne zadanie, nie poprawka.
+
+**Co weszło zamiast tego:**
+- **(A)** `vite.config.js` → `server.warmup.clientFiles` (`main.jsx`, `App.jsx`,
+  `src/pages/**/*.jsx`): Vite mieli graf tras od razu po starcie, zamiast czekać na pierwszego
+  klienta. Do tego `playwright.config.js` → `expect.timeout` **15 s w CI** (5 s lokalnie);
+  domyślne 5 s było strojone pod ciepłą maszynę.
+- **(B)** `playwright.config.js` → `webServer.env.VITE_FIREBASE_MEASUREMENT_ID = 'G-TESTTEST00'`.
+
+**Prawdziwa przyczyna (B), ustalona 2026-08-25:** `src/firebase.js:99` i `:112` ustawiają flagę
+opt-out `window['ga-disable-<id>']` **tylko `if (measurementId)`**, a identyfikator pochodzi
+z `.env.local` — pliku w `.gitignore`, istniejącego **wyłącznie na maszynie właściciela**.
+`ci.yml` nie ustawia ani jednej zmiennej środowiskowej. Stąd asymetria: lokalnie flaga się
+ustawia i testy przechodzą, w CI nie ustawia się nigdy. 🔥 **To ta sama przyczyna źródłowa
+co (A): środowisko testowe lokalnie nie było tym samym, co w CI.**
+
+**Weryfikacja 2026-08-25:**
+- ✅ **e2e 204/204** (`CI=true`, 4,3 min) — w tym komplet `cookie-consent`.
+- ✅ **Pierwszeństwo zmiennych potwierdzone empirycznie**, bo od niego zależy wartość
+  powyższego przebiegu: serwer podniesiony z atrapą serwuje `src/firebase.js` zawierający
+  `G-TESTTEST00`, a prawdziwego identyfikatora z `.env.local` **nie zawiera** (0 wystąpień).
+  Czyli przebieg testował warunek z CI, a nie lokalny.
+- ✅ `npm run lint` 0 błędów, `npm run build` OK.
+
+⏳ **Czego ten dowód NIE obejmuje — grupy (A).** Pusty `#root` **nigdy nie odtworzył się na
+maszynie właściciela** (204/204 przed poprawką, dwa razy, w tym `CI=true`), więc lokalny
+zielony przebieg nie jest dowodem, że rozgrzewka pomogła. Naprawa jest wycelowana w przyczynę
+odczytaną ze śladu, ale **dowodem będzie dopiero zielony przebieg na GitHubie**. Do tego czasu
+(A) pozostaje hipotezą popartą śladem, nie faktem.
+
 ### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
 
 **Objaw:** kliknięcie „Synchronizacja" w panelu kończy się komunikatem „Wystąpił błąd podczas
