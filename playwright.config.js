@@ -7,11 +7,6 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
-  // Domyślne 5 s było strojone pod ciepłą maszynę lokalną. Na runnerze `vite dev`
-  // transformuje graf trasy przy pierwszym wejściu i pierwszy render potrafi się nie zmieścić
-  // — to był objaw grupy A z [[Known-Issues]] #18 (pusty `#root` w snapshocie DOM).
-  // Rozgrzewkę robi `server.warmup` w `vite.config.js`; to jest zapas na resztę.
-  expect: { timeout: process.env.CI ? 15000 : 5000 },
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
@@ -36,12 +31,32 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       VITE_USE_EMULATORS: 'true',
-      // Atrapa `measurementId` — BEZ NIEJ 6 testów `cookie-consent` pada w CI i nigdy
-      // lokalnie ([[Known-Issues]] #18, grupa B). `src/firebase.js:99` i `:112` ustawiają
-      // flagę opt-out `window['ga-disable-<id>']` tylko `if (measurementId)`, a identyfikator
-      // pochodzi z `.env.local`, który jest w `.gitignore` i istnieje jedynie na maszynie
-      // właściciela. Wartość jest atrapą i taka ma zostać: moduł analityki i tak jest
-      // przechwytywany przez `firebase-mock.js`, liczy się wyłącznie to, że jest niepusta.
+      // ATRAPY KONFIGURACJI FIREBASE — bez nich CI bylo czerwone od 13.08 ([[Known-Issues]] #18).
+      //
+      // Prawdziwe wartosci mieszkaja w `.env.local`, ktory jest w `.gitignore` i istnieje
+      // WYLACZNIE na maszynie wlasciciela; `ci.yml` nie ustawia zadnej zmiennej. Na runnerze
+      // `apiKey` bylo wiec `undefined`, `getAuth(app)` rzucalo
+      //     Firebase: Error (auth/invalid-api-key)
+      // juz przy wykonywaniu modulu `src/firebase.js`, wiec `main.jsx` nigdy nie dochodzil do
+      // `createRoot().render()` i test widzial PUSTY `#root`. Dowod: slad z przebiegu #36.
+      //
+      // Dotyczylo to DOKLADNIE tych testow, ktore nie wolaja `setupFirebaseMocks` — atrapa
+      // podmienia moduly firebase'a, wiec mockowane testy klucza nie potrzebowaly. Korelacja
+      // byla co do sztuki: 22 czerwone = 22 testy bez atrapy.
+      //
+      // Wartosci sa FALSZYWE i takie maja zostac. Nie moga trafic w prawdziwy projekt, bo
+      // VITE_USE_EMULATORS kieruje SDK na localhost, a testy stron publicznych i tak nie
+      // wykonuja zadnego zapytania do Firebase — potrzebuja tylko tego, zeby inicjalizacja
+      // nie rzucila wyjatkiem.
+      VITE_FIREBASE_API_KEY: 'AIzaSyE2E-ATRAPA-NIE-JEST-PRAWDZIWYM-KLUCZEM',
+      VITE_FIREBASE_AUTH_DOMAIN: 'e2e-atrapa.firebaseapp.com',
+      VITE_FIREBASE_PROJECT_ID: 'e2e-atrapa',
+      VITE_FIREBASE_STORAGE_BUCKET: 'e2e-atrapa.appspot.com',
+      VITE_FIREBASE_MESSAGING_SENDER_ID: '000000000000',
+      VITE_FIREBASE_APP_ID: '1:000000000000:web:0000000000000000000000',
+      // Flaga opt-out GA (`window['ga-disable-<id>']`) ustawia sie tylko `if (measurementId)`
+      // — `src/firebase.js:99` i `:112`. Bez tego 6 testow `cookie-consent` padalo w CI
+      // i nigdy lokalnie. Naprawa potwierdzona na runnerze w przebiegu #36.
       VITE_FIREBASE_MEASUREMENT_ID: 'G-TESTTEST00',
     },
     timeout: 120000,

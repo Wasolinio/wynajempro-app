@@ -2,7 +2,7 @@
 
 ## Critical Issues
 
-### 18. CI na `main` czerwone od dnia założenia — przyczyna ustalona, naprawa do decyzji (2026-08-25, OTWARTE)
+### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-25)
 
 **Objaw:** każdy zakończony przebieg `ci.yml` po pushu na `main` kończy się `failure`.
 Sprawdzone przez API GitHuba 2026-08-25: przebiegi **#16 (13.08), #24 (21.08), #27 (22.08),
@@ -180,6 +180,70 @@ konkurując o procesor z Chromium.
 **Poprawki w `ci.yml` (2026-08-25), żeby następny przebieg w ogóle coś powiedział:**
 `timeout-minutes` 20 → **30**; raport `if: failure()` → **`if: failure() || cancelled()`**.
 **Następny krok:** przeczytać artefakt z pierwszego przebiegu, który dobiegnie końca.
+
+
+---
+
+## 🔥 PRZYCZYNA USTALONA 2026-08-25 — brak konfiguracji Firebase w CI
+
+> ⚠️ **ERRATA do całej diagnozy powyżej.** Hipoteza „zimna transformacja `vite dev`" była
+> **BŁĘDNA**. Poniższe akapity zostają w pierwotnym brzmieniu (konwencja pliku), ale czytaj
+> je z tą poprawką. **Co przeżywa:** podział na dwie grupy usterek, opis objawu (pusty `#root`),
+> ustalenie, że `(B)` to brak `measurementId`, oraz wniosek nadrzędny — środowisko testowe
+> lokalnie nie było tym samym co w CI. **Co upada:** wyjaśnienie grupy `(A)` przez powolność
+> serwera deweloperskiego i obie oparte na nim poprawki (`server.warmup`, okno asercji 15 s).
+
+**Dowód — wyjątek ze śladu przebiegu #36** (`gh run download`, pierwszy raz mieliśmy artefakt):
+```
+Firebase: Error (auth/invalid-api-key)
+```
+`getAuth(app)` rzuca ten wyjątek **przy wykonywaniu modułu `src/firebase.js`**, bo
+`VITE_FIREBASE_API_KEY` jest w CI `undefined`. Wyjątek wywraca cały graf importów `main.jsx`,
+`createRoot().render()` nigdy się nie wykonuje i test widzi **pusty `#root`**. Zgadza się to
+z każdą wcześniejszą obserwacją: brak wpisu `pageerror` w krótkim śladzie, obecny komunikat
+React DevTools (drukuje go `react-dom` przy załadowaniu modułu, nie przy renderze) i brak
+jakiegokolwiek żądania sieciowego do Firebase.
+
+**Korelacja co do sztuki — to ona przesądziła:**
+
+| plik | testów bez `setupFirebaseMocks` | porażek w #36 |
+|---|---|---|
+| `help-center` | 7 | 7 |
+| `ui-scaling` | 6 | 6 |
+| `landing-demo` | 4 | 4 |
+| `spelling` | 4 | 4 |
+| `smoke` | 2 | 1 |
+| `cookie-consent` | 0 | 0 |
+
+**Każdy czerwony test to test, który NIE woła atrapy Firebase'a.** Atrapa podmienia moduły
+`firebase_*`, więc testom mockowanym klucz nie był do niczego potrzebny. Jedyny wyjątek —
+`smoke › has title` — przechodzi, bo sprawdza tytuł, a ten siedzi w statycznym `index.html`
+i nie wymaga Reacta. **To ta sama przyczyna co grupa (B)**, tylko o skutku brutalniejszym:
+tam brakowało `measurementId` i psuło jedną asercję, tu brakuje `apiKey` i nie startuje
+aplikacja.
+
+**Dlaczego nie odtwarzało się lokalnie:** `.env.local` na maszynie właściciela dostarcza
+prawdziwy klucz. Dlatego dwa pełne przebiegi lokalne (w tym `CI=true`) dawały 204/204 —
+sprawdzały warunek, którego na runnerze nigdy nie było.
+
+**Odtworzone lokalnie 2026-08-25, żeby diagnoza nie została wnioskiem:** serwer podniesiony
+z `VITE_FIREBASE_API_KEY=` (pusty) → `smoke › has logo text` **PADA**, `smoke › has title`
+**PRZECHODZI**. Dokładnie sygnatura z CI.
+
+**Naprawa:** komplet atrap `VITE_FIREBASE_*` w `webServer.env` w `playwright.config.js`.
+Wartości są jawnie fałszywe i takie mają zostać — `VITE_USE_EMULATORS` kieruje SDK na
+localhost, a testy stron publicznych nie wykonują żadnego zapytania do Firebase; potrzebują
+wyłącznie tego, żeby inicjalizacja nie rzuciła wyjątkiem.
+
+**Wycofane jako oparte na obalonej hipotezie:** `server.warmup` w `vite.config.js` oraz
+`expect.timeout` 15 s. To drugie realnie zaszkodziło — potroiło koszt czerwonego przebiegu
+i doprowadziło do anulowania #35 limitem czasu. **Zostają** poprawki `ci.yml`
+(`timeout-minutes: 30`, raport przy `cancelled()`), bo są słuszne niezależnie od przyczyny:
+to dzięki nim przebieg #36 w ogóle zostawił artefakt.
+
+📌 **Wniosek metodyczny, wart więcej niż sama naprawa:** trzy razy z rzędu uznałem hipotezę
+za obaloną, bo „lokalnie przechodzi" — a lokalnie było inne środowisko. Dopóki nie
+odtworzysz warunku z CI u siebie, „u mnie działa" nie jest dowodem na nic.
 
 ### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
 
