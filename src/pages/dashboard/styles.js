@@ -549,6 +549,13 @@ export const DASHBOARD_CSS = `
 .wpd-checkrow{ display:flex; align-items:flex-start; gap:11px; padding:10px 0; cursor:pointer;
   font-size:14px; font-weight:500; color:var(--ink); }
 .wpd-checkrow input{ width:17px; height:17px; accent-color:var(--cynober); margin-top:1px; flex:0 0 17px; }
+/* Obramowana KARTA opcji (.wpd-listrow.wpd-checkrow) rzadzi sie inaczej niz goly wiersz
+   z checkboxem: karty w siatce maja rowna wysokosc, wiec przy dwuliniowej etykiecie
+   („Najem prywatny — wynajmuje poza dzialalnoscia gospodarcza") przelacznik przyklejony
+   do gory czytal sie jako przekrzywiony obok sasiada z jedna linia. W karcie centrujemy;
+   gole wiersze zostaja przy rownaniu do pierwszej linii, bo tam jest to poprawne. */
+.wpd-listrow.wpd-checkrow{ align-items:center; }
+.wpd-listrow.wpd-checkrow input{ margin-top:0; }
 .wpd-codebox{ display:flex; gap:8px; align-items:center; }
 .wpd-codebox input{ flex:1; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--muted);
   background:var(--inner); border:1px solid var(--hairline); border-radius:3px; padding:9px 11px;
@@ -594,10 +601,14 @@ export const DASHBOARD_CSS = `
 .wpd-guide__pin--empty{ color:var(--on-side-label); letter-spacing:.22em; }
 .wpd-guide__note{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--on-side-faint); margin:10px 0 0; }
 .wpd-kvgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; min-width:0; }
+/* Etykieta NAD wartoscia, nie obok. Wczesniej .wpd-kv bylo zwyklym blokiem, a oba dzieci
+   to span-y, czyli elementy liniowe — margin-bottom na etykiecie nie dziala wtedy w pionie
+   i wartosc sklejala sie z etykieta w jeden ciag: „PODSTAWA WYNAJMUnieuzupelniona"
+   (zgloszenie wlasciciela ze zrzutem, 2026-08-25). Kolumna flex naprawia to u zrodla. */
 .wpd-kv{ border:1px solid var(--hairline); border-radius:4px; padding:11px 13px; background:var(--surface);
-  min-width:0; overflow-wrap:anywhere; }
+  min-width:0; overflow-wrap:anywhere; display:flex; flex-direction:column; gap:4px; }
 .wpd-kv__k{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.06em;
-  text-transform:uppercase; color:var(--label); margin-bottom:4px; }
+  text-transform:uppercase; color:var(--label); margin-bottom:0; }
 .wpd-kv__v{ font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500; color:var(--ink); }
 
 /* ── Kreator przewodnika ── */
@@ -1047,6 +1058,12 @@ export const DASHBOARD_CSS = `
   color:var(--paper); white-space:nowrap; font-variant-numeric:tabular-nums; }
 .wpd-hero__v--muted{ font-size:12px; color:var(--on-side-faint); text-transform:uppercase;
   letter-spacing:.06em; white-space:normal; text-align:right; }
+/* Gdy zamiast kwoty stoi zdanie („przy najmie prywatnym nie doliczamy"), uklad dwukolumnowy
+   przestaje dzialac: etykieta lamie sie na dwie linie, adnotacja tez, i wiersz czyta sie jak
+   dwa teksty nachodzace na siebie (widoczne od ~1280 px w dol, zgloszenie wlasciciela).
+   Taki wiersz układamy pionowo — etykieta, pod nia adnotacja. */
+.wpd-hero__row:has(.wpd-hero__v--muted){ flex-direction:column; align-items:flex-start; gap:3px; }
+.wpd-hero__row:has(.wpd-hero__v--muted) .wpd-hero__v--muted{ text-align:left; }
 .wpd-hero__tag{ display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
   font-weight:600; letter-spacing:.08em; text-transform:uppercase; background:var(--cynober);
   color:#fff; padding:3px 7px; border-radius:3px; margin-bottom:12px; }
@@ -1060,7 +1077,11 @@ export const DASHBOARD_CSS = `
 .wpd-prog__pct--over{ color:var(--cynober); }
 .wpd-prog__lead{ font-weight:700; font-size:27px; letter-spacing:-.02em; margin:12px 0 14px; }
 .wpd-prog__lead strong{ font-family:'IBM Plex Mono', monospace; font-weight:600;
-  font-variant-numeric:tabular-nums; }
+  font-variant-numeric:tabular-nums;
+  /* Separator tysiecy z pl-PL to TWARDA SPACJA, a w monospace kazdy znak ma te sama
+     szerokosc (0,6 em) — przy 27 px dawalo to dwie przepascie: „Zostalo 60  000  zl".
+     Korekta sprowadza spacje monospace'u do szerokosci spacji tekstu obok. */
+  word-spacing:-0.32em; }
 .wpd-prog__track{ height:18px; background:var(--inner-2); border-radius:3px; overflow:hidden;
   display:flex; }
 .wpd-prog__fill{ background:var(--amber); height:100%; }

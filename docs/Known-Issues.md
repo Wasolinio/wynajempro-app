@@ -159,6 +159,28 @@ zielony przebieg nie jest dowodem, że rozgrzewka pomogła. Naprawa jest wycelow
 odczytaną ze śladu, ale **dowodem będzie dopiero zielony przebieg na GitHubie**. Do tego czasu
 (A) pozostaje hipotezą popartą śladem, nie faktem.
 
+
+**⚠️ Pierwsza próba naprawy NIE zadziałała — przebieg #35 (`d15c21c`, 2026-08-25) ANULOWANY.**
+e2e szło **19 min 22 s** i dobiło do `timeout-minutes: 20`. Dwie rzeczy poszły źle naraz:
+1. **Podniesienie okna asercji do 15 s potroiło koszt każdej porażki** (przy `retries: 2`
+   każdy czerwony test to trzy podejścia). Czerwony przebieg urósł z 13,7 min do ponad 19.
+   Skutków dla workflow nie skompensowano — to błąd w ocenie, nie niespodzianka.
+2. **Krok „Raport z nieudanego przebiegu" miał `if: failure()`, a `failure()` NIE obejmuje
+   anulowania.** Przebieg ubity limitem czasu to dokładnie ten przypadek, w którym raport
+   jest najbardziej potrzebny — a został pominięty. Zostaliśmy bez danych do diagnozy.
+
+🔥 **Obserwacja, która PODWAŻA hipotezę o zimnej transformacji:** przy `retries: 2` każdy test
+szedł **trzy razy**, po 5 s każde podejście — i za trzecim razem strona **dalej była pusta**.
+Gdyby chodziło wyłącznie o to, że Vite transformuje moduł na żądanie, druga próba trafiłaby
+już w ciepły moduł i przeszła. Nie przeszła. Przyczyna (A) jest więc **nadal nieustalona**,
+a `server.warmup` i dłuższe okno mogły co najwyżej pomóc częściowo. ⚖️ Nie wykluczam też,
+że **rozgrzewka pogorszyła sprawę**: mieli graf ~50 modułów na dwurdzeniowym runnerze,
+konkurując o procesor z Chromium.
+
+**Poprawki w `ci.yml` (2026-08-25), żeby następny przebieg w ogóle coś powiedział:**
+`timeout-minutes` 20 → **30**; raport `if: failure()` → **`if: failure() || cancelled()`**.
+**Następny krok:** przeczytać artefakt z pierwszego przebiegu, który dobiegnie końca.
+
 ### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
 
 **Objaw:** kliknięcie „Synchronizacja" w panelu kończy się komunikatem „Wystąpił błąd podczas

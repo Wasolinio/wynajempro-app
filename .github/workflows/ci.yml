@@ -21,7 +21,11 @@ jobs:
   sprawdzenie:
     name: lint · build · e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 20 min nie starcza, gdy suita jest CZERWONA: przy `retries: 2` i podniesionym oknie
+    # asercji każda porażka kosztuje trzy podejścia. Przebieg 25.08 stanął na 19:22 i został
+    # ANULOWANY przez ten limit — a wtedy krok z raportem się nie wykonał i zostaliśmy bez
+    # jakichkolwiek danych do diagnozy ([[Known-Issues]] #18).
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
@@ -50,8 +54,10 @@ jobs:
       - name: Testy e2e
         run: npx playwright test
 
+      # `failure()` NIE obejmuje anulowania. Przebieg ubity limitem czasu to dokładnie ten
+      # przypadek, w którym raport jest najbardziej potrzebny — stąd jawne `cancelled()`.
       - name: Raport z nieudanego przebiegu
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
