@@ -2,7 +2,51 @@
 
 ## Critical Issues
 
-### 19. „Konta płacące" i MRR liczą konta nadane ręcznie — metryka pokazuje przychód, którego nie ma (2026-08-25, OTWARTE)
+### 20. Landing na 375 px bywa o 6 px za szeroki po otwarciu menu — niestabilne w CI (2026-08-25, OTWARTE)
+
+**Objaw:** `ui-scaling.spec.js:106` („Test mobile navigation menu hamburger toggle on mobile
+viewport") **bywa** czerwony na runnerze:
+```
+expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375)
+Expected: <= 375   Received: 381
+```
+Test mierzy szerokość dokumentu **zaraz po otwarciu** mobilnego panelu nawigacji. 381 px
+przy oknie 375 px oznacza, że strona na moment **rozpycha się w poziomie** — na telefonie
+objawia się to drgnięciem albo możliwością przesunięcia strony w bok przy otwieraniu menu.
+
+**Ślad z CI — to nie jest jednorazowy kaprys:**
+- przebieg **#36** (2026-08-25): test **czerwony**, z tym samym `381`;
+- przebieg **#44** (2026-08-25): ten sam test **flaky** — padł i przeszedł przy powtórce.
+  Przebieg zaraportował `success`, bo test niestabilny, który ostatecznie przeszedł,
+  **nie wywraca joba**. ⚠️ Czyli usterka jest w CI niewidoczna z samego statusu.
+
+**Nie odtwarza się lokalnie:** 5 przebiegów pod rząd na macOS — 5× zielone (3,3–3,4 s).
+🔥 **To ta sama klasa problemu co [[Known-Issues]] #18: różnica środowiska, nie kodu.**
+macOS ma nakładkowe paski przewijania (zero szerokości), Linux klasyczne (zajmują miejsce);
+do tego inne metryki czcionek. Dopóki nie odtworzy się tego na Linuksie, każda „naprawa"
+będzie strzelaniem.
+
+**Podejrzani (nie zweryfikowani), z `LandingPage.jsx:981`:**
+```css
+.wp4-mnav{ position:absolute; left:0; right:0; top:100%;
+  max-height:calc(100vh - 68px); overflow-y:auto;
+  animation:wp4-mnav-in .16s ease-out; }
+@keyframes wp4-mnav-in{ from{ opacity:0; transform:translateY(-6px); } to{ transform:none; } }
+```
+1. **`overflow-y:auto` + klasyczny pasek przewijania** — panel wysoki na ~100vh dostaje
+   pionowy pasek, który na Linuksie zabiera szerokość.
+2. **Pomiar w trakcie animacji** (.16s) — asercja pada zaraz po `toBeVisible()`.
+3. **Metryki czcionek** — przycisk „Wypróbuj za darmo" ma `width:100%` plus padding.
+
+**Kierunek naprawy, gdy będzie czym potwierdzić:** najtańsze i odporne na wszystkie trzy
+hipotezy naraz to `overflow-x:clip` na kontenerze landingu plus `scrollbar-gutter:stable`
+na panelu. ⚖️ Ale **nie wdrażam tego w ciemno** — bez odtworzenia nie będzie wiadomo,
+czy poprawka zadziałała, czy test akurat przeszedł.
+
+📌 **Sprzężone:** [[Projects/Backlog]] — czternaście sztywnych `waitForTimeout` w suicie,
+z czego **6 w `ui-scaling.spec.js`**, czyli w tym samym pliku.
+
+### 19. „Konta płacące" i MRR liczyły konta nadane ręcznie — metryka pokazywała przychód, którego nie ma (2026-08-25, NAPRAWIONE, czeka na wdrożenie)
 
 **Objaw:** Przegląd panelu administratora pokazuje **„Konta płacące: 3 · MRR 90 zł"**, podczas
 gdy **Stripe nie jest jeszcze aktywowany** (A1 wstrzymane decyzją właściciela 2026-08-25),
@@ -45,6 +89,40 @@ użytkowników to zero dowodu, że ktoś zapłaci 29,99 zł".
 
 📌 Znalezione przy przechodzeniu listy kontrolnej D1 — czyli dokładnie tam, gdzie miało być
 znalezione.
+
+
+---
+
+## ✅ NAPRAWIONE 2026-08-25 — wariant 2 (rozdzielenie liczb), decyzja właściciela
+
+**Co się zmieniło:**
+- `functions/admin-data.js` — nowa liczba `paidCount`, liczona **podwójnym warunkiem**:
+  `status === "active" ORAZ hasStripeSubscription`. ⚖️ Sama obecność `stripeSubscriptionId`
+  nie wystarcza, bo konto po anulowaniu subskrypcji może to pole zachować, a płacącym już nie jest.
+- `funnel.paying` = `paidCount` (było: `activeCount`), doszło `funnel.withAccess` = `activeCount`.
+- `revenue` liczony od `paidCount`, nie od `activeCount` — **MRR przestaje mnożyć cenę cennikową
+  przez liczbę nadanych dostępów**.
+- `OverviewView.jsx` — kafelek nazywa się teraz **„Konta opłacone"**, jego wartością jest liczba
+  opłaconych, a liczba z dostępem stoi **obok, w stopce kafelka** („N z dostępem (w tym nadane
+  ręcznie)"), i pokazuje się tylko wtedy, gdy obie liczby się różnią. Ostatni stopień lejka:
+  „Opłacone konta".
+- Nota pod przeglądem przestała być zastrzeżeniem drobnym drukiem, a zaczęła opisywać fakt:
+  liczymy wyłącznie konta z subskrypcją po stronie Stripe.
+
+📌 **Warte odnotowania: zastrzeżenie już tam było.** Stopka przeglądu od początku mówiła
+„konta z dostępem nadanym ręcznie też mają status «aktywna», więc nie każde z nich płaci" —
+czyli autor **wiedział**, a mimo to duża liczba nad tym tekstem twierdziła co innego.
+⚖️ Przypis nie naprawia liczby. Jeśli metryka wymaga zastrzeżenia, żeby nie wprowadzać w błąd,
+to jest to zła metryka — a nie dobra metryka ze złym opisem.
+
+**Weryfikacja:** `admin-panel.spec.js` 30/30 z **nowym testem**, który pilnuje obu liczb naraz
+(fixture: `paying: 9`, `withAccess: 14` → kafelek pokazuje 9 i wiersz „14 z dostępem", ostatni
+stopień lejka nazywa się „Opłacone konta"). Poprzedni zestaw testów tego nie łapał, bo fixture
+miał jedną liczbę i nie było czego rozjeżdżać.
+
+🔴 **NIEWDROŻONE — zmiana dotyka Cloud Functions I frontu.** Do zobaczenia na produkcji
+potrzeba `firebase deploy --only functions` **oraz** `--only hosting:app`. Do czasu wydania
+panel właściciela **dalej pokazuje starą, zawyżoną liczbę**.
 
 ### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-13 → 2026-08-25, ZAMKNIĘTE)
 

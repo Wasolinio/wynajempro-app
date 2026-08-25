@@ -164,10 +164,12 @@ test.describe('Stripe Payment E2E Tests', () => {
     await page.goto('/dashboard');
     await page.locator('button:has-text("Aktywuj i odzyskaj dane")').first().click();
 
-    // Wait short time for async function to invoke
-    await page.waitForTimeout(500);
-
-    expect(callParams).not.toBeNull();
+    // Czekamy na WARUNEK, nie na zegar. Sztywne `waitForTimeout(500)` robiło z tego testu
+    // FLAKY: na obciążonej maszynie wywołanie nie zdążało w 500 ms, test padał i przechodził
+    // dopiero przy powtórce (przebieg 2026-08-25: „203 passed, 1 flaky", 14,1 min zamiast
+    // 4,3 — powtórki kosztują trzy podejścia). Test niestabilny jest gorszy niż brak testu,
+    // bo uczy ignorowania czerwonego CI.
+    await expect.poll(() => callParams, { timeout: 10000 }).not.toBeNull();
     expect(callParams.successUrl).toContain('/dashboard');
     expect(callParams.cancelUrl).toContain('/dashboard');
   });

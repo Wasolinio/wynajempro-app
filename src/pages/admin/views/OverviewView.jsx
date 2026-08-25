@@ -44,7 +44,7 @@ export default function OverviewView({ data, onGo }) {
     { name: 'Potwierdzony adres', value: funnel.verified },
     { name: 'Uzupełniony profil', value: funnel.profiled },
     { name: 'Wprowadzone dane', value: funnel.withBookings },
-    { name: 'Płacące konta', value: funnel.paying, end: true },
+    { name: 'Opłacone konta', value: funnel.paying, end: true },
   ];
 
   const riskRows = [
@@ -80,7 +80,7 @@ export default function OverviewView({ data, onGo }) {
         <div className="wpd-stat" role="button" tabIndex={0}
           onClick={() => onGo('users')} onKeyDown={(e) => e.key === 'Enter' && onGo('users')}>
           <div className="wpd-stat__head">
-            <p className="wpd-stat__label">Konta płacące</p>
+            <p className="wpd-stat__label">Konta opłacone</p>
             <span className="wpd-stat__ic"><CreditCard /></span>
           </div>
           <div className="wpd-stat__value">{fmtNum(funnel.paying)}</div>
@@ -88,6 +88,15 @@ export default function OverviewView({ data, onGo }) {
             <span className="wpd-stat__sub">
               {revenue ? `MRR ${fmtMoney(revenue.mrr, revenue.currency)}` : 'MRR — brak danych ze Stripe'}
             </span>
+            {/* Druga liczba stoi OBOK, nie zamiast ([[Known-Issues]] #19). Konta z dostępem
+                to także te nadane ręcznie przyciskiem „Nadaj dostęp", czyli każdy tester bety.
+                Wcześniej kafelek pokazywał je jako „konta płacące" i mnożył przez cenę
+                cennikową — raportując przychód, którego nie było. */}
+            {funnel.withAccess !== funnel.paying && (
+              <span className="wpd-stat__sub">
+                {fmtNum(funnel.withAccess)} z dostępem (w tym nadane ręcznie)
+              </span>
+            )}
           </div>
         </div>
 
@@ -280,7 +289,8 @@ export default function OverviewView({ data, onGo }) {
         <p className="wpd-fhint" style={{ marginTop: 18 }}>
           MRR liczone jako {fmtNum(revenue.activeSubs)} × {fmtMoney(revenue.price, revenue.currency)}
           {revenue.interval === 'year' ? ' rocznie ÷ 12' : ' miesięcznie'} (cena pobrana ze Stripe).
-          Konta z dostępem nadanym ręcznie też mają status „aktywna", więc nie każde z nich płaci.
+          Liczymy wyłącznie konta z subskrypcją po stronie Stripe — dostęp nadany ręcznie
+          („Nadaj dostęp") daje status „aktywna", ale nie jest płatnością i tutaj się nie liczy.
         </p>
       )}
       {data.truncated && (

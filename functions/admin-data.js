@@ -321,6 +321,17 @@ async function buildOverview({ mrr } = {}) {
 
   const todayKey = dayKey(new Date());
   const activeCount = byStatus.active || 0;
+  // DWIE ROZNE LICZBY, celowo rozdzielone ([[Known-Issues]] #19).
+  // `activeCount` to konta Z DOSTEPEM — status 'active' ustawia takze przycisk
+  // „Nadaj dostep" w panelu, wiec kazdy tester bety tu wpada. `paidCount` to konta
+  // OPLACONE, czyli takie, ktore maja subskrypcje po stronie Stripe. Do 2026-08-25
+  // panel pokazywal `activeCount` jako „konta placace" i mnozyl przez nie cene
+  // cennikowa — raportujac przychod, ktorego nie bylo (3 konta nadane recznie = 90 zl
+  // przy niezaktywowanym Stripe). Rozjazd miedzy tymi liczbami jest teraz informacja:
+  // ilu masz testerow, a ilu klientow.
+  // Warunek jest PODWOJNY celowo: sama obecnosc `stripeSubscriptionId` nie wystarcza,
+  // bo konto po anulowaniu subskrypcji moze to pole zachowac, a placacym juz nie jest.
+  const paidCount = accounts.filter((a) => a.status === "active" && a.hasStripeSubscription).length;
   const trialing = accounts.filter((a) => a.status === "trialing");
   const withBookings = accounts.filter((a) => (rentals.map.get(a.uid) || 0) > 0);
 
@@ -362,7 +373,10 @@ async function buildOverview({ mrr } = {}) {
       verified: accounts.filter((a) => a.emailVerified === true).length,
       profiled: accounts.filter((a) => profiled.set.has(a.uid)).length,
       withBookings: withBookings.length,
-      paying: activeCount,
+      // Ostatni stopien lejka MUSI byc o pieniadzach, inaczej lejek konczy sie
+      // na czynnosci administracyjnej i sam sobie zaprzecza.
+      paying: paidCount,
+      withAccess: activeCount,
     },
     trials: {
       active: trialing.filter((a) => a.trialEndsAt && a.trialEndsAt > now).length,
@@ -370,7 +384,7 @@ async function buildOverview({ mrr } = {}) {
       endingIn7: trialing.filter((a) => a.trialEndsAt && a.trialEndsAt > now && a.trialEndsAt <= now + 7 * 86400000).length,
       expired: trialing.filter((a) => a.trialEndsAt && a.trialEndsAt <= now).length,
     },
-    revenue: mrr ? await mrr(activeCount) : null,
+    revenue: mrr ? await mrr(paidCount) : null,
     // Sesje gości NIE są kontami (patrz isGuestSession) — ale są miarą tego,
     // ilu odwiedzających otworzyło przewodniki. Osobna liczba, osobne znaczenie.
     guests: { sessions: guestSessions, staleDocs: staleGuestDocs.length },

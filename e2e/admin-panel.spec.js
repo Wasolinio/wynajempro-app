@@ -43,7 +43,7 @@ const OVERVIEW = {
   generatedAt: Date.now(), cached: false, truncated: false,
   accounts: { total: 37, byStatus: { trialing: 14, active: 9, past_due: 2, canceled: 12 }, verified: 28, unverified: 9, admins: 1 },
   registrations: { today: 2, d7: 8, d30: 24, prev7: 5, prev30: 12, chart: wykres30 },
-  funnel: { registered: 37, verified: 28, profiled: 19, withBookings: 15, paying: 9 },
+  funnel: { registered: 37, verified: 28, profiled: 19, withBookings: 15, paying: 9, withAccess: 14 },
   trials: { active: 11, endingIn3: 2, endingIn7: 5, expired: 3 },
   revenue: { price: 49, interval: 'month', currency: 'PLN', mrr: 441, activeSubs: 9 },
   content: { rentals: 412, accountsWithData: 15, guides: 23, signatures: 87 },
@@ -212,6 +212,15 @@ test('Przegląd pokazuje rejestracje, lejek i wykres 30 dni', async ({ page }) =
 
   // Wykres ma DOKŁADNIE 30 kolumn — dni bez rejestracji też, inaczej kłamie o tempie
   await expect(page.locator('.wpa-chart30 .wpd-chart__col')).toHaveCount(30);
+
+  // Konta OPŁACONE i konta Z DOSTĘPEM to dwie różne liczby ([[Known-Issues]] #19).
+  // Do 2026-08-25 panel pokazywał jedną — liczbę kont ze statusem 'active' — i mnożył
+  // ją przez cenę cennikową, raportując przychód, którego nie było. Status 'active'
+  // ustawia też przycisk „Nadaj dostęp", więc każdy tester bety wpadał do „płacących".
+  const kafelek = page.locator('.wpd-stat').filter({ hasText: 'Konta opłacone' });
+  await expect(kafelek.locator('.wpd-stat__value')).toHaveText('9');
+  await expect(kafelek).toContainText('14 z dostępem');
+  await expect(page.locator('.wpa-funnel__row').last()).toContainText('Opłacone konta');
 
   // Lejek: pięć stopni, każdy z procentem względem rejestracji
   await expect(page.locator('.wpa-funnel__row')).toHaveCount(5);
