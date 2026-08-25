@@ -124,7 +124,11 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
         {ryczalt && (
           <div className="wpd-stat">
             <div className="wpd-stat__head">
-              <p className="wpd-stat__label">Próg ryczałtu {p.prog.toLocaleString('pl-PL')} zł</p>
+              <p className="wpd-stat__label">
+                Próg ryczałtu {p.prog.toLocaleString('pl-PL')} zł
+                {p.wariantMalzenski === 'calosc' && ' · oświadczenie małżeńskie'}
+                {p.wariantMalzenski === 'polowa' && ' · Twoja część'}
+              </p>
             </div>
             <div className="wpd-stat__value">
               {p.progPrzekroczony ? 'przekroczony' : zl(p.doProgu)}
@@ -196,7 +200,20 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
               {p.vatNalezny > 0 && (
                 <div className="wpd-settle__row"><span className="wpd-settle__k">VAT należny (8%)</span><span className="wpd-settle__v wpd-mono">−{zl(p.vatNalezny)}</span></div>
               )}
-              <div className="wpd-settle__row"><span className="wpd-settle__k">Przychód netto</span><span className="wpd-settle__v wpd-mono">{zl(p.przychod)}</span></div>
+              {/* Bez tego wiersza „brutto 150 000, netto 75 000" wygląda jak błąd aplikacji.
+                  Połowa nie jest pomniejszeniem — to przychód małżonka, który rozlicza go u siebie. */}
+              {p.wariantMalzenski === 'polowa' && (
+                <div className="wpd-settle__row">
+                  <span className="wpd-settle__k">Część małżonka · rozlicza ją u siebie</span>
+                  <span className="wpd-settle__v wpd-mono">−{zl(p.przychodCalosc - p.przychod)}</span>
+                </div>
+              )}
+              <div className="wpd-settle__row">
+                <span className="wpd-settle__k">
+                  {p.wariantMalzenski === 'polowa' ? 'Twój przychód do opodatkowania' : 'Przychód netto'}
+                </span>
+                <span className="wpd-settle__v wpd-mono">{zl(p.przychod)}</span>
+              </div>
               <div className="wpd-settle__row"><span className="wpd-settle__k">Prowizje portali</span><span className="wpd-settle__v wpd-mono">{zl(p.prowizje)}</span></div>
               <div className="wpd-settle__row"><span className="wpd-settle__k">Koszty eksploatacyjne</span><span className="wpd-settle__v wpd-mono">{zl(p.media)}</span></div>
               {/* Odliczenie przysługuje WYŁĄCZNIE w działalności — art. 11 ust. 1a ustawy

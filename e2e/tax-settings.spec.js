@@ -89,3 +89,31 @@ test('Zakładka Podatki mieści się na 375 px', async ({ page }) => {
   const szerokosc = await page.evaluate(() => document.body.scrollWidth);
   expect(szerokosc, 'strona rozpycha się w poziomie').toBeLessThanOrEqual(375);
 });
+
+test('Współwłasność małżeńska: trzy stany, tylko przy najmie prywatnym', async ({ page }) => {
+  const dialog = await otworzPodatki(page);
+
+  // Przy działalności pola nie ma — ust. 6 mówi o przychodach z art. 6 ust. 1a.
+  await dialog.getByText(/Działalność gospodarcza/).click();
+  await expect(dialog.getByText('Współwłasność małżeńska', { exact: true })).toHaveCount(0);
+
+  // Pojawia się dopiero przy najmie prywatnym, domyślnie „na własny rachunek".
+  await dialog.getByText(/Najem prywatny/).click();
+  await expect(dialog.getByText('Współwłasność małżeńska', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('Wynajmuję na własny rachunek')).toBeVisible();
+
+  // Połowa: podpowiedź mówi o podziale i o tym, że próg zostaje.
+  await dialog.getByText('Wspólnie z małżonkiem, każde rozlicza swoją część').click();
+  await expect(dialog.getByText(/liczymy połowę tego, co wpłynęło/)).toBeVisible();
+  await expect(dialog.getByText(/Próg pozostaje 100 000 zł/)).toBeVisible();
+
+  // Całość: wymaga oświadczenia i odcina się od wspólnego rozliczenia rocznego.
+  await dialog.getByText('Wspólnie z małżonkiem, całość rozliczam ja').click();
+  await expect(dialog.getByText(/pisemne oświadczenie/)).toBeVisible();
+  await expect(dialog.getByText(/próg wynosi 200 000 zł/)).toBeVisible();
+  await expect(dialog.getByText(/nie to samo co wspólne rozliczenie roczne/)).toBeVisible();
+
+  // Przy zasadach ogólnych znika — mechanizm dotyczy wyłącznie ryczałtu.
+  await dialog.getByText('Zasady ogólne (skala)').click();
+  await expect(dialog.getByText('Współwłasność małżeńska', { exact: true })).toHaveCount(0);
+});

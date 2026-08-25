@@ -93,11 +93,12 @@ Podatek i VAT liczą się automatycznie przy każdej rezerwacji — na podstawie
 1. Kliknij ikonę zębatki („Ustawienia") i przejdź do zakładki „Podatki".
 2. W „Jak wynajmujesz" zaznacz, czy to najem prywatny, czy działalność gospodarcza. Od tego zależy, czy doliczamy składkę zdrowotną — przy najmie poza działalnością jej nie ma. Dopóki nie odpowiesz, nie doliczamy jej wcale.
 3. Wybierz formę opodatkowania: „Ryczałt" albo „Zasady ogólne (skala)".
-4. Dla ryczałtu domyślnie włączona jest opcja „Automatyczny próg (8,5% do 100k, 12,5% powyżej)" — system sam pilnuje progu 100 000 zł przychodu i przełącza stawkę. Możesz ją wyłączyć i wpisać stałą stawkę w polu „Stała stawka ryczałtu (%)".
-5. Dla zasad ogólnych ustaw „Kwota wolna od podatku (rocznie)" — domyślnie 0. Jeśli kwotę wolną uwzględnia już Twój pracodawca, zostaw 0, żeby nie odjąć jej dwa razy. System stosuje skalę 12% i 32% powyżej 120 000 zł dochodu.
-6. Jeśli masz status czynnego podatnika VAT, zaznacz „Czynny podatnik VAT" — od przychodu z noclegów wydzielimy VAT 8%, a podatek dochodowy policzymy od kwoty netto.
-7. Możesz też podać miesięczne składki: „Składka ZUS zdrowotna (mies.)" i „Składka ZUS społeczna (mies.)" oraz zdecydować, czy „Uwzględniaj składki ZUS w kosztach obniżających podatek".
-8. Kliknij „Zapisz ustawienia".
+4. Przy najmie prywatnym na ryczałcie pojawi się „Współwłasność małżeńska". Zostaw „Wynajmuję na własny rachunek", jeśli nieruchomość jest tylko Twoja. Jeśli wynajmujecie wspólnie, wybierz „każde rozlicza swoją część" — wtedy liczymy połowę przychodu, a próg zostaje 100 000 zł. Opcję „całość rozliczam ja" zaznacz wyłącznie wtedy, gdy złożyliście w urzędzie skarbowym pisemne oświadczenie o opodatkowaniu całości przychodu przez jedno z Was; wtedy próg rośnie do 200 000 zł. To nie jest wspólne rozliczenie roczne — przy ryczałcie ono nie występuje.
+5. Dla ryczałtu domyślnie włączona jest opcja „Automatyczny próg (8,5% do 100k, 12,5% powyżej)" — system sam pilnuje progu 100 000 zł przychodu i przełącza stawkę. Możesz ją wyłączyć i wpisać stałą stawkę w polu „Stała stawka ryczałtu (%)".
+6. Dla zasad ogólnych ustaw „Kwota wolna od podatku (rocznie)" — domyślnie 0. Jeśli kwotę wolną uwzględnia już Twój pracodawca, zostaw 0, żeby nie odjąć jej dwa razy. System stosuje skalę 12% i 32% powyżej 120 000 zł dochodu.
+7. Jeśli masz status czynnego podatnika VAT, zaznacz „Czynny podatnik VAT" — od przychodu z noclegów wydzielimy VAT 8%, a podatek dochodowy policzymy od kwoty netto.
+8. Możesz też podać miesięczne składki: „Składka ZUS zdrowotna (mies.)" i „Składka ZUS społeczna (mies.)" oraz zdecydować, czy „Uwzględniaj składki ZUS w kosztach obniżających podatek".
+9. Kliknij „Zapisz ustawienia".
 
 Od tej pory każda nowa lub edytowana rezerwacja dostaje wyliczony podatek i VAT automatycznie — zobaczysz je w „Rozliczeniu" w szczegółach rezerwacji oraz w sumach zakładek „Przegląd" i „Koszty i opłaty".
 

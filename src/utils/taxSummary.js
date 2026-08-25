@@ -56,16 +56,44 @@ export function zdrowotnaRyczalt(przychodRoczny) {
 }
 
 /**
+ * Współwłasność małżeńska przy najmie prywatnym — art. 12 ust. 5, 6 i 13 ustawy o ryczałcie.
+ *
+ * Zwraca dwie rzeczy naraz, bo są nierozłączne: jaką CZĘŚĆ przychodu rozlicza ten gospodarz
+ * i JAKI PRÓG go obowiązuje. Ustawa daje trzy układy:
+ *
+ *   • sam(a) — cały przychód, próg 100 000 zł;
+ *   • współwłasność bez oświadczenia — ust. 6 odsyła do ust. 5, więc przychód dzieli się
+ *     proporcjonalnie do udziału (przy wspólności majątkowej po połowie), a każdy małżonek
+ *     ma własny próg 100 000 zł;
+ *   • oświadczenie z ust. 6 — całość rozlicza jedno z małżonków, a ust. 13 podnosi jego
+ *     próg do 200 000 zł.
+ *
+ * Dotyczy WYŁĄCZNIE najmu prywatnego: ust. 6 mówi o przychodach z art. 6 ust. 1a. Przy
+ * działalności gospodarczej każdy małżonek prowadzi własną firmę i ten mechanizm nie działa.
+ */
+function wspolwlasnosc(ustawienia) {
+  const S = STAWKI_PODATKOWE.ryczaltNajem;
+  const dotyczy = ustawienia.taxForm === 'lump_sum' && ustawienia.rentalBasis === 'private';
+  if (!dotyczy) return { udzial: 1, prog: S.prog, wariant: 'brak' };
+
+  if (ustawienia.spouseRental === 'polowa') return { udzial: 0.5, prog: S.prog, wariant: 'polowa' };
+  if (ustawienia.spouseRental === 'calosc') {
+    return { udzial: 1, prog: S.progMalzonkowieZOswiadczeniem, wariant: 'calosc' };
+  }
+  return { udzial: 1, prog: S.prog, wariant: 'brak' };
+}
+
+/**
  * Podatek dochodowy od podstawy, wg formy opodatkowania.
  * Te same reguły co `calculateTaxes()` per rezerwacja — liczone raz, od sumy roku,
  * zamiast sumować zaokrąglenia z pojedynczych rezerwacji.
  */
-function podatekDochodowy(podstawa, przychodDoProgu, settings) {
+function podatekDochodowy(podstawa, przychodDoProgu, settings, prog = STAWKI_PODATKOWE.ryczaltNajem.prog) {
   const S = STAWKI_PODATKOWE;
   const forma = settings.taxForm;
 
   if (forma === 'lump_sum' && settings.autoThreshold) {
-    const { prog, stawkaDoProgu, stawkaPowyzejProgu } = S.ryczaltNajem;
+    const { stawkaDoProgu, stawkaPowyzejProgu } = S.ryczaltNajem;
     if (przychodDoProgu <= 0) return 0;
 
     // Przychód dzieli się na dwa pasma wg PROGU, a nie wg podstawy.
@@ -134,7 +162,13 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
 
   const brutto = bookings.reduce((s, r) => s + (Number(r.income) || 0), 0);
   const vatNalezny = ustawienia.isVatPayer ? brutto - (brutto / (1 + S.vatNoclegi)) : 0;
-  const przychod = brutto - vatNalezny;
+  const przychodCalosc = brutto - vatNalezny;
+
+  // Przy współwłasności małżeńskiej bez oświadczenia rozliczasz POŁOWĘ tego, co wpłynęło
+  // — reszta jest przychodem małżonka. `przychod` to od tej pory kwota, od której liczy
+  // się TWÓJ podatek; `brutto` zostaje pełne, bo tyle faktycznie zapłacili goście.
+  const { udzial, prog: progRyczaltu, wariant: wariantMalzenski } = wspolwlasnosc(ustawienia);
+  const przychod = przychodCalosc * udzial;
 
   const sumaProwizji = bookings.reduce((s, r) => s + prowizja(r), 0);
   const sumaMediow = media.reduce((s, r) => s + (Number(r.utilities) || 0), 0);
@@ -180,7 +214,7 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   // `null`, gdy forma opodatkowania jest nieznana. Wtedy NIE podajemy też sumy —
   // `null + liczba` daje w JavaScripcie liczbę, więc brak podatku przeszedłby po cichu
   // jako „0 zł podatku" i gospodarz zobaczyłby zaniżoną kwotę do odłożenia.
-  const podatek = podatekDochodowy(podstawa, przychod, ustawienia);
+  const podatek = podatekDochodowy(podstawa, przychod, ustawienia, progRyczaltu);
   const formaZnana = podatek !== null;
 
   // Rozjazd wobec kwot zapisanych przy rezerwacjach (mogły powstać przy innych ustawieniach).
@@ -192,8 +226,8 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   const zRozliczonym = bookings.filter((r) => Number(r.tax) > 0);
   const zapisanyPodatek = zRozliczonym.reduce((s, r) => s + (Number(r.tax) || 0), 0);
 
-  const doProgu = Math.max(0, S.ryczaltNajem.prog - przychod);
-  const procentProgu = Math.min(100, (przychod / S.ryczaltNajem.prog) * 100);
+  const doProgu = Math.max(0, progRyczaltu - przychod);
+  const procentProgu = Math.min(100, (przychod / progRyczaltu) * 100);
 
   return {
     rok,
@@ -214,9 +248,15 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
     miesiecy: miesiecyWRoku,
     lacznieDoZaplaty: formaZnana ? podatek + zdrowotnaRok + spoleczneRok : null,
 
-    prog: S.ryczaltNajem.prog,
+    prog: progRyczaltu,
     doProgu, procentProgu,
-    progPrzekroczony: przychod > S.ryczaltNajem.prog,
+    progPrzekroczony: przychod > progRyczaltu,
+
+    // Współwłasność małżeńska — panel musi umieć powiedzieć, dlaczego liczby są inne
+    // niż suma rezerwacji, bo inaczej wygląda to na błąd aplikacji.
+    wariantMalzenski,
+    udzialPodatkowy: udzial,
+    przychodCalosc,
 
     rozjazd: (zRozliczonym.length > 0 && Math.abs(podatek - zapisanyPodatek) > 1)
       ? { wyliczony: podatek, zapisany: zapisanyPodatek, rezerwacji: zRozliczonym.length }

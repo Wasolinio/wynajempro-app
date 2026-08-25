@@ -79,3 +79,25 @@ test('Panel podatkowy mieści się na 375 px', async ({ page }) => {
   expect(szerokosc, 'strona rozpycha się w poziomie').toBeLessThanOrEqual(375);
   await page.screenshot({ path: 'test-results/panel-podatkowy-375.png' });
 });
+
+test('Współwłasność bez oświadczenia: panel tłumaczy, skąd połowa', async ({ page }) => {
+  await otworzPodatki(page, {
+    taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private',
+    spouseRental: 'polowa', viewMode: 'szczegolowy',
+  });
+
+  // Rezerwacja w atrapie ma 40 000 zł; do opodatkowania wchodzi połowa.
+  await expect(page.getByText(/Część małżonka · rozlicza ją u siebie/)).toBeVisible();
+  await expect(page.getByText('Twój przychód do opodatkowania')).toBeVisible();
+  await expect(page.getByText('Próg ryczałtu 100 000 zł · Twoja część')).toBeVisible();
+});
+
+test('Oświadczenie małżeńskie podnosi próg do 200 000 zł', async ({ page }) => {
+  await otworzPodatki(page, {
+    taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', spouseRental: 'calosc',
+  });
+
+  await expect(page.getByText('Próg ryczałtu 200 000 zł · oświadczenie małżeńskie')).toBeVisible();
+  // Całość rozlicza jedno z małżonków, więc nic nie odejmujemy.
+  await expect(page.getByText(/Część małżonka/)).toHaveCount(0);
+});

@@ -572,3 +572,49 @@ przeszedłby po cichu jako „0 zł podatku" w sumie `lacznieDoZaplaty`. Stąd j
 do doradcy podatkowego (czy najem krótkoterminowy z usługami mieści się w działalności
 nierejestrowanej) i z własną ścieżką liczenia — dla nierejestrowanej: skala plus koszty plus
 licznik limitu kwartalnego zamiast progu 100 000 zł.
+
+---
+
+## ADR-021: Współwłasność małżeńska ma trzy stany, nie jeden przełącznik
+
+**Data**: 2026-08-25
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Lektura tekstu ustawy (2026-08-25) ujawniła **art. 12 ust. 13**: małżonkowie,
+którzy złożyli oświadczenie z ust. 6, mają próg ryczałtu **200 000 zł**, nie 100 000 zł.
+Żaden z wcześniejszych przeglądów tego nie miał. Dotyczy wprost grupy docelowej, bo
+mieszkania na wynajem bywają wspólną własnością małżeńską.
+
+Przy okazji okazało się, że układów jest **trzy, nie dwa**. Art. 12 ust. 6 odsyła do ust. 5:
+przy współwłasności przychód dzieli się proporcjonalnie, *„chyba że złożą sporządzone na piśmie
+oświadczenie o opodatkowaniu całości przychodu przez jednego z nich"*. Czyli:
+
+| Sytuacja | Co rozlicza gospodarz | Próg |
+|---|---|---|
+| Wynajem na własny rachunek | całość | 100 000 zł |
+| Współwłasność, bez oświadczenia | **połowę** | 100 000 zł |
+| Współwłasność, z oświadczeniem (ust. 6) | całość za oboje | **200 000 zł** |
+
+**Decyzja**: pole `spouseRental` o trzech wartościach (`'brak' | 'polowa' | 'calosc'`),
+widoczne **wyłącznie przy ryczałcie i najmie prywatnym** — ust. 6 mówi o przychodach
+z art. 6 ust. 1a, a przy działalności każdy małżonek prowadzi własną firmę i mechanizm
+nie działa. Wartość domyślna `'brak'`, bo to sytuacja większości i jedyna, która nie zmienia
+niczyjego wyliczenia wobec stanu sprzed tej opcji.
+
+**Dlaczego nie jednym checkboxem „rozliczenie małżeńskie"**, o co pierwotnie poproszono:
+
+1. **Nazwa myliłaby z czymś innym.** „Rozliczenie małżeńskie" brzmi jak wspólne zeznanie
+   roczne — a to przy ryczałcie **nie istnieje** w ogóle. Gospodarz zaznaczyłby to w dobrej
+   wierze i dostał zawyżony o 100 000 zł próg bez żadnej podstawy.
+2. **Dwa stany zgubiłyby przypadek częstszy.** Oświadczenie z ust. 6 trzeba złożyć w terminie
+   z ust. 7 (do 20. dnia miesiąca po pierwszym przychodzie). Kto go nie złożył — a to domyślny
+   stan rzeczy — rozlicza połowę. Bez tej opcji aplikacja liczyłaby mu **podwójny przychód**
+   i fałszywie alarmowała przekroczeniem progu.
+
+**Konsekwencja dla interfejsu**: przy wariancie `'polowa'` rachunek pokazuje osobny wiersz
+„Część małżonka · rozlicza ją u siebie", a „Przychód netto" zmienia nazwę na „Twój przychód
+do opodatkowania". Bez tego zestawienie „brutto 150 000, netto 75 000" wygląda jak błąd
+aplikacji. Karta progu dopisuje, z którego wariantu wynika jej liczba.
+
+⚠️ **Czego to nie rozstrzyga**: czy dana nieruchomość faktycznie jest współwłasnością i czy
+oświadczenie zostało skutecznie złożone — to wie tylko gospodarz. Aplikacja liczy zgodnie
+z odpowiedzią, nie sprawdza jej. Tak samo jak przy `rentalBasis` (ADR-018).

@@ -151,6 +151,48 @@ function SettingsModal(props) {
                 </p>
               </div>
 
+              {/* Współwłasność małżeńska — art. 12 ust. 5, 6 i 13 ustawy o ryczałcie.
+                  Pokazujemy TYLKO przy najmie prywatnym i ryczałcie, bo ust. 6 mówi
+                  o przychodach z art. 6 ust. 1a. Przy działalności każdy małżonek prowadzi
+                  własną firmę i ten mechanizm nie działa — pole stałoby tam bezużytecznie. */}
+              {ts.taxForm === 'lump_sum' && ts.rentalBasis === 'private' && (
+                <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
+                  <p className="wpd-fieldset__title">Współwłasność małżeńska</p>
+                  <label className="wpd-checkrow">
+                    <input type="radio" checked={(ts.spouseRental || 'brak') === 'brak'}
+                      onChange={() => setTs({ spouseRental: 'brak' })} />
+                    Wynajmuję na własny rachunek
+                  </label>
+                  <label className="wpd-checkrow">
+                    <input type="radio" checked={ts.spouseRental === 'polowa'}
+                      onChange={() => setTs({ spouseRental: 'polowa' })} />
+                    Wspólnie z małżonkiem, każde rozlicza swoją część
+                  </label>
+                  <label className="wpd-checkrow">
+                    <input type="radio" checked={ts.spouseRental === 'calosc'}
+                      onChange={() => setTs({ spouseRental: 'calosc' })} />
+                    Wspólnie z małżonkiem, całość rozliczam ja
+                  </label>
+                  <p className="wpd-fhint" style={{ marginTop: 8 }}>
+                    {ts.spouseRental === 'polowa' && (
+                      <>Bez pisemnego oświadczenia przychód z wynajmowanej wspólnie nieruchomości
+                      dzieli się między małżonków, więc liczymy połowę tego, co wpłynęło.
+                      Próg pozostaje 100 000 zł — drugie 100 000 zł ma małżonek.</>
+                    )}
+                    {ts.spouseRental === 'calosc' && (
+                      <>Dotyczy tylko wtedy, gdy złożyliście w urzędzie skarbowym pisemne oświadczenie,
+                      że całość przychodu rozlicza jedno z Was. Wtedy próg wynosi 200 000 zł zamiast
+                      100 000 zł. To nie to samo co wspólne rozliczenie roczne — przy ryczałcie ono
+                      nie występuje.</>
+                    )}
+                    {(!ts.spouseRental || ts.spouseRental === 'brak') && (
+                      <>Zaznacz, jeśli wynajmujecie nieruchomość będącą współwłasnością małżeńską —
+                      od tego zależy, jaką część przychodu rozliczasz i jaki masz próg.</>
+                    )}
+                  </p>
+                </div>
+              )}
+
               <div className="wpd-fgrid" style={{ marginBottom: 14 }}>
                 <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
                   <input type="radio" checked={ts.taxForm === 'lump_sum'} onChange={() => setTs({ taxForm: 'lump_sum' })} /> Ryczałt

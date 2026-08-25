@@ -175,11 +175,16 @@ albo do końca roku, jeżeli pierwszy przychód wypadł w grudniu.
 Bez oświadczenia działa zasada z **ust. 5 przez ust. 6**: przychód dzieli się między małżonków
 proporcjonalnie, więc **każde ma własne 100 000 zł**.
 
-⚠️ **W obu układach nasz sztywny próg 100 000 zł ostrzega wcześniej, niż powinien.** Kierunek
-jest bezpieczny — gospodarz odłoży za dużo, nie za mało — ale karta progu istnieje właśnie po
+⚠️ **W obu układach nasz sztywny próg 100 000 zł ostrzegał wcześniej, niż powinien.** Kierunek
+był bezpieczny — gospodarz odłożyłby za dużo, nie za mało — ale karta progu istnieje właśnie po
 to, żeby wpływać na decyzje cenowe pod koniec sezonu, a fałszywy alarm przy 100 000 zł u pary
-wynajmującej wspólnie jest wtedy szkodliwy. **Wymaga pola w ustawieniach.** Nie zaimplementowane
-— to nowa funkcja, nie poprawka; decyzja właściciela.
+wynajmującej wspólnie jest wtedy szkodliwy.
+
+✅ **ZAIMPLEMENTOWANE 2026-08-25** ([[Decisions]] ADR-021). Pole `spouseRental` o trzech stanach,
+widoczne wyłącznie przy ryczałcie i najmie prywatnym: wynajem na własny rachunek (całość, próg
+100 000 zł), współwłasność bez oświadczenia (połowa przychodu, próg 100 000 zł), oświadczenie
+z ust. 6 (całość za oboje, próg 200 000 zł). Sprawdzone na liczbach: przy 150 000 zł przychodu
+podatek wynosi odpowiednio 14 750 zł, 6 375 zł i 12 750 zł.
 
 ### Czego z tekstów ustaw ustalić się NIE DA
 

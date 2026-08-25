@@ -79,6 +79,10 @@ export const STAWKI_PODATKOWE = {
   // nieprawdziwy — wymaga pola w ustawieniach, patrz [[Rejestr-stawek-podatkowych]].
   ryczaltNajem: {
     prog: 100000,
+    // Art. 12 ust. 13: małżonkowie, którzy złożyli oświadczenie z ust. 6 (całość przychodu
+    // rozlicza jedno z nich), mają próg podwójny. Bez oświadczenia działa ust. 5 przez ust. 6 —
+    // przychód dzieli się proporcjonalnie i każde ma własne 100 000 zł.
+    progMalzonkowieZOswiadczeniem: 200000,
     stawkaDoProgu: 0.085,
     stawkaPowyzejProgu: 0.125,
   },
@@ -116,6 +120,16 @@ export const defaultTaxSettings = {
   // statusu podatkowego, a pomyłka kosztuje ~10 tys. zł zawyżenia albo ~424 zł
   // niedopłaty rocznie. `null` znaczy „nie wiemy" i panel ma o to zapytać.
   rentalBasis: null,     // null | 'private' | 'business'
+
+  // Współwłasność małżeńska przy najmie prywatnym (art. 12 ust. 5, 6 i 13 ustawy o ryczałcie).
+  //   'brak'    — wynajem na własny rachunek, cały przychód i próg 100 000 zł
+  //   'polowa'  — współwłasność BEZ oświadczenia: przychód dzieli się proporcjonalnie,
+  //               więc rozliczasz połowę, a próg pozostaje 100 000 zł
+  //   'calosc'  — złożone oświadczenie z ust. 6: rozliczasz całość za oboje,
+  //               a próg rośnie do 200 000 zł
+  // Domyślnie 'brak', bo to sytuacja większości i jedyna, której wybór niczego nie zmienia
+  // wobec stanu sprzed tej opcji — nikomu nie przestawiamy wyliczenia bez jego wiedzy.
+  spouseRental: 'brak',
 
   autoThreshold: true,
   rate: 8.5,
