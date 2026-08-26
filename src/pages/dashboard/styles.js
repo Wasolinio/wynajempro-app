@@ -212,7 +212,11 @@ export const DASHBOARD_CSS = `
   text-transform:uppercase; color:var(--label); margin:0 0 14px; line-height:1.4; }
 .wpd-stat__value{ font-weight:800; font-size:30px; letter-spacing:-.02em; color:var(--ink); line-height:1.05; }
 .wpd-stat__value small{ font-size:17px; font-weight:700; margin-left:2px; }
-.wpd-stat__foot{ margin-top:auto; padding-top:12px; }
+/* Kolumna, nie blok. Kazde inne uzycie ma jedno dziecko, wiec wyglada tak samo — ale
+   kafelek „Konta oplacone" ma dwa (MRR oraz liczba kont z dostepem) i w zwyklym bloku
+   elementy span sklejaly sie w jeden ciag: „MRR 0 ZL3 Z DOSTEPEM". Ta sama pomylka co
+   w .wpd-kv tego samego dnia — elementy liniowe nie rozdzielaja sie same. */
+.wpd-stat__foot{ margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:3px; }
 .wpd-stat__delta{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--cynober);
   letter-spacing:.03em; text-transform:uppercase; }
 .wpd-stat__delta--up{ color:var(--green); }

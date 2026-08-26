@@ -220,6 +220,14 @@ test('Przegląd pokazuje rejestracje, lejek i wykres 30 dni', async ({ page }) =
   const kafelek = page.locator('.wpd-stat').filter({ hasText: 'Konta opłacone' });
   await expect(kafelek.locator('.wpd-stat__value')).toHaveText('9');
   await expect(kafelek).toContainText('14 z dostępem');
+  // Asercja UKŁADU, nie samej treści. `toContainText` przeszło nawet wtedy, gdy oba napisy
+  // skleiły się w jeden ciąg („MRR 0 ZŁ3 Z DOSTĘPEM") — bo tekst tam BYŁ, tylko w jednej
+  // linii. Sprawdzamy więc, że drugi wiersz stopki faktycznie stoi NIŻEJ niż pierwszy.
+  const wiersze = kafelek.locator('.wpd-stat__sub');
+  await expect(wiersze).toHaveCount(2);
+  const g = await wiersze.nth(0).boundingBox();
+  const d = await wiersze.nth(1).boundingBox();
+  expect(d.y).toBeGreaterThanOrEqual(g.y + g.height - 1);
   await expect(page.locator('.wpa-funnel__row').last()).toContainText('Opłacone konta');
 
   // Lejek: pięć stopni, każdy z procentem względem rejestracji
