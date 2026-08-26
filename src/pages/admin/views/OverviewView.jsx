@@ -55,7 +55,7 @@ export default function OverviewView({ data, onGo }) {
     { key: 'missingDoc', label: 'Login bez dokumentu w bazie', value: risks.missingDoc, tone: 'cynober' },
     { key: 'missingAuth', label: 'Dokument bez loginu', value: risks.missingAuth, tone: 'cynober' },
     { key: 'staleGuestDocs', label: 'Dokumenty-widma po sesjach gości', value: risks.staleGuestDocs || 0, tone: 'amber' },
-    { key: 'retention', label: `Zgłoszenia starsze niż ${risks.retentionMonths} mies.`, value: risks.messagesOverRetention, tone: 'muted' },
+    { key: 'retention', label: `Zgłoszenia po terminie retencji (${risks.retentionMonths} mies.)`, value: risks.messagesOverRetention, tone: 'muted' },
   ].filter((r) => r.value > 0);
 
   const statusRows = Object.keys(accounts.byStatus)

@@ -15,6 +15,7 @@ const ACTION_LABEL = {
   'message.update': 'Zmiana zgłoszenia',
   'newsletter.read': 'Podgląd newslettera',
   'newsletter.export': 'Eksport newslettera',
+  'retention.cleanup': 'Automatyczne kasowanie po retencji',
 };
 const TONE = {
   'user.read.level2.taxId': 'cynober',
@@ -88,7 +89,7 @@ export default function AuditView() {
                   </span>
                 </td>
                 <td className="wpd-cell-sub" style={{ marginTop: 0 }}>{summarize(r.details)}</td>
-                <td className="wpd-cell-num">{r.adminUid ? `${r.adminUid.slice(0, 8)}…` : '—'}</td>
+                <td className="wpd-cell-num">{r.adminUid ? (r.adminUid.length > 8 ? `${r.adminUid.slice(0, 8)}…` : r.adminUid) : '—'}</td>
               </tr>
             ))}
           </tbody>

@@ -172,15 +172,17 @@ export default function HealthView() {
         <div style={{ padding: '16px 20px 20px' }}>
           <p style={{ fontSize: 13.5, margin: 0, lineHeight: 1.6 }}>
             {data.messagesOverRetention.count > 0
-              ? <>Zgłoszeń starszych niż {data.messagesOverRetention.months} miesięcy: <b>{data.messagesOverRetention.count}</b>.</>
-              : <>Żadne zgłoszenie nie przekracza {data.messagesOverRetention.months} miesięcy.</>}
+              ? <>Zgłoszeń zakończonych ponad {data.messagesOverRetention.months} miesięcy temu: <b>{data.messagesOverRetention.count}</b>.</>
+              : <>Żadne zgłoszenie nie przekracza {data.messagesOverRetention.months} miesięcy od zakończenia korespondencji.</>}
             {data.messagesOverRetention.oldest && <> Najstarsze: {fmtDate(data.messagesOverRetention.oldest)}.</>}
           </p>
-          {/* Okres nie jest zatwierdzony — panel nie może udawać, że jest. */}
+          {/* Okres zatwierdzony 2026-08-26 (Polityka §2); kasuje nocny cleanupContactMessages. */}
           <div className="wpd-note wpd-note--info" style={{ marginTop: 14 }}>
-            {data.messagesOverRetention.months} miesięcy to <b>propozycja kierunkowa</b>, nie decyzja:
-            w Polityce prywatności §2 okres wciąż jest oznaczony jako do rozstrzygnięcia (zadanie #31).
-            Dopóki decyzja nie zapadnie, ta liczba jest przypomnieniem, a nie podstawą do kasowania.
+            {data.messagesOverRetention.months} miesięcy od zakończenia korespondencji — okres
+            <b> zatwierdzony i zapisany w Polityce prywatności §2</b>. Zgłoszenia po terminie kasuje
+            automatycznie nocny przebieg (codziennie 03:45). Koniec korespondencji to ostatnia
+            aktywność w wątku: wpłynięcie zgłoszenia albo czynność administratora. Licznik wyżej
+            powinien być zerowy — utrzymująca się wartość oznacza, że nocne kasowanie nie działa.
           </div>
         </div>
       </div>

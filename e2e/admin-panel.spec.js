@@ -242,7 +242,7 @@ test('Panel „Wymaga uwagi” pokazuje tylko niezerowe pozycje', async ({ page 
   await expect(panel.getByText('Zaległość w płatności')).toBeVisible();
   await expect(panel.getByText('Zaplanowane usunięcie danych')).toBeVisible();
   // messagesOverRetention: 0 i missingDoc: 0 — nie mają prawa się pokazać
-  await expect(panel.getByText(/starsze niż/)).toHaveCount(0);
+  await expect(panel.getByText(/po terminie retencji/)).toHaveCount(0);
   await expect(panel.getByText('Login bez dokumentu w bazie')).toHaveCount(0);
 });
 
@@ -448,8 +448,10 @@ test('Porządek: przewodnik bez właściciela jest widoczny wraz z powodem', asy
 
   await expect(page.getByText('Domek nad jeziorem')).toBeVisible();
   await expect(page.getByText(/podpisy gości i sekrety/)).toBeVisible();
-  // Okres retencji ma być opisany jako propozycja, nie decyzja
-  await expect(page.getByText(/propozycja kierunkowa/)).toBeVisible();
+  // Okres retencji zatwierdzony 2026-08-26 — notka musi mówić o realnym kasowaniu,
+  // nie o „propozycji" (od deployu cleanupContactMessages tamten tekst byłby kłamstwem)
+  await expect(page.getByText(/zatwierdzony i zapisany w Polityce/)).toBeVisible();
+  await expect(page.getByText(/kasuje\s+automatycznie nocny przebieg/)).toBeVisible();
 });
 
 test('Dziennik: odsłonięcie identyfikatora jest w logu pod własną nazwą', async ({ page }) => {
