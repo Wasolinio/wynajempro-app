@@ -48,21 +48,18 @@ const { stripeSecretKey, PRICE_ID } = require("./params");
 // Warstwa odczytu w osobnym module — ten sam kod uruchamia lustrzany tester
 // `audit-admin-api.cjs` poza Cloud Functions. Patrz nagłówek admin-data.js.
 const {
-  db, SCAN_LIMIT,
-  toMillis, maskIdentifier, maskUrl,
+  db, SCAN_LIMIT, MESSAGE_RETENTION_MONTHS,
+  toMillis, maskIdentifier, maskUrl, messageLastActivity,
   loadSources, invalidateSources, loadMessages,
   buildOverview, buildHealth,
 } = require("./admin-data");
 
-// ⚠️ [DO POTWIERDZENIA PRZEZ PRAWNIKA] Okres przechowywania dziennika dostępu.
-// 12 miesięcy to propozycja z oceny `docs/legal/Ocena-panelu-administratora-2026-08-19.md`
-// (spójna z propozycją kierunkową dla `contact_messages`, zadanie #31). Wariant 24 miesiące,
-// jeśli dziennik ma służyć obronie przed roszczeniami.
-//
-// Dlaczego mechanizm działa, choć okres nie jest zatwierdzony: `admin_audit` to nowy zbiór
-// danych osobowych, a zbiór BEZ ŻADNEGO okresu narusza art. 5 ust. 1 lit. e od pierwszego
-// wpisu. Przechowywanie w nieskończoność jest gorsze niż przechowywanie przez okres, który
-// czeka na potwierdzenie. Zmiana okresu = zmiana tej jednej liczby.
+// Okres przechowywania dziennika dostępu — ZATWIERDZONY: 12 miesięcy od zapisu
+// (decyzja właściciela 2026-08-26, wariant 24 mies. odrzucony; zapis w
+// `docs/legal/Polityka-prywatnosci.md` §2). Pierwotnie propozycja z oceny
+// `docs/legal/Ocena-panelu-administratora-2026-08-19.md`; mechanizm działał od
+// początku, bo zbiór danych osobowych BEZ ŻADNEGO okresu narusza art. 5 ust. 1
+// lit. e od pierwszego wpisu. Zmiana okresu = zmiana tej jednej liczby.
 const AUDIT_RETENTION_MONTHS = 12;
 
 // =============================================================================
@@ -599,6 +596,76 @@ exports.cleanupAdminAudit = onSchedule(
     console.log(
       `🧹 admin_audit: usunięto ${usuniete} wpisów starszych niż ${AUDIT_RETENTION_MONTHS} mies. `
       + `(granica ${granica.toISOString()})`
+    );
+  }
+);
+
+// =============================================================================
+// RETENCJA ZGŁOSZEŃ Z FORMULARZA KONTAKTOWEGO
+// =============================================================================
+// Polityka prywatności §2 deklaruje: „12 miesięcy od zakończenia korespondencji"
+// (decyzja właściciela B-5, 2026-08-26). Ta funkcja jest mechanizmem tej deklaracji —
+// bez niej Polityka obiecywałaby kasowanie, którego nie ma (wzorzec „deklaracja bez
+// mechanizmu", naprawiany już przy newsletterze i `admin_audit`; Roadmapa F7,
+// warunek publikacji Polityki).
+//
+// REGUŁA — operacjonalizacja „zakończenia korespondencji" w `messageLastActivity`
+// (admin-data.js, tam pełny opis): koniec korespondencji = późniejsza z dat
+// `createdAt` i `adminUpdatedAt`. Czyli: zamknięte → 12 mies. od zamknięcia;
+// nigdy nieobsłużone → 12 mies. od utworzenia; otwarte z niedawną czynnością
+// administratora → zostają, aż minie 12 mies. od tej czynności. Zgłoszenia
+// testowe właściciela (source: 'kontakt-test') — ta sama reguła, bez wyjątków.
+//
+// Zapytanie filtruje po `createdAt` (warunek konieczny: skoro koniec korespondencji
+// to max(createdAt, adminUpdatedAt), każdy dokument do skasowania ma createdAt za
+// granicą), a warunek dokładny dokłada kod — Firestore nie porówna max() dwóch pól
+// w zapytaniu. Paginacja po `startAfter`, nie „kasuj aż pusto" jak w admin_audit:
+// tu strona może w całości składać się z dokumentów zatrzymanych (stare createdAt,
+// świeże adminUpdatedAt) i pętla bez kursora nigdy by się nie przesunęła.
+exports.cleanupContactMessages = onSchedule(
+  { schedule: "every day 03:45", timeZone: "Europe/Warsaw", maxInstances: 1 },
+  async (_event) => {
+    const granica = new Date();
+    granica.setMonth(granica.getMonth() - MESSAGE_RETENTION_MONTHS);
+    const cutoff = Timestamp.fromDate(granica);
+
+    let usuniete = 0;
+    let zatrzymane = 0;
+    let ostatni = null;
+    while (true) {
+      let zapytanie = db.collection("contact_messages")
+        .where("createdAt", "<=", cutoff)
+        .orderBy("createdAt")
+        .limit(300);
+      if (ostatni) zapytanie = zapytanie.startAfter(ostatni);
+      const snap = await zapytanie.get();
+      if (snap.empty) break;
+
+      const doSkasowania = snap.docs.filter((d) => {
+        const m = d.data() || {};
+        const koniec = messageLastActivity(toMillis(m.createdAt), toMillis(m.adminUpdatedAt));
+        return koniec !== null && koniec <= granica.getTime();
+      });
+      if (doSkasowania.length) {
+        const batch = db.batch();
+        doSkasowania.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+        usuniete += doSkasowania.length;
+      }
+      zatrzymane += snap.size - doSkasowania.length;
+      ostatni = snap.docs[snap.docs.length - 1];
+      if (snap.size < 300) break;
+    }
+
+    // Ślad rozliczalności (art. 5 ust. 2): sam fakt i liczba, zero danych osobowych.
+    // Wpis tylko gdy coś skasowano — puste przebiegi zostają w logach konsoli.
+    if (usuniete > 0) {
+      await audit("system", "retention.cleanup", { collection: "contact_messages", deleted: usuniete });
+    }
+    console.log(
+      `🧹 contact_messages: usunięto ${usuniete} zgłoszeń zakończonych przed `
+      + `${granica.toISOString()} (${MESSAGE_RETENTION_MONTHS} mies.); `
+      + `zatrzymane mimo starego createdAt: ${zatrzymane}`
     );
   }
 );

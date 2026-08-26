@@ -1011,6 +1011,11 @@ exports.exportIcal = onRequest(async (req, res) => {
 exports.adminApi = require("./admin").adminApi;
 
 // Retencja dziennika dostępu — `admin_audit` to zbiór danych osobowych i nie może
-// rosnąć bez granicy. Okres czeka na potwierdzenie przez prawnika; opis przy stałej
-// AUDIT_RETENTION_MONTHS w admin.js.
+// rosnąć bez granicy. Okres zatwierdzony 2026-08-26 (12 mies. od zapisu); opis przy
+// stałej AUDIT_RETENTION_MONTHS w admin.js.
 exports.cleanupAdminAudit = require("./admin").cleanupAdminAudit;
+
+// Retencja zgłoszeń z formularza kontaktowego — Polityka §2: 12 miesięcy od
+// zakończenia korespondencji (decyzja B-5, 2026-08-26). Reguła i pełny opis przy
+// funkcji w admin.js; operacjonalizacja końca korespondencji w admin-data.js.
+exports.cleanupContactMessages = require("./admin").cleanupContactMessages;

@@ -28,9 +28,31 @@ const db = getFirestore(app);
 
 const TZ = "Europe/Warsaw";
 
-// Propozycja kierunkowa okresu przechowywania zgłoszeń (zadanie #31, decyzja
-// jeszcze nie zapadła). Panel tylko RAPORTUJE przekroczenie, nic nie kasuje.
+// Okres przechowywania zgłoszeń z formularza kontaktowego — ZATWIERDZONY:
+// „12 miesięcy od zakończenia korespondencji" (decyzja właściciela B-5, 2026-08-26,
+// zapis w `docs/legal/Polityka-prywatnosci.md` §2). Panel RAPORTUJE przekroczenie,
+// kasuje scheduler `cleanupContactMessages` w admin.js — obie strony liczą koniec
+// korespondencji tym samym `messageLastActivity`, żeby raport „Porządek" nie pokazywał
+// jako przeterminowanych zgłoszeń, których czyściciel świadomie jeszcze nie rusza.
 const MESSAGE_RETENTION_MONTHS = 12;
+
+/**
+ * Operacjonalizacja „zakończenia korespondencji" (patrz MESSAGE_RETENTION_MONTHS):
+ * ostatnia aktywność w wątku = późniejsza z dat utworzenia zgłoszenia i ostatniej
+ * czynności administratora (`adminUpdatedAt` zmienia i zamknięcie, i sama notatka).
+ * W praktyce daje to regułę:
+ *   • zamknięte (`adminStatus: 'closed'`) → 12 mies. od zamknięcia (`adminUpdatedAt`),
+ *   • nigdy nieobsłużone → 12 mies. od utworzenia (`createdAt`),
+ *   • otwarte z późniejszą czynnością → 12 mies. od tej czynności, bo korespondencja
+ *     z niedawną aktywnością nie jest zakończona, choćby sam dokument był stary.
+ * Zgłoszenia testowe właściciela (source: 'kontakt-test') podlegają tej samej regule.
+ * Zwraca milisekundy albo null, gdy dokument nie ma żadnej daty — taki dokument
+ * zostaje, bo bez daty nie da się uczciwie policzyć terminu.
+ */
+const messageLastActivity = (createdAtMillis, updatedAtMillis) => {
+  const last = Math.max(createdAtMillis || 0, updatedAtMillis || 0);
+  return last > 0 ? last : null;
+};
 
 // Limit bezpieczeństwa dla skanów całych kolekcji. Przy skali przedlaunchowej
 // nieosiągalny; gdyby padł, odpowiedź niesie flagę `truncated` i panel to pokazuje.
@@ -406,7 +428,10 @@ async function buildOverview({ mrr } = {}) {
       missingDoc: accounts.filter((a) => a.missingDoc).length,
       missingAuth: accounts.filter((a) => a.missingAuth).length,
       staleGuestDocs: staleGuestDocs.length,
-      messagesOverRetention: messages.filter((m) => m.createdAt && m.createdAt < retentionCutoff.getTime()).length,
+      messagesOverRetention: messages.filter((m) => {
+        const koniec = messageLastActivity(m.createdAt, m.updatedAt);
+        return koniec !== null && koniec < retentionCutoff.getTime();
+      }).length,
       retentionMonths: MESSAGE_RETENTION_MONTHS,
     },
   };
@@ -458,7 +483,10 @@ async function buildHealth() {
     staleGuestDocs,
     messagesOverRetention: {
       months: MESSAGE_RETENTION_MONTHS,
-      count: messages.filter((m) => m.createdAt && m.createdAt < retentionCutoff.getTime()).length,
+      count: messages.filter((m) => {
+        const koniec = messageLastActivity(m.createdAt, m.updatedAt);
+        return koniec !== null && koniec < retentionCutoff.getTime();
+      }).length,
       oldest: messages.length ? messages[messages.length - 1].createdAt : null,
     },
   };
@@ -466,7 +494,7 @@ async function buildHealth() {
 
 module.exports = {
   db, TZ, MESSAGE_RETENTION_MONTHS, SCAN_LIMIT,
-  dayKey, toMillis, daysAgo, maskIdentifier, maskUrl,
+  dayKey, toMillis, daysAgo, maskIdentifier, maskUrl, messageLastActivity,
   listAllAuthUsers, rentalCountsByUid, profiledUids, loadAccounts, loadMessages, isGuestSession,
   loadSources, invalidateSources,
   buildOverview, buildHealth,

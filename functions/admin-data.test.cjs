@@ -12,7 +12,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { maskIdentifier, maskUrl, toMillis, dayKey, daysAgo } = require('./admin-data');
+const { maskIdentifier, maskUrl, toMillis, dayKey, daysAgo, messageLastActivity } = require('./admin-data');
 
 test('maskIdentifier zostawia wyłącznie trzy ostatnie znaki', () => {
   // PESEL ma 11 cyfr — z tego widoczne mogą być trzy, reszta to gwiazdki.
@@ -71,4 +71,28 @@ test('dayKey zwraca format sortowalny leksykograficznie', () => {
 test('daysAgo cofa o zadaną liczbę dni', () => {
   assert.strictEqual(Math.round((Date.now() - daysAgo(7).getTime()) / 86400000), 7);
   assert.strictEqual(Math.round((Date.now() - daysAgo(0).getTime()) / 86400000), 0);
+});
+
+test('messageLastActivity: zamknięte zgłoszenie liczy się od czynności administratora', () => {
+  // Zamknięcie sprawy (adminUpdatedAt) jest późniejsze niż wpłynięcie — retencja
+  // „od zakończenia korespondencji" (Polityka §2) biegnie od zamknięcia.
+  assert.strictEqual(messageLastActivity(1000, 5000), 5000);
+});
+
+test('messageLastActivity: zgłoszenie nigdy nieobsłużone liczy się od utworzenia', () => {
+  assert.strictEqual(messageLastActivity(1000, null), 1000);
+  assert.strictEqual(messageLastActivity(1000, undefined), 1000);
+});
+
+test('messageLastActivity: czynność wcześniejsza niż createdAt nie skraca życia', () => {
+  // Rozjazd zegarów albo ręczna poprawka danych — wygrywa data późniejsza.
+  assert.strictEqual(messageLastActivity(5000, 1000), 5000);
+});
+
+test('messageLastActivity: dokument bez żadnej daty daje null, nie zero', () => {
+  // Zero znaczyłoby „rok 1970" — czyściciel od razu skasowałby dokument,
+  // którego terminu w ogóle nie umie policzyć. Null = zostaw.
+  assert.strictEqual(messageLastActivity(null, null), null);
+  assert.strictEqual(messageLastActivity(0, 0), null);
+  assert.strictEqual(messageLastActivity(undefined, undefined), null);
 });
