@@ -46,7 +46,7 @@ czy poprawka zadziałała, czy test akurat przeszedł.
 📌 **Sprzężone:** [[Projects/Backlog]] — czternaście sztywnych `waitForTimeout` w suicie,
 z czego **6 w `ui-scaling.spec.js`**, czyli w tym samym pliku.
 
-### 19. „Konta płacące" i MRR liczyły konta nadane ręcznie — metryka pokazywała przychód, którego nie ma (2026-08-25, NAPRAWIONE, czeka na wdrożenie)
+### 19. „Konta płacące" i MRR liczyły konta nadane ręcznie — metryka pokazywała przychód, którego nie ma (2026-08-25, ZAMKNIĘTE — wdrożone)
 
 **Objaw:** Przegląd panelu administratora pokazuje **„Konta płacące: 3 · MRR 90 zł"**, podczas
 gdy **Stripe nie jest jeszcze aktywowany** (A1 wstrzymane decyzją właściciela 2026-08-25),
@@ -120,9 +120,10 @@ to jest to zła metryka — a nie dobra metryka ze złym opisem.
 stopień lejka nazywa się „Opłacone konta"). Poprzedni zestaw testów tego nie łapał, bo fixture
 miał jedną liczbę i nie było czego rozjeżdżać.
 
-🔴 **NIEWDROŻONE — zmiana dotyka Cloud Functions I frontu.** Do zobaczenia na produkcji
-potrzeba `firebase deploy --only functions` **oraz** `--only hosting:app`. Do czasu wydania
-panel właściciela **dalej pokazuje starą, zawyżoną liczbę**.
+✅ **WDROŻONE 2026-08-25** (`1fca989`): `functions` (12 funkcji) → `hosting:app` (25 plików),
+w tej kolejności, bo front czyta nowe pole `funnel.withAccess`. Potwierdzone kontrolą pozytywną
+i negatywną na paczce produkcyjnej `AdminApp-BIGrsjC7.js`: nowe napisy są, stare („Konta płacące",
+„Płacące konta", zastrzeżenie „nie każde z nich płaci") zniknęły.
 
 ### 18. CI na `main` czerwone od dnia założenia — brak konfiguracji Firebase w CI (2026-08-13 → 2026-08-25, ZAMKNIĘTE)
 
