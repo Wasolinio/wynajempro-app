@@ -4,6 +4,20 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-26
+
+### Wydanie poprawkowe 2026-08-26 — sklejona stopka kafelka „Konta opłacone"
+- 🛑 **Usterka wprowadzona przez agenta poprzedniego dnia**, razem z naprawą [[Known-Issues]] #19: kafelek dostał **drugie dziecko** w stopce (liczba kont z dostępem), a `.wpd-stat__foot` jest zwykłym blokiem. Na produkcji dało to `MRR 0 ZŁ3 Z DOSTĘPEM`. Wykryte przez właściciela na zrzucie po deployu.
+- ⚖️ **To ta sama pomyłka co `.wpd-kv` tego samego dnia — elementy liniowe nie rozdzielają się same.** Naprawiona rano w jednym miejscu, powtórzona wieczorem w drugim. 📌 **Wniosek do zapamiętania: dokładając drugie dziecko do istniejącego kontenera, sprawdź jego `display`.** Wszystkie 21 użyć `.wpd-stat__foot` miało dotąd jedno dziecko, więc wada nigdy się nie ujawniła — nowy element ją odsłonił, nie stworzył.
+- ✅ **Naprawa u źródła**: `.wpd-stat__foot` jako kolumna flex z `gap:3px`. Dla pozostałych kafelków neutralna — sprawdzone wszystkie użycia; dwa pozorne trafienia „dwoje dzieci" to gałęzie ternary (renderuje się jedna) i zagnieżdżony pasek postępu.
+- 🔥 **Test tego NIE łapał i to jest ciekawsze niż sama usterka.** `toContainText('14 z dostępem')` przechodziło również przy sklejonym napisie, bo **tekst tam był — tylko w jednej linii**. Dopisana asercja **układu**: drugi wiersz stopki musi stać niżej niż pierwszy (`boundingBox`). ⚖️ Trzeci raz tego dnia test sprawdzał treść zamiast tego, co widzi człowiek — po stopce Zgłoszeń i po payloadzie `includeTests`.
+- ⚠️ **Backtick w komentarzu `styles.js` wywalił parser PO RAZ DRUGI tego samego dnia.** Arkusz jest literałem szablonowym, więc odwrotny apostrofraz zamyka go w środku. Pułapka była już opisana w dzienniku rano — i mimo to powtórzona, w tym samym pliku, a po pierwszej poprawce został jeszcze jeden. Koszt: dwa dodatkowe przebiegi suity. **W komentarzach w `styles.js` nie używa się odwrotnych apostrofów w ogóle.**
+- ✅ **Wydanie**: `firebase deploy --only hosting:app` (commit `4257e77`) — sam front, funkcje nietknięte, bo zmiana to jedna reguła CSS. **Weryfikacja live**: trasy `/`, `/kontakt`, `/pomoc` → 200; paczka `styles-C3PoHZCt.js` serwowana z regułą `flex-direction:column`; **kontrola negatywna** — stara reguła `.wpd-stat__foot{ margin-top:auto; padding-top:12px; }` **zniknęła**; konsola bez `Failed to fetch dynamically imported module` (jedyny błąd to znany `403` App Check).
+- ✅ **Przed wydaniem**: e2e **204/204** (`CI=true`, 4,3 min, **bez flaky**), `admin-panel` 30/30, lint 0, build OK.
+- 🛡️ **Zgoda na deploy pytana osobno**, mimo że poprzednia padła kilka godzin wcześniej — skill `deploy` mówi wprost, że zgoda na jedno wydanie nie jest zgodą na następne.
+
+---
+
 ## 2026-08-25
 
 ### Wydanie 2026-08-25 — naprawa MRR, poprawki panelu podatkowego, widget zadań
