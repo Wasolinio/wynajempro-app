@@ -78,6 +78,15 @@ Identyfikatory: `properties`, `syncLinks`, `sources`, `categories`, `tax`, `recu
 ⚠️ **`hostProfile` czytaj wyłącznie przy zgłoszeniach o profil lub faktury** — pole
 `taxIdentifier` może zawierać PESEL (ustalenie audytu N5).
 
+### ⛔ NAJPIERW PRZECZYTAJ — kanał zawieszony dla danych osobowych (2026-08-26)
+
+Plan Claude właściciela jest konsumencki (Max) — **bez umowy powierzenia**. Do czasu przejścia
+na ofertę komercyjną **nie czytasz żadnych danych osobowych klientów**: ani `contact_messages`,
+ani kont (`auth_get_users`, `users/*`, `settings/*`). Narzędzia Firebase MCP zostają w konfiguracji,
+ale ich użycie wobec danych klientów jest zabronione procedurą. Tryb pracy: właściciel czyta
+zgłoszenie w panelu `/admin` i streszcza problem bez danych identyfikujących; diagnozujesz na
+kodzie i opisie. Poziomy 1–2 opisane niżej wracają dopiero po zawarciu DPA.
+
 ### Poziom 3 — ⛔ ZNIESIONY z dniem publikacji dokumentów (2026-08-26)
 
 **Danych Gości nie czytasz w ogóle** — `users/{uid}/rentals/`, `guides/`,

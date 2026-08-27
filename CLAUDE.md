@@ -60,11 +60,7 @@ Zgłoszenia z `/kontakt` lądują w Firestore (`contact_messages`), a reguły za
 klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase MCP** (`.mcp.json`,
 5 narzędzi wyłącznie do odczytu; `--tools` usuwa kasowanie i deploy u źródła).
 Proces: **`docs/support/Proces-obslugi-zgloszen.md`**.
-**Tryb pracy:** właściciel podaje UID (lub e-mail), agent diagnozuje. Zakres **stopniowany**:
-poziom 1 konto/subskrypcja → poziom 2 `settings/*`. **⛔ Poziom 3 (dane Gości) ZNIESIONY
-z dniem publikacji dokumentów (2026-08-26; bramka F4a)** — agent nie czyta rezerwacji,
-przewodników, podpisów ani `secrets/data`; diagnostyka kończy się na poziomie 2 + ścieżka
-dokumentu do samodzielnego otwarcia przez właściciela w konsoli. `hostProfile` ma `taxIdentifier` (może być PESEL) —
+**Tryb pracy — ⛔ ZAWIESZONY dla danych osobowych (2026-08-26):** właściciel potwierdził plan konsumencki Max (bez DPA), więc do czasu oferty komercyjnej agent NIE czyta `contact_messages` ani danych kont; właściciel czyta zgłoszenia w `/admin` i streszcza problem bez danych identyfikujących, agent diagnozuje na kodzie. Wpis o Anthropic wykreślony z Polityki §5. Po DPA wracają poziomy 1–2 (poziom 3 zniesiony na stałe — F4a). `hostProfile` ma `taxIdentifier` (może być PESEL) —
 czytać wyłącznie przy zgłoszeniach o profil/faktury. Kanał jest **tylko do odczytu**:
 agent diagnozuje i proponuje, nie naprawia danych na produkcji.
 
@@ -87,4 +83,4 @@ Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowani
 - [ ] Dopieszczanie UI końcowej wersji
 - [x] ~~Blokery techniczne przed launchem: weryfikacja e-mail (N1), sprawdzanie subskrypcji (N2), walidacja schematu (N3)~~ — **wszystkie wdrożone i wydane 2026-07-09/10**; wpis wisiał nieaktualny do 2026-07-22 (weryfikacja przy pakiecie dla prawnika).
 - [x] ~~**Przed launchem zostaje:** akceptacja dokumentów przez prawnika (N4)~~ — ✅ **PRAWNIK BEZ ZASTRZEŻEŃ 2026-08-25**; N6 domknięte 2026-08-18. **Wszystkie blokery launchu zamknięte.**
-- [x] ✅ **DOKUMENTY OPUBLIKOWANE 2026-08-26** (commit `328cd71`, weryfikacja live) — bramka publikacji zamknięta z zerem placeholderów; Regulamin, Polityka i **nowa strona `/dpa`** renderują treść z `docs/legal/` (generator `npm run legal:build` z filtrem publikacyjnym — zmiany treści TYLKO przez markdown + regenerację + deploy). Poziom 3 supportu zniesiony (F4a). Historia bramki: `docs/legal/Bramka-publikacji-2026-08-26.md`, analiza: `docs/legal/Analiza-prawna-2026-08-26.md` (ADR-025). ⚠️ Otwarta jedna weryfikacja: plan Anthropic (`/status`) — warunkuje wpis w Polityce §5.
+- [x] ✅ **DOKUMENTY OPUBLIKOWANE 2026-08-26** (commit `328cd71`, weryfikacja live) — bramka publikacji zamknięta z zerem placeholderów; Regulamin, Polityka i **nowa strona `/dpa`** renderują treść z `docs/legal/` (generator `npm run legal:build` z filtrem publikacyjnym — zmiany treści TYLKO przez markdown + regenerację + deploy). Poziom 3 supportu zniesiony (F4a). Historia bramki: `docs/legal/Bramka-publikacji-2026-08-26.md`, analiza: `docs/legal/Analiza-prawna-2026-08-26.md` (ADR-025). Plan Anthropic zweryfikowany 2026-08-26: **Max (konsumencki, bez DPA)** — wpis o Anthropic wykreślony z Polityki §5 wydaniem poprawkowym; kanał supportu zawieszony dla danych osobowych do czasu oferty komercyjnej.

@@ -173,6 +173,19 @@ konkretnym dokumencie. Istniejące identyfikatory: `properties`, `syncLinks`, `s
 ⚠️ **`hostProfile` czytaj tylko wtedy, gdy zgłoszenie dotyczy profilu lub faktur** — pole
 `taxIdentifier` może zawierać PESEL (ustalenie audytu N5 🟡5).
 
+### ⛔ KANAŁ ZAWIESZONY dla danych osobowych — do czasu umowy powierzenia (2026-08-26, wieczór)
+
+> ⛔ **Właściciel potwierdził plan konsumencki (Max) — plany konsumenckie Claude nie zawierają
+> umowy powierzenia (DPA).** Do czasu przejścia na ofertę objętą Commercial Terms (Team /
+> Enterprise / klucz API) **agent nie czyta ŻADNYCH danych osobowych klientów**: ani treści
+> `contact_messages`, ani danych kont (e-mail, UID, status subskrypcji, `settings/*`).
+> Wpis o dostawcy modelu został wykreślony z opublikowanej Polityki §5 — kanał musi być tego
+> wpisu wart.
+> **Tryb przejściowy:** właściciel czyta zgłoszenia w panelu `/admin` (widok Zgłoszenia)
+> i przekazuje agentowi treść problemu **bez danych identyfikujących** (bez adresu e-mail,
+> bez UID, bez nazwisk); agent diagnozuje na kodzie i opisie. Po zawarciu DPA: poziomy 1–2
+> wracają, wpis w Polityce §5 wraca w trybie sekcji 11 (e-mail + komunikat, 14 dni).
+
 ### Poziom 3 — ⛔ ZNIESIONY z dniem publikacji dokumentów (2026-08-26)
 
 > ⛔ **Bramka F4a wykonana przy publikacji dokumentów 2026-08-26** (Anthropic wykreślony

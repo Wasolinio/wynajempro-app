@@ -502,7 +502,7 @@ export const legalDocs = [
           ],
           [
             "**** Formularz kontaktowy (`contact_messages`): adres e-mail, treść wiadomości, data, źródło. **Dane dodawane przy obsłudze zgłoszenia przez Operatora: status zgłoszenia (nowe / w toku / zamknięte), notatka Operatora (pole swobodne, do 5000 znaków), data ostatniej zmiany oraz identyfikator osoby działającej z ramienia Operatora**",
-            "Obsługa zapytań i zgłoszeń kierowanych do Operatora (także przez osoby niebędące Użytkownikami). **Odbiorcy: dostawca modelu językowego wspierającego obsługę zgłoszeń — patrz sekcja 5.** Treść wiadomości jest polem swobodnym, więc może zawierać dane, których Operator sam nie zbiera",
+            "Obsługa zapytań i zgłoszeń kierowanych do Operatora (także przez osoby niebędące Użytkownikami). Treść wiadomości jest polem swobodnym, więc może zawierać dane, których Operator sam nie zbiera",
             "art. 6 ust. 1 lit. f (uzasadniony interes — odpowiedź na zgłoszenie osoby, która sama się zwraca) albo lit. b, gdy dotyczy umowy —",
             "**12 miesięcy od zakończenia korespondencji**"
           ],
@@ -609,11 +609,6 @@ export const legalDocs = [
             "**Google** (Google OAuth)",
             "Logowanie kontem Google (dla użytkowników wybierających tę metodę)",
             "jw."
-          ],
-          [
-            "**Anthropic** (Anthropic Ireland, Limited)",
-            "**Wsparcie obsługi zgłoszeń.** Na polecenie Operatora model językowy przetwarza: treść zgłoszenia z formularza `/kontakt` wraz z podanym adresem e-mail oraz — przy diagnostyce konkretnego konta — dane konta Gospodarza wskazanego przez Operatora (stan konta, subskrypcja, ustawienia). **Dane Gości (rezerwacje, przewodniki, zapisy akceptacji) nie są przekazywane temu dostawcy** — kanał kończy się na danych, których administratorem jest Operator. Przetwarzanie jest **wyłącznie odczytem** — kanał techniczny nie ma uprawnień do zapisu ani kasowania danych",
-            "Transfer poza EOG: SCC włączone do DPA Anthropic (Commercial Terms); Anthropic nie figuruje w EU-US DPF (stan na 2026-08-26)"
           ]
         ]
       },
@@ -623,7 +618,7 @@ export const legalDocs = [
       },
       {
         "type": "p",
-        "content": "**Transfery poza EOG** odbywają się wyłącznie z zabezpieczeniami z art. 46 RODO: Google — SCC w Cloud Data Processing Addendum oraz certyfikacja Google LLC w EU-US Data Privacy Framework; Stripe — certyfikacja Stripe, Inc. w DPF, zapasowo SCC; Anthropic — SCC w DPA (oferta komercyjna). Kopie zabezpieczeń: cloud.google.com/terms/data-processing-addendum, stripe.com/legal/dpa, anthropic.com/legal — oraz u Operatora na żądanie (kontakt: sekcja 12)."
+        "content": "**Transfery poza EOG** odbywają się wyłącznie z zabezpieczeniami z art. 46 RODO: Google — SCC w Cloud Data Processing Addendum oraz certyfikacja Google LLC w EU-US Data Privacy Framework; Stripe — certyfikacja Stripe, Inc. w DPF, zapasowo SCC. Kopie zabezpieczeń: cloud.google.com/terms/data-processing-addendum, stripe.com/legal/dpa — oraz u Operatora na żądanie (kontakt: sekcja 12)."
       },
       {
         "type": "h2",
