@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Strażnik zgłoszeń WynajemPRO — patrz scripts/check-messages.mjs.
+       Instalacja: cp scripts/com.wynajempro.msgcheck.plist ~/Library/LaunchAgents/
+                   launchctl load -w ~/Library/LaunchAgents/com.wynajempro.msgcheck.plist
+       Odinstalowanie: launchctl unload -w ~/Library/LaunchAgents/com.wynajempro.msgcheck.plist -->
+  <key>Label</key><string>com.wynajempro.msgcheck</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/wasolinio/Desktop/WynajemPRO App/scripts/check-messages.mjs</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/wasolinio/Desktop/WynajemPRO App</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>StandardErrorPath</key><string>/Users/wasolinio/Library/Logs/wynajempro-msgcheck.log</string>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>10</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>16</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>47</integer></dict>
+    <dict><key>Hour</key><integer>22</integer><key>Minute</key><integer>47</integer></dict>
+  </array>
+</dict>
+</plist>

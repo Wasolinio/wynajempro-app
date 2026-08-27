@@ -181,6 +181,11 @@ konkretnym dokumencie. Istniejące identyfikatory: `properties`, `syncLinks`, `s
 > `contact_messages`, ani danych kont (e-mail, UID, status subskrypcji, `settings/*`).
 > Wpis o dostawcy modelu został wykreślony z opublikowanej Polityki §5 — kanał musi być tego
 > wpisu wart.
+> **Sygnał o nowych zgłoszeniach:** strażnik `scripts/check-messages.mjs` (LaunchAgent
+> `com.wynajempro.msgcheck`, co 3 h w godz. 7–23) liczy nowe dokumenty **z maską pól
+> `createdAt/source/adminStatus`** — zero danych osobowych z konstrukcji, nic nie idzie do
+> żadnego modelu — i pokazuje właścicielowi natywne powiadomienie macOS. Log:
+> `~/Library/Logs/wynajempro-msgcheck.log`.
 > **Tryb przejściowy:** właściciel czyta zgłoszenia w panelu `/admin` (widok Zgłoszenia)
 > i przekazuje agentowi treść problemu **bez danych identyfikujących** (bez adresu e-mail,
 > bez UID, bez nazwisk); agent diagnozuje na kodzie i opisie. Po zawarciu DPA: poziomy 1–2

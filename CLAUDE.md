@@ -60,7 +60,7 @@ Zgłoszenia z `/kontakt` lądują w Firestore (`contact_messages`), a reguły za
 klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase MCP** (`.mcp.json`,
 5 narzędzi wyłącznie do odczytu; `--tools` usuwa kasowanie i deploy u źródła).
 Proces: **`docs/support/Proces-obslugi-zgloszen.md`**.
-**Tryb pracy — ⛔ ZAWIESZONY dla danych osobowych (2026-08-26):** właściciel potwierdził plan konsumencki Max (bez DPA), więc do czasu oferty komercyjnej agent NIE czyta `contact_messages` ani danych kont; właściciel czyta zgłoszenia w `/admin` i streszcza problem bez danych identyfikujących, agent diagnozuje na kodzie. Wpis o Anthropic wykreślony z Polityki §5. Po DPA wracają poziomy 1–2 (poziom 3 zniesiony na stałe — F4a). `hostProfile` ma `taxIdentifier` (może być PESEL) —
+**Tryb pracy — ⛔ ZAWIESZONY dla danych osobowych (2026-08-26):** właściciel potwierdził plan konsumencki Max (bez DPA), więc do czasu oferty komercyjnej agent NIE czyta `contact_messages` ani danych kont; właściciel czyta zgłoszenia w `/admin` i streszcza problem bez danych identyfikujących, agent diagnozuje na kodzie. Wpis o Anthropic wykreślony z Polityki §5. Po DPA wracają poziomy 1–2 (poziom 3 zniesiony na stałe — F4a). O nowych zgłoszeniach właściciela powiadamia lokalny strażnik `scripts/check-messages.mjs` (LaunchAgent co 3 h, maska pól bez danych osobowych). `hostProfile` ma `taxIdentifier` (może być PESEL) —
 czytać wyłącznie przy zgłoszeniach o profil/faktury. Kanał jest **tylko do odczytu**:
 agent diagnozuje i proponuje, nie naprawia danych na produkcji.
 

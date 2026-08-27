@@ -4,6 +4,15 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-27
+
+### Strażnik zgłoszeń — powiadomienia o nowych wiadomościach bez danych osobowych i bez modelu w pętli
+- 🎯 **Zlecenie właściciela:** co 2–3 h sprawdzać, czy wpadły nowe zgłoszenia, i powiadamiać. Zderzenie z zawieszeniem kanału (2026-08-26) rozwiązane u źródła: sprawdzanie liczy dokumenty **bez dotykania treści**.
+- 🛡️ **Architektura: czysty lokalny skrypt, zero modelu w pętli.** `scripts/check-messages.mjs` rozmawia bezpośrednio z serwerem `firebase mcp` (JSON-RPC po stdio; auth = zalogowane firebase CLI) i pobiera listę `contact_messages` z **maską pól `createdAt/source/adminStatus`** — odpowiedź nie zawiera żadnych danych osobowych z konstrukcji (identyfikatory dokumentów są automatyczne). Nowe od ostatniego znacznika → natywne powiadomienie macOS („N nowych + M testowych — otwórz /admin", odsiew testów po `source` jak w skillu `zgloszenie`); stan w `~/.claude/projects/…/msgcheck-state.json`; **awaria sprawdzenia też powiadamia** — cisza wyglądałaby jak „brak zgłoszeń".
+- ✅ **Harmonogram: LaunchAgent `com.wynajempro.msgcheck`** (kopia źródłowa w `scripts/`), co 3 h w godz. 7:47–22:47 — trwałe, przeżywa restart Maca i nie zależy od żadnej sesji agenta. Odrzucone: `CronCreate` (żyje tylko do końca sesji, maks. 7 dni) i rutyny chmurowe (brak uwierzytelnienia Firebase poza tą maszyną).
+- 🔥 **Pułapka launchd złapana na teście, nie w nocy:** pierwszy przebieg spod launchd padł timeoutem — minimalny `PATH` launchd nie zna node'a, więc shebang `#!/usr/bin/env node` bin-shima firebase nie wstaje. Naprawa: spawn przez `process.execPath` + bezpośrednia ścieżka `firebase-tools/lib/bin/firebase.js`, do tego jawny `PATH` w plist. 📌 **Wniosek: automat spod launchd testuje się przez `launchctl start`, nie ręcznym uruchomieniem z terminala — to inne środowisko.**
+- ✅ **Przetestowane wszystkie trzy ścieżki:** baseline (pierwszy przebieg nie straszy zaległościami), powiadomienie (stan cofnięty do 01.08 → „1 nowe zgłoszenie + 1 testowe" na ekranie właściciela), cisza („bez zmian") — ostatnia z prawdziwego kontekstu launchd.
+
 ## 2026-08-26
 
 ### Wydanie poprawkowe: plan Max potwierdzony — Anthropic wykreślony z Polityki, kanał supportu zawieszony dla danych osobowych
