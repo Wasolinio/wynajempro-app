@@ -27,16 +27,16 @@
 
 # Regulamin świadczenia usług drogą elektroniczną — WynajemPRO
 
-**Wersja:** [DO UZUPEŁNIENIA: numer wersji, np. 1.0] · **Obowiązuje od:** [DO UZUPEŁNIENIA: data]
+**Wersja:** 1.0 · **Obowiązuje od:** 26 sierpnia 2026 r. *(decyzja właściciela 2026-08-26)*
 
 ## §1. Definicje
 
-1. **Usługodawca / Operator** — [DO UZUPEŁNIENIA: pełna firma / nazwa, forma prawna (np. działalność gospodarcza, sp. z o.o.), adres siedziby, NIP, REGON, ewentualnie KRS i kapitał zakładowy]. Kontakt: [DO UZUPEŁNIENIA: adres e-mail kontaktowy, np. kontakt@wynajempro.pl].
+1. **Usługodawca / Operator** — **Szymon Wasiak** — osoba fizyczna (działalność nierejestrowana; NIP, REGON i KRS nie mają zastosowania), adres do korespondencji: **Nowogródzka 9/9, 82-300 Elbląg** *(dane podane przez właściciela 2026-08-26)*. Kontakt: **kontakt@wynajempro.com** *(adres potwierdzony przez właściciela 2026-08-26)*.
 2. **Aplikacja / Serwis** — aplikacja internetowa **WynajemPRO** dostępna pod adresem **https://wynajempro.com**, służąca do zarządzania wynajmem nieruchomości. **[PRZEGLĄD 2026-07-22]** *(Stan faktyczny: od 2026-07-22 `wynajempro.com` jest jedynym adresem kanonicznym serwisu; dotychczasowy adres techniczny w domenie dostawcy hostingu przekierowuje trwale (301) na adres kanoniczny. Uwaga dla prawnika/właściciela: adres e-mail podawany w §1 ust. 1 jest obecnie w domenie `.pl` — do ujednolicenia z domeną serwisu przed publikacją.)*
 3. **Użytkownik / Gospodarz** — osoba fizyczna posiadająca pełną zdolność do czynności prawnych, osoba prawna lub jednostka organizacyjna, która założyła Konto i korzysta z Aplikacji w celu zarządzania własnym wynajmem.
 4. **Konsument** — Użytkownik będący osobą fizyczną, dokonujący z Operatorem czynności prawnej niezwiązanej bezpośrednio z jego działalnością gospodarczą lub zawodową (art. 22¹ Kodeksu cywilnego).
 5. **Przedsiębiorca na prawach konsumenta** — osoba fizyczna zawierająca umowę bezpośrednio związaną z jej działalnością gospodarczą, gdy z treści umowy wynika, że nie ma ona dla niej charakteru zawodowego (art. 7aa ustawy o prawach konsumenta oraz art. 385⁵, 556⁴, 556⁵, 5564 KC). *(Kwestia istotna dla WynajemPRO — większość gospodarzy prowadzi działalność, ale usługa może nie mieć dla nich charakteru zawodowego. Zakres ochrony wymaga potwierdzenia prawnika — patrz checklista.)*
-6. **Gość / Najemca** — osoba trzecia, której dane Gospodarz wprowadza lub udostępnia w Aplikacji (np. w rezerwacjach, przewodniku dla gości). Operator nie ma z Gościem bezpośredniej relacji umownej. Zasady przetwarzania danych Gości reguluje **Umowa powierzenia przetwarzania (DPA)** — `DPA-powierzenie.md`.
+6. **Gość / Najemca** — osoba trzecia, której dane Gospodarz wprowadza lub udostępnia w Aplikacji (np. w rezerwacjach, przewodniku dla gości). Operator nie ma z Gościem bezpośredniej relacji umownej. Zasady przetwarzania danych Gości reguluje **Umowa powierzenia przetwarzania (DPA)**, dostępna w Aplikacji pod adresem /dpa i stanowiąca integralną część Regulaminu — jej akceptacja następuje wraz z akceptacją Regulaminu. *(Model akceptacji — decyzja B-7 z 2026-08-26; wdrożenie strony /dpa: F4.)*
 7. **Okres próbny (Trial)** — 14-dniowy bezpłatny okres testowy uruchamiany automatycznie po rejestracji.
 8. **Subskrypcja** — odpłatny, odnawialny dostęp do pełnej funkcjonalności Aplikacji.
 9. **Operator płatności** — Stripe Payments Europe, Ltd. / Stripe, Inc. i podmioty powiązane, obsługujący płatności subskrypcyjne. *(Dokładna nazwa podmiotu kontraktującego wg umowy ze Stripe — do potwierdzenia, patrz checklista.)*
@@ -45,7 +45,7 @@
 ## §2. Postanowienia ogólne
 
 1. Regulamin określa zasady świadczenia przez Operatora usług drogą elektroniczną w ramach Aplikacji WynajemPRO, w tym warunki zawierania i rozwiązywania umowy o świadczenie usług, zasady okresu próbnego i subskrypcji oraz tryb reklamacji.
-2. Warunkiem korzystania z Aplikacji jest akceptacja Regulaminu oraz zapoznanie się z Polityką Prywatności (`Polityka-prywatnosci.md`).
+2. Warunkiem korzystania z Aplikacji jest akceptacja Regulaminu oraz zapoznanie się z Polityką Prywatności (dostępną pod adresem /prywatnosc).
 3. Usługa świadczona jest wyłącznie drogą elektroniczną, za pośrednictwem przeglądarki internetowej.
 4. **Wymagania techniczne:** urządzenie z dostępem do Internetu, aktualna przeglądarka internetowa z włączoną obsługą JavaScript i plików cookies (dla działania sesji logowania). Do rejestracji wymagany jest aktywny adres e-mail; alternatywnie logowanie kontem Google.
 
@@ -76,13 +76,13 @@
 
 ## §6. Subskrypcja, płatności i ceny
 
-1. Cena Subskrypcji wynosi **29,99 zł brutto miesięcznie** [DO UZUPEŁNIENIA/POTWIERDZENIA: czy kwota jest brutto z VAT; stawka VAT lub podstawa zwolnienia; ewentualny cennik roczny founding members]. *(Cennik zatwierdzony przez właściciela 2026-07-04: jedna cena 29,99 zł/mc + founding members. Kwestia VAT wymaga potwierdzenia — patrz checklista.)*
+1. Cena Subskrypcji wynosi **29,99 zł miesięcznie** i jest ceną ostateczną. Sprzedaż jest zwolniona z podatku VAT na podstawie art. 113 ust. 1 (w pierwszym roku działalności — ust. 9) ustawy o podatku od towarów i usług; cena nie zawiera podatku VAT. *(Cennik zatwierdzony 2026-07-04; brzmienie VAT — decyzja właściciela 2026-08-26 po analizie: limit zwolnienia 240 000 zł/rok od 2026, SaaS poza katalogiem wyłączeń art. 113 ust. 13; pilnowanie limitu, sprzedaż konsumentom z innych krajów UE i wpięcie w KSeF — do potwierdzenia z księgowym, bez wpływu na to brzmienie.)*
 2. Płatności obsługuje Operator płatności (Stripe) w modelu subskrypcji z **automatycznym odnawianiem**. **[PRZEGLĄD 2026-07-22]** Dane karty płatniczej są podawane wyłącznie na stronie płatności Operatora płatności — **nie są przekazywane do Aplikacji ani w niej przechowywane w żadnym zakresie**; Aplikacja przechowuje jedynie identyfikatory rozliczeniowe i status subskrypcji. *(Poprzednie brzmienie — „nie przechowuje pełnych danych kart" — sugerowało przechowywanie danych częściowych, co nie odpowiada stanowi faktycznemu: proces płatności odbywa się przez przekierowanie do Stripe Checkout, a zarządzanie płatnościami przez Portal Klienta Stripe.)*
 3. Opłata pobierana jest z góry za każdy cykl rozliczeniowy (miesięczny lub roczny, zależnie od wybranego planu).
 4. **Automatyczne odnawianie i rezygnacja:** Subskrypcja odnawia się automatycznie na kolejny cykl, chyba że Użytkownik anuluje ją przed końcem bieżącego cyklu. Anulowanie następuje samodzielnie przez panel rozliczeniowy (Stripe Customer Portal) dostępny w ustawieniach Konta. Po anulowaniu dostęp do funkcji płatnych trwa do końca opłaconego cyklu.
-5. **Founding members (cena startowa):** Użytkownik, który rozpocznie płatną Subskrypcję nie później niż [DO UZUPEŁNIENIA: data zakończenia naboru — ustalana w dniu uruchomienia płatnej sprzedaży], zachowuje cenę obowiązującą w dniu rozpoczęcia Subskrypcji przez okres **12 (dwunastu) miesięcy**, liczony od dnia pierwszej płatności. Po upływie tego okresu Subskrypcja odnawia się według ceny aktualnie obowiązującej, przy czym Operator informuje o zmianie ceny z co najmniej **30-dniowym wyprzedzeniem**, w trybie §10. Skorzystanie z oferty nie wymaga kodu rabatowego ani odrębnego wniosku — wystarczy rozpoczęcie Subskrypcji w okresie naboru. *(Warunki zatwierdzone przez właściciela 2026-08-22; uzasadnienie i odrzucone warianty: [[Decisions]] ADR-016.)*
+5. **Founding members (cena startowa):** Użytkownik, który rozpocznie płatną Subskrypcję **przed ogłoszeniem przez Operatora zakończenia naboru founding members**, zachowuje cenę obowiązującą w dniu rozpoczęcia Subskrypcji przez okres **12 (dwunastu) miesięcy**, liczony od dnia pierwszej płatności. Po upływie tego okresu Subskrypcja odnawia się według ceny aktualnie obowiązującej, przy czym Operator informuje o zmianie ceny z co najmniej **30-dniowym wyprzedzeniem**, w trybie §10. Skorzystanie z oferty nie wymaga kodu rabatowego ani odrębnego wniosku — wystarczy rozpoczęcie Subskrypcji przed zakończeniem naboru. **Ogłoszenie o zakończeniu naboru następuje z co najmniej 14-dniowym wyprzedzeniem, w trybie §10** — do chwili upływu tego terminu rozpoczęcie Subskrypcji nadal obejmuje warunki founding members. *(Warunki zatwierdzone przez właściciela 2026-08-22 — [[Decisions]] ADR-016; konstrukcja zdarzeniowa zamiast daty kalendarzowej — decyzja właściciela 2026-08-26, wariant 2 z analizy; do pokazania prawnikowi przy najbliższej rewizji dokumentów.)*
    ⚠️ **Sposób komunikacji oferty ma znaczenie prawne.** Jeżeli oferta będzie prezentowana jako **obniżka ceny**, przy jej prezentacji należy podać najniższą cenę z 30 dni przed obniżką (obowiązek z tzw. dyrektywy Omnibus — patrz checklista). Decyzją właściciela oferta jest komunikowana jako **cena startowa gwarantowana na 12 miesięcy**, a nie jako rabat procentowy; jeżeli cena 29,99 zł nie była poprzedzona ceną wyższą, obniżka w rozumieniu tych przepisów nie występuje. **Konstrukcja i sposób prezentacji do potwierdzenia przez prawnika.**
-6. Faktury / potwierdzenia płatności udostępniane są [DO UZUPEŁNIENIA: sposób — panel Stripe, e-mail]. [DO UZUPEŁNIENIA: czy i jak Operator wystawia faktury VAT].
+6. Potwierdzenia płatności wysyłane są automatycznie przez Operatora płatności (Stripe) na adres e-mail przypisany do Konta. Na żądanie zgłoszone na kontakt@wynajempro.com w terminie 3 miesięcy, licząc od końca miesiąca, w którym wykonano usługę, Operator wystawia fakturę bez VAT ze wskazaniem podstawy zwolnienia (art. 106b ust. 3 ustawy o VAT). *(Decyzja właściciela 2026-08-26; techniczne wpięcie wystawiania faktur w KSeF — do ustalenia z księgowym przed pierwszym żądaniem.)*
 7. Zmiana ceny Subskrypcji dla nowych cykli następuje w trybie zmiany Regulaminu (§10) z uprzednim powiadomieniem; zmiana nie wpływa na cykl już opłacony.
 
 ## §7. Prawo odstąpienia od umowy (Konsument i przedsiębiorca na prawach konsumenta)
@@ -90,7 +90,7 @@
 > **⚠️ Sekcja szczególnie wrażliwa prawnie — bezwzględna weryfikacja prawnika (patrz checklista).**
 
 1. Konsument (oraz przedsiębiorca na prawach konsumenta) zawierający umowę na odległość może od niej odstąpić bez podania przyczyny w terminie **14 dni** od zawarcia umowy (art. 27 ustawy z dnia 30 maja 2014 r. o prawach konsumenta).
-2. Aby odstąpić, należy złożyć jednoznaczne oświadczenie, np. na adres e-mail: [DO UZUPEŁNIENIA: adres e-mail] lub korespondencyjny: [DO UZUPEŁNIENIA: adres]. Można skorzystać ze wzoru formularza stanowiącego załącznik nr [DO UZUPEŁNIENIA] (wzór ustawowy).
+2. Aby odstąpić, należy złożyć jednoznaczne oświadczenie, np. na adres e-mail: **kontakt@wynajempro.com** lub korespondencyjny: **Nowogródzka 9/9, 82-300 Elbląg** (Szymon Wasiak). Można skorzystać ze wzoru formularza stanowiącego **załącznik nr 1** do Regulaminu (wzór zgodny z załącznikiem nr 2 do ustawy o prawach konsumenta).
 3. **Rozpoczęcie świadczenia przed upływem terminu na odstąpienie:** Jeżeli Użytkownik będący Konsumentem wyraźnie zażąda rozpoczęcia świadczenia usługi (dostępu do pełnej funkcjonalności) przed upływem 14-dniowego terminu na odstąpienie i zostanie poinformowany o utracie prawa odstąpienia, wówczas:
    - w przypadku usługi świadczonej za zapłatą — Konsument, który odstąpi w trakcie świadczenia, zapłaci za świadczenia spełnione do chwili odstąpienia (proporcjonalnie);
    - Konsument **traci prawo odstąpienia po pełnym wykonaniu usługi**, o ile świadczenie rozpoczęto za jego wyraźną i uprzednią zgodą oraz po przyjęciu do wiadomości informacji o utracie tego prawa (art. 38 pkt 1 ustawy o prawach konsumenta).
@@ -99,7 +99,7 @@
 
 ## §8. Reklamacje
 
-1. Reklamacje dotyczące działania Aplikacji można składać na adres e-mail: [DO UZUPEŁNIENIA: adres] lub korespondencyjnie: [DO UZUPEŁNIENIA: adres].
+1. Reklamacje dotyczące działania Aplikacji można składać na adres e-mail: **kontakt@wynajempro.com** lub korespondencyjnie: **Nowogródzka 9/9, 82-300 Elbląg** (Szymon Wasiak).
 2. Reklamacja powinna zawierać opis problemu, dane kontaktowe zgłaszającego oraz — w miarę możliwości — datę i okoliczności wystąpienia.
 3. Operator rozpatruje reklamację w terminie **14 dni** od jej otrzymania. *(Uwaga: dla reklamacji konsumenckich dot. treści/usług cyfrowych ustawa o prawach konsumenta przewiduje własne terminy i skutki milczenia przedsiębiorcy — termin i tryb do potwierdzenia przez prawnika; obecne „14 dni roboczych" z kodu TermsPage jest ryzykowne i tu zmienione na 14 dni.)*
 4. **Zgodność usługi cyfrowej:** Operator odpowiada wobec Konsumenta za zgodność świadczonej usługi cyfrowej z umową na zasadach określonych w rozdziale 5b ustawy o prawach konsumenta (art. 43h i nast.). *(Ten reżim zastąpił klasyczną „rękojmię" dla treści/usług cyfrowych od 2023 r. — szczegółowe brzmienie do potwierdzenia prawnika.)*
@@ -107,12 +107,12 @@
 ## §9. Pozasądowe rozwiązywanie sporów
 
 1. Konsument ma możliwość skorzystania z pozasądowych sposobów rozpatrywania reklamacji i dochodzenia roszczeń, m.in. przed właściwym miejscowo Wojewódzkim Inspektoratem Inspekcji Handlowej oraz u powiatowego (miejskiego) rzecznika konsumentów. Informacje dostępne są na stronie UOKiK (uokik.gov.pl).
-2. [DO UZUPEŁNIENIA/POTWIERDZENIA przez prawnika: aktualny status platformy ODR — unijna platforma ODR została wygaszona; sprawdzić, jakie informacje o pozasądowym rozwiązywaniu sporów są obecnie obowiązkowe.]
+2. Operator nie zobowiązuje się z góry do udziału w postępowaniach w sprawie pozasądowego rozwiązywania sporów konsumenckich i nie jest do tego obowiązany odrębnymi przepisami. Jeżeli spór nie zostanie rozwiązany w następstwie reklamacji, Operator przekaże Konsumentowi — na papierze lub innym trwałym nośniku — oświadczenie o zgodzie albo odmowie wzięcia udziału w postępowaniu w sprawie pozasądowego rozwiązania sporu (art. 32 ustawy z dnia 23 września 2016 r. o pozasądowym rozwiązywaniu sporów konsumenckich). *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 
 ## §10. Zmiana Regulaminu
 
 1. Operator może zmienić Regulamin z ważnych przyczyn (zmiana przepisów, zmiana zakresu lub sposobu świadczenia usług, względy bezpieczeństwa, zmiana cen dla przyszłych cykli).
-2. O zmianie Operator informuje Użytkowników [DO UZUPEŁNIENIA: kanał — e-mail / komunikat w panelu] z wyprzedzeniem co najmniej [DO UZUPEŁNIENIA: liczba dni, np. 14] dni przed wejściem zmian w życie.
+2. O zmianie Operator informuje Użytkowników e-mailem na adres przypisany do Konta oraz komunikatem w panelu Aplikacji, z wyprzedzeniem co najmniej **14 dni** przed wejściem zmian w życie *(decyzja właściciela 2026-08-26)*.
 3. Użytkownik, który nie akceptuje zmian, może wypowiedzieć umowę / usunąć Konto przed dniem wejścia zmian w życie.
 
 ## §11. Rozwiązanie umowy i usunięcie Konta
@@ -131,15 +131,39 @@
 
 ## §13. Własność intelektualna
 
-1. Aplikacja, jej kod, interfejs, nazwa i znaki WynajemPRO podlegają ochronie prawnej i pozostają własnością Operatora [DO UZUPEŁNIENIA: potwierdzić stan praw — czy zarejestrowany znak towarowy].
+1. Aplikacja, jej kod, interfejs, nazwa i oznaczenia WynajemPRO podlegają ochronie prawnej — w szczególności na podstawie przepisów o prawie autorskim i prawach pokrewnych oraz o zwalczaniu nieuczciwej konkurencji — i pozostają własnością Operatora. *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 2. Użytkownik zachowuje prawa do wprowadzonych przez siebie treści i danych.
 
 ## §14. Postanowienia końcowe
 
 1. W sprawach nieuregulowanych stosuje się prawo polskie, w szczególności Kodeks cywilny, ustawę o świadczeniu usług drogą elektroniczną, ustawę o prawach konsumenta oraz przepisy o ochronie danych osobowych (RODO). Wybór prawa nie pozbawia Konsumenta ochrony wynikającej z bezwzględnie obowiązujących przepisów państwa jego zwykłego pobytu.
-2. Ewentualne spory z Użytkownikami niebędącymi Konsumentami rozstrzyga sąd właściwy dla siedziby Operatora. [DO POTWIERDZENIA przez prawnika.]
+2. Ewentualne spory z Użytkownikami niebędącymi Konsumentami ani przedsiębiorcami na prawach konsumenta rozstrzyga sąd właściwy miejscowo dla adresu Operatora. *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 3. Regulamin dostępny jest nieodpłatnie w Aplikacji w formie umożliwiającej pozyskanie, odtwarzanie i utrwalanie jego treści.
-4. Kontakt z Operatorem: [DO UZUPEŁNIENIA: e-mail, adres korespondencyjny].
+4. Kontakt z Operatorem: **kontakt@wynajempro.com**; adres korespondencyjny: **Nowogródzka 9/9, 82-300 Elbląg** (Szymon Wasiak).
+
+
+---
+
+## Załącznik nr 1 — wzór formularza odstąpienia od umowy
+
+*(formularz ten należy wypełnić i odesłać tylko w przypadku chęci odstąpienia od umowy)*
+
+> Adresat: Szymon Wasiak, Nowogródzka 9/9, 82-300 Elbląg, e-mail: kontakt@wynajempro.com
+>
+> Ja/My(\*) niniejszym informuję/informujemy(\*) o moim/naszym odstąpieniu od umowy
+> o świadczenie następującej usługi: dostęp do aplikacji WynajemPRO (Subskrypcja)
+>
+> Data zawarcia umowy: …
+>
+> Imię i nazwisko konsumenta(-ów): …
+>
+> Adres konsumenta(-ów): …
+>
+> Podpis konsumenta(-ów): … *(tylko jeżeli formularz jest przesyłany w wersji papierowej)*
+>
+> Data: …
+>
+> (\*) Niepotrzebne skreślić.
 
 ---
 

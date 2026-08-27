@@ -718,3 +718,25 @@ niż obsługa obu trybów**, inaczej zmiana adresu poprowadzi klienta w ślepy z
 wiadomości do gości. Wtedy własna wysyłka nadpisze Action URL i te ścieżki się zejdą.
 Kolejność wejścia bez zmian: najpierw `legal` (podprocesor, DPA), potem SPF/DKIM/DMARC,
 dopiero potem kod.
+
+## ADR-025: Pytania prawne bramki publikacji domykamy własną analizą
+
+**Data**: 2026-08-26
+**Status**: ACCEPTED
+**Kontekst**: Prawnik ocenił dokumenty 2026-08-25 „bez zastrzeżeń", ale 9 pytań oznaczonych
+„do potwierdzenia przez prawnika" (grupa D bramki publikacji) zostawił bez odpowiedzi.
+Właściciel ocenił, że kolejna runda u prawnika nie wnosi wartości („wziął kasę i powiedział,
+że dokumenty są super") i polecił: przeprowadzić analizę ustaw samodzielnie, przedstawić
+odpowiedzi do akceptacji i nanieść.
+
+**Decyzja**: pytania D-1…D-9 oraz ustalenia E-1…E-6 rozstrzyga analiza własna
+(`docs/legal/Analiza-prawna-2026-08-26.md`) z podaniem źródła i daty odczytu przy każdym
+ustaleniu oraz jawnym poziomem pewności ([PEWNE]/[MOCNE]/[OCENA]). Ryzyko rezydualne pozycji
+[OCENA] przyjmuje właściciel świadomie. Analiza nie jest poradą prawną; brzmienia w dokumentach
+noszą odnośnik do analizy zamiast do opinii prawnika.
+
+**Konsekwencje**: bramka publikacji spadła z 21 do 3 luk (zostały wyłącznie pozycje księgowego
+i data naboru founding members). Jedyny warunek blokujący z analizy: plan Anthropic — oferta
+konsumencka nie ma DPA, więc wpisy o Anthropic w Polityce §5 i DPA §7 są oznaczone jako
+warunkowe do czasu potwierdzenia planu przez właściciela. Rewizja dokumentów przez prawnika
+przy przeskalowaniu biznesu (zalecenie z 2026-08-25, Backlog) obejmie także tę analizę.

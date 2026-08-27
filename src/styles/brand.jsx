@@ -96,6 +96,21 @@ export const BRAND_CSS = `
 .wpb-prose strong{ color:var(--ink); font-weight:600; }
 .wpb-prose a{ color:var(--cynober); font-weight:600; text-decoration:none; border-bottom:1px solid transparent; }
 .wpb-prose a:hover{ border-color:var(--cynober); }
+.wpb-prose em{ font-style:italic; }
+.wpb-prose code{ font-family:ui-monospace, monospace; font-size:.92em; background:var(--wash);
+  padding:1px 5px; border-radius:3px; color:var(--ink); }
+.wpb-prose-hr{ border:0; border-top:1px solid var(--hairline); margin:26px 0; }
+.wpb-prose-quote{ margin:0 0 12px; padding:12px 16px; border-left:3px solid var(--cynober);
+  background:var(--wash); border-radius:0 3px 3px 0; }
+.wpb-prose-quote p{ margin:0 0 4px; }
+.wpb-prose-quote p:last-child{ margin-bottom:0; }
+/* Tabele dokumentow (Polityka par. 2 i 5 sa szerokie) - przewijanie w obrebie karty,
+   nie strony. Uwaga: zadnych odwrotnych apostrofow w komentarzach tego arkusza. */
+.wpb-tablewrap{ overflow-x:auto; margin:0 0 14px; }
+.wpb-tablewrap table{ border-collapse:collapse; width:100%; min-width:640px; font-size:14px; }
+.wpb-tablewrap th{ text-align:left; font-weight:700; color:var(--ink);
+  border-bottom:2px solid var(--hairline); padding:8px 10px; vertical-align:bottom; }
+.wpb-tablewrap td{ border-bottom:1px solid var(--hairline); padding:8px 10px; vertical-align:top; }
 
 /* ── Przyciski ── */
 .wpb-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 22px;

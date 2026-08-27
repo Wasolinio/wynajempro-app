@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { BrandStyles } from '../styles/brand';
 
-export default function LegalLayout({ title, subtitle, lastUpdated, children, bare = false, wide = false, label }) {
+export default function LegalLayout({ title, subtitle, lastUpdated, meta, children, bare = false, wide = false, label }) {
   return (
     <div className="wpb">
       <BrandStyles />
@@ -26,6 +26,7 @@ export default function LegalLayout({ title, subtitle, lastUpdated, children, ba
           <h1 className="wpb-h1">{title}</h1>
           {subtitle && <p className="wpb-lead">{subtitle}</p>}
           {lastUpdated && <p className="wpb-meta">Ostatnia aktualizacja: {lastUpdated}</p>}
+          {meta && <p className="wpb-meta">{meta}</p>}
         </div>
 
         {bare ? children : <article className="wpb-card wpb-prose">{children}</article>}

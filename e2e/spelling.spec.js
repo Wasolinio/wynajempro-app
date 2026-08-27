@@ -22,8 +22,9 @@ test('Landing Page has spelling corrections', async ({ page }) => {
 test('Privacy Page has spelling corrections', async ({ page }) => {
   await page.goto('/prywatnosc');
 
-  // Verify 'wyłącznie' is used instead of 'wyłacznie'
-  await expect(page.locator('text=wyłącznie w minimalnym')).toBeVisible();
+  // Kotwica po F4 (2026-08-26): strona renderuje treść z docs/legal/ — fraza N6.1
+  // o wycofaniu zgody, z poprawnym „równie łatwo" (nie „równie latwo").
+  await expect(page.locator('text=równie łatwo, jak jej udzielić').first()).toBeVisible();
 });
 
 test('Contact Page has spelling corrections', async ({ page }) => {
@@ -36,9 +37,8 @@ test('Contact Page has spelling corrections', async ({ page }) => {
 test('Terms Page has spelling corrections', async ({ page }) => {
   await page.goto('/regulamin');
 
-  // Verify 'Niewykorzystywania' is used instead of 'Nie wykorzystywania'
-  await expect(page.locator('text=Niewykorzystywania Aplikacji')).toBeVisible();
-
-  // Verify 'bez przerwy' is used instead of 'bezprzerwanie'
-  await expect(page.locator('text=działała bez przerwy')).toBeVisible();
+  // Kotwice po F4 (2026-08-26): treść z docs/legal/ — „nieprzerwanie" jednym słowem
+  // (nie „bez przerwanie") i poprawna odmiana w §3.
+  await expect(page.locator('text=działała nieprzerwanie')).toBeVisible();
+  await expect(page.locator('text=zobowiązuje się podawać dane prawdziwe')).toBeVisible();
 });

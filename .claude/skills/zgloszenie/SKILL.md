@@ -78,16 +78,14 @@ Identyfikatory: `properties`, `syncLinks`, `sources`, `categories`, `tax`, `recu
 ⚠️ **`hostProfile` czytaj wyłącznie przy zgłoszeniach o profil lub faktury** — pole
 `taxIdentifier` może zawierać PESEL (ustalenie audytu N5).
 
-### Poziom 3 — dane Gości (tylko gdy zgłoszenie tego wymaga)
+### Poziom 3 — ⛔ ZNIESIONY z dniem publikacji dokumentów (2026-08-26)
 
-`users/{uid}/rentals/`, `guides/` z filtrem `ownerId`, `guides/{id}/signatures/`.
-Zawierają imiona gości, kontakt i obrazy podpisów.
-
-1. Wchodź, tylko gdy problem dotyczy konkretnej rezerwacji albo przewodnika.
-2. Czytaj **wąsko** — pojedynczy dokument, jeśli znasz identyfikator, nie całą kolekcję.
-3. **Nie czytaj `secrets/data`** (hasło WiFi, kod do drzwi), chyba że zgłoszenie dotyczy
-   wprost tego, że sekrety się nie wyświetlają. To dane dostępowe do czyjegoś mieszkania.
-4. Odnotuj w odpowiedzi, że sięgnięcie po dane Gości było potrzebne i dlaczego.
+**Danych Gości nie czytasz w ogóle** — `users/{uid}/rentals/`, `guides/`,
+`guides/{id}/signatures/` i `secrets/data` są poza kanałem, niezależnie od treści zgłoszenia.
+To wykonana bramka F4a: Anthropic jest wykreślony z opublikowanego DPA §7, więc kanał modelu
+nie może dotykać danych powierzonych. Gdy diagnostyka wymaga zajrzenia w rezerwacje albo
+przewodnik: zakończ na poziomie 2 i podaj właścicielowi dokładną ścieżkę dokumentu do
+samodzielnego otwarcia w konsoli Firebase, z opisem, czego w nim szukać.
 
 ## Czego nie robisz
 

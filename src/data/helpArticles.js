@@ -1396,7 +1396,7 @@ export const helpArticles = [
       },
       {
         "type": "p",
-        "content": "WynajemPRO działa w przeglądarce telefonu — nie ma osobnej aplikacji do zainstalowania ze sklepu. Zaloguj się na wynajempro.pl tak samo jak na komputerze."
+        "content": "WynajemPRO działa w przeglądarce telefonu — nie ma osobnej aplikacji do zainstalowania ze sklepu. Zaloguj się na wynajempro.com tak samo jak na komputerze."
       },
       {
         "type": "list",
@@ -1445,7 +1445,7 @@ export const helpArticles = [
       },
       {
         "type": "p",
-        "content": "Napisz na kontakt@wynajempro.pl. Staramy się odpowiadać w ciągu 24–48 godzin roboczych."
+        "content": "Napisz na kontakt@wynajempro.com. Staramy się odpowiadać w ciągu 24–48 godzin roboczych."
       },
       {
         "type": "p",
@@ -1477,7 +1477,7 @@ export const helpArticles = [
           },
           {
             "q": "Czy mogę zgłosić pomysł na nową funkcję?",
-            "a": "Tak, chętnie je czytamy — napisz na kontakt@wynajempro.pl. Nie obiecujemy terminów, ale każdy pomysł trafia na naszą listę i wpływa na kolejność prac."
+            "a": "Tak, chętnie je czytamy — napisz na kontakt@wynajempro.com. Nie obiecujemy terminów, ale każdy pomysł trafia na naszą listę i wpływa na kolejność prac."
           },
           {
             "q": "Zgubiłem dostęp do skrzynki e-mail, na którą mam konto. Co teraz?",

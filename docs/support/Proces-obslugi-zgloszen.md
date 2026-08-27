@@ -173,7 +173,17 @@ konkretnym dokumencie. Istniejące identyfikatory: `properties`, `syncLinks`, `s
 ⚠️ **`hostProfile` czytaj tylko wtedy, gdy zgłoszenie dotyczy profilu lub faktur** — pole
 `taxIdentifier` może zawierać PESEL (ustalenie audytu N5 🟡5).
 
-### Poziom 3 — dane powierzone (dane Gości) — tylko gdy zgłoszenie tego wymaga
+### Poziom 3 — ⛔ ZNIESIONY z dniem publikacji dokumentów (2026-08-26)
+
+> ⛔ **Bramka F4a wykonana przy publikacji dokumentów 2026-08-26** (Anthropic wykreślony
+> z DPA §7, DPA opublikowane — od tej chwili deklaracja musi być prawdziwa): **agent NIE
+> czyta danych Gości w ogóle** — `users/{uid}/rentals/`, `guides/`, `signatures/` ani
+> `secrets/data` są poza kanałem, niezależnie od treści zgłoszenia. Gdy diagnostyka wymaga
+> zajrzenia w rezerwacje lub przewodnik, agent kończy na poziomie 2 i przekazuje
+> właścicielowi dokładną ścieżkę dokumentu do samodzielnego otwarcia w konsoli Firebase,
+> z opisem, czego w nim szukać. Dawne zasady poziomu 3 zostają niżej wyłącznie jako opis
+> historyczny (obowiązywały do publikacji; okres przejściowy bety — [[Activity-Log]] 2026-08-26).
+
 
 | Odczyt | Zawiera dane osobowe Gości |
 |---|---|
@@ -210,7 +220,7 @@ zapis do bazy produkcyjnej.
    - *błąd* → weryfikacja w kodzie (nigdy „na słowo"), wpis do [[Known-Issues]],
    - *żądanie RODO* (usunięcie danych, dostęp) → ścieżka z Polityki §6, **termin miesiąca**,
    - *pomysł* → [[Projects/Backlog]] z jednym zdaniem „po co".
-4. **Odpisz z własnej skrzynki** (`kontakt@wynajempro.pl`). Aplikacja nie ma kanału wysyłki —
+4. **Odpisz z własnej skrzynki** (`kontakt@wynajempro.com`). Aplikacja nie ma kanału wysyłki —
    agent przygotowuje treść, wysyłasz Ty.
 5. **Odnotuj** — dopóki nie ma pola statusu (sekcja 6), rejestr obsłużonych zgłoszeń
    prowadzimy w [[Activity-Log]] przy okazji zmian, które z nich wynikły.

@@ -15,4 +15,4 @@ Krótkie, praktyczne instrukcje do wszystkich części systemu. Każdy artykuł 
 
 ## Kontakt
 
-Nie znajdujesz odpowiedzi? Napisz na kontakt@wynajempro.pl — staramy się odpowiadać w ciągu 24–48 godzin roboczych.
+Nie znajdujesz odpowiedzi? Napisz na kontakt@wynajempro.com — staramy się odpowiadać w ciągu 24–48 godzin roboczych.

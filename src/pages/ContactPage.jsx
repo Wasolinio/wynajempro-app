@@ -56,7 +56,7 @@ export default function ContactPage() {
       setMessage('');
     } catch (err) {
       console.error('Błąd wysyłki formularza kontaktowego:', err);
-      toast.error('Nie udało się wysłać wiadomości. Napisz na kontakt@wynajempro.pl');
+      toast.error('Nie udało się wysłać wiadomości. Napisz na kontakt@wynajempro.com');
     } finally {
       setIsSending(false);
     }
@@ -82,8 +82,8 @@ export default function ContactPage() {
             <span className="wpb-ic"><Mail /></span>
             <div>
               <p className="wpb-label" style={{ marginBottom: 4 }}>E-mail kontaktowy</p>
-              <a href="mailto:kontakt@wynajempro.pl" className="wpb-link" style={{ fontSize: 18, fontWeight: 700 }}>
-                kontakt@wynajempro.pl
+              <a href="mailto:kontakt@wynajempro.com" className="wpb-link" style={{ fontSize: 18, fontWeight: 700 }}>
+                kontakt@wynajempro.com
               </a>
             </div>
           </div>

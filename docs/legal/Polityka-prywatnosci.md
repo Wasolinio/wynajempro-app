@@ -62,20 +62,20 @@
 
 # Polityka Prywatności WynajemPRO
 
-**Obowiązuje od:** [DO UZUPEŁNIENIA: data]
+**Wersja:** 1.0 · **Obowiązuje od:** 26 sierpnia 2026 r. *(decyzja właściciela 2026-08-26)*
 
 ## 1. Administrator danych
 
-Administratorem danych osobowych Użytkowników (Gospodarzy) w zakresie ich kont jest [DO UZUPEŁNIENIA: pełna firma, forma prawna, adres, NIP], dalej „Operator" / „my".
+Administratorem danych osobowych Użytkowników (Gospodarzy) w zakresie ich kont jest **Szymon Wasiak** — osoba fizyczna (działalność nierejestrowana; NIP, REGON i KRS nie mają zastosowania), adres do korespondencji: **Nowogródzka 9/9, 82-300 Elbląg** *(dane podane przez właściciela 2026-08-26)*, dalej „Operator" / „my".
 
-Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail; publiczny adres na stronie /kontakt to obecnie kontakt@wynajempro.pl — spójność z domeną kanoniczną wynajempro.com do decyzji właściciela] oraz adres korespondencyjny [DO UZUPEŁNIENIA].
+Kontakt w sprawach danych osobowych: **kontakt@wynajempro.com** *(adres potwierdzony przez właściciela 2026-08-26; zgodny z domeną kanoniczną wynajempro.com)* oraz adres korespondencyjny: **Nowogródzka 9/9, 82-300 Elbląg** (Szymon Wasiak).
 
-**Inspektor Ochrony Danych (IOD):** [DO UZUPEŁNIENIA: czy powołano IOD — jeśli tak, podać dane kontaktowe; jeśli nie, usunąć sekcję. Uwaga: dla podmiotu tej skali IOD zwykle nie jest obowiązkowy (art. 37 RODO), ale to ocena prawnika — patrz checklista.]
+*(IOD nie został powołany — informacji nie zamieszcza się. Decyzja właściciela 2026-08-26; ocena, że obowiązek z art. 37 RODO nie zachodzi przy tej skali, do potwierdzenia przy najbliższym przeglądzie prawnika.)*
 
 > **Ważne rozróżnienie dwóch ról.** W odniesieniu do danych **Gości/Najemców**, które Gospodarz
 > wprowadza do Aplikacji (rezerwacje, kontakty, podpisy pod regulaminem, dane dostępowe),
 > **administratorem jest Gospodarz**, a Operator występuje jako **podmiot przetwarzający**
-> (procesor) na podstawie Umowy powierzenia (DPA — `DPA-powierzenie.md`). Niniejsza Polityka
+> (procesor) na podstawie Umowy powierzenia (DPA, dostępnej pod adresem /dpa). Niniejsza Polityka
 > opisuje przede wszystkim przetwarzanie danych, dla których administratorem jest Operator
 > (konto Gospodarza). Dane Gości opisujemy poglądowo w sekcji 4.
 
@@ -84,13 +84,14 @@ Kontakt w sprawach danych osobowych: [DO UZUPEŁNIENIA: adres e-mail; publiczny 
 | Kategoria danych | Cel | Podstawa prawna (RODO) | Okres przechowywania |
 |---|---|---|---|
 | Adres e-mail, identyfikator (UID), hasło (w formie zabezpieczonej przez Firebase Auth), fakt weryfikacji e-mail | Założenie i utrzymanie Konta, logowanie, świadczenie usługi | art. 6 ust. 1 lit. b (wykonanie umowy) | Przez czas trwania Konta + okres retencji po usunięciu/wygaśnięciu (patrz sekcja 6) |
-| Dane rozliczeniowe / identyfikatory Stripe (`stripeCustomerId`, `stripeSubscriptionId`, status subskrypcji) | Obsługa płatności i subskrypcji | art. 6 ust. 1 lit. b (umowa); w zakresie dokumentacji rozliczeniowej — art. 6 ust. 1 lit. c (obowiązek prawny, przepisy podatkowe) | Zgodnie z przepisami podatkowo-rachunkowymi [DO UZUPEŁNIENIA/POTWIERDZENIA: np. 5 lat dla dokumentów księgowych] |
+| Dane rozliczeniowe / identyfikatory Stripe (`stripeCustomerId`, `stripeSubscriptionId`, status subskrypcji) | Obsługa płatności i subskrypcji | art. 6 ust. 1 lit. b (umowa); w zakresie dokumentacji rozliczeniowej — art. 6 ust. 1 lit. c (obowiązek prawny, przepisy podatkowe) | Zgodnie z przepisami podatkowymi: **5 lat, licząc od końca roku kalendarzowego, w którym upłynął termin płatności podatku** (art. 86 § 1 w zw. z art. 70 § 1 Ordynacji podatkowej) — *do potwierdzenia przez księgowego* |
 | Dane biznesowe Gospodarza: nazwy obiektów, ceny, wpisy w kalendarzu (rezerwacje, koszty, zadania), ustawienia podatkowe | Świadczenie funkcji zarządzania wynajmem | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + okres retencji (sekcja 6) |
 | **[UZUPEŁNIENIE 2026-07-22]** Profil gospodarza (`hostProfile`): imię/nazwa, typ identyfikatora, NIP albo PESEL (opcjonalnie), adres, telefon, e-mail logowania, publiczny e-mail — **niepubliczny**, dostępny wyłącznie dla Użytkownika | Dane do dokumentów i rozliczeń w ramach usługi | art. 6 ust. 1 lit. b (umowa) | Przez czas trwania Konta + okres retencji (sekcja 6) |
 | **[UZUPEŁNIENIE 2026-07-22, doprecyzowanie PRZEGLĄD 2026-07-22]** Kontakt publiczny gospodarza (`publicContact`): nazwa, telefon oraz **publiczny adres e-mail wskazany odrębnie przez Gospodarza** (adres logowania nie jest publikowany) — wyświetlane w sekcji „Kontakt z gospodarzem" publicznego przewodnika dla gości; **publikację można w każdej chwili wyłączyć przełącznikiem** w profilu (wówczas sekcja kontaktu nie pojawia się w przewodniku) | Prezentacja kontaktu gościom w przewodniku; **odbiorcy: każda osoba dysponująca linkiem przewodnika** (dokument czytelny publicznie — patrz sekcja 4) | art. 6 ust. 1 lit. b (element usługi konfigurowanej przez Gospodarza) — *wybór podstawy do potwierdzenia przez prawnika; alternatywa: zgoda (lit. a) — patrz `Uwagi-N5-dla-prawnika.md`, C.4* | Przez czas trwania Konta; publiczna widoczność do usunięcia przewodnika lub wyłączenia kontaktu publicznego |
-| **[PRZEGLĄD 2026-07-22, UZUPEŁNIENIE 2026-08-10]** Formularz kontaktowy (`contact_messages`): adres e-mail, treść wiadomości, data, źródło | Obsługa zapytań i zgłoszeń kierowanych do Operatora (także przez osoby niebędące Użytkownikami). **Odbiorcy: dostawca modelu językowego wspierającego obsługę zgłoszeń — patrz sekcja 5.** Treść wiadomości jest polem swobodnym, więc może zawierać dane, których Operator sam nie zbiera | art. 6 ust. 1 lit. f (uzasadniony interes — odpowiedź na zgłoszenie osoby, która sama się zwraca) albo lit. b, gdy dotyczy umowy — *wybór podstawy do decyzji prawnika* | [DO DECYZJI właściciela + prawnik: propozycja kierunkowa 12 miesięcy od zakończenia korespondencji; wg stanowiska UODO okres musi być konkretny] |
-| Dane techniczne: adres IP, logi, identyfikatory sesji, dane z zabezpieczeń (App Check / reCAPTCHA) | Bezpieczeństwo, zapobieganie nadużyciom, diagnostyka | art. 6 ust. 1 lit. f (uzasadniony interes — bezpieczeństwo usługi) | [DO UZUPEŁNIENIA: okres retencji logów — zależny od konfiguracji Firebase; do ustalenia] |
-| Dane analityczne (Google/Firebase Analytics) | Analiza ruchu i optymalizacja | art. 6 ust. 1 lit. a (zgoda z bannera cookie) | Do wycofania zgody / zgodnie z ustawieniami Analytics [DO UZUPEŁNIENIA: okres retencji GA] |
+| **[PRZEGLĄD 2026-07-22, UZUPEŁNIENIE 2026-08-10, UZUPEŁNIENIE 2026-08-26]** Formularz kontaktowy (`contact_messages`): adres e-mail, treść wiadomości, data, źródło. **Dane dodawane przy obsłudze zgłoszenia przez Operatora: status zgłoszenia (nowe / w toku / zamknięte), notatka Operatora (pole swobodne, do 5000 znaków), data ostatniej zmiany oraz identyfikator osoby działającej z ramienia Operatora** | Obsługa zapytań i zgłoszeń kierowanych do Operatora (także przez osoby niebędące Użytkownikami). **Odbiorcy: dostawca modelu językowego wspierającego obsługę zgłoszeń — patrz sekcja 5.** Treść wiadomości jest polem swobodnym, więc może zawierać dane, których Operator sam nie zbiera | art. 6 ust. 1 lit. f (uzasadniony interes — odpowiedź na zgłoszenie osoby, która sama się zwraca) albo lit. b, gdy dotyczy umowy — *wybór podstawy do decyzji prawnika* | **12 miesięcy od zakończenia korespondencji** *(decyzja właściciela 2026-08-26)* |
+| **[UZUPEŁNIENIE 2026-08-26]** Dziennik dostępu administracyjnego (`admin_audit`): identyfikator (UID) konta, którego dotyczył odczyt lub zmiana, rodzaj czynności, data oraz identyfikator osoby działającej z ramienia Operatora. **Dziennik nie zawiera adresu e-mail** ani treści danych, których dotyczył odczyt | Wykazanie, że dostęp Operatora do danych Konta był ograniczony do niezbędnego zakresu; wykrywanie nadużyć uprawnień administratora | art. 6 ust. 1 lit. f (uzasadniony interes — rozliczalność i bezpieczeństwo; art. 5 ust. 2, art. 24, art. 32 RODO) — *podstawa rozstrzygnięta na lit. f analizą 2026-08-26; test równowagi udokumentowany w `Analiza-prawna-2026-08-26.md` (D-7)* | **12 miesięcy od zapisu** — wpisy starsze usuwa automatycznie proces cykliczny (uruchamiany codziennie). *(decyzja właściciela 2026-08-26 — okres potwierdzony, wariant 24 mies. odrzucony)* |
+| Dane techniczne: adres IP, logi, identyfikatory sesji, dane z zabezpieczeń (App Check / reCAPTCHA) | Bezpieczeństwo, zapobieganie nadużyciom, diagnostyka | art. 6 ust. 1 lit. f (uzasadniony interes — bezpieczeństwo usługi) | do **30 dni** (domyślna retencja dzienników technicznych Google Cloud Logging); dzienniki audytu administracyjnego dostawcy — do **400 dni** (retencja niekonfigurowalna) *(ustalone u źródła 2026-08-26)* |
+| Dane analityczne (Google/Firebase Analytics) | Analiza ruchu i optymalizacja | art. 6 ust. 1 lit. a (zgoda z bannera cookie) | Do wycofania zgody; dane zdarzeń w Google Analytics 4 — **nie dłużej niż 14 miesięcy** (maksymalne ustawienie retencji w bezpłatnym GA4) *(ustalone u źródła 2026-08-26)* |
 | Zapisy do newslettera (adres e-mail, źródło, **zapis zgody wraz z wersją jej treści**) — jeśli Użytkownik się zapisze | Marketing własny / informacje o usłudze | art. 6 ust. 1 lit. a (zgoda) | Do wycofania zgody |
 
 *(Podstawy prawne to szkielet do potwierdzenia prawnika — zwłaszcza rozgraniczenie lit. b / lit. f oraz podstawy dla logów bezpieczeństwa i danych podatkowych.)*
@@ -121,7 +122,7 @@ W zakresie tych danych **administratorem jest Gospodarz**. Operator przetwarza j
 > przetwarzania i obowiązek informacyjny wobec gościa (art. 13 RODO) spoczywają na **Gospodarzu**
 > jako administratorze — Operator ich za niego nie wykonuje. *(Do rozważenia przez prawnika:
 > czy warto, by Operator udostępniał Gospodarzom wzór informacji dla gości obejmujący także tę
-> kategorię danych. Szersza analiza — `DPA-powierzenie.md` §3.)*
+> kategorię danych. Szersza analiza — DPA §3.)*
 
 ## 5. Odbiorcy danych i podmioty przetwarzające (subprocesorzy)
 
@@ -129,14 +130,14 @@ Dane mogą być powierzane następującym dostawcom działającym jako podmioty 
 
 | Subprocesor | Rola / zakres | Uwaga o transferze |
 |---|---|---|
-| **Google Cloud / Firebase** (Google Cloud EMEA Ltd. / Google Ireland Ltd.) | Infrastruktura: uwierzytelnianie (Auth), baza danych (Firestore), pliki (Storage), funkcje serwerowe (Cloud Functions), hosting, Analytics, App Check/reCAPTCHA | Możliwy transfer poza EOG — [DO UZUPEŁNIENIA/POTWIERDZENIA: lokalizacja regionu Firestore/Storage projektu `moje-domki-6c77d` oraz mechanizm transferu — SCC / DPF. To wymaga sprawdzenia w konsoli Firebase i potwierdzenia prawnika.] |
-| **Stripe** (Stripe Payments Europe, Ltd. / Stripe, Inc.) | Obsługa płatności subskrypcyjnych, dane rozliczeniowe | Możliwy transfer do USA — mechanizm: [DO UZUPEŁNIENIA/POTWIERDZENIA: SCC / DPF wg DPA Stripe] |
+| **Google Cloud / Firebase** (Google Cloud EMEA Ltd. / Google Ireland Ltd.) | Infrastruktura: uwierzytelnianie (Auth), baza danych (Firestore), pliki (Storage), funkcje serwerowe (Cloud Functions), hosting, Analytics, App Check/reCAPTCHA | Dane aplikacji (Firestore, Storage) przechowywane w regionie **eur3** (multiregion UE: Belgia/Holandia — ustalono w konsoli projektu 2026-08-26). Część usług (Cloud Functions — region us-central1, uwierzytelnianie, Analytics) przetwarza dane w USA. Transfer: SCC w Cloud Data Processing Addendum Google oraz certyfikacja Google LLC w EU-US Data Privacy Framework *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)* |
+| **Stripe** (Stripe Payments Europe, Ltd. / Stripe, Inc.) | Obsługa płatności subskrypcyjnych, dane rozliczeniowe | Transfer do USA: certyfikacja Stripe, Inc. w EU-US Data Privacy Framework (mechanizm nadrzędny wg Data Transfers Addendum Stripe); zapasowo SCC *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)* |
 | **Google** (Google OAuth) | Logowanie kontem Google (dla użytkowników wybierających tę metodę) | jw. |
-| **[UZUPEŁNIENIE 2026-08-10] Anthropic** ([DO POTWIERDZENIA: podmiot kontraktujący — Anthropic PBC czy podmiot irlandzki; ustalić w umowie, nie wpisywać z pamięci]) | **Wsparcie obsługi zgłoszeń.** Na polecenie Operatora model językowy przetwarza: treść zgłoszenia z formularza `/kontakt` wraz z podanym adresem e-mail oraz — przy diagnostyce konkretnego konta — dane konta Gospodarza wskazanego przez Operatora (stan konta, subskrypcja, ustawienia). **Zakres jest stopniowany i minimalizowany** (art. 5 ust. 1 lit. c): diagnostyka zaczyna się od stanu konta, a do danych rezerwacji sięga wyłącznie wtedy, gdy zgłoszenie tego wymaga. Przetwarzanie jest **wyłącznie odczytem** — kanał techniczny nie ma uprawnień do zapisu ani kasowania danych | Możliwy transfer poza EOG — [DO UZUPEŁNIENIA/POTWIERDZENIA: mechanizm legalizujący (SCC / EU-US DPF) wg umowy powierzenia Anthropic — do zweryfikowania u źródła] |
+| **[UZUPEŁNIENIE 2026-08-10] Anthropic** (Anthropic Ireland, Limited *(podmiot dla EOG wg Commercial Terms — wpis warunkowy: ważny wyłącznie przy ofercie komercyjnej objętej DPA; plany konsumenckie Claude.ai nie mają umowy powierzenia — warunek D-5 analizy, sprawdza właściciel przed publikacją)*) | **Wsparcie obsługi zgłoszeń.** Na polecenie Operatora model językowy przetwarza: treść zgłoszenia z formularza `/kontakt` wraz z podanym adresem e-mail oraz — przy diagnostyce konkretnego konta — dane konta Gospodarza wskazanego przez Operatora (stan konta, subskrypcja, ustawienia). **Dane Gości (rezerwacje, przewodniki, zapisy akceptacji) nie są przekazywane temu dostawcy** — kanał kończy się na danych, których administratorem jest Operator *(decyzja właściciela 2026-08-26; stan od dnia wejścia w życie tej Polityki — bramka publikacji wymaga uprzedniego zniesienia poziomu 3 w procedurze wsparcia)*. Przetwarzanie jest **wyłącznie odczytem** — kanał techniczny nie ma uprawnień do zapisu ani kasowania danych | Transfer poza EOG: SCC włączone do DPA Anthropic (Commercial Terms); Anthropic nie figuruje w EU-US DPF (stan na 2026-08-26) *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)* |
 
-Operator korzysta z subprocesorów na podstawie umów powierzenia zapewniających poziom ochrony wymagany przez RODO. [DO UZUPEŁNIENIA: link do listy subprocesorów lub zobowiązanie do jej aktualizacji.]
+Operator korzysta z subprocesorów na podstawie umów powierzenia zapewniających poziom ochrony wymagany przez RODO. **Aktualna lista subprocesorów prowadzona jest w niniejszej sekcji**; o zmianach informujemy w trybie opisanym w sekcji 11 (e-mail oraz komunikat w Aplikacji, z 14-dniowym wyprzedzeniem).
 
-**Transfery poza EOG:** [DO UZUPEŁNIENIA/POTWIERDZENIA przez prawnika: dokładne wskazanie mechanizmów legalizujących transfer — standardowe klauzule umowne (SCC) i/lub EU-US Data Privacy Framework, wraz z informacją, gdzie Użytkownik może uzyskać kopię zabezpieczeń. Nie wpisujemy tego „z pamięci" — do zweryfikowania u źródła.]
+**Transfery poza EOG** odbywają się wyłącznie z zabezpieczeniami z art. 46 RODO: Google — SCC w Cloud Data Processing Addendum oraz certyfikacja Google LLC w EU-US Data Privacy Framework; Stripe — certyfikacja Stripe, Inc. w DPF, zapasowo SCC; Anthropic — SCC w DPA (oferta komercyjna). Kopie zabezpieczeń: cloud.google.com/terms/data-processing-addendum, stripe.com/legal/dpa, anthropic.com/legal — oraz u Operatora na żądanie (kontakt: sekcja 12). *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 
 ## 6. Okres przechowywania i usuwanie danych
 
@@ -148,6 +149,8 @@ Dane przechowujemy przez czas trwania Konta oraz — po jego usunięciu lub wyga
 - **Po anulowaniu Subskrypcji** dane są przechowywane jeszcze przez **30 dni** od anulowania (możliwość powrotu), a następnie trwale usuwane w takim samym pełnym zakresie jak wyżej (proces cykliczny `deleteExpiredAccountsData`; ponowne opłacenie w okresie karencji przerywa usuwanie).
 - **Po zakończeniu bezpłatnego okresu próbnego bez wykupienia Subskrypcji** dane konta są przechowywane jeszcze przez **90 dni** od końca okresu próbnego, a następnie trwale usuwane w pełnym zakresie jak wyżej.
 - Dane wymagane przepisami prawa (np. dokumentacja rozliczeniowa) mogą być przechowywane dłużej, w zakresie i przez okres wynikający z tych przepisów.
+- **[UZUPEŁNIENIE 2026-08-26]** Usunięcie Konta **nie usuwa wpisów w dzienniku dostępu administracyjnego** (`admin_audit` — patrz sekcja 2). W dzienniku pozostaje identyfikator (UID) konta, rodzaj czynności i data — **bez adresu e-mail i bez treści danych**, których czynność dotyczyła; po usunięciu Konta UID przestaje wskazywać na istniejące konto. Wpisy usuwane są automatycznie po upływie okresu wskazanego w sekcji 2. Podstawa zachowania wpisu mimo żądania usunięcia: art. 17 ust. 3 lit. e RODO w zw. z art. 5 ust. 2 (rozliczalność) — *rozstrzygnięte analizą 2026-08-26, uzasadnienie w `Analiza-prawna-2026-08-26.md` (D-8)*.
+
 
 ## 7. Prawa osób, których dane dotyczą
 
@@ -160,7 +163,7 @@ Przysługuje Państwu prawo do:
 - **sprzeciwu** wobec przetwarzania opartego na uzasadnionym interesie (art. 21),
 - **wycofania zgody** w dowolnym momencie, bez wpływu na zgodność przetwarzania sprzed wycofania (dot. Analytics, newslettera).
 
-**[PRZEGLĄD 2026-07-22]** Konto można usunąć **samodzielnie z poziomu Aplikacji** (Konto → Usunięcie konta) — zarówno przy logowaniu hasłem (potwierdzenie hasłem), jak i przy logowaniu kontem Google (ponowne potwierdzenie logowania Google). Pozostałe żądania: [DO UZUPEŁNIENIA: kanał — e-mail; publiczny adres na /kontakt to obecnie kontakt@wynajempro.pl].
+**[PRZEGLĄD 2026-07-22]** Konto można usunąć **samodzielnie z poziomu Aplikacji** (Konto → Usunięcie konta) — zarówno przy logowaniu hasłem (potwierdzenie hasłem), jak i przy logowaniu kontem Google (ponowne potwierdzenie logowania Google). Pozostałe żądania: e-mail na **kontakt@wynajempro.com** (adres publiczny na stronie /kontakt).
 
 **Prawo skargi:** Przysługuje Państwu prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa; uodo.gov.pl).
 
@@ -185,7 +188,7 @@ WynajemPRO wykorzystuje:
 
 **[UZUPEŁNIENIE 2026-07-22] Analityka na stronach publicznych.** Zasady powyższe obowiązują także na publicznych stronach przewodnika gościa (`/guide/…`) i prośby o opinię (`/opinie/…`): technologie analityczne uruchamiają się tam wyłącznie po zgodzie osoby odwiedzającej, a administratorem danych analitycznych zbieranych na tych stronach jest Operator. Identyfikator konkretnej strony (element linku przewodnika) jest w danych analitycznych maskowany i nie jest przekazywany do narzędzia analitycznego. *(Stan faktyczny zweryfikowany w kodzie 2026-07-22: maskowanie wdrożone w `src/App.jsx` — funkcja `trackedPagePath` zamienia ścieżki `/guide/…` i `/opinie/…` na zbiorcze `/guide/[id]` / `/opinie/[id]` i odcina parametry adresu przed wysyłką zdarzenia `page_view`; wdrożone na produkcji — deploy 2026-07-22, commit `e850136`.)*
 
-**Stan faktyczny (zweryfikowany w kodzie `firebase.js`):** Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody. **Jedyne przetwarzanie uruchamiane po zgodzie to analiza ruchu (Google/Firebase Analytics) — Aplikacja nie personalizuje na tej podstawie treści ani komunikatów i nie stosuje cookies reklamowych.**
+**Stan faktyczny:** *(zweryfikowano w kodzie `firebase.js`)* Analytics inicjalizuje się dopiero, gdy zgoda została zapisana (`cookie_consent === 'true'`); przy wyborze „Tylko niezbędne" lub zamknięciu bannera skrypt analityczny nie jest ładowany. Jest to model opt-in zgodny z zasadą uprzedniej zgody. **Jedyne przetwarzanie uruchamiane po zgodzie to analiza ruchu (Google/Firebase Analytics) — Aplikacja nie personalizuje na tej podstawie treści ani komunikatów i nie stosuje cookies reklamowych.**
 
 **[UZUPEŁNIENIE 2026-07-24] Wycofanie i zmiana zgody.** Zgodę na cookies analityczne można w każdej chwili **zmienić lub wycofać — równie łatwo, jak jej udzielić** (art. 7 ust. 3 RODO). Służą do tego dwa równorzędne wejścia: link **„Ustawienia cookies"** w stopce serwisu oraz przycisk **„Zmień lub wycofaj zgodę na cookies"** na tej stronie — oba ponownie otwierają banner zgody (bez przeładowania strony), z symetrycznym wyborem „Akceptuję" / „Wycofaj zgodę" oraz informacją o aktualnym stanie wyboru. Wycofanie zgody **realnie zatrzymuje** działanie Google/Firebase Analytics (ustawienie standardowej flagi opt-out dla identyfikatora pomiaru, wyłączenie zbierania danych po stronie Firebase oraz usunięcie istniejących plików cookies `_ga*`) — nie ogranicza się do ukrycia bannera. Wycofanie zgody **nie wpływa na zgodność z prawem** przetwarzania, którego dokonano na podstawie zgody przed jej wycofaniem. Ponieważ jedyną kategorią cookies niewymagającą niezbędności jest analityka, wybór ma charakter binarny (zgoda / tylko niezbędne) i nie wymaga dodatkowej granulacji.
 
@@ -205,11 +208,11 @@ Stosujemy środki techniczne i organizacyjne odpowiednie do ryzyka, m.in.: regu�
 
 ## 11. Zmiany Polityki
 
-Politykę możemy aktualizować. O istotnych zmianach poinformujemy [DO UZUPEŁNIENIA: kanał]. Aktualna wersja jest zawsze dostępna w Aplikacji.
+Politykę możemy aktualizować. O istotnych zmianach poinformujemy e-mailem na adres przypisany do Konta oraz komunikatem w Aplikacji *(decyzja właściciela 2026-08-26)*. Aktualna wersja jest zawsze dostępna w Aplikacji.
 
 ## 12. Kontakt
 
-[DO UZUPEŁNIENIA: e-mail, adres]. W sprawach dotyczących danych Gości — prosimy kierować się do właściwego Gospodarza jako administratora.
+E-mail: **kontakt@wynajempro.com**; adres korespondencyjny: **Nowogródzka 9/9, 82-300 Elbląg** (Szymon Wasiak). W sprawach dotyczących danych Gości — prosimy kierować się do właściwego Gospodarza jako administratora.
 
 ---
 

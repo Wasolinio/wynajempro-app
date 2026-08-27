@@ -44,10 +44,12 @@
 
 # Umowa powierzenia przetwarzania danych osobowych (DPA)
 
+**Wersja:** 1.0 · **Obowiązuje od:** 26 sierpnia 2026 r. *(decyzja właściciela 2026-08-26, spójnie z Regulaminem i Polityką)*
+
 zawierana pomiędzy:
 
 - **Administratorem** — Użytkownikiem (Gospodarzem) korzystającym z Aplikacji WynajemPRO, który wprowadza do niej dane osobowe swoich Gości/Najemców, oraz
-- **Podmiotem przetwarzającym (Procesorem)** — [DO UZUPEŁNIENIA: pełna firma Operatora, forma prawna, adres, NIP],
+- **Podmiotem przetwarzającym (Procesorem)** — **Szymon Wasiak** — osoba fizyczna (działalność nierejestrowana; NIP, REGON i KRS nie mają zastosowania), adres do korespondencji: **Nowogródzka 9/9, 82-300 Elbląg** *(dane podane przez właściciela 2026-08-26)*,
 
 zwanymi łącznie „Stronami". Umowa stanowi wykonanie obowiązku z art. 28 ust. 3 RODO i wiąże się z korzystaniem przez Administratora z Aplikacji.
 
@@ -69,7 +71,7 @@ Pojęcia „dane osobowe", „przetwarzanie", „administrator", „podmiot prze
 - Goście / Najemcy obiektów Administratora,
 - inne osoby, których dane Administrator zdecyduje się wprowadzić do Aplikacji.
 
-**Kategorie danych** (ustalone na podstawie faktycznego modelu danych Aplikacji — Agent-Process-Map, `GuestGuideView.jsx`, `firestore.rules`):
+**Kategorie danych** *(katalog ustalony na podstawie faktycznego modelu danych Aplikacji — Agent-Process-Map, GuestGuideView.jsx, firestore.rules)*:
 - dane rezerwacji: nazwa obiektu, daty pobytu, kwoty oraz ewentualne dane identyfikacyjne/kontaktowe gościa wpisane przez Administratora,
 - **[UZUPEŁNIENIE 2026-07-25 — funkcja w kodzie, przed wdrożeniem na produkcję]** **skład osobowy pobytu:** liczba dorosłych, liczba dzieci oraz liczba zwierząt towarzyszących — pola **opcjonalne**, uzupełniane wyłącznie z inicjatywy Administratora, przechowywane jako **wartości liczbowe** w dokumencie rezerwacji (`users/{uid}/rentals/{id}`; łączna liczba osób pozostaje sumą dorosłych i dzieci). Pola te **nie zawierają danych identyfikujących poszczególne osoby**, w tym dzieci (brak imienia, wieku, daty urodzenia) — przechowywana jest sama liczba. Nie są to dane szczególnych kategorii w rozumieniu art. 9 RODO. Dostęp: wyłącznie Administrator po zalogowaniu (reguły bazy: właściciel + zweryfikowany e-mail + aktywna subskrypcja); dane nie są publikowane w przewodniku dla gości ani na stronie opinii, nie występują w publicznym eksporcie kalendarza (iCal) i nie są przekazywane do narzędzi analitycznych,
 - **dane akceptacji regulaminu:** **[PRZEGLĄD 2026-07-22]** data akceptacji, identyfikator anonimowej sesji przeglądarki gościa oraz migawka zaakceptowanej treści regulaminu — przechowywane w `guides/{id}/signatures`. **Obecny przepływ nie zbiera imienia gościa ani odręcznego podpisu**; starsze zapisy (z wcześniejszej wersji funkcji) mogą je zawierać. *(Do oceny prawnika: czy identyfikator anonimowej sesji stanowi dane osobowe w rozumieniu art. 4 pkt 1 — w ocenie roboczej jest to dana spseudonimizowana, pozwalająca powiązać akceptację z urządzeniem, nie z tożsamością osoby.)*
@@ -174,23 +176,25 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 
 1. Administrator udziela Procesorowi **ogólnej zgody** na korzystanie z subprocesorów niezbędnych do świadczenia usługi. Na dzień zawarcia Umowy są to:
    - **Google / Firebase (Google Cloud EMEA Ltd. / Google Ireland Ltd.)** — infrastruktura (Auth, Firestore, Storage, Functions, hosting),
-   - **Stripe (Stripe Payments Europe, Ltd. / Stripe, Inc.)** — w zakresie, w jakim dane rozliczeniowe mogą się wiązać z rezerwacjami [DO POTWIERDZENIA zakresu — Stripe dotyczy głównie relacji Operator↔Gospodarz, nie danych Gości; prawnik ustali, czy Stripe jest subprocesorem danych powierzonych],
+   - *(nota wyjaśniająca — analiza 2026-08-26: **Stripe nie jest subprocesorem danych powierzonych** i został zdjęty z tej listy. Do Stripe trafiają wyłącznie dane rozliczeniowe Gospodarza — relacja, w której Operator jest administratorem, opisana w Polityce prywatności §5; dane Gości nie są przekazywane Stripe w żadnym przepływie, co potwierdzono w kodzie funkcji płatności)*,
    - **Google (OAuth)** — w zakresie logowania,
-   - **[UZUPEŁNIENIE 2026-08-10] Anthropic** ([DO POTWIERDZENIA: podmiot kontraktujący] ) — **wsparcie obsługi zgłoszeń i diagnostyki kont**. Zakres wobec danych powierzonych jest **ograniczony i warunkowy**: kanał służy przede wszystkim danym Gospodarza (stan konta, subskrypcja, ustawienia), a **dane Gości (rezerwacje, zapisy akceptacji regulaminu) są odczytywane wyłącznie wtedy, gdy rozpatrzenie zgłoszenia Gospodarza tego wymaga** — zgodnie z zasadą minimalizacji (art. 5 ust. 1 lit. c). Kanał techniczny ma uprawnienia **wyłącznie do odczytu** (brak możliwości zapisu, modyfikacji i usunięcia danych — ograniczenie wymuszone konfiguracją, nie tylko procedurą). [DO POTWIERDZENIA przez prawnika: czy przy tak zawężonym zakresie Anthropic jest subprocesorem **danych powierzonych**, czy wyłącznie danych, wobec których Operator jest administratorem — analogiczne pytanie postawiono już przy Stripe.]
+   - *(nota — decyzja właściciela 2026-08-26: **Anthropic wykreślony z listy subprocesorów
+     danych powierzonych**. Od dnia wejścia w życie niniejszej Umowy kanał wsparcia oparty na
+     modelu językowym **nie odczytuje danych Gości** — rezerwacji, przewodników ani zapisów
+     akceptacji; diagnostyka kończy się na danych, których administratorem jest Operator
+     (Polityka prywatności §5), a dane Gości ogląda wyłącznie Operator osobiście.
+     Warunek publikacji WYKONANY 2026-08-26: poziom 3 procedury wsparcia zniesiony z chwilą
+     publikacji Umowy (bramka F4a), więc postanowienie jest prawdziwe od pierwszego dnia
+     obowiązywania.)*
 
-   > **Uwaga o momencie wprowadzenia.** Kanał dodano **przed publicznym launchem**, gdy jedynym
-   > Gospodarzem jest właściciel serwisu. Ust. 2 poniżej daje Administratorowi prawo sprzeciwu
-   > wobec nowego subprocesora — wprowadzenie tego kanału po launchu wymagałoby powiadomienia
-   > każdego Gospodarza i obsłużenia sprzeciwów. Dziś ten koszt jest zerowy.
-
-2. Procesor **informuje Administratora o zamierzonych zmianach** dotyczących dodania lub zastąpienia subprocesorów, dając możliwość wyrażenia sprzeciwu. [DO UZUPEŁNIENIA: kanał i termin informowania, np. e-mail / aktualizacja listy subprocesorów z 14-dniowym wyprzedzeniem.]
+2. Procesor **informuje Administratora o zamierzonych zmianach** dotyczących dodania lub zastąpienia subprocesorów, dając możliwość wyrażenia sprzeciwu. Informacja przekazywana jest e-mailem na adres przypisany do Konta lub komunikatem w Aplikacji, z co najmniej **14-dniowym wyprzedzeniem** *(decyzja właściciela 2026-08-26)*.
 3. Procesor nakłada na subprocesorów obowiązki ochrony danych co najmniej równoważne obowiązkom z niniejszej Umowy (art. 28 ust. 4).
-4. **Transfery poza EOG:** [DO UZUPEŁNIENIA/POTWIERDZENIA: mechanizm legalizujący (SCC / EU-US DPF) dla każdego subprocesora przekazującego dane poza EOG — do zweryfikowania u źródła, nie wpisywać „z pamięci".]
+4. **Transfery poza EOG:** Google — SCC w Cloud Data Processing Addendum oraz certyfikacja Google LLC w EU-US Data Privacy Framework (dane Firestore/Storage w spoczynku w regionie eur3 — UE; część usług przetwarza dane w USA). Kopie zabezpieczeń — adresy w Polityce prywatności §5 oraz u Procesora na żądanie. *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 
 ## §8. Prawo do audytu i informacji
 
 1. Procesor udostępnia Administratorowi informacje niezbędne do wykazania zgodności z art. 28 RODO.
-2. Administrator ma prawo do audytu; z uwagi na charakter usługi (współdzielona infrastruktura SaaS, wielu administratorów) audyt realizowany jest przede wszystkim przez [DO UZUPEŁNIENIA: udostępnienie dokumentacji / certyfikatów / raportów; warunki ewentualnej inspekcji na miejscu — częstotliwość, uprzedzenie, poufność, koszty]. *(Zakres i tryb audytu w SaaS to typowy przedmiot negocjacji — do ustalenia z prawnikiem.)*
+2. Administrator ma prawo do audytu; z uwagi na charakter usługi (współdzielona infrastruktura SaaS, wielu administratorów) audyt realizowany jest przede wszystkim przez udostępnienie posiadanej dokumentacji, certyfikatów i raportów dostawców infrastruktury; inspekcja na miejscu jest wyłączona z uwagi na współdzieloną infrastrukturę SaaS *(decyzja właściciela 2026-08-26; dopuszczalność wyłączenia inspekcji — do przeglądu przy najbliższej rewizji prawnej)*. *(Zakres i tryb audytu w SaaS to typowy przedmiot negocjacji — do ustalenia z prawnikiem.)*
 
 ## §9. Usunięcie / zwrot danych po zakończeniu
 
@@ -204,16 +208,19 @@ Procesor wdraża środki techniczne i organizacyjne odpowiednie do ryzyka, w szc
 
 ## §10. Zgłaszanie naruszeń
 
-Procesor bez zbędnej zwłoki, po stwierdzeniu naruszenia ochrony danych powierzonych, zgłasza je Administratorowi [DO UZUPEŁNIENIA: kanał kontaktu, np. e-mail administratora] wraz z informacjami umożliwiającymi Administratorowi wywiązanie się z obowiązku z art. 33 RODO. *(RODO nie wyznacza procesorowi sztywnego terminu godzinowego — „bez zbędnej zwłoki". Ewentualny termin umowny do ustalenia z prawnikiem.)*
+Procesor bez zbędnej zwłoki, po stwierdzeniu naruszenia ochrony danych powierzonych, zgłasza je Administratorowi na adres e-mail przypisany do Konta Administratora *(decyzja właściciela 2026-08-26)* wraz z informacjami umożliwiającymi Administratorowi wywiązanie się z obowiązku z art. 33 RODO. *(RODO nie wyznacza procesorowi sztywnego terminu godzinowego — „bez zbędnej zwłoki". Ewentualny termin umowny do ustalenia z prawnikiem.)*
 
 ## §11. Odpowiedzialność
 
-Odpowiedzialność Stron reguluje RODO (art. 82) oraz [DO UZUPEŁNIENIA: ewentualne postanowienia umowne — ograniczenia odpowiedzialności między przedsiębiorcami, w granicach prawa; do ustalenia z prawnikiem, w spójności z Regulaminem §12].
+1. Odpowiedzialność Stron wobec osób, których dane dotyczą, reguluje art. 82 RODO i nie podlega ograniczeniu.
+2. W stosunkach między Stronami łączna odpowiedzialność każdej ze Stron z niniejszej Umowy ograniczona jest do wysokości opłat za Subskrypcję zapłaconych przez Administratora w okresie 12 miesięcy poprzedzających zdarzenie wywołujące szkodę.
+3. Ograniczenie z ust. 2 nie dotyczy szkody wyrządzonej umyślnie (art. 473 § 2 Kodeksu cywilnego).
+4. Wobec Administratorów będących konsumentami lub przedsiębiorcami na prawach konsumenta ograniczenia obowiązują wyłącznie w zakresie dopuszczalnym przez bezwzględnie obowiązujące przepisy prawa (spójnie z Regulaminem §12 ust. 2). *(analiza prawna 2026-08-26 — `Analiza-prawna-2026-08-26.md`)*
 
 ## §12. Postanowienia końcowe
 
 1. W sprawach nieuregulowanych stosuje się RODO i prawo polskie.
-2. Umowa wiąże z chwilą [DO UZUPEŁNIENIA: akceptacji Regulaminu przy rejestracji / odrębnej akceptacji w panelu].
+2. Umowa wiąże z chwilą akceptacji Regulaminu przy rejestracji Konta *(decyzja właściciela 2026-08-26)*. *(Zastrzeżenie do prawnika: pole zgody przy rejestracji wymienia dziś Regulamin i Politykę, nie DPA — patrz `Bramka-publikacji-2026-08-26.md` §8.2.)*
 3. W razie sprzeczności między Umową a Regulaminem w zakresie ochrony danych powierzonych — pierwszeństwo ma niniejsza Umowa.
 
 ---

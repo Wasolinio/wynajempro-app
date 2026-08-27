@@ -30,7 +30,7 @@ Sprawdź po kolei:
 
 ## Jak korzystać z WynajemPRO na telefonie
 
-WynajemPRO działa w przeglądarce telefonu — nie ma osobnej aplikacji do zainstalowania ze sklepu. Zaloguj się na wynajempro.pl tak samo jak na komputerze.
+WynajemPRO działa w przeglądarce telefonu — nie ma osobnej aplikacji do zainstalowania ze sklepu. Zaloguj się na wynajempro.com tak samo jak na komputerze.
 
 - Najważniejsze widoki są na dolnym pasku: „Pulpit", „Kalendarz", „Rezerwacje", „Finanse".
 - Pozostałe („Obiekty", „Przewodniki", „Opinie"), a także „Konto", „Wyloguj" i status synchronizacji, znajdziesz pod przyciskiem „Więcej".
@@ -55,7 +55,7 @@ Po płatności status konta odświeża się automatycznie, zwykle w ciągu chwil
 
 ## Jak się z nami skontaktować
 
-Napisz na kontakt@wynajempro.pl. Staramy się odpowiadać w ciągu 24–48 godzin roboczych.
+Napisz na kontakt@wynajempro.com. Staramy się odpowiadać w ciągu 24–48 godzin roboczych.
 
 Pomożemy szybciej, jeśli w wiadomości podasz:
 
@@ -72,7 +72,7 @@ Nigdy nie wysyłaj nam swojego hasła — nie poprosimy o nie w żadnej sytuacji
 Nie. Pomoc jest częścią subskrypcji — dotyczy to także okresu próbnego.
 
 **Czy mogę zgłosić pomysł na nową funkcję?**
-Tak, chętnie je czytamy — napisz na kontakt@wynajempro.pl. Nie obiecujemy terminów, ale każdy pomysł trafia na naszą listę i wpływa na kolejność prac.
+Tak, chętnie je czytamy — napisz na kontakt@wynajempro.com. Nie obiecujemy terminów, ale każdy pomysł trafia na naszą listę i wpływa na kolejność prac.
 
 **Zgubiłem dostęp do skrzynki e-mail, na którą mam konto. Co teraz?**
 Napisz do nas z nowego adresu i opisz sytuację — poprosimy o informacje potwierdzające, że konto należy do Ciebie, zanim cokolwiek zmienimy. Bezpieczeństwo danych gości i rezerwacji jest tu nadrzędne.

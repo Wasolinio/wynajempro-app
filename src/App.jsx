@@ -23,8 +23,7 @@ const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
 const LoginPanel = lazy(() => import('./pages/landing/LoginPanel'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const AuthActionHandler = lazy(() => import('./pages/AuthActionHandler'));
-const TermsPage = lazy(() => import('./pages/TermsPage'));
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const LegalDocPage = lazy(() => import('./pages/LegalDocPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
@@ -137,8 +136,9 @@ export default function App() {
               <Route path="/login" element={<LoginPanel />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/action" element={<AuthActionHandler />} />
-              <Route path="/regulamin" element={<TermsPage />} />
-              <Route path="/prywatnosc" element={<PrivacyPage />} />
+              <Route path="/regulamin" element={<LegalDocPage slug="regulamin" />} />
+              <Route path="/prywatnosc" element={<LegalDocPage slug="prywatnosc" />} />
+              <Route path="/dpa" element={<LegalDocPage slug="dpa" />} />
               <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/blog" element={<BlogListPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />

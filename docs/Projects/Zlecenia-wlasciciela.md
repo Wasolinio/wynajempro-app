@@ -179,6 +179,68 @@ Pozycje firmowe (nazwa, forma prawna, NIP, REGON, KRS) **odpadają do czasu reje
 
 ---
 
+### 11. ✅ DANE OPERATORA — PODANE I NANIESIONE 2026-08-26 (tego samego dnia)
+
+**Wynik:** właściciel podał dane w dniu założenia zlecenia — **Szymon Wasiak, Nowogródzka 9/9,
+82-300 Elbląg** — i zostały naniesione w 8 miejsc trzech dokumentów. Stan bramki: 43 → **35 luk**.
+
+**Aktualizacja tego samego dnia:** właściciel zatwierdził też **wszystkie 11 decyzji
+operacyjnych** po propozycjach — naniesione, stan bramki **21 luk**.
+
+**Co z tego zlecenia ZOSTAJE otwarte:**
+- **3 pytania do księgowego** (grupa C): VAT w cenie 29,99 zł, faktury, retencja dokumentów
+  księgowych;
+- **data zakończenia naboru founding members** (Regulamin §6 ust. 5) — pętla z wstrzymaną
+  ścieżką A, dwa warianty wyjścia w inwentarzu §8.3.
+
+<details><summary>Pierwotna treść zlecenia (do historii)</summary>
+
+**E-mail już mamy:** `kontakt@wynajempro.com` — potwierdzony przez Ciebie 2026-08-26. Ta jedna
+odpowiedź zamknęła **cztery luki** w dokumentach i naprawiła martwy kanał kontaktu w produkcie
+(patrz [[Activity-Log]] 2026-08-26 — domena `wynajempro.pl` w ogóle się nie rozwiązuje).
+
+**Dlaczego to musisz podać Ty i dlaczego nie da się tego obejść:** obowiązek podania tożsamości
+usługodawcy wynika z UŚUDE art. 5 i RODO art. 13. Jest **niezależny od formy działalności** —
+działalność nierejestrowana go nie znosi. Agent tych danych nie zmyśli.
+
+⚠️ **Adres będzie publiczny.** Trafi do Regulaminu (§1, §7 odstąpienie, §8 reklamacje, §14),
+Polityki (§1, §12) i DPA — łącznie **7 miejsc**. Jeśli nie chcesz podawać domowego, rozważ
+skrytkę pocztową albo wirtualne biuro. Warunek: musisz pod nim **realnie odbierać
+korespondencję**, bo tam konsument wysyła odstąpienie od umowy i reklamację.
+
+⚠️ **PESEL nie idzie do dokumentów publicznych.** Pola firmowe (nazwa, forma prawna, NIP,
+REGON, KRS) zostają puste świadomie — Operatorem jest osoba fizyczna.
+
+**Co jeszcze czeka na Twoje „tak" (11 decyzji z gotowymi propozycjami):** numer wersji i data
+dokumentów, kanały informowania o zmianach, IOD, okresy przechowywania, tryb audytu, moment
+związania DPA. Wszystkie rozpisane z propozycjami w
+`docs/legal/Bramka-publikacji-2026-08-26.md` (jest też `.docx`) — jedna odpowiedź zamyka komplet.
+
+**Osobno do księgowego (3 luki):** czy 29,99 zł to brutto z VAT, czy i jak wystawiasz faktury,
+ile trzymamy dokumenty księgowe.
+
+📌 **Uwaga, która zmienia zakres pracy:** wypełnienie luk **nie wystarczy**. Strony
+`/regulamin` i `/prywatnosc` na produkcji mają własną, starszą treść i nie czytają
+z `docs/legal/`; DPA nie ma strony w ogóle. To osobna praca dla `dev` — ścieżka **F4**
+w [[Projects/Roadmap]].
+</details>
+
+### 12. ✅ Merge + deploy functions — purge `contact_messages` — WYKONANE 2026-08-26 (F7 zamknięte)
+Na Twoje „tak, przeprowadź merge i deploy" (czat, 26.08): merge do `main` + `firebase
+deploy --only functions` — `cleanupContactMessages` utworzona na produkcji (trigger
+`scheduled`, codziennie 03:45), 12 pozostałych funkcji zaktualizowanych bez błędów.
+Bramki przed wydaniem: testy functions 41/41, e2e 204/204, przegląd `code-reviewer`.
+Pierwszy przebieg najbliższej nocy skasuje 0 dokumentów (najstarsze zgłoszenia są
+z lipca 2026) — kontrola logów sprawdza sam przebieg, nie efekt.
+**Zostaje ogon (Twoja zgoda):** deploy `hosting:app` z poprawką notki panelu
+(`222c656` — stara notka w „Porządku" mówi, że okres to „propozycja, nie podstawa
+do kasowania", co od dziś jest nieprawdą). Poza tym recenzent słusznie wytknął, że
+zapis decyzji o kasowaniu żyje w niezacommitowanych dokumentach — **commit dokumentów
+z 26.08** domknie ślad w historii git.
+Powiązane: [[Roadmap]] F7 ✅, wpis w [[Activity-Log]] 2026-08-26.
+
+---
+
 ## Decyzje czekające
 
 ### 4. ✅ Decyzje po raporcie `legal` — PODJĘTE I ZREALIZOWANE 2026-07-22

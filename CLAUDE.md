@@ -61,8 +61,10 @@ klientom — czyta się je ścieżką administracyjną. Odczyt przez **Firebase 
 5 narzędzi wyłącznie do odczytu; `--tools` usuwa kasowanie i deploy u źródła).
 Proces: **`docs/support/Proces-obslugi-zgloszen.md`**.
 **Tryb pracy:** właściciel podaje UID (lub e-mail), agent diagnozuje. Zakres **stopniowany**:
-poziom 1 konto/subskrypcja → poziom 2 `settings/*` → poziom 3 dane Gości (rezerwacje, podpisy)
-tylko gdy zgłoszenie tego wymaga. `hostProfile` ma `taxIdentifier` (może być PESEL) —
+poziom 1 konto/subskrypcja → poziom 2 `settings/*`. **⛔ Poziom 3 (dane Gości) ZNIESIONY
+z dniem publikacji dokumentów (2026-08-26; bramka F4a)** — agent nie czyta rezerwacji,
+przewodników, podpisów ani `secrets/data`; diagnostyka kończy się na poziomie 2 + ścieżka
+dokumentu do samodzielnego otwarcia przez właściciela w konsoli. `hostProfile` ma `taxIdentifier` (może być PESEL) —
 czytać wyłącznie przy zgłoszeniach o profil/faktury. Kanał jest **tylko do odczytu**:
 agent diagnozuje i proponuje, nie naprawia danych na produkcji.
 
@@ -85,4 +87,4 @@ Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowani
 - [ ] Dopieszczanie UI końcowej wersji
 - [x] ~~Blokery techniczne przed launchem: weryfikacja e-mail (N1), sprawdzanie subskrypcji (N2), walidacja schematu (N3)~~ — **wszystkie wdrożone i wydane 2026-07-09/10**; wpis wisiał nieaktualny do 2026-07-22 (weryfikacja przy pakiecie dla prawnika).
 - [x] ~~**Przed launchem zostaje:** akceptacja dokumentów przez prawnika (N4)~~ — ✅ **PRAWNIK BEZ ZASTRZEŻEŃ 2026-08-25**; N6 domknięte 2026-08-18. **Wszystkie blokery launchu zamknięte.**
-- [ ] 🔴 **Bramka publikacji dokumentów — jedyne, co dzieli nas od wydania:** w `docs/legal/` zostaje **36 placeholderów `[DO UZUPEŁNIENIA]`** (Regulamin 12, Polityka 16, DPA 8). Kluczowa jest **tożsamość Operatora** — imię i nazwisko, adres do korespondencji, e-mail (UŚUDE art. 5, RODO art. 13; obowiązek **niezależny od formy działalności**, więc działalność nierejestrowana go nie znosi). Dokumentu z placeholderem nie wolno opublikować. Dane podaje **wyłącznie właściciel** — agent ich nie zmyśla.
+- [ ] 🔴 **Bramka publikacji dokumentów — jedyne, co dzieli nas od wydania:** w `docs/legal/` zostały **2 luki** — obie w Regulaminie §6 dla księgowego: VAT w cenie i faktury. Founding members: konstrukcja zdarzeniowa (ogłoszenie zakończenia naboru z 14-dniowym wyprzedzeniem — wariant 2, decyzja 2026-08-26). Grupy A, B, D, E zamknięte 2026-08-26; D i E — analizą własną po rezygnacji z prawnika (**ADR-025**, `docs/legal/Analiza-prawna-2026-08-26.md`). 🔴 Warunki publikacji: **zniesienie poziomu 3 supportu w dniu publikacji** (Anthropic wykreślony z DPA 2026-08-26, ale do końca bety poziom 3 działa — decyzja właściciela; wpis o Anthropic w Polityce §5 nadal warunkowy od planu), **F4** (✅ kod gotowy 2026-08-26: `legal:build` + `LegalDocPage`, trasa `/dpa` nowa; zostaje deploy + data „Obowiązuje od" w dniu wydania), **F7** (purge `contact_messages` — kod gotowy na gałęzi `claude/clever-snyder-b0b401`, czeka merge + deploy functions). Dokumentu z placeholderem nie wolno opublikować.
