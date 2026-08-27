@@ -54,6 +54,12 @@ do nich pasuje, albo wywołasz je jako `/nazwa`:
 - **`reguly`** — zmiana `firestore.rules`/`storage.rules` bez emulatora (lustrzany tester
   w `functions/*.cjs`, bramka deployu, pułapki App Check).
 - **`zgloszenie`** — obsługa zgłoszenia: odsiew testów po `source`, stopniowany dostęp do danych.
+- **`testy`** — cztery suity (e2e na atrapach / prod smoke / functions / podatki), pułapki
+  CI (flaki maskowane powtórkami), brak Javy, wzorzec `expect.poll`.
+- **`dokument`** — dokument dla właściciela w `.md` + `.docx`: generator, zestaw
+  DOKUMENTY, kontrola rozjazdu kopii.
+- **`porzadek`** — okresowy rytuał porządków w vaulcie i repo: śmieci w gicie, martwe
+  wikilinki, świeżość indeksów, sieroty, duplikaty skilli.
 
 Osobno, globalnie: **`humanizer`** (`~/.claude/skills/`) do tekstów dla klientów —
 landing, maile, wpisy, odpowiedzi supportu. Kalibracja polska w jego `PL.md`.
