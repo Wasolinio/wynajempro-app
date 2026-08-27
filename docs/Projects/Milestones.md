@@ -13,8 +13,14 @@
 | Identyfikacja WynajemPRO v2 + porządek repo (jedna wersja produkcyjna) | 2026-07-01 | ✅ |
 | Widok Analityka, przebudowa rezerwacji, generator umów najmu | 2026-07-02 | ✅ |
 | Zespół agentów + Team-Playbook + konsolidacja roadmapy | 2026-07-02 | ✅ |
-| Gotowość launchowa (sekcja NOW roadmapy: N1–N5) | — | ⬜ |
-| **Publiczny launch** | decyzja właściciela po NOW | ⬜ |
+| Blokery techniczne launchu (weryfikacja e-mail, paywall, walidacja schematu) | 2026-07-10 | ✅ |
+| Hosting multi-site: domena kanoniczna wynajempro.com | 2026-07-22 | ✅ |
+| Panel administratora + migracja Stripe | 2026-08-21 | ✅ |
+| Prawnik bez zastrzeżeń do dokumentów (N4) | 2026-08-25 | ✅ |
+| Publikacja dokumentów prawnych — bramka 47→0, weryfikacja live | 2026-08-26 | ✅ |
+| **Gotowość launchowa (wszystkie blokery NOW zamknięte)** | 2026-08-26 | ✅ |
+| Beta — testy testerów zakończone | — | ⬜ |
+| **Publiczny launch** | decyzja właściciela po becie | ⬜ |
 
 Zasada wpisów: kamień dostaje datę dopiero, gdy jest ukończony albo gdy data wynika
 z realnego zobowiązania (np. termin u prawnika) — nie z optymizmu.

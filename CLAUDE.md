@@ -4,8 +4,11 @@
 **WynajemPRO** - aplikacja do zarządzania wynajmem (React + Firebase)
 
 ## Aktualny focus
+- **Beta testerów = ścieżka krytyczna** (launch: decyzja właściciela po becie);
+  ścieżka A (Stripe/pieniądze) ⏸ wstrzymana — wznawia wyłącznie właściciel (2026-08-25)
 - Dopieszczanie końcowej wersji (identyfikacja WynajemPRO v2)
-- Porządek w kodzie zrobiony: jedna wersja produkcyjna, stare wersje w `/_legacy`
+- Porządek w kodzie zrobiony: jedna wersja produkcyjna, stare wersje w `/_legacy`.
+  Vault Obsidiana = `docs/` (porządek 2026-08-27; start: `docs/Home.md`)
 
 ## Struktura
 Mapa żywego kodu: **`src/README.md`**. Kod archiwalny (stare wersje/prototypy): **`/_legacy`** (poza buildem).
@@ -80,7 +83,12 @@ Hosting multi-site (od 2026-07-22): aplikacja na site **`wynajempro`** (domena k
 
 ## Zadania w trakcie
 Plan pracy: **`docs/Projects/Roadmap.md`** — jedyne źródło prawdy planowania (Now/Next/Later).
-- [ ] Dopieszczanie UI końcowej wersji
-- [x] ~~Blokery techniczne przed launchem: weryfikacja e-mail (N1), sprawdzanie subskrypcji (N2), walidacja schematu (N3)~~ — **wszystkie wdrożone i wydane 2026-07-09/10**; wpis wisiał nieaktualny do 2026-07-22 (weryfikacja przy pakiecie dla prawnika).
-- [x] ~~**Przed launchem zostaje:** akceptacja dokumentów przez prawnika (N4)~~ — ✅ **PRAWNIK BEZ ZASTRZEŻEŃ 2026-08-25**; N6 domknięte 2026-08-18. **Wszystkie blokery launchu zamknięte.**
-- [x] ✅ **DOKUMENTY OPUBLIKOWANE 2026-08-26** (commit `328cd71`, weryfikacja live) — bramka publikacji zamknięta z zerem placeholderów; Regulamin, Polityka i **nowa strona `/dpa`** renderują treść z `docs/legal/` (generator `npm run legal:build` z filtrem publikacyjnym — zmiany treści TYLKO przez markdown + regenerację + deploy). Poziom 3 supportu zniesiony (F4a). Historia bramki: `docs/legal/Bramka-publikacji-2026-08-26.md`, analiza: `docs/legal/Analiza-prawna-2026-08-26.md` (ADR-025). Plan Anthropic zweryfikowany 2026-08-26: **Max (konsumencki, bez DPA)** — wpis o Anthropic wykreślony z Polityki §5 wydaniem poprawkowym; kanał supportu zawieszony dla danych osobowych do czasu oferty komercyjnej.
+- [ ] Beta testerów (ścieżka krytyczna) + dopieszczanie UI końcowej wersji
+- [x] ✅ **Wszystkie blokery launchu ZAMKNIĘTE** (stan 2026-08-26): blokery techniczne
+  N1–N3 wydane 2026-07-09/10 · prawnik bez zastrzeżeń 2026-08-25 (N4) · **dokumenty
+  opublikowane 2026-08-26** (commit `328cd71`, weryfikacja live, bramka 47→0).
+  Regulamin, Polityka i `/dpa` renderują treść z `docs/legal/` — **zmiany treści TYLKO
+  przez markdown + `npm run legal:build` + deploy**. Historia:
+  `docs/legal/Bramka-publikacji-2026-08-26.md` + `Analiza-prawna-2026-08-26.md` (ADR-025).
+  Plan Anthropic = Max (konsumencki, bez DPA) → zasady kanału supportu: sekcja
+  „Obsługa zgłoszeń" wyżej.

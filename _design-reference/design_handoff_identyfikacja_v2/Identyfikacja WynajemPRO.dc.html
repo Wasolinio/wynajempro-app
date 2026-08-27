@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#17150F;background:#F3EFE5}
+  ::selection{background:#D9492B;color:#fff}
+  a{color:#D9492B;text-decoration:none}
+  a:hover{color:#C23E22;text-decoration:underline}
+  .mono{font-family:'IBM Plex Mono',monospace}
+</style>
+</helmet>
+
+<div style="max-width:1080px;margin:0 auto;padding:0 48px 80px;background:#F3EFE5">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:24px 0;border-bottom:1px solid #DDD5C3">
+    <div style="display:flex;align-items:center;gap:11px">
+      <svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <div style="display:flex;align-items:baseline;font-weight:800;font-size:19px;letter-spacing:-.02em">Wynajem<span class="mono" style="font-weight:500;font-size:12px;background:#17150F;color:#F3EFE5;padding:2px 5px;margin-left:3px;letter-spacing:.05em">PRO</span></div>
+    </div>
+    <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">System identyfikacji wizualnej · v2.0</div>
+  </div>
+
+  <div style="padding:90px 0 70px;border-bottom:1px solid #DDD5C3">
+    <div class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;margin-bottom:36px">Brand book — dla zespołu i agenta kodującego</div>
+    <div style="display:flex;align-items:center;gap:22px;margin-bottom:34px">
+      <svg viewBox="0 0 40 40" width="76" height="76"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <div style="display:flex;align-items:baseline;font-weight:800;font-size:52px;letter-spacing:-.03em">Wynajem<span class="mono" style="font-weight:500;font-size:24px;background:#17150F;color:#F3EFE5;padding:5px 11px;margin-left:8px;letter-spacing:.04em">PRO</span></div>
+    </div>
+    <h1 style="font-weight:800;font-size:64px;line-height:.98;letter-spacing:-.035em;margin:0 0 18px;max-width:760px">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</h1>
+    <p style="font-size:19px;line-height:1.6;color:#524C3F;max-width:520px;margin:0 0 34px">System do zarządzania najmem krótkoterminowym dla mikro-gospodarzy. Spokojny, precyzyjny, bez chaosu — jak dobre narzędzie pracy.</p>
+    <div style="display:grid;grid-template-columns:repeat(5,auto);gap:0;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;width:max-content;background:#FBFAF6">
+      <a href="#znak" style="padding:12px 20px;border-right:1px solid #DDD5C3;font-size:13px;font-weight:600;color:#17150F">Znak</a>
+      <a href="#aplikacje" style="padding:12px 20px;border-right:1px solid #DDD5C3;font-size:13px;font-weight:600;color:#17150F">Ikony</a>
+      <a href="#sociale" style="padding:12px 20px;border-right:1px solid #DDD5C3;font-size:13px;font-weight:600;color:#17150F">Sociale</a>
+      <a href="#slogany" style="padding:12px 20px;border-right:1px solid #DDD5C3;font-size:13px;font-weight:600;color:#17150F">Slogany</a>
+      <a href="#firmowe" style="padding:12px 20px;font-size:13px;font-weight:600;color:#17150F">Materiały firmowe</a>
+    </div>
+  </div>
+
+  <div style="padding:64px 0 20px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:36px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Logo</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">01</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:620px;margin:0 0 28px">Znak to miniaturowa oś czasu rezerwacji — trzy paski na atramentowym kaflu, jeden w kolorze cynobrowym (zajęty termin). Nawiązuje wprost do produktu: kalendarz pod kontrolą. Logotyp łączy „Wynajem" (Schibsted Grotesk 800) z tagiem „PRO" w monospace.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Lockup poziomy — podstawowy</span>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#17150F;color:#F3EFE5;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+      <div style="background:#17150F;border-radius:4px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555">Na tle atramentowym</span>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#D9492B;color:#fff;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;display:flex;flex-direction:column;gap:24px;justify-content:space-between;min-height:170px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Sam znak</span>
+        <svg viewBox="0 0 40 40" width="56" height="56"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;min-height:170px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;display:block;margin-bottom:20px">Pole ochronne = ½ wysokości znaku</span>
+        <div style="display:inline-block;border:1px dashed #D9492B;padding:18px">
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        </div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:30px;min-height:170px;display:flex;flex-direction:column;justify-content:space-between">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Rozmiar minimalny</span>
+        <div style="display:flex;align-items:flex-end;gap:16px">
+          <div style="text-align:center"><svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg><div class="mono" style="font-size:10px;color:#9A917D;margin-top:8px">24 PX znak</div></div>
+          <div style="text-align:center"><div style="display:flex;align-items:baseline;font-weight:800;font-size:14px;letter-spacing:-.02em">Wynajem<span class="mono" style="font-weight:500;font-size:8px;background:#17150F;color:#F3EFE5;padding:1px 3px;margin-left:2px">PRO</span></div><div class="mono" style="font-size:10px;color:#9A917D;margin-top:10px">120 PX lockup</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="znak" style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Znak — trzy kierunki do wyboru</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">02</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">W kodzie funkcjonują dziś dwie różne wersje znaku: identyfikacja ma paski 17/17/11 z przesunięciem, a <span class="mono" style="font-size:14px;background:#F0EADC;padding:1px 5px;border-radius:2px">LandingPage.jsx</span> trzy równe paski w kolorze beżowym. Poniżej trzy dopracowane kierunki. Wybierz jeden — wtedy ujednolicę go w całym repo i wygeneruję pełny zestaw ikon.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px">
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:44px;display:flex;justify-content:center"><svg viewBox="0 0 40 40" width="112" height="112"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg></div>
+        <div style="padding:20px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:8px">Kierunek A</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:6px">Oś czasu</div>
+          <div style="font-size:14px;color:#524C3F;line-height:1.55">Trzy paski o różnej długości i przesunięciu — wykres Gantta rezerwacji. Środkowy pasek cynobrowy: zajęty termin. Wersja obecna, wyrównana optycznie.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 20px;border-top:1px solid #EFE9DA">Czyta się od 16 px · najbliżej produktu</div>
+      </div>
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:44px;display:flex;justify-content:center"><svg viewBox="0 0 40 40" width="112" height="112"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg></div>
+        <div style="padding:20px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:8px">Kierunek B</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:6px">Kalendarz</div>
+          <div style="font-size:14px;color:#524C3F;line-height:1.55">Belka nagłówka i siatka dni, jeden dzień zaznaczony cynobrem. Najbardziej dosłowny — czytelny bez kontekstu marki.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 20px;border-top:1px solid #EFE9DA">Gęsty — przy 16 px siatka się zlewa</div>
+      </div>
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:44px;display:flex;justify-content:center"><svg viewBox="0 0 40 40" width="112" height="112"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="padding:20px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:8px">Kierunek C</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:6px">Litera W z pasków</div>
+          <div style="font-size:14px;color:#524C3F;line-height:1.55">Monogram zbudowany z tych samych zaokrąglonych pasków. Prawe ramię cynobrowe. Najmocniejsza rozpoznawalność jako inicjał.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 20px;border-top:1px solid #EFE9DA">Mocny znak · słabsze skojarzenie z kalendarzem</div>
+      </div>
+    </div>
+
+    <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:26px">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:20px">Test skalowania — 64 / 40 / 32 / 24 / 16 px</div>
+      <div style="display:grid;grid-template-columns:44px 1fr;gap:18px;align-items:center">
+        <span class="mono" style="font-size:11px;color:#D9492B;font-weight:600">A</span>
+        <div style="display:flex;align-items:center;gap:26px">
+          <svg viewBox="0 0 40 40" width="64" height="64"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="16" height="16"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="8" y="9" width="16" height="5" rx="2.5" fill="#F3EFE5"/><rect x="13" y="17.5" width="19" height="5" rx="2.5" fill="#D9492B"/><rect x="8" y="26" width="11" height="5" rx="2.5" fill="#F3EFE5"/></svg>
+        </div>
+        <span class="mono" style="font-size:11px;color:#D9492B;font-weight:600">B</span>
+        <div style="display:flex;align-items:center;gap:26px">
+          <svg viewBox="0 0 40 40" width="64" height="64"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="16" height="16"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="9.5" width="22" height="3.5" rx="1.75" fill="#A0987F"/><rect x="9" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="25" y="17.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="9" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/><rect x="17" y="25.5" width="6.5" height="5" rx="1.5" fill="#D9492B"/><rect x="25" y="25.5" width="6.5" height="5" rx="1.5" fill="#F3EFE5"/></svg>
+        </div>
+        <span class="mono" style="font-size:11px;color:#D9492B;font-weight:600">C</span>
+        <div style="display:flex;align-items:center;gap:26px">
+          <svg viewBox="0 0 40 40" width="64" height="64"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 40 40" width="16" height="16"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Warianty logo</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">03</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Pięć wariantów pokrywa wszystkie zastosowania. Poziomy jest domyślny; pionowy do avatarów i stopek wyśrodkowanych; monochromatyczny do faksymile, pieczątek i druku jednokolorowego.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;min-height:180px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Pionowy</span>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0">
+          <svg viewBox="0 0 40 40" width="48" height="48"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:22px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:11px;background:#17150F;color:#F3EFE5;padding:2px 5px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;min-height:180px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Monochromatyczny — atrament</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#F3EFE5" opacity=".55"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:22px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:11px;border:1px solid #17150F;padding:1px 4px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+      <div style="background:#17150F;border:1px solid #2C2920;border-radius:4px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;min-height:180px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555">Negatyw — jednobarwny</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect x="1" y="1" width="38" height="38" rx="7.5" fill="none" stroke="#F3EFE5" stroke-width="2"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#F3EFE5" opacity=".55"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:22px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:11px;border:1px solid #F3EFE5;padding:1px 4px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;min-height:150px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Sam logotyp — bez znaku</span>
+        <div style="display:flex;align-items:baseline;font-weight:800;font-size:28px;letter-spacing:-.03em">Wynajem<span class="mono" style="font-weight:500;font-size:14px;background:#D9492B;color:#fff;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+        <div class="mono" style="font-size:10px;color:#9A917D;line-height:1.6">Do stopek, faktur i miejsc, gdzie znak już wystąpił</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;min-height:150px">
+        <span class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Avatar — sam znak w kadrze kwadratowym</span>
+        <div style="display:flex;align-items:center;gap:16px">
+          <svg viewBox="0 0 40 40" width="56" height="56" style="border-radius:50%"><rect width="40" height="40" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          <svg viewBox="0 0 40 40" width="56" height="56"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        </div>
+        <div class="mono" style="font-size:10px;color:#9A917D;line-height:1.6">Kadr okrągły: znak bez promienia, kafel wypełnia pole</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Czego nie robić</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">04</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="58" preserveAspectRatio="none" style="margin-bottom:16px"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie rozciągać</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px"><rect width="40" height="40" rx="8" fill="#7A52C9"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#39C56B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie zmieniać barw</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px;transform:rotate(18deg)"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Nie obracać</div>
+      </div>
+      <div style="background:#D9C9C2;border:1px solid #DDD5C3;border-radius:4px;padding:24px;text-align:center">
+        <svg viewBox="0 0 40 40" width="40" height="40" style="margin-bottom:16px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">✕ Bez cieni i teł</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Kolory</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">05</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;margin-bottom:14px">
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#F3EFE5;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Paper</div><div class="mono" style="font-size:12px;color:#9A917D">#F3EFE5</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Tło główne</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#FBFAF6;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Surface</div><div class="mono" style="font-size:12px;color:#9A917D">#FBFAF6</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Panele / karty</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:96px;background:#17150F;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Ink</div><div class="mono" style="font-size:12px;color:#9A917D">#17150F</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Atrament / tekst</div></div>
+      </div>
+      <div>
+        <div style="height:96px;background:#D9492B;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Cynober</div><div class="mono" style="font-size:12px;color:#9A917D">#D9492B</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Akcent / CTA</div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden">
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#2F6B53;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Zieleń</div><div class="mono" style="font-size:12px;color:#9A917D">#2F6B53</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Pieniądze / zysk</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#234B7A;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Granat</div><div class="mono" style="font-size:12px;color:#9A917D">#234B7A</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Kanał Booking</div></div>
+      </div>
+      <div style="border-right:1px solid #DDD5C3">
+        <div style="height:72px;background:#C99A2E;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Amber</div><div class="mono" style="font-size:12px;color:#9A917D">#C99A2E</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">W toku / uwaga</div></div>
+      </div>
+      <div>
+        <div style="height:72px;background:#DDD5C3;border-bottom:1px solid #DDD5C3"></div>
+        <div style="padding:14px"><div style="font-size:14px;font-weight:700">Hairline</div><div class="mono" style="font-size:12px;color:#9A917D">#DDD5C3</div><div class="mono" style="font-size:10px;color:#A0987F;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Linie / obramowania</div></div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:14px;letter-spacing:.03em;line-height:1.6">POMOCNICZE — tinty: cynober #F6E5DF · zieleń #E7EDE7 · amber #FBF1D9 / linie wewn. #EFE9DA / tekst: muted #524C3F, faint #9A917D, label #A0987F / na atramencie: #E4DDCE, faint #8C8576, label #6B6555, linia #2C2920</p>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Typografia</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">06</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div style="font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">Schibsted Grotesk</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Nagłówki + UI · 400–800</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div style="font-family:'Newsreader',serif;font-style:italic;font-weight:500;font-size:46px;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">Newsreader <span style="font-family:'Newsreader';font-style:italic;font-weight:500">italic</span></div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Akcent w nagłówkach · cytaty</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:22px">
+        <div class="mono" style="font-size:42px;font-weight:500;line-height:1">Aa</div>
+        <div style="font-size:15px;font-weight:700;margin-top:14px">IBM Plex Mono</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:4px;letter-spacing:.04em;text-transform:uppercase">Etykiety · liczby · dane</div>
+      </div>
+    </div>
+    <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-weight:800;font-size:42px;letter-spacing:-.03em;line-height:1">Display / H1</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">800 · −0.03em · 1.04</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-weight:600;font-size:27px;letter-spacing:-.02em">Nagłówek sekcji / H2</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">600 · −0.02em · 1.1</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-size:19px;line-height:1.6">Lead — wprowadzający akapit, większy</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">400 · 19/1.6</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px;border-bottom:1px solid #EFE9DA"><span style="font-size:16px;line-height:1.6">Tekst podstawowy — opisy, treść interfejsu</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">400 · 16/1.6</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;padding:18px 24px"><span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Etykieta mono · liczby tabularne</span><span class="mono" style="font-size:11px;color:#9A917D;white-space:nowrap">500 · +0.10em · UPPER</span></div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Głos marki</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">07</span>
+    </div>
+    <div style="background:#17150F;border-radius:4px;padding:40px;color:#E4DDCE;margin-bottom:18px">
+      <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:18px">Slogan główny</div>
+      <div style="font-weight:800;font-size:46px;letter-spacing:-.03em;color:#F3EFE5;line-height:1.02">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">Obietnica marki</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.25">Cały Twój wynajem w jednym precyzyjnym panelu.</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">Wariant emocjonalny</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.25">Mniej chaosu. Więcej wynajmu.</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Rzeczowy</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Konkrety i liczby zamiast obietnic. „Zysk 33 280 zł", nie „rosnące przychody".</div></div>
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Spokojny</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Krótkie zdania, bez wykrzykników i żargonu. Ton narzędzia, nie sprzedawcy.</div></div>
+      <div style="border-top:2px solid #17150F;padding-top:14px"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Po imieniu</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Mówimy do gospodarza „Ty". Jeden człowiek, kilka obiektów — nie korporacja.</div></div>
+    </div>
+  </div>
+
+  <div id="slogany" style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Biblioteka sloganów</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">08</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Trzy osie znaczeniowe. Na jednym materiale używamy jednego sloganu i jednego dowodu — nigdy dwóch obietnic naraz.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:22px">
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:18px 22px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:6px">Oś 01</div>
+          <div style="font-size:17px;font-weight:700;color:#F3EFE5">Kontrola i spokój</div>
+        </div>
+        <div style="padding:6px 0">
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:19px;font-weight:700;letter-spacing:-.02em">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Mniej chaosu. Więcej wynajmu.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Kalendarz, który się nie myli.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Nic Ci nie umknie w sezonie.</div>
+          <div style="padding:14px 22px;font-size:17px;font-weight:600;letter-spacing:-.01em">Wiesz, ile zarabia każdy obiekt.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 22px;border-top:1px solid #EFE9DA">Główna oś · landing, OG, reklamy</div>
+      </div>
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:18px 22px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:6px">Oś 02</div>
+          <div style="font-size:17px;font-weight:700;color:#F3EFE5">Profesjonalizm wobec gości</div>
+        </div>
+        <div style="padding:6px 0">
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:19px;font-weight:700;letter-spacing:-.02em">Gość widzi <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">porządek</span>.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Jeden link i gość wie wszystko.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Przewodnik odpowiada, gdy Ty śpisz.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Profesjonalnie od pierwszej wiadomości.</div>
+          <div style="padding:14px 22px;font-size:17px;font-weight:600;letter-spacing:-.01em">Gość dostaje wszystko, zanim zapyta.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 22px;border-top:1px solid #EFE9DA">Sociale · przewodnik gościa · opinie</div>
+      </div>
+      <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+        <div style="background:#17150F;padding:18px 22px">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:6px">Oś 03</div>
+          <div style="font-size:17px;font-weight:700;color:#F3EFE5">Prostota — jedno narzędzie</div>
+        </div>
+        <div style="padding:6px 0">
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:19px;font-weight:700;letter-spacing:-.02em">Jeden panel. <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">Cały</span> wynajem.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Koniec z Excelem.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Pięć narzędzi zmieściło się w jednym.</div>
+          <div style="padding:14px 22px;border-bottom:1px solid #EFE9DA;font-size:17px;font-weight:600;letter-spacing:-.01em">Otwierasz i działa. Bez wdrożenia.</div>
+          <div style="padding:14px 22px;font-size:17px;font-weight:600;letter-spacing:-.01em">Zbudowane dla kilku obiektów, nie dla hotelu.</div>
+        </div>
+        <div class="mono" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;padding:12px 22px;border-top:1px solid #EFE9DA">Reklamy · porównania · onboarding</div>
+      </div>
+    </div>
+
+    <div style="border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;background:#FBFAF6">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;padding:16px 22px;border-bottom:1px solid #EFE9DA">Dowody — dopisek pod sloganem, zawsze konkret</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0">
+        <div style="padding:18px 22px;border-right:1px solid #EFE9DA;border-bottom:1px solid #EFE9DA"><div class="mono" style="font-size:15px;font-weight:600">14 dni bezpłatnie</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Bez karty. Bez zobowiązań.</div></div>
+        <div style="padding:18px 22px;border-right:1px solid #EFE9DA;border-bottom:1px solid #EFE9DA"><div class="mono" style="font-size:15px;font-weight:600">29,99 zł / mc</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Jedna cena, wszystkie obiekty.</div></div>
+        <div style="padding:18px 22px;border-bottom:1px solid #EFE9DA"><div class="mono" style="font-size:15px;font-weight:600">Booking + Airbnb</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Synchronizacja iCal, koniec z overbookingiem.</div></div>
+        <div style="padding:18px 22px;border-right:1px solid #EFE9DA"><div class="mono" style="font-size:15px;font-weight:600">Rentowność per obiekt</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Przychód, koszty, zysk netto — osobno.</div></div>
+        <div style="padding:18px 22px;border-right:1px solid #EFE9DA"><div class="mono" style="font-size:15px;font-weight:600">Przewodnik gościa</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Kody i WiFi po podpisie regulaminu.</div></div>
+        <div style="padding:18px 22px"><div class="mono" style="font-size:15px;font-weight:600">Zamiast Excela</div><div style="font-size:13px;color:#9A917D;margin-top:4px">Jeden panel na telefonie i w laptopie.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="aplikacje" style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Ikona w przeglądarce i na telefonie</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">09</span>
+    </div>
+    <div style="background:#F6E5DF;border:1px solid #D9492B;border-radius:4px;padding:20px 24px;margin-bottom:26px">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:8px">Do naprawy w repo</div>
+      <div style="font-size:15px;line-height:1.6;color:#17150F">Plik <span class="mono" style="font-size:13px;background:#fff;padding:1px 5px;border-radius:2px">public/favicon.svg</span> to fioletowy znak z szablonu Vite (<span class="mono" style="font-size:13px">#863bff</span>, rozmyte elipsy, filtry gaussa) — nie ma nic wspólnego z marką. W karcie przeglądarki użytkownik widzi dziś obcy znak. Do podmiany: favicon, <span class="mono" style="font-size:13px">icon-192x192.png</span>, <span class="mono" style="font-size:13px">icon-512x512.png</span> oraz <span class="mono" style="font-size:13px">theme-color</span> w <span class="mono" style="font-size:13px">index.html</span>, który jest ustawiony na niebieski <span class="mono" style="font-size:13px">#2563eb</span> zamiast atramentu.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Karta przeglądarki — 16 px</div>
+        <div style="background:#E8E2D5;border-radius:8px 8px 0 0;padding:8px 8px 0;display:flex;gap:6px;align-items:flex-end">
+          <div style="background:#FBFAF6;border-radius:7px 7px 0 0;padding:9px 14px;display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+            <svg viewBox="0 0 40 40" width="16" height="16" style="flex:0 0 auto"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+            <span style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">WynajemPRO — panel</span>
+            <span style="font-size:13px;color:#9A917D;margin-left:auto">✕</span>
+          </div>
+          <div style="background:#DED7C8;border-radius:7px 7px 0 0;padding:9px 14px;display:flex;align-items:center;gap:8px;flex:1;opacity:.75">
+            <div style="width:16px;height:16px;border-radius:3px;background:#C9C0AD;flex:0 0 auto"></div>
+            <span style="font-size:12px;color:#6B6555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Booking.com — Extranet</span>
+          </div>
+        </div>
+        <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-top:none;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span class="mono" style="font-size:11px;color:#9A917D">←&nbsp;→&nbsp;⟳</span>
+          <div style="flex:1;background:#F3EFE5;border:1px solid #DDD5C3;border-radius:3px;padding:6px 10px"><span class="mono" style="font-size:11px;color:#524C3F">wynajempro.com/dashboard</span></div>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">Przy 16 px znika przesunięcie pasków — dlatego promień kafla i grubość pasków są tu ważniejsze niż detal.</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;display:flex;flex-direction:column;justify-content:space-between">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Favicon — 16 / 32 / 48 px</div>
+        <div style="display:flex;align-items:flex-end;gap:24px;padding:8px 0 4px">
+          <div style="text-align:center"><svg viewBox="0 0 40 40" width="16" height="16"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg><div class="mono" style="font-size:10px;color:#9A917D;margin-top:10px">16</div></div>
+          <div style="text-align:center"><svg viewBox="0 0 40 40" width="32" height="32"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg><div class="mono" style="font-size:10px;color:#9A917D;margin-top:10px">32</div></div>
+          <div style="text-align:center"><svg viewBox="0 0 40 40" width="48" height="48"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg><div class="mono" style="font-size:10px;color:#9A917D;margin-top:10px">48</div></div>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">Jeden plik SVG obsługuje wszystkie rozmiary. PNG tylko jako fallback.</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Ekran telefonu — 180 px</div>
+        <div style="display:flex;justify-content:center;padding:12px 0">
+          <div style="text-align:center">
+            <svg viewBox="0 0 40 40" width="72" height="72" style="border-radius:17px"><rect width="40" height="40" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+            <div style="font-size:11px;font-weight:500;margin-top:8px">WynajemPRO</div>
+          </div>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;line-height:1.6">apple-touch-icon · bez promienia w pliku, iOS docina sam</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Maskable — pole bezpieczne 80%</div>
+        <div style="display:flex;justify-content:center;padding:12px 0">
+          <div style="position:relative;width:96px;height:96px;background:#17150F;border-radius:4px;display:flex;align-items:center;justify-content:center">
+            <div style="position:absolute;inset:9.6px;border:1px dashed #D9492B;border-radius:50%"></div>
+            <svg viewBox="0 0 40 40" width="52" height="52"><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+          </div>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;line-height:1.6">192 i 512 px · paski w kole 80% · tło pełne atramentowe</div>
+      </div>
+      <div style="background:#17150F;border:1px solid #2C2920;border-radius:4px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555">Splash / ekran startowy PWA</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:12px 0">
+          <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+          <div style="display:flex;align-items:baseline;font-weight:800;font-size:17px;letter-spacing:-.02em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:9px;background:#D9492B;color:#fff;padding:2px 4px;margin-left:3px;letter-spacing:.04em">PRO</span></div>
+        </div>
+        <div class="mono" style="font-size:11px;color:#8C8576;line-height:1.6">theme-color #17150F · nie #2563EB</div>
+      </div>
+    </div>
+
+    <div style="background:#17150F;border-radius:4px;padding:24px 26px">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:16px">Do wklejenia w index.html</div>
+      <pre class="mono" style="margin:0;font-size:12px;line-height:1.85;color:#E4DDCE;white-space:pre-wrap;word-break:break-word">&lt;link rel="icon" type="image/svg+xml" href="/favicon.svg" /&gt;
+&lt;link rel="apple-touch-icon" href="/icon-192x192.png" /&gt;
+&lt;meta name="theme-color" content="#17150F" /&gt;</pre>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">OG image — podgląd linku</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">10</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">1200 × 630 px. To najczęściej widziany baner marki — pojawia się przy każdym wklejeniu linku na Facebooku, LinkedInie, w Slacku i WhatsAppie. Dwa warianty: typograficzny (kampanie, strona główna) i danymi (podstrony produktowe).</p>
+
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 1 — OG typograficzny · 1200 × 630 px · podgląd 50%</div>
+        <div style="width:600px;height:315px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="og-typo" style="width:1200px;height:630px;transform:scale(.5);transform-origin:top left;background:#17150F;padding:72px 80px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;align-items:center;gap:18px">
+                <svg viewBox="0 0 40 40" width="56" height="56"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:36px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:18px;background:#D9492B;color:#fff;padding:4px 9px;margin-left:6px;letter-spacing:.04em">PRO</span></div>
+              </div>
+              <div class="mono" style="font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555">wynajempro.com</div>
+            </div>
+            <div>
+              <div style="font-weight:800;font-size:88px;line-height:.98;letter-spacing:-.035em;color:#F3EFE5;max-width:900px">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+              <div style="font-size:26px;line-height:1.5;color:#A0987F;margin-top:24px;max-width:720px">Kalendarz, finanse i przewodniki gości w jednym panelu. Dla gospodarzy z kilkoma obiektami.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:20px">
+              <span style="background:#D9492B;color:#fff;padding:18px 30px;font-weight:600;font-size:22px;border-radius:3px">Wypróbuj 14 dni bezpłatnie</span>
+              <span class="mono" style="font-size:17px;color:#6B6555;letter-spacing:.06em">BEZ KARTY · 29,99 ZŁ/MC PÓŹNIEJ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 2 — OG danymi · 1200 × 630 px · podgląd 50%</div>
+        <div style="width:600px;height:315px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="og-data" style="width:1200px;height:630px;transform:scale(.5);transform-origin:top left;background:#F3EFE5;display:grid;grid-template-columns:1.05fr 1fr;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="padding:64px 56px 64px 72px;display:flex;flex-direction:column;justify-content:space-between">
+              <div style="display:flex;align-items:center;gap:16px">
+                <svg viewBox="0 0 40 40" width="48" height="48"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#17150F;color:#F3EFE5;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+              </div>
+              <div>
+                <div class="mono" style="font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:#A0987F;margin-bottom:20px">Rentowność każdego obiektu</div>
+                <div style="font-weight:800;font-size:62px;line-height:1.02;letter-spacing:-.035em;max-width:440px">Wiesz, ile <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">naprawdę</span> zarabiasz.</div>
+              </div>
+              <div class="mono" style="font-size:17px;color:#524C3F;letter-spacing:.04em">WYNAJEMPRO.COM · 14 DNI BEZPŁATNIE</div>
+            </div>
+            <div style="background:#17150F;padding:56px 64px 56px 48px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+              <div style="background:#1F1C15;border:1px solid #2C2920;border-radius:4px;padding:28px 30px">
+                <div class="mono" style="font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555;margin-bottom:12px">Zysk netto · 2026</div>
+                <div style="font-size:52px;font-weight:800;letter-spacing:-.03em;color:#F3EFE5;line-height:1">69 520 zł</div>
+                <div class="mono" style="font-size:16px;color:#7FD0AC;margin-top:12px">▲ 12% VS 2025</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;border-bottom:1px solid #2C2920;padding-bottom:14px"><span style="font-size:19px;font-weight:600;color:#E4DDCE">Apartament Centrum</span><span class="mono" style="font-size:19px;color:#7FD0AC">33 280 zł</span></div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;border-bottom:1px solid #2C2920;padding-bottom:14px"><span style="font-size:19px;font-weight:600;color:#E4DDCE">Domek nad jeziorem</span><span class="mono" style="font-size:19px;color:#7FD0AC">24 140 zł</span></div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center"><span style="font-size:19px;font-weight:600;color:#E4DDCE">Studio Rynek</span><span class="mono" style="font-size:19px;color:#7FD0AC">12 100 zł</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:20px;letter-spacing:.03em;line-height:1.7">ZASADY OG — logo lewy górny róg, min. 48 px wysokości · nagłówek max 6 słów · jeden dowód liczbowy · adres w monospace · nigdy zrzut całego panelu (nieczytelny w miniaturze 320 px)</p>
+  </div>
+
+  <div id="sociale" style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Instagram</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">11</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Post 1080 × 1080 px, story 1080 × 1920 px. Na Instagramie marka mówi jednym zdaniem i pokazuje fragment panelu — nigdy cały zrzut ekranu.</p>
+
+    <div style="display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 3 — Post 1:1 · podgląd 40%</div>
+        <div style="width:432px;height:432px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="ig-post" style="width:1080px;height:1080px;transform:scale(.4);transform-origin:top left;background:#17150F;padding:80px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div style="display:flex;align-items:center;gap:18px">
+                <svg viewBox="0 0 40 40" width="60" height="60"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:38px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:19px;background:#D9492B;color:#fff;padding:4px 9px;margin-left:6px;letter-spacing:.04em">PRO</span></div>
+              </div>
+              <div class="mono" style="font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#6B6555;padding-top:16px">01 / 05</div>
+            </div>
+            <div style="font-weight:800;font-size:104px;line-height:.98;letter-spacing:-.04em;color:#F3EFE5">Gość widzi <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">porządek</span>.</div>
+            <div style="background:#1F1C15;border:1px solid #2C2920;border-radius:6px;padding:36px 40px">
+              <div class="mono" style="font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#6B6555;margin-bottom:22px">Przewodnik gościa · Domek nad jeziorem</div>
+              <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;border-bottom:1px solid #2C2920;padding-bottom:20px"><span style="font-size:26px;color:#E4DDCE">Kod do skrytki</span><span class="mono" style="font-size:26px;color:#F3EFE5;letter-spacing:.1em">994 521</span></div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;border-bottom:1px solid #2C2920;padding-bottom:20px"><span style="font-size:26px;color:#E4DDCE">WiFi</span><span class="mono" style="font-size:26px;color:#F3EFE5">jezioro_5G</span></div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center"><span style="font-size:26px;color:#E4DDCE">Zameldowanie</span><span class="mono" style="font-size:26px;color:#F3EFE5">od 16:00</span></div>
+              </div>
+            </div>
+            <div class="mono" style="font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Wynajempro.com · 14 dni bezpłatnie</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 4 — Story 9:16 · podgląd 25%</div>
+        <div style="width:270px;height:480px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="ig-story" style="width:1080px;height:1920px;transform:scale(.25);transform-origin:top left;background:#17150F;display:flex;flex-direction:column;font-family:'Schibsted Grotesk',sans-serif">
+            <sc-if value="{{ photoSlots }}" hint-placeholder-val="{{ true }}">
+              <div style="position:relative;height:1000px;flex:0 0 auto">
+                <div style="position:absolute;inset:0;background:#1F1C15;border:2px dashed #3A362B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:80px">
+                  <span class="mono" style="font-size:34px;letter-spacing:.16em;text-transform:uppercase;color:#8C8576">Zdjęcie obiektu</span>
+                  <span style="font-size:30px;line-height:1.5;color:#6B6555;max-width:620px">Kadr pionowy, szeroki. Przeciągnij plik na to pole.</span>
+                </div>
+                <image-slot id="ig-story-photo" shape="rect" style="font-size:52px;color:#C4BCA6" placeholder=" " fit="cover"></image-slot>
+                <div style="position:absolute;top:0;left:0;right:0;padding:80px 72px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none">
+                  <div style="display:flex;align-items:center;gap:16px;background:#17150F;padding:16px 24px;border-radius:4px">
+                    <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+                    <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#D9492B;color:#fff;padding:3px 7px;margin-left:5px">PRO</span></div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ plainBanners }}">
+              <div style="height:1000px;flex:0 0 auto;padding:80px 72px;display:flex;flex-direction:column;justify-content:space-between;border-bottom:2px solid #2C2920">
+                <div style="display:flex;align-items:center;gap:16px">
+                  <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+                  <div style="display:flex;align-items:baseline;font-weight:800;font-size:30px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:15px;background:#D9492B;color:#fff;padding:3px 7px;margin-left:5px">PRO</span></div>
+                </div>
+                <div style="background:#1F1C15;border:1px solid #2C2920;border-radius:6px;padding:44px">
+                  <div class="mono" style="font-size:22px;letter-spacing:.14em;text-transform:uppercase;color:#6B6555;margin-bottom:20px">Sierpień · obłożenie</div>
+                  <div style="display:flex;flex-direction:column;gap:18px">
+                    <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center"><span style="font-size:26px;color:#A0987F">Domek nad jeziorem</span><div style="height:34px;background:#2C2920;border-radius:4px;position:relative"><div style="position:absolute;left:6%;width:74%;top:0;bottom:0;background:#D9492B;border-radius:4px"></div></div></div>
+                    <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center"><span style="font-size:26px;color:#A0987F">Apartament Centrum</span><div style="height:34px;background:#2C2920;border-radius:4px;position:relative"><div style="position:absolute;left:22%;width:58%;top:0;bottom:0;background:#D9492B;border-radius:4px"></div></div></div>
+                    <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center"><span style="font-size:26px;color:#A0987F">Studio Rynek</span><div style="height:34px;background:#2C2920;border-radius:4px;position:relative"><div style="position:absolute;left:0;width:92%;top:0;bottom:0;background:#2F6B53;border-radius:4px"></div></div></div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+            <div style="flex:1;padding:80px 72px;display:flex;flex-direction:column;justify-content:space-between">
+              <div style="font-weight:800;font-size:96px;line-height:.98;letter-spacing:-.04em;color:#F3EFE5">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+              <div>
+                <div style="background:#D9492B;color:#fff;padding:34px;font-weight:600;font-size:38px;border-radius:4px;text-align:center;margin-bottom:28px">Wypróbuj 14 dni bezpłatnie</div>
+                <div class="mono" style="font-size:26px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;text-align:center">Link w bio · wynajempro.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:20px;letter-spacing:.03em;line-height:1.7">STORY — dolne 250 px zostawiamy wolne pod pasek „Przesuń w górę". Logo zawsze na plamie atramentu, nigdy wprost na zdjęciu.</p>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Facebook</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">12</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Cover 1640 × 624 px — z tego na telefonie widać tylko środkowe 820 × 312 px. Wszystko, co musi być czytelne, mieści się w tym polu. Post kwadratowy 1080 × 1080 px.</p>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 5 — Cover strony · podgląd 52%</div>
+    <div style="width:853px;height:325px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px;margin-bottom:22px">
+      <div id="fb-cover" style="width:1640px;height:624px;transform:scale(.52);transform-origin:top left;background:#17150F;position:relative;display:grid;grid-template-columns:1fr 1fr;font-family:'Schibsted Grotesk',sans-serif">
+        <div style="padding:72px 56px 72px 96px;display:flex;flex-direction:column;justify-content:center;gap:32px;z-index:2">
+          <div style="display:flex;align-items:center;gap:18px">
+            <svg viewBox="0 0 40 40" width="52" height="52"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+            <div style="display:flex;align-items:baseline;font-weight:800;font-size:34px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:17px;background:#D9492B;color:#fff;padding:4px 8px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+          </div>
+          <div style="font-weight:800;font-size:64px;line-height:1;letter-spacing:-.035em;color:#F3EFE5">Jeden panel.<br>Cały wynajem.</div>
+          <div class="mono" style="font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:#A0987F">Kalendarz · finanse · podatki · przewodniki</div>
+        </div>
+        <div style="position:relative">
+          <sc-if value="{{ photoSlots }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;inset:0;background:#1F1C15;border:2px dashed #3A362B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px">
+              <span class="mono" style="font-size:22px;letter-spacing:.16em;text-transform:uppercase;color:#8C8576">Zdjęcie obiektu</span>
+              <span style="font-size:20px;line-height:1.5;color:#6B6555;max-width:420px">Kadr poziomy, spokojny, bez tekstu. Przeciągnij plik na to pole.</span>
+            </div>
+            <image-slot id="fb-cover-photo" shape="rect" style="font-size:26px;color:#C4BCA6" placeholder=" " fit="cover"></image-slot>
+          </sc-if>
+          <sc-if value="{{ plainBanners }}">
+            <div style="position:absolute;inset:0;padding:80px 96px 80px 40px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+              <div style="background:#1F1C15;border:1px solid #2C2920;border-radius:6px;padding:30px 34px">
+                <div class="mono" style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#6B6555;margin-bottom:12px">Zysk netto · 2026</div>
+                <div style="font-size:46px;font-weight:800;letter-spacing:-.03em;color:#F3EFE5;line-height:1">69 520 zł</div>
+              </div>
+              <div style="display:flex;gap:16px">
+                <div style="flex:1;background:#1F1C15;border:1px solid #2C2920;border-radius:6px;padding:22px 26px"><div class="mono" style="font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555;margin-bottom:8px">Obłożenie</div><div style="font-size:30px;font-weight:800;color:#F3EFE5">78%</div></div>
+                <div style="flex:1;background:#1F1C15;border:1px solid #2C2920;border-radius:6px;padding:22px 26px"><div class="mono" style="font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555;margin-bottom:8px">Obiekty</div><div style="font-size:30px;font-weight:800;color:#F3EFE5">3</div></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ showSafeAreas }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:410px;top:156px;width:820px;height:312px;border:2px dashed #D9492B;z-index:3;pointer-events:none">
+            <span class="mono" style="position:absolute;top:-34px;left:0;font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:#D9492B">Pole widoczne na telefonie · 820 × 312</span>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 6 — Post 1:1 danymi · podgląd 40%</div>
+        <div style="width:432px;height:432px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="fb-post" style="width:1080px;height:1080px;transform:scale(.4);transform-origin:top left;background:#F3EFE5;padding:80px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;align-items:center;gap:16px">
+                <svg viewBox="0 0 40 40" width="52" height="52"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:32px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:16px;background:#17150F;color:#F3EFE5;padding:3px 7px;margin-left:5px;letter-spacing:.04em">PRO</span></div>
+              </div>
+              <span class="mono" style="background:#D9492B;color:#fff;font-size:18px;font-weight:600;padding:10px 18px;border-radius:3px;letter-spacing:.08em">BEZ OVERBOOKINGU</span>
+            </div>
+            <div style="font-weight:800;font-size:78px;line-height:1;letter-spacing:-.04em;max-width:820px">Kalendarz, który się <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">nie myli</span>.</div>
+            <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:6px;padding:40px">
+              <div class="mono" style="font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;margin-bottom:26px">Sierpień 2026 · trzy obiekty · jedna siatka</div>
+              <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:center"><span style="font-size:26px;font-weight:600">Domek nad jeziorem</span><div style="height:40px;background:#EFE9DA;border-radius:4px;position:relative"><div style="position:absolute;left:4%;width:38%;top:0;bottom:0;background:#234B7A;border-radius:4px"></div><div style="position:absolute;left:48%;width:44%;top:0;bottom:0;background:#D9492B;border-radius:4px"></div></div></div>
+                <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:center"><span style="font-size:26px;font-weight:600">Apartament Centrum</span><div style="height:40px;background:#EFE9DA;border-radius:4px;position:relative"><div style="position:absolute;left:14%;width:30%;top:0;bottom:0;background:#D9492B;border-radius:4px"></div><div style="position:absolute;left:60%;width:26%;top:0;bottom:0;background:#234B7A;border-radius:4px"></div></div></div>
+                <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:center"><span style="font-size:26px;font-weight:600">Studio Rynek</span><div style="height:40px;background:#EFE9DA;border-radius:4px;position:relative"><div style="position:absolute;left:0;width:56%;top:0;bottom:0;background:#2F6B53;border-radius:4px"></div></div></div>
+              </div>
+              <div style="display:flex;gap:32px;margin-top:30px;padding-top:26px;border-top:1px solid #EFE9DA">
+                <span class="mono" style="display:flex;align-items:center;gap:12px;font-size:18px;color:#524C3F"><span style="width:16px;height:16px;background:#234B7A;border-radius:3px"></span>BOOKING</span>
+                <span class="mono" style="display:flex;align-items:center;gap:12px;font-size:18px;color:#524C3F"><span style="width:16px;height:16px;background:#D9492B;border-radius:3px"></span>AIRBNB</span>
+                <span class="mono" style="display:flex;align-items:center;gap:12px;font-size:18px;color:#524C3F"><span style="width:16px;height:16px;background:#2F6B53;border-radius:3px"></span>BEZPOŚREDNIA</span>
+              </div>
+            </div>
+            <div class="mono" style="font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:#524C3F">Wynajempro.com · 14 dni bezpłatnie, bez karty</div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:26px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Zasady postu na Facebooku</div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Jeden komunikat</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Nagłówek + jeden dowód. Nie łączymy podatków z kalendarzem w jednym poście.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Tekst w kadrze, nie w opisie</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Post musi działać bez czytania podpisu — pierwsze trzy linie opisu i tak są przycięte.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Fragment, nie zrzut</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Trzy wiersze kalendarza wystarczą. Cały panel jest nieczytelny na telefonie.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Adres zamiast „kliknij"</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Stopka to zawsze <span class="mono" style="font-size:13px">wynajempro.com</span> i warunek próby.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">LinkedIn</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">13</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Cover firmowy 1128 × 191 px — pas bardzo niski, mieści logo i jedno zdanie. Lewy dolny róg zasłania awatar strony, więc zostaje pusty. Post 1200 × 627 px.</p>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 7 — Cover firmowy · podgląd 76%</div>
+    <div style="width:857px;height:146px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px;margin-bottom:22px">
+      <div id="li-cover" style="width:1128px;height:191px;transform:scale(.76);transform-origin:top left;background:#17150F;position:relative;display:flex;align-items:center;justify-content:space-between;padding:0 56px 0 300px;font-family:'Schibsted Grotesk',sans-serif">
+        <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+            <svg viewBox="0 0 40 40" width="30" height="30"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+            <div style="display:flex;align-items:baseline;font-weight:800;font-size:24px;letter-spacing:-.025em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:12px;background:#D9492B;color:#fff;padding:2px 6px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+          </div>
+          <div class="mono" style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">System do zarządzania najmem krótkoterminowym</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;font-size:26px;letter-spacing:-.025em;color:#F3EFE5;line-height:1.1">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+          <div class="mono" style="font-size:13px;color:#6B6555;margin-top:6px;letter-spacing:.08em">WYNAJEMPRO.COM</div>
+        </div>
+        <sc-if value="{{ showSafeAreas }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:0;top:0;width:290px;height:191px;border-right:2px dashed #D9492B;background:rgba(217,73,43,.12);display:flex;align-items:flex-end;padding:12px;pointer-events:none">
+            <span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;line-height:1.4">Pole awatara<br>zostaw puste</span>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 8 — Post · 1200 × 627 px · podgląd 50%</div>
+    <div style="width:600px;height:314px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+      <div id="li-post" style="width:1200px;height:627px;transform:scale(.5);transform-origin:top left;background:#F3EFE5;display:grid;grid-template-columns:1fr 1.1fr;font-family:'Schibsted Grotesk',sans-serif">
+        <div style="padding:64px 48px 64px 72px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:16px">
+            <svg viewBox="0 0 40 40" width="44" height="44"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+            <div style="display:flex;align-items:baseline;font-weight:800;font-size:27px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:14px;background:#17150F;color:#F3EFE5;padding:3px 6px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+          </div>
+          <div>
+            <div class="mono" style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#D9492B;margin-bottom:18px">Rozliczenia</div>
+            <div style="font-weight:800;font-size:50px;line-height:1.02;letter-spacing:-.035em">Ryczałt, skala i VAT — <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">policzone</span>.</div>
+            <div style="font-size:19px;line-height:1.55;color:#524C3F;margin-top:20px">Panel liczy podatek z rezerwacji i kosztów, które już masz w systemie.</div>
+          </div>
+          <div class="mono" style="font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:#A0987F">Wynajempro.com</div>
+        </div>
+        <div style="background:#FBFAF6;border-left:1px solid #DDD5C3;padding:56px 72px 56px 48px;display:flex;flex-direction:column;justify-content:center">
+          <div style="border:1px solid #DDD5C3;border-radius:6px;overflow:hidden;background:#fff">
+            <div class="mono" style="font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#A0987F;padding:20px 26px;border-bottom:1px solid #EFE9DA">Podatek do zapłaty · Q3 2026</div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:18px 26px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-size:19px">Przychód</span><span class="mono" style="font-size:19px">84 600 zł</span></div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:18px 26px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-size:19px">Koszty</span><span class="mono" style="font-size:19px">15 080 zł</span></div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:18px 26px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-size:19px">Ryczałt 8,5%</span><span class="mono" style="font-size:19px">7 191 zł</span></div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:22px 26px;background:#17150F;align-items:center"><span style="font-size:19px;font-weight:700;color:#F3EFE5">Zysk netto</span><span class="mono" style="font-size:22px;font-weight:600;color:#7FD0AC">62 329 zł</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Szablon: nowa funkcja</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">14</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Powtarzalny format do ogłaszania zmian w panelu. Trzy stałe elementy: metka <span class="mono" style="font-size:14px;background:#F0EADC;padding:1px 5px;border-radius:2px">NOWE W PANELU</span>, nazwa funkcji, fragment interfejsu. Podmieniasz tylko treść.</p>
+
+    <div style="display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 9 — 1080 × 1080 px · podgląd 40%</div>
+        <div style="width:432px;height:432px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="feature-post" style="width:1080px;height:1080px;transform:scale(.4);transform-origin:top left;background:#F3EFE5;padding:80px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <span class="mono" style="background:#17150F;color:#F3EFE5;font-size:20px;font-weight:600;padding:12px 20px;border-radius:3px;letter-spacing:.14em">NOWE W PANELU</span>
+              <div style="display:flex;align-items:center;gap:14px">
+                <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:26px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:13px;background:#17150F;color:#F3EFE5;padding:2px 6px;margin-left:4px">PRO</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight:800;font-size:86px;line-height:1;letter-spacing:-.04em;margin-bottom:26px">Generator umów najmu</div>
+              <div style="font-size:32px;line-height:1.5;color:#524C3F;max-width:820px">Wypełniasz dane raz. Umowa wychodzi gotowa do podpisu, z załącznikami i protokołem zdawczym.</div>
+            </div>
+            <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:6px;overflow:hidden">
+              <div class="mono" style="font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F;padding:26px 34px;border-bottom:1px solid #EFE9DA">Umowa najmu · Studio Rynek</div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:24px 34px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-size:26px">Najemca</span><span class="mono" style="font-size:26px;color:#524C3F">Anna Nowak</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:24px 34px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-size:26px">Okres</span><span class="mono" style="font-size:26px;color:#524C3F">01.09 — 31.08.2027</span></div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:24px 34px;align-items:center"><span style="font-size:26px">Czynsz</span><span class="mono" style="font-size:26px;font-weight:600;color:#2F6B53">2 400 zł / mc</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="background:#D9492B;color:#fff;padding:22px 34px;font-weight:600;font-size:26px;border-radius:3px">Zobacz w panelu</span>
+              <span class="mono" style="font-size:20px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">Wynajempro.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;background:#17150F;border-radius:4px;padding:26px 28px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:20px">Co podmieniasz</div>
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div><div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:6px">01 · Nazwa funkcji</div><div style="font-size:15px;color:#E4DDCE;line-height:1.55">Rzeczownik, max 3 słowa. „Generator umów najmu", nie „Nowa funkcjonalność umów".</div></div>
+          <div><div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:6px">02 · Jedno zdanie korzyści</div><div style="font-size:15px;color:#E4DDCE;line-height:1.55">Co gospodarz przestaje robić ręcznie. Bez słów „intuicyjny", „nowoczesny", „innowacyjny".</div></div>
+          <div><div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#D9492B;margin-bottom:6px">03 · Fragment interfejsu</div><div style="font-size:15px;color:#E4DDCE;line-height:1.55">Trzy do czterech wierszy danych z tej funkcji. Dane przykładowe, nigdy prawdziwych gości.</div></div>
+          <div style="border-top:1px solid #2C2920;padding-top:18px"><div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-bottom:6px">Stałe</div><div style="font-size:15px;color:#A0987F;line-height:1.55">Metka, logo, przycisk i adres zostają bez zmian — z tego powstaje rozpoznawalna seria.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Banery na stronę</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">15</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Dwa pasy: hero na wejściu (1440 × 560 px) i pas domykający przed stopką (1440 × 280 px). Hero jest jasny, pas CTA atramentowy — jeden mocny kontrast na całej stronie, nie pięć.</p>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 10 — Hero · 1440 × 560 px · podgląd 60%</div>
+    <div style="width:864px;height:336px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px;margin-bottom:22px">
+      <div id="hero-banner" style="width:1440px;height:560px;transform:scale(.6);transform-origin:top left;background:#F3EFE5;display:grid;grid-template-columns:1fr 1.05fr;font-family:'Schibsted Grotesk',sans-serif">
+        <div style="padding:72px 56px 72px 100px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+          <span class="mono" style="align-self:flex-start;background:#F6E5DF;color:#D9492B;font-size:13px;font-weight:600;padding:8px 14px;border-radius:3px;letter-spacing:.1em">14 DNI BEZPŁATNIE · BEZ KARTY</span>
+          <div style="font-weight:800;font-size:66px;line-height:.98;letter-spacing:-.04em">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+          <div style="font-size:20px;line-height:1.6;color:#524C3F;max-width:460px">Kalendarz wielu obiektów, synchronizacja z Booking i Airbnb, rozliczenia podatkowe i przewodniki gości. Jeden panel zamiast pięciu narzędzi.</div>
+          <div style="display:flex;gap:14px;align-items:center">
+            <span style="background:#D9492B;color:#fff;padding:15px 26px;font-weight:600;font-size:16px;border-radius:3px">Wypróbuj za darmo</span>
+            <span style="border:1px solid #DDD5C3;background:#FBFAF6;padding:14px 24px;font-weight:600;font-size:16px;border-radius:3px">Zobacz demo panelu</span>
+          </div>
+          <div class="mono" style="font-size:13px;color:#9A917D;letter-spacing:.06em">POTEM 29,99 ZŁ/MC · REZYGNUJESZ KIEDY CHCESZ</div>
+        </div>
+        <div style="background:#17150F;padding:56px 100px 56px 56px;display:flex;flex-direction:column;justify-content:center;gap:18px">
+          <div class="mono" style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6B6555">RYS. — Panel · sierpień 2026</div>
+          <div style="background:#1F1C15;border:1px solid #2C2920;border-radius:5px;padding:24px 26px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px">
+              <span class="mono" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555">Obłożenie miesiąca</span>
+              <span style="font-size:24px;font-weight:800;color:#F3EFE5;letter-spacing:-.02em">78%</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center"><span class="mono" style="font-size:12px;color:#8C8576">DOMEK JEZIORO</span><div style="height:22px;background:#2C2920;border-radius:3px;position:relative"><div style="position:absolute;left:4%;width:36%;top:0;bottom:0;background:#234B7A;border-radius:3px"></div><div style="position:absolute;left:46%;width:46%;top:0;bottom:0;background:#D9492B;border-radius:3px"></div></div></div>
+              <div style="display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center"><span class="mono" style="font-size:12px;color:#8C8576">AP. CENTRUM</span><div style="height:22px;background:#2C2920;border-radius:3px;position:relative"><div style="position:absolute;left:12%;width:30%;top:0;bottom:0;background:#D9492B;border-radius:3px"></div><div style="position:absolute;left:58%;width:28%;top:0;bottom:0;background:#234B7A;border-radius:3px"></div></div></div>
+              <div style="display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center"><span class="mono" style="font-size:12px;color:#8C8576">STUDIO RYNEK</span><div style="height:22px;background:#2C2920;border-radius:3px;position:relative"><div style="position:absolute;left:0;width:58%;top:0;bottom:0;background:#2F6B53;border-radius:3px"></div></div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div style="flex:1;background:#1F1C15;border:1px solid #2C2920;border-radius:5px;padding:20px 22px"><div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555;margin-bottom:8px">Zysk netto</div><div style="font-size:26px;font-weight:800;color:#F3EFE5;letter-spacing:-.02em">69 520 zł</div><div class="mono" style="font-size:12px;color:#7FD0AC;margin-top:6px">▲ 12% VS 2025</div></div>
+            <div style="flex:1;background:#1F1C15;border:1px solid #2C2920;border-radius:5px;padding:20px 22px"><div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6B6555;margin-bottom:8px">Podatek Q3</div><div style="font-size:26px;font-weight:800;color:#F3EFE5;letter-spacing:-.02em">7 191 zł</div><div class="mono" style="font-size:12px;color:#8C8576;margin-top:6px">RYCZAŁT 8,5%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 11 — Pas CTA przed stopką · 1440 × 280 px · podgląd 60%</div>
+    <div style="width:864px;height:168px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+      <div id="cta-banner" style="width:1440px;height:280px;transform:scale(.6);transform-origin:top left;background:#17150F;padding:0 100px;display:flex;align-items:center;justify-content:space-between;gap:48px;font-family:'Schibsted Grotesk',sans-serif">
+        <div>
+          <div style="font-weight:800;font-size:44px;line-height:1.05;letter-spacing:-.035em;color:#F3EFE5">Mniej chaosu. <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">Więcej wynajmu</span>.</div>
+          <div class="mono" style="font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:#6B6555;margin-top:14px">Pełny dostęp na 14 dni · bez karty · bez wdrożenia</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:stretch;flex:0 0 auto">
+          <span style="background:#D9492B;color:#fff;padding:17px 34px;font-weight:600;font-size:17px;border-radius:3px;text-align:center;white-space:nowrap">Zacznij bezpłatnie</span>
+          <span class="mono" style="font-size:12px;color:#8C8576;text-align:center;letter-spacing:.06em">29,99 ZŁ/MC PO OKRESIE PRÓBNYM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Google Ads</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">16</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Trzy formaty pokrywają większość powierzchni displayowych. Poniżej w skali 1:1 — tak małe, że mieszczą tylko trzy elementy: logo, jedno zdanie, przycisk. Bez zrzutów panelu.</p>
+
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:10px">Kwadrat · 300 × 250</div>
+        <div id="ad-300x250" style="width:300px;height:250px;background:#17150F;padding:24px;display:flex;flex-direction:column;justify-content:space-between;border-radius:4px;font-family:'Schibsted Grotesk',sans-serif">
+          <div style="display:flex;align-items:center;gap:9px">
+            <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+            <div style="display:flex;align-items:baseline;font-weight:800;font-size:16px;letter-spacing:-.02em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:9px;background:#D9492B;color:#fff;padding:1px 4px;margin-left:3px">PRO</span></div>
+          </div>
+          <div style="font-weight:800;font-size:29px;line-height:1.02;letter-spacing:-.03em;color:#F3EFE5">Koniec z<br>overbookingiem.</div>
+          <div>
+            <div style="background:#D9492B;color:#fff;padding:11px;font-weight:600;font-size:14px;border-radius:3px;text-align:center">Wypróbuj 14 dni</div>
+            <div class="mono" style="font-size:10px;color:#6B6555;margin-top:8px;letter-spacing:.08em;text-align:center">BEZ KARTY · WYNAJEMPRO.COM</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:10px">Pion · 160 × 600</div>
+        <div id="ad-160x600" style="width:160px;height:600px;background:#F3EFE5;border:1px solid #DDD5C3;padding:20px 18px;display:flex;flex-direction:column;justify-content:space-between;border-radius:4px;font-family:'Schibsted Grotesk',sans-serif">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <svg viewBox="0 0 40 40" width="28" height="28"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+            <div style="display:flex;align-items:baseline;font-weight:800;font-size:14px;letter-spacing:-.02em">Wynajem<span class="mono" style="font-weight:500;font-size:8px;background:#17150F;color:#F3EFE5;padding:1px 3px;margin-left:2px">PRO</span></div>
+          </div>
+          <div style="font-weight:800;font-size:26px;line-height:1.04;letter-spacing:-.03em;text-align:center">Jeden panel. Cały wynajem.</div>
+          <div style="border-top:1px solid #DDD5C3;border-bottom:1px solid #DDD5C3;padding:16px 0;display:flex;flex-direction:column;gap:12px">
+            <div style="text-align:center"><div class="mono" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:3px">Zysk netto</div><div class="mono" style="font-size:16px;font-weight:600">69 520 zł</div></div>
+            <div style="text-align:center"><div class="mono" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:3px">Obłożenie</div><div class="mono" style="font-size:16px;font-weight:600">78%</div></div>
+          </div>
+          <div>
+            <div style="background:#D9492B;color:#fff;padding:11px;font-weight:600;font-size:13px;border-radius:3px;text-align:center">Wypróbuj</div>
+            <div class="mono" style="font-size:9px;color:#9A917D;margin-top:8px;letter-spacing:.06em;text-align:center;line-height:1.5">14 DNI BEZPŁATNIE<br>WYNAJEMPRO.COM</div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:260px;background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Reguły dla formatów reklamowych</div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Trzy elementy, nie cztery</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Logo, jedno zdanie, przycisk. Liczba dowodowa tylko w formacie 160 × 600.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Nagłówek do 4 słów</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Przy 300 px szerokości dłuższy tekst spada poniżej 24 px i przestaje być czytelny.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Naprzemienne tła</div><div style="font-size:14px;color:#524C3F;line-height:1.55">W jednej kampanii część kreacji na atramencie, część na papierze — obie wersje logo są gotowe.</div></div>
+          <div style="border-top:2px solid #17150F;padding-top:12px"><div style="font-size:15px;font-weight:700;margin-bottom:5px">Bez animacji</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Statyczny PNG lub JPG. Ruch nie należy do tej marki.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:10px">Leaderboard · 728 × 90</div>
+    <div id="ad-728x90" style="width:728px;height:90px;background:#17150F;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-radius:4px;font-family:'Schibsted Grotesk',sans-serif">
+      <div style="display:flex;align-items:center;gap:9px;flex:0 0 auto">
+        <svg viewBox="0 0 40 40" width="26" height="26"><rect width="40" height="40" rx="8" fill="#F3EFE5"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#17150F"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#17150F"/></svg>
+        <div style="display:flex;align-items:baseline;font-weight:800;font-size:17px;letter-spacing:-.02em;color:#F3EFE5">Wynajem<span class="mono" style="font-weight:500;font-size:9px;background:#D9492B;color:#fff;padding:1px 4px;margin-left:3px">PRO</span></div>
+      </div>
+      <div style="font-weight:800;font-size:24px;letter-spacing:-.03em;color:#F3EFE5;white-space:nowrap">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+      <div style="display:flex;align-items:center;gap:14px;flex:0 0 auto">
+        <span class="mono" style="font-size:10px;letter-spacing:.08em;color:#6B6555;white-space:nowrap">14 DNI BEZPŁATNIE</span>
+        <span style="background:#D9492B;color:#fff;padding:10px 18px;font-weight:600;font-size:14px;border-radius:3px;white-space:nowrap">Wypróbuj</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="firmowe" style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Materiały firmowe</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">17</span>
+    </div>
+    <p style="font-size:16px;line-height:1.6;color:#524C3F;max-width:660px;margin:0 0 28px">Dane osobowe i linki są wpisane jako placeholdery w nawiasach kwadratowych — podmień je przed produkcją. Wizytówka 85 × 55 mm, papier firmowy A4, sygnatura 600 px szerokości.</p>
+
+    <div style="display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;margin-bottom:22px">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 12 — Wizytówka, awers · 85 × 55 mm</div>
+        <div style="width:402px;height:260px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="card-front" style="width:1004px;height:650px;transform:scale(.4);transform-origin:top left;background:#F3EFE5;padding:72px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;align-items:center;gap:18px">
+              <svg viewBox="0 0 40 40" width="60" height="60"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+              <div style="display:flex;align-items:baseline;font-weight:800;font-size:40px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:20px;background:#17150F;color:#F3EFE5;padding:4px 9px;margin-left:6px;letter-spacing:.04em">PRO</span></div>
+            </div>
+            <div>
+              <div style="font-size:40px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px">[Imię i nazwisko]</div>
+              <div class="mono" style="font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F">[Stanowisko]</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div class="mono" style="font-size:22px;line-height:1.7;color:#524C3F">[+48 000 000 000]<br>[imie@wynajempro.com]</div>
+              <div class="mono" style="font-size:22px;letter-spacing:.08em;text-transform:uppercase;color:#17150F;font-weight:600">wynajempro.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 13 — Wizytówka, rewers</div>
+        <div style="width:402px;height:260px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="card-back" style="width:1004px;height:650px;transform:scale(.4);transform-origin:top left;background:#17150F;padding:72px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="font-weight:800;font-size:52px;line-height:1.02;letter-spacing:-.035em;color:#F3EFE5">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="mono" style="font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:#6B6555">Kalendarz · finanse · podatki · przewodniki</div>
+              <div style="display:flex;gap:26px">
+                <span class="mono" style="font-size:20px;color:#A0987F">[/facebook]</span>
+                <span class="mono" style="font-size:20px;color:#A0987F">[/instagram]</span>
+                <span class="mono" style="font-size:20px;color:#A0987F">[/linkedin]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 14 — Papier firmowy A4 · podgląd 42%</div>
+        <div style="width:333px;height:472px;overflow:hidden;border:1px solid #DDD5C3;border-radius:4px">
+          <div id="letterhead" style="width:794px;height:1123px;transform:scale(.42);transform-origin:top left;background:#fff;padding:64px 72px;display:flex;flex-direction:column;font-family:'Schibsted Grotesk',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:1px solid #DDD5C3">
+              <div style="display:flex;align-items:center;gap:12px">
+                <svg viewBox="0 0 40 40" width="36" height="36"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+                <div style="display:flex;align-items:baseline;font-weight:800;font-size:23px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:12px;background:#17150F;color:#F3EFE5;padding:2px 6px;margin-left:4px;letter-spacing:.04em">PRO</span></div>
+              </div>
+              <div class="mono" style="font-size:11px;line-height:1.8;color:#9A917D;text-align:right">[NAZWA FIRMY]<br>[ULICA, KOD MIASTO]<br>NIP [000 000 00 00]</div>
+            </div>
+            <div style="padding:40px 0 0;flex:1">
+              <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#A0987F;margin-bottom:28px">[Miejscowość], [data]</div>
+              <div style="font-weight:800;font-size:26px;letter-spacing:-.025em;margin-bottom:20px">[Temat pisma]</div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="height:9px;background:#F0EADC;border-radius:2px"></div>
+                <div style="height:9px;background:#F0EADC;border-radius:2px"></div>
+                <div style="height:9px;background:#F0EADC;border-radius:2px;width:82%"></div>
+                <div style="height:9px;background:#F0EADC;border-radius:2px;margin-top:14px"></div>
+                <div style="height:9px;background:#F0EADC;border-radius:2px;width:64%"></div>
+              </div>
+            </div>
+            <div style="border-top:1px solid #DDD5C3;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
+              <span class="mono" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9A917D">wynajempro.com</span>
+              <span class="mono" style="font-size:11px;color:#9A917D">[kontakt@wynajempro.com] · [+48 000 000 000]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:340px;max-width:600px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:12px">RYS. 15 — Sygnatura e-mail · docelowa szerokość 600 px</div>
+        <div id="signature" style="width:100%;background:#fff;border:1px solid #DDD5C3;border-radius:4px;padding:22px 24px;font-family:'Schibsted Grotesk',sans-serif">
+          <div style="display:flex;gap:20px;align-items:flex-start">
+            <svg viewBox="0 0 40 40" width="48" height="48" style="flex:0 0 auto"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+            <div style="flex:1;border-left:1px solid #DDD5C3;padding-left:20px">
+              <div style="font-size:16px;font-weight:700;letter-spacing:-.01em">[Imię i nazwisko]</div>
+              <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-top:3px">[Stanowisko] · WynajemPRO</div>
+              <div class="mono" style="font-size:12px;color:#524C3F;line-height:1.8;margin-top:12px">[+48 000 000 000]<br>[imie@wynajempro.com]</div>
+              <div style="display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid #EFE9DA;flex-wrap:wrap">
+                <a href="https://wynajempro.com" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#D9492B">wynajempro.com</a>
+                <span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D">[/facebook]</span>
+                <span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D">[/instagram]</span>
+                <span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D">[/linkedin]</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid #EFE9DA;display:flex;justify-content:space-between;align-items:center;gap:16px">
+            <span style="font-size:13px;font-weight:600;letter-spacing:-.01em">Wynajem <span style="font-family:'Newsreader',serif;font-weight:500;font-style:italic">pod kontrolą</span>.</span>
+            <span class="mono" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9A917D">14 dni bezpłatnie</span>
+          </div>
+        </div>
+        <p class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;letter-spacing:.03em;line-height:1.7">SYGNATURA — bez obrazków tła i bez czcionek webowych: klienty pocztowe je zignorują. Znak jako plik PNG 96 × 96 px hostowany na domenie, fallback font-family: Arial, Helvetica, sans-serif.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Komponenty</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">18</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Przyciski</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <span style="background:#D9492B;color:#fff;padding:13px 22px;font-weight:600;font-size:15px;border-radius:3px">Wypróbuj za darmo</span>
+          <span style="background:#FBFAF6;border:1px solid #DDD5C3;color:#17150F;padding:12px 20px;font-weight:600;font-size:15px;border-radius:3px">Drugorzędny</span>
+          <span style="font-weight:600;font-size:15px;border-bottom:2px solid #17150F;padding-bottom:2px">Link →</span>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">radius 3px · padding 13/22 · waga 600<br>primary hover #C23E22</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Tagi i statusy</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="mono" style="display:flex;align-items:center;gap:5px;background:#E7EDE7;color:#2F6B53;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em"><span style="width:6px;height:6px;background:#2F6B53;border-radius:50%"></span>POTWIERDZONA</span>
+          <span class="mono" style="background:#D9492B;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">POLECANY</span>
+          <span class="mono" style="background:#FBF1D9;color:#9A7B12;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">W TOKU</span>
+          <span class="mono" style="background:#F0EADC;color:#524C3F;font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;letter-spacing:.05em">AIRBNB</span>
+        </div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">mono 11px · UPPER +0.05em<br>padding 5/10 · radius 3px</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:8px">Adres e-mail</div>
+        <div style="width:100%;padding:13px 14px;border:1px solid #DDD5C3;border-radius:3px;font-size:15px;background:#fff;color:#9A917D">anna@wynajempro.com</div>
+        <div class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;line-height:1.6">label mono nad polem · border hairline<br>radius 3px · focus border cynober</div>
+      </div>
+      <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;padding:24px">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:18px">Panel KPI</div>
+        <div style="border:1px solid #DDD5C3;border-radius:4px;padding:18px;background:#fff">
+          <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;margin-bottom:8px">Zysk netto · 2026</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.02em">69 520 zł</div>
+          <div class="mono" style="font-size:11px;color:#2F6B53;margin-top:6px">▲ 12% VS 2025</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#FBFAF6;border:1px solid #DDD5C3;border-radius:4px;overflow:hidden;margin-top:18px">
+      <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#A0987F;padding:16px 22px;border-bottom:1px solid #EFE9DA">Tabela danych — liczby tabularne, wyrównane do prawej</div>
+      <div class="mono" style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:11px 22px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9A917D;border-bottom:1px solid #EFE9DA"><span>Obiekt</span><span style="text-align:right">Przychód</span><span style="text-align:right">Zysk netto</span></div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:14px 22px;border-bottom:1px solid #EFE9DA;align-items:center"><span style="font-weight:600;font-size:14px">Apartament Centrum</span><span class="mono" style="text-align:right;font-size:14px">38 400 zł</span><span class="mono" style="text-align:right;font-size:14px;font-weight:600;color:#2F6B53">33 280 zł</span></div>
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:16px;padding:14px 22px;background:#17150F;color:#F3EFE5;align-items:center"><span style="font-weight:700;font-size:14px">Razem</span><span class="mono" style="text-align:right;font-size:14px">84 600 zł</span><span class="mono" style="text-align:right;font-size:14px;font-weight:600;color:#7FD0AC">69 520 zł</span></div>
+    </div>
+  </div>
+
+  <div style="padding:52px 0 20px;border-top:1px solid #DDD5C3">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px">
+      <h2 style="font-weight:800;font-size:34px;letter-spacing:-.03em;margin:0">Zasady układu</h2>
+      <span class="mono" style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A0987F">19</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid #17150F;border-radius:4px;overflow:hidden">
+      <div style="padding:24px;border-right:1px solid #DDD5C3;border-bottom:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">01</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Struktura liniami, nie cieniami</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Sekcje i karty oddzielamy włoskową linią 1px (#DDD5C3). Cienie minimalne lub żadne.</div></div>
+      <div style="padding:24px;border-bottom:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">02</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Etykiety i liczby w monospace</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Nagłówki sekcji, metki i wszystkie liczby w IBM Plex Mono z liczbami tabularnymi.</div></div>
+      <div style="padding:24px;border-right:1px solid #DDD5C3;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">03</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Podpisy „RYS." przy figurach</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Zrzuty i wykresy opisujemy edytorialnie: „RYS. 1 — Kalendarz". Daje wrażenie precyzji.</div></div>
+      <div style="padding:24px;background:#FBFAF6"><div class="mono" style="font-size:11px;color:#D9492B;font-weight:600;margin-bottom:8px">04</div><div style="font-size:16px;font-weight:600;margin-bottom:5px">Zero emoji, zero gradientów</div><div style="font-size:14px;color:#524C3F;line-height:1.55">Placeholdery zdjęć = „papier milimetrowy" z etykietą. Promień: 3px kontrolki, 4px panele.</div></div>
+    </div>
+    <p class="mono" style="font-size:11px;color:#9A917D;margin-top:16px;letter-spacing:.03em;line-height:1.7">SKALA ODSTĘPÓW — 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 64 · 84 PX &nbsp;|&nbsp; PROMIENIE — 3PX (przyciski / pola / tagi) · 4PX (panele) &nbsp;|&nbsp; SIATKA — max 1240PX, padding 40PX, gap 16–20PX</p>
+  </div>
+
+  <div style="margin-top:40px;border-top:1px solid #17150F;padding-top:22px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg viewBox="0 0 40 40" width="24" height="24"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <span style="font-weight:800;font-size:15px;letter-spacing:-.02em">WynajemPRO</span>
+    </div>
+    <span class="mono" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A0987F">Identyfikacja v2.0 · 2026</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:1000},&quot;showSafeAreas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Banery&quot;},&quot;photoSlots&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Banery&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showSafeAreas: this.props.showSafeAreas ?? true,
+      photoSlots: this.props.photoSlots ?? true,
+      plainBanners: !(this.props.photoSlots ?? true)
+    };
+  }
+}
+</script>
+</body>
+</html>

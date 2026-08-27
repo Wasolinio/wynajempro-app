@@ -1,50 +1,26 @@
 # 📚 WynajemPRO Knowledge Base
 
-Dokumentacja projektu zorganizowana dla Obsidiana. Każda strona zawiera klucze informacje o projekcie.
+Vault Obsidiana projektu WynajemPRO. **Zacznij od [[Home]]** — tam jest aktualny status,
+mapa wiedzy i typowe przepływy pracy.
 
-## 📂 Struktura
+## Konwencje vaulta
 
-### 🏗️ [Architecture](Architecture.md)
-- Data flow w aplikacji
-- Komponenty i ich rola
-- Security model
-- State management
+- **Vault = katalog `docs/`** (nie korzeń repo). Konfiguracja vaulta (`.obsidian/app.json`
+  itd.) jest w repo; układ paneli i grafu (`workspace*.json`, `graph.json`) — ignorowany.
+- **[[Projects/Roadmap]]** — jedyne źródło prawdy planowania (NOW/NEXT/LATER).
+- **[[Activity-Log]]** — historia zmian, wpisy wg skilla `dziennik` (najnowsze na górze).
+- **`legal/`** — dokumenty prawne; źródło prawdy stron `/regulamin`, `/prywatnosc`, `/dpa`
+  (`npm run legal:build` → deploy; nigdy edycja stron w `src/`).
+- **`support/`** — proces obsługi zgłoszeń + artykuły centrum pomocy.
+- **`docx/`** — generowane kopie `.docx` dla właściciela (`npm run docs:docx`; poza repo).
+- **`archive/`** — materiały historyczne, nieaktualne celowo.
+- Linkuj notatki wikilinkami `[[...]]`; nowe pomysły → [[Projects/Backlog]].
 
-### 🎯 [Features](Features.md)
-- Authentication (Google Sign-in)
-- Property Management
-- Guest Guides (public)
-- iCal Export
-- Stripe Integration
-- Account Deletion
+## Szybkie ścieżki do kodu
 
-### 🛠️ [Development](Development.md)
-- Lokalna konfiguracja
-- Running tests (Playwright)
-- Firebase Emulator
-- Common tasks
+- Mapa żywego kodu: `src/README.md` · procesy → pliki: [[Agent-Process-Map]]
+- Panel: `src/pages/dashboard/` · Landing/logowanie: `src/pages/landing/`
+- Stan: `src/context/WynajemContext.jsx` + `src/hooks/useFirebaseData.js`
+- Reguły: `firestore.rules` / `storage.rules` · Funkcje: `functions/index.js`
 
-### 🐛 [Known Issues](Known-Issues.md)
-- iCal Token — NOT a bug (verified)
-- Storage Leak — NOT a bug (verified)
-- App Check / Auth iFrame / Google Loop — fixed
-
-### 🎨 [Design Notes](Design-Notes.md)
-- Apple Animation Architecture
-- Landing Page Design
-- UI/UX decisions
-
-## 🚀 Quick Links
-
-- **Main App**: `src/App.jsx`
-- **Manager View**: `src/ManagerApp.jsx`
-- **Data Hook**: `src/hooks/useFirebaseData.js`
-- **Config**: `firebase.json`, `.firebaserc`
-- **Tests**: `e2e/*.spec.js`
-
-## 📝 Last Updated
-2026-06-29
-
----
-
-💡 **Tip**: Use Obsidian's graph view to see connections between notes. Backlink frequently!
+**Last Updated**: 2026-08-27

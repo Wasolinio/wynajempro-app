@@ -45,6 +45,14 @@ firebase-debug.log*
 .claude/worktrees/
 .codex/
 PROJECT.md
+# humanizer to osobne repo git (klon) — nie zagnieżdżamy repozytoriów
+.claude/skills/humanizer/
+
+# lokalny cache npm — nigdy do repo (raz trafił: 2337 plików, wyczyszczone 2026-08-27)
+.npm_cache/
+
+# Obsidian otwierany w korzeniu projektu (właściwy vault: docs/)
+/.obsidian/
 
 # Playwright
 test-results/

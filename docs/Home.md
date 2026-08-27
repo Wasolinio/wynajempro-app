@@ -8,10 +8,11 @@
 
 | Aspekt | Status | Link |
 |--------|--------|------|
-| **Project** | 🟡 PRE-LAUNCH (V2 na hostingu) | [[Projects/WynajemPRO]] |
-| **Roadmap** | 🔴 5 blokerów launchu (NOW) | [[Projects/Roadmap]] |
-| **Known Bugs** | 🟢 0 krytycznych (2 dawne = fałszywe alarmy) | [[Known-Issues]] |
-| **Zespół agentów** | 🤖 8 ról + wspólna metodologia | [[Team-Playbook]] |
+| **Project** | 🟢 GOTOWOŚĆ LAUNCHOWA — wszystkie blokery zamknięte 2026-08-26; launch = decyzja właściciela po becie | [[Projects/WynajemPRO]] |
+| **Roadmap** | 🎯 Beta = ścieżka krytyczna; ścieżka A (pieniądze) ⏸ wstrzymana przez właściciela | [[Projects/Roadmap]] |
+| **Known Bugs** | 🟡 1 otwarty (#20: flaky test 375 px w CI — nie blokuje) | [[Known-Issues]] |
+| **Dokumenty prawne** | ✅ Opublikowane 2026-08-26 (bramka 47→0); zmiany TYLKO przez `docs/legal/` + `npm run legal:build` | [[legal/Bramka-publikacji-2026-08-26]] |
+| **Zespół agentów** | 🤖 9 ról + wspólna metodologia | [[Team-Playbook]] |
 
 ---
 
@@ -39,8 +40,13 @@
 - **[[Projects/WynajemPRO]]** - Main project overview
 - **[[Projects/Milestones]]** - Widok dat (same kamienie, bez list zadań)
 - **[[Projects/Backlog]]** - Poczekalnia pomysłów (niezaplanowane)
+- **[[Projects/Zlecenia-wlasciciela]]** - Rejestr zleceń właściciela
 - **[[Team-Playbook]]** - Zespół agentów + metodologia pracy
 - **[[Decisions]]** - Architecture decisions log
+
+### ⚖️ Legal & Support
+- **[[legal/Regulamin]]** · **[[legal/Polityka-prywatnosci]]** · **[[legal/DPA-powierzenie]]** - jedyne źródło prawdy stron `/regulamin`, `/prywatnosc`, `/dpa`
+- **[[support/Proces-obslugi-zgloszen]]** - obsługa zgłoszeń (⛔ kanał zawieszony dla danych osobowych od 2026-08-26)
 
 ### 📖 Resources & Reference
 - **[[Resources]]** - Links, libraries, articles
@@ -61,7 +67,9 @@
 
 **...fix a bug** → [[Known-Issues]] → Pick issue → Check [[Debugging]] for similar cases
 
-**...optimize performance** → [[Performance]] → Review checklist → Implement suggestions
+**...change legal docs** → edycja w `docs/legal/*.md` → `npm run legal:build` → deploy (nigdy edycja stron w `src/`)
+
+**...deploy** → skill `deploy` (pre-flight, komenda per cel, weryfikacja live przez przeglądarkę)
 
 **...write tests** → [[Development]] "Testing" section → Copy pattern from existing tests
 
@@ -71,13 +79,13 @@
 
 ## 📅 Recent Activity
 
-- **2026-07-02** - Zespół 8 agentów + [[Team-Playbook]]; konsolidacja roadmapy; generator umów najmu, widok Analityka, przebudowa szczegółów rezerwacji
-- **2026-07-01** - Identyfikacja v2 na stronach publicznych; fix odkrywania danych dostępowych w przewodniku
-- **2026-06-30** - Porządek repo (jedna wersja produkcyjna, reszta → `/_legacy`); dashboard V4 produkcyjny
-- **2026-06-29** - Set up knowledge base system (CLAUDE.md, memory/, docs/)
-- **2026-06-28** - Fixed App Check re-enablement
-- **2026-06-25** - Fixed Google login loop
-- **2026-06-20** - Removed X-Frame-Options header
+- **2026-08-27** - Strażnik zgłoszeń: LaunchAgent co 3 h powiadamia właściciela o nowych wiadomościach bez danych osobowych
+- **2026-08-26** - 🚀 **Dokumenty prawne OPUBLIKOWANE** (bramka 47→0, weryfikacja live); wydanie poprawkowe: plan Max bez DPA → Anthropic poza Polityką §5, kanał supportu zawieszony dla danych osobowych; purge `contact_messages` wdrożony
+- **2026-08-25** - ✅ Prawnik bez zastrzeżeń (N4 zamknięte); decyzja: ścieżka A (Stripe) wstrzymana do końca testów bety
+- **2026-08-19/21** - Panel administratora `/admin`, migracja Stripe, dopieszczenie identyfikacji
+- **2026-07-22** - Hosting multi-site: aplikacja na `wynajempro.com`, stary site = redirector 301
+- **2026-07-09/10** - Blokery techniczne launchu wdrożone: weryfikacja e-mail (N1), paywall (N2), walidacja schematu (N3)
+- **2026-07-02** - Zespół agentów + [[Team-Playbook]]; konsolidacja roadmapy
 
 📖 See: [[Activity-Log]] for full history
 
@@ -85,10 +93,10 @@
 
 ## 🎯 Next Steps
 
-1. **Read** [[Projects/WynajemPRO]] to understand current status
-2. **Pick** from [[Projects/Roadmap]] what to work on (najpierw sekcja NOW)
-3. **Follow** [[Development]] setup guide
-4. **Contribute** → Create branch → Write tests → PR → Merge
+1. **Sprawdź** [[Projects/Roadmap]] — beta jest ścieżką krytyczną (sekcja „Plan tygodnia")
+2. **Nie ruszaj** ścieżki A (pieniądze) — wznawia wyłącznie właściciel
+3. **Przed zmianą logiki biznesowej** przeczytaj [[Agent-Process-Map]]
+4. **Po każdej zmianie stanu rzeczy** — wpis w [[Activity-Log]] (skill `dziennik`)
 
 ---
 
@@ -97,33 +105,19 @@
 - Use **backlinks** (arrows ↔️) to jump between related notes
 - Check **graph view** (icon in left sidebar) to see connections
 - Use **search** (Ctrl+Shift+F) to find anything
-- Open **daily note** for today's progress log
-- Tag notes with `#bug #feature #refactor` for filtering
+- Vault Obsidiana = katalog `docs/` (nie korzeń projektu)
 
 ---
 
-## 📚 Sidebar Navigation
-
-| Icon | Section | Purpose |
-|------|---------|---------|
-| 📖 | Learn | Understanding the project |
-| 🛠️ | Build | Development and coding |
-| 🐛 | Debug | Issues and solutions |
-| 📋 | Plan | Projects and tasks |
-| 📚 | Ref | Resources and patterns |
-
----
-
-**Last Updated**: 2026-07-02  
-**Maintained By**: Claude + You  
+**Last Updated**: 2026-08-27
+**Maintained By**: Claude + You
 **Update Frequency**: When significant changes occur
 
 ---
 
 ## 🔗 Quick Links
 
+- **Live App**: https://wynajempro.com
 - **GitHub**: https://github.com/Wasolinio/wynajempro-app
-- **Firebase Console**: https://console.firebase.google.com
-- **Live App**: (add URL when deployed)
-- **Issues Tracker**: (add your issue tracker URL)
-
+- **Firebase Console**: https://console.firebase.google.com (projekt `moje-domki-6c77d`, site `wynajempro`)
+- **Panel administratora**: https://wynajempro.com/admin ([[Panel-administratora]])
