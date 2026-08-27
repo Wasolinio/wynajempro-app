@@ -1,6 +1,6 @@
 # Bramka publikacji dokumentów — co dokładnie zostało
 
-**Data:** 2026-08-26 · **Stan:** 0 placeholderów; zostają bramki wykonawcze — deploy F4 (kod gotowy) i F4a przy publikacji · **Autor:** agent (na podstawie
+**Data:** 2026-08-26 · **Stan:** 🚀 OPUBLIKOWANE (deploy + weryfikacja live 2026-08-26); F4 i F4a wykonane · **Autor:** agent (na podstawie
 plików w `docs/legal/`, kodu aplikacji i konfiguracji projektu)
 
 > Ten dokument nie jest opinią prawną. Jest listą tego, czego w dokumentach fizycznie nie ma,
@@ -24,6 +24,7 @@ a warianty `[DO DECYZJI]` i `[DO POTWIERDZENIA]` nie były liczone w ogóle.
 | Po analizie prawnej grup D i E (tego samego dnia, ADR-025) | 3 | 0 | 0 | **3** |
 | Po decyzjach wieczornych (founding wariant 2, Anthropic poza DPA) | 2 | 0 | 0 | **2** |
 | Po brzmieniach VAT/faktur z analizy podatkowej (noc) | 0 | 0 | 0 | **0** |
+| **OPUBLIKOWANE NA PRODUKCJI** (2026-08-26, commit `328cd71`) | — | — | — | 🚀 |
 
 Cztery luki zamknęło potwierdzenie adresu `kontakt@wynajempro.com`, kolejne osiem — podanie
 przez właściciela imienia, nazwiska i adresu do korespondencji (tego samego dnia, po południu).
