@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarPlus } from 'lucide-react';
 import {
-  clampToToday, taskEventContent, buildTaskIcs, buildGoogleCalendarUrl, downloadIcs,
+  clampToToday, taskEventContent, buildGoogleCalendarUrl, saveTaskIcs,
 } from '../../utils/addToCalendar';
 
 /*
   E6: przycisk „Dodaj do kalendarza" przy wierszu zadania (wzorzec Booksy).
   Klik odsłania dwie opcje: Google Calendar (szablon wydarzenia w nowej karcie —
-  na Androidzie otwiera aplikację kalendarza) i Apple / plik .ics (pobranie).
+  na Androidzie otwiera aplikację kalendarza) i Apple / plik .ics (na iOS nawigacja
+  do Cloud Function `taskIcs` z podglądem Safari; desktop/Android — pobranie pliku).
 
   Menu jest pozycjonowane `fixed` od prostokąta przycisku, nie `absolute` w wierszu:
   listy zadań żyją w kontenerach z overflow (tabela Rezerwacji przewija się poziomo,
@@ -83,8 +84,10 @@ export default function AddToCalendarButton({ dateStr, text, property, guest, ui
     setOpen(true);
   };
 
+  // iOS: nawigacja do Cloud Function `taskIcs` (podgląd Safari „Dodaj wszystkie");
+  // desktop/Android: lokalne pobranie pliku. Rozstrzyga saveTaskIcs w utils.
   const saveIcs = () => {
-    downloadIcs(buildTaskIcs({ dateStr: eventDate, summary, details, uid }), `zadanie_${eventDate}.ics`);
+    saveTaskIcs({ dateStr: eventDate, summary, details, uid, filename: `zadanie_${eventDate}.ics` });
     setOpen(false);
   };
 

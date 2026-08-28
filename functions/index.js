@@ -8,6 +8,7 @@ const { getStorage } = require("firebase-admin/storage");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { mergeClaims } = require("./claims");
 const icalSync = require("./ical-sync");
+const { taskIcsResponse } = require("./task-ics");
 
 // Inicjalizacja Firebase Admin
 const app = initializeApp();
@@ -891,7 +892,10 @@ exports.deleteGuide = onCall(
 // 8. EKSPORT KALENDARZA (iCal Channel Manager)
 // Umożliwia pobranie kalendarza w formacie .ics dla konkretnego obiektu
 // =============================================================================
-exports.exportIcal = onRequest(async (req, res) => {
+// maxInstances domknięte przy przeglądzie taskIcs (2026-08-28): jedyne dwie funkcje
+// bez capa to były oba publiczne endpointy — portale odpytują feed kilka razy dziennie
+// per obiekt, więc 3 instancje wystarczają z zapasem, a zalew żądań nie skaluje kosztów.
+exports.exportIcal = onRequest({ maxInstances: 3 }, async (req, res) => {
   const userId = (req.query.u || '').toString().slice(0, 128);
   const propertyId = (req.query.p || '').toString().slice(0, 200);
   const token = (req.query.token || '').toString().slice(0, 256);
@@ -1001,6 +1005,26 @@ exports.exportIcal = onRequest(async (req, res) => {
     console.error("Błąd generowania pliku iCal:", error);
     res.status(500).send("Wystąpił błąd serwera.");
   }
+});
+
+// =============================================================================
+// 8a. ZADANIE JAKO WYDARZENIE KALENDARZA (E6, runda 3)
+// Czysty formatter: parametry query → .ics z jednym wydarzeniem, podany INLINE,
+// żeby nawigacja na iOS otwierała podgląd Safari „Dodaj wszystkie" zamiast pobierania.
+// Logika i uzasadnienia w functions/task-ics.js; bez App Check (nawigacja nie niesie
+// tokenu) i bez Firestore — endpoint publiczny z założenia, jak exportIcal.
+// =============================================================================
+// maxInstances: odpowiedź jest tania (~0,5 KB, zero odczytów), więc niski cap niczego
+// nie psuje, a zalew żądań dusi ruch zamiast skalować rachunek (przegląd rundy 3).
+exports.taskIcs = onRequest({ maxInstances: 3 }, (req, res) => {
+  const wynik = taskIcsResponse(req.query);
+  // Idiom exportIcal: endpoint publiczny nie loguje treści od użytkownika —
+  // wyłącznie status i rozmiar odpowiedzi.
+  console.log(`📅 taskIcs: ${wynik.status}, ${wynik.body.length} B`);
+  if (wynik.headers) res.set(wynik.headers);
+  // Endpoint odbija cudzy tekst w ciele odpowiedzi — nosniff to tani pas bezpieczeństwa.
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.status(wynik.status).send(wynik.body);
 });
 
 // =============================================================================

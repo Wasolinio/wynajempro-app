@@ -5,7 +5,8 @@ import { setupFirebaseMocks } from './firebase-mock';
 /*
   E6: „Dodaj do kalendarza" przy zadaniu (wzorzec Booksy) — decyzja właściciela 2026-08-28.
   Klik odsłania dwie opcje: Google Calendar (szablon w nowej karcie) i Apple / plik .ics
-  (pobranie). Testy kotwiczą asercje w źródle prawdy: termin zadania liczy taskSchedule
+  (desktop/Android: lokalne pobranie; iOS: nawigacja do Cloud Function taskIcs).
+  Testy kotwiczą asercje w źródle prawdy: termin zadania liczy taskSchedule
   (X20), a treść wydarzenia składa src/utils/addToCalendar.js.
 
   Daty WZGLĘDEM DNIA URUCHOMIENIA i LOKALNIE (nie toISOString — UTC przesuwa dzień
@@ -201,10 +202,13 @@ test('E6 Zadanie zaległe dostaje wydarzenie DZIŚ, nie w przeszłości', async 
 });
 
 /*
-  iOS: anchor z `download` zapisuje .ics jak zwykły plik bez ścieżki do Kalendarza
-  (potwierdzone na iPhonie właściciela 2026-08-28) — ścieżka Apple musi tam NAWIGOWAĆ
-  do blob:, bo podgląd wydarzenia z „Dodaj wszystkie" Safari pokazuje przy nawigacji.
-  Emulujemy UA iPhone'a; sam podgląd Safari potwierdzi właściciel na urządzeniu.
+  iOS (runda 3): anchor z `download` ORAZ nawigacja do blob: kończą się plikiem
+  w Pobranych bez ścieżki do Kalendarza (oba potwierdzone na iPhonie właściciela
+  na produkcji, 2026-08-28). Ścieżka Apple nawiguje więc do Cloud Function `taskIcs`
+  — prawdziwego adresu https podającego text/calendar INLINE, przy którym Safari
+  pokazuje podgląd „Dodaj wszystkie". Emulujemy UA iPhone'a i przechwytujemy
+  nawigację routem; sam podgląd Safari potwierdza właściciel na urządzeniu.
+  Format odpowiedzi funkcji pilnują testy jednostkowe functions/task-ics.test.cjs.
 */
 test.describe('iOS', () => {
   test.use({
@@ -212,26 +216,52 @@ test.describe('iOS', () => {
     viewport: { width: 375, height: 812 },
   });
 
-  test('E6 iOS: opcja Apple nawiguje do blob: zamiast używać atrybutu download', async ({ page }) => {
+  const przechwycTaskIcs = async (page) => {
+    await page.route('**/taskIcs*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'text/calendar; charset=utf-8',
+      body: 'BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n',
+    }));
+  };
+
+  test('E6 iOS: opcja Apple nawiguje do taskIcs z treścią i terminem zadania', async ({ page }) => {
     await setupFirebaseMocks(page, { user: mockUser, dbData: wlasneZadanie });
+    await przechwycTaskIcs(page);
     await page.goto('/dashboard');
 
-    const pobrania = [];
-    page.on('download', (d) => pobrania.push(d.suggestedFilename()));
-
     await wierszZadania(page, 'Kupić żarówki').getByTitle('Dodaj do kalendarza').click();
-    await page.getByRole('menuitem', { name: 'Apple / plik .ics' }).click();
+    const [zadanie] = await Promise.all([
+      page.waitForRequest('**/taskIcs*'),
+      page.getByRole('menuitem', { name: 'Apple / plik .ics' }).click(),
+    ]);
 
-    /*
-      Chromium nie umie pokazać podglądu Safari — nawigację do blob: zamienia na
-      pobranie nazwane UUID-em bloba (np. '3e346fc7-….ics'). To wystarcza za dowód,
-      że poszła NAWIGACJA, nie anchor z atrybutem download: tamta ścieżka nadaje
-      plikowi nazwę 'zadanie_YYYY-MM-DD.ics'. Sam podgląd „Dodaj wszystkie"
-      potwierdza właściciel na urządzeniu.
-    */
-    await expect.poll(() => pobrania.length, { timeout: 10000 }).toBeGreaterThan(0);
-    expect(pobrania[0]).toMatch(/\.ics$/);
-    expect(pobrania[0]).not.toMatch(/^zadanie_/);
+    const url = new URL(zadanie.url());
+    expect(url.origin + url.pathname).toBe('https://us-central1-moje-domki-6c77d.cloudfunctions.net/taskIcs');
+    expect(url.searchParams.get('t')).toBe('Kupić żarówki, bezpieczniki');
+    expect(url.searchParams.get('d')).toBe(isoInDays(0));
+    expect(url.searchParams.get('uid')).toBe('task-cal-manual@wynajempro.pl');
+  });
+
+  test('E6 iOS: zadanie zaległe nawiguje z terminem przyciętym do DZIŚ', async ({ page }) => {
+    await setupFirebaseMocks(page, {
+      user: mockUser,
+      dbData: {
+        ...baseDb,
+        'users/uid-test/rentals/task-late': {
+          id: 'task-late', type: 'reminder', text: 'Zaległy przegląd komina', date: isoInDays(-5), isCompleted: false,
+        },
+      },
+    });
+    await przechwycTaskIcs(page);
+    await page.goto('/dashboard');
+
+    await wierszZadania(page, 'Zaległy przegląd komina').getByTitle('Dodaj do kalendarza').click();
+    const [zadanie] = await Promise.all([
+      page.waitForRequest('**/taskIcs*'),
+      page.getByRole('menuitem', { name: 'Apple / plik .ics' }).click(),
+    ]);
+
+    expect(new URL(zadanie.url()).searchParams.get('d')).toBe(isoInDays(0));
   });
 });
 

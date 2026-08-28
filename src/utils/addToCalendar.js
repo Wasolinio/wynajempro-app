@@ -1,9 +1,10 @@
 /*
   E6: „Dodaj do kalendarza" przy zadaniu (wzorzec Booksy) — decyzja właściciela 2026-08-28.
   Klik przy zadaniu zapisuje je jako wydarzenie CAŁODNIOWE w kalendarzu telefonu gospodarza;
-  przypomnienie obsługuje aplikacja kalendarza. Rozwiązanie czysto frontendowe: plik .ics
-  (Apple/Outlook) albo szablon Google Calendar — bez Cloud Functions i bez feedu
-  subskrypcyjnego (rezerwacje mają swój `exportIcal` w functions/index.js, to co innego).
+  przypomnienie obsługuje aplikacja kalendarza. Trzy ścieżki: lokalny plik .ics
+  (desktop/Android), nawigacja do Cloud Function `taskIcs` (iOS — historia niżej) albo
+  szablon Google Calendar. Bez feedu subskrypcyjnego (rezerwacje mają swój `exportIcal`
+  w functions/index.js, to co innego).
 
   Terminy zadań liczy WYŁĄCZNIE src/utils/taskSchedule.js (X20) — ten moduł dostaje
   gotową datę 'YYYY-MM-DD' i tylko ją formatuje. Nie liczy żadnych terminów.
@@ -113,32 +114,11 @@ export const isIOS = (nav = navigator) => (
   (/Mac/.test(nav.platform || '') && (nav.maxTouchPoints || 0) > 1)
 );
 
-/*
-  Dostarczenie pliku .ics — jedyny fragment dotykający DOM.
-
-  Desktop i Android: Blob + tymczasowy <a download> (działa — potwierdzone).
-
-  iOS: anchor z `download` NIE prowadzi do Kalendarza — Safari zapisuje .ics jak zwykły
-  plik (pasek „Pobieranie zakończone", arkusz udostępniania bez żadnej ścieżki „Dodaj do
-  Kalendarza"); potwierdzone na iPhonie właściciela 2026-08-28, funkcja była realnie
-  martwa. Natywny podgląd wydarzenia z przyciskiem „Dodaj wszystkie" Safari pokazuje
-  przy NAWIGACJI do zasobu .ics, dlatego na iOS nawigujemy do blob: w BIEŻĄCEJ karcie
-  (window.open ryzykuje blokadę popupu). revokeObjectURL odłożony w czasie, żeby nie
-  ubić podglądu, zanim się wyrenderuje. ⚠️ Zachowanie nawigacji do blob: wymaga
-  potwierdzenia na urządzeniu przez właściciela — nie mamy iPhone'a w środowisku.
-*/
+// Pobranie pliku lokalnie: Blob + tymczasowy <a download> — desktop i Android (działa).
 export const downloadIcs = (icsText, filename) => {
   if (!icsText) return;
   const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  if (isIOS()) {
-    window.location.href = url;
-    // Gdy nawigacja dojdzie do skutku, dokument się wyładowuje i ten timer ginie razem
-    // z nim (blob sprząta się z dokumentem) — realnie chroni tylko wariant, w którym
-    // Safari zrobiło pobieranie i strona żyje dalej. To nie jest zepsuty timer.
-    setTimeout(() => URL.revokeObjectURL(url), 15000);
-    return;
-  }
   const a = document.createElement('a');
   a.href = url;
   a.download = filename || 'zadanie.ics';
@@ -146,4 +126,37 @@ export const downloadIcs = (icsText, filename) => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+};
+
+/*
+  iOS — historia porażek potwierdzonych na iPhonie właściciela na produkcji (2026-08-28):
+  1. anchor z `download` → Safari zapisuje .ics jak zwykły plik (pasek „Pobieranie
+     zakończone", arkusz udostępniania), zero ścieżki do Kalendarza;
+  2. nawigacja do blob: → dokładnie to samo, plik ląduje w Pobranych.
+  Działający wzorzec rynkowy (tak robi Booksy): natywny podgląd wydarzenia
+  „Dodaj wszystkie" Safari pokazuje przy nawigacji do PRAWDZIWEGO adresu https
+  zwracającego `text/calendar` z `Content-Disposition: inline` — stąd Cloud Function
+  `taskIcs` (functions/task-ics.js), czysty formatter parametrów na VEVENT.
+  Baza adresu jak przy eksporcie iCal w SettingsModal. Nawigacja w BIEŻĄCEJ karcie
+  (window.open ryzykuje blokadę popupu); w standalone PWA nawigacja cross-origin
+  otwiera nakładkę systemową nad aplikacją, więc powrót nie gubi stanu SPA.
+  ⚠️ Podgląd „Dodaj wszystkie" potwierdza właściciel na urządzeniu.
+*/
+export const TASK_ICS_URL = 'https://us-central1-moje-domki-6c77d.cloudfunctions.net/taskIcs';
+
+export const buildTaskIcsUrl = ({ dateStr, summary, uid }) => {
+  if (!isDateStr(dateStr)) return null;
+  const params = new URLSearchParams({ t: summary, d: dateStr, uid: `${uid}@wynajempro.pl` });
+  return `${TASK_ICS_URL}?${params.toString()}`;
+};
+
+// Opcja „Apple / plik .ics": iOS nawiguje do adresu funkcji (podgląd Safari),
+// desktop i Android pobierają plik lokalnie.
+export const saveTaskIcs = ({ dateStr, summary, details, uid, filename }) => {
+  if (isIOS()) {
+    const url = buildTaskIcsUrl({ dateStr, summary, uid });
+    if (url) window.location.href = url;
+    return;
+  }
+  downloadIcs(buildTaskIcs({ dateStr, summary, details, uid }), filename);
 };
