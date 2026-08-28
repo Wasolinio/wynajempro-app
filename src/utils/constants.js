@@ -106,6 +106,19 @@ export const STAWKI_PODATKOWE = {
   },
 
   vatNoclegi: 0.08,
+
+  // Zwolnienie podmiotowe z VAT — art. 113 ust. 1 ustawy o VAT w brzmieniu od 1.01.2026:
+  // limit podniesiony z 200 000 zł ustawą z 24.06.2025 (Dz.U. 2025 poz. 896).
+  // Licznik = pełna wartość sprzedaży z aplikacji (pole `brutto`), BEZ podziału
+  // małżeńskiego — oświadczenie ryczałtowe to mechanika PIT, na VAT się nie przenosi.
+  // Kwota roczna, zmienna ustawowo — objęta rytmem rejestru „do 31 stycznia".
+  // Zweryfikowano u źródła 2026-08-28 (analiza legal, [[Rejestr-stawek-podatkowych]]).
+  vatZwolnieniePodmiotowe: {
+    limit: 240000,
+    // Od tej części limitu karta w panelu przechodzi w stan ostrzegawczy —
+    // spójnie z ostrzeganiem przy progu ryczałtu.
+    progOstrzezenia: 0.8,
+  },
 };
 
 export const defaultTaxSettings = {

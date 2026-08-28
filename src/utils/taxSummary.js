@@ -247,6 +247,26 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   const doProgu = Math.max(0, progRyczaltu - przychod);
   const procentProgu = Math.min(100, (przychod / progRyczaltu) * 100);
 
+  // LIMIT ZWOLNIENIA PODMIOTOWEGO Z VAT — art. 113 ust. 1 ustawy o VAT (ADR-026).
+  //
+  // Licznik = `brutto`, nie `przychod`, i to jest różnica merytoryczna, nie stylistyczna:
+  //   • do limitu wchodzi CAŁA wartość sprzedaży — u zwolnionego w cenie nie ma VAT,
+  //     więc wartością sprzedaży jest pełna kwota należna od gościa;
+  //   • podział małżeński (`spouseRental`) to mechanika PIT z ustawy o ryczałcie —
+  //     na VAT się nie przenosi, licznik biegnie od pełnej sprzedaży (P6 analizy legal);
+  //   • prowizje portali NICZEGO nie pomniejszają — to zakup usługi, a limit liczy sprzedaż.
+  //
+  // Liczymy zawsze (u czynnego podatnika też — patrz `vatPlatnik`), ale render karty
+  // jest warunkowany w widoku: czynnemu podatnikowi zwolnienie podmiotowe jest obojętne.
+  const vatLimit = S.vatZwolnieniePodmiotowe.limit;
+  const vatDoLimitu = Math.max(0, vatLimit - brutto);
+  const vatProcentLimitu = Math.min(100, (brutto / vatLimit) * 100);
+  const vatLimitPrzekroczony = brutto > vatLimit;
+  // Trzy stany karty: spokojny / ostrzegawczy (od 80% limitu) / przekroczony.
+  const vatStan = vatLimitPrzekroczony ? 'przekroczony'
+    : brutto >= vatLimit * S.vatZwolnieniePodmiotowe.progOstrzezenia ? 'ostrzezenie'
+      : 'spokojny';
+
   // FAKTYCZNY podział na pasma — do karty „Podatek po dwóch stawkach". Liczony z tego
   // samego współczynnika co podatek, więc kwoty w karcie sumują się do kwoty w rachunku.
   // Wpisanie tam „8,5% od 100 000 zł" na sztywno byłoby nieprawdą u każdego, kto ma
@@ -287,6 +307,12 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
     prog: progRyczaltu,
     doProgu, procentProgu,
     progPrzekroczony: przychod > progRyczaltu,
+
+    // Zwolnienie podmiotowe z VAT (ADR-026). `vatPlatnik` jest tu po to, żeby widok
+    // i eksport gatowały kartę/linię z tego samego źródła co wyliczenie, a nie każde
+    // po swojemu z ustawień.
+    vatLimit, vatDoLimitu, vatProcentLimitu, vatLimitPrzekroczony, vatStan,
+    vatPlatnik: !!ustawienia.isVatPayer,
 
     // Współwłasność małżeńska — panel musi umieć powiedzieć, dlaczego liczby są inne
     // niż suma rezerwacji, bo inaczej wygląda to na błąd aplikacji.

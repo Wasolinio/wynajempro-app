@@ -112,6 +112,42 @@ test('Oświadczenie małżeńskie podnosi próg do 200 000 zł', async ({ page }
   await expect(page.getByText(/Część małżonka/)).toHaveCount(0);
 });
 
+test('Karta limitu VAT: widoczna bez statusu podatnika, z oboma zdaniami obowiązkowymi', async ({ page }) => {
+  // Ustawienia domyślne = isVatPayer false → karta ma się pokazać (ADR-026).
+  await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private' });
+
+  await expect(page.getByText(/Limit zwolnienia z VAT · 240\s?000 zł/)).toBeVisible();
+  // Rezerwacja w atrapie ma 40 000 zł → zostało 200 000 zł, stan spokojny.
+  await expect(page.getByText(/Zostało\s*200\s?000 zł\s*wartości sprzedaży/)).toBeVisible();
+  // Dwa zdania obowiązkowe: licznik tylko z aplikacji + proporcja pierwszego roku.
+  await expect(page.getByText(/pozostała sprzedaż \(inny najem,\s*inna działalność\) także zużywa ten limit/)).toBeVisible();
+  await expect(page.getByText(/W pierwszym roku działalności limit liczy\s*się proporcjonalnie/)).toBeVisible();
+});
+
+test('Karta limitu VAT: czynny podatnik jej nie widzi', async ({ page }) => {
+  await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', isVatPayer: true });
+  await expect(page.getByText(/Limit zwolnienia z VAT/)).toHaveCount(0);
+});
+
+test('Przekroczenie limitu VAT: karta mówi o całej czynności, nie o stawce od nadwyżki', async ({ page }) => {
+  // Mechanika z art. 113 ust. 5 jest inna niż przy progu ryczałtu — karta nie może
+  // sugerować „od nadwyżki inna stawka".
+  const db = bazaDb({ taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private' });
+  db['users/uid-test/rentals/r1'].income = 250000;
+  await setupFirebaseMocks(page, { user: mockUser, dbData: db });
+  await page.goto('/dashboard');
+  await page.locator('.wpd-nav__item', { hasText: 'Finanse' }).click();
+  await page.locator('.wpd-tab', { hasText: 'Podatki' }).click();
+  await expect(page.locator('.wpd-seg')).toBeVisible();
+
+  await expect(page.getByText(/Powyżej limitu o\s*10\s?000 zł/)).toBeVisible();
+  await expect(page.getByText(/art\. 113 ust\. 5 ustawy o VAT/)).toBeVisible();
+
+  const kartaVat = page.locator('.wpd-panel').filter({ hasText: 'Limit zwolnienia z VAT' });
+  await expect(kartaVat.getByText(/12,5%/)).toHaveCount(0);
+  await expect(kartaVat.getByText(/musisz/)).toHaveCount(0);
+});
+
 test('Eksport CSV: przycisk działa i plik niesie zastrzeżenie', async ({ page }) => {
   await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'business' });
 
@@ -129,6 +165,7 @@ test('Eksport CSV: przycisk działa i plik niesie zastrzeżenie', async ({ page 
   expect(tresc.charCodeAt(0), 'BOM — bez niego Excel rozsypuje polskie znaki').toBe(0xFEFF);
   expect(tresc).toContain('Nie jest deklaracją, wyliczeniem podatku ani poradą podatkową');
   expect(tresc).toContain('VAT od prowizji portali (import usług) jest poza zakresem aplikacji');
+  expect(tresc).toContain('Limit zwolnienia podmiotowego z VAT (art. 113)');
   expect(tresc).toContain('REZERWACJE');
   expect(tresc).toContain('RAZEM DO ODŁOŻENIA');
 });

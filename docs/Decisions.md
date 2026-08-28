@@ -740,3 +740,74 @@ i data naboru founding members). Jedyny warunek blokujący z analizy: plan Anthr
 konsumencka nie ma DPA, więc wpisy o Anthropic w Polityce §5 i DPA §7 są oznaczone jako
 warunkowe do czasu potwierdzenia planu przez właściciela. Rewizja dokumentów przez prawnika
 przy przeskalowaniu biznesu (zalecenie z 2026-08-25, Backlog) obejmie także tę analizę.
+
+---
+
+## ADR-026: Próg zwolnienia podmiotowego VAT — licznik z aplikacji, granice zapisane
+
+**Data**: 2026-08-28
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Prześwietlenie panelu podatkowego z 2026-08-28 wskazało jako lukę nr 1 brak
+pilnowania limitu zwolnienia podmiotowego z VAT (art. 113 ustawy o VAT). Analiza legal
+z tego samego dnia ([[legal/Formy-opodatkowania-wynajmu-2026-08-28]], część II, P1–P8)
+dostarczyła parametry — w tym korektę na wejściu: **limit od 1.01.2026 wynosi 240 000 zł**
+(podwyższony z 200 000 zł ustawą z 24.06.2025, Dz.U. 2025 poz. 896), nie 200 000 zł
+z pierwotnego sformułowania zadania.
+
+**Decyzja — co liczymy**:
+- **Licznik = pole `brutto`** z `podsumowaniePodatkowe()`: pełna wartość sprzedaży
+  z rezerwacji w aplikacji (`type: 'booking'`, bez `vanished`), **bez** pomniejszania
+  o prowizje (to zakup, limit liczy sprzedaż), **bez** podziału małżeńskiego
+  (`spouseRental` to mechanika PIT — na VAT się nie przenosi, P6) i **bez** odejmowania
+  VAT (u zwolnionego w cenie go nie ma). Świadomie NIE pole `przychod` — ono jest po
+  podziale małżeńskim i po VAT.
+- **Stała `vatZwolnieniePodmiotowe: { limit: 240000, progOstrzezenia: 0.8 }`**
+  w `STAWKI_PODATKOWE`, objęta rytmem rejestru stawek „do 31 stycznia"
+  ([[legal/Rejestr-stawek-podatkowych]], wpis 2026-08-28).
+- **Trzy stany karty**: spokojny / ostrzegawczy od 80% limitu (spójnie z ostrzeganiem
+  przy progu ryczałtu) / przekroczony. Teksty z P5 analizy — mówią, co stanowi przepis
+  i co widzą dane aplikacji; mechanika przekroczenia opisana po VAT-owsku (opodatkowana
+  cała czynność, którą przekroczono limit — art. 113 ust. 5), **nie** wzorem ryczałtu
+  („od nadwyżki inna stawka" byłoby tu nieprawdą).
+- **Karta i linia eksportu tylko dla `isVatPayer === false`** (także przy ustawieniach
+  domyślnych) — czynnemu podatnikowi zwolnienie podmiotowe jest obojętne, pasek byłby
+  szumem. Logika w `taxSummary.js` (pola `vatLimit`, `vatDoLimitu`, `vatProcentLimitu`,
+  `vatLimitPrzekroczony`, `vatStan`, `vatPlatnik`); widok i eksport niczego nie liczą.
+- **Dwa zdania obowiązkowe w karcie**: licznik obejmuje wyłącznie rezerwacje w aplikacji
+  (pozostała sprzedaż gospodarza także zużywa limit — licznik jest dolnym oszacowaniem)
+  oraz informacja o proporcjonalnym limicie pierwszego roku (art. 113 ust. 9).
+
+**Czego świadomie NIE robimy** (granice zapisane, żeby nie były domyślne):
+- **Proporcji pierwszego roku (art. 113 ust. 9) nie liczymy** — panel nie zna daty
+  rozpoczęcia wykonywania czynności; pytanie o nią w ustawieniach odradzone przez legal
+  (pole o niejasnej definicji, mała wartość). Zostaje zdanie informacyjne w karcie,
+  bo bez niego pasek u gospodarza z pierwszego roku pokazuje więcej zapasu, niż istnieje.
+- **Powrotu do zwolnienia (art. 113 ust. 11) nie modelujemy** — wymaga historii utraty,
+  której panel nie ma; scenariusz jednostkowy.
+- **Wyłączeń z art. 113 ust. 13 nie obsługujemy i o nie nie pytamy** — usług
+  zakwaterowania katalog nie obejmuje, a ankieta o inne czynności gospodarza byłaby
+  kwalifikowaniem jego sytuacji prawnej. Pokrywa to odesłanie do księgowego w karcie.
+- **Nie kwalifikujemy obowiązku**: żadnego „musisz się zarejestrować", „straciłeś
+  zwolnienie", „jesteś podatnikiem VAT" (granica z art. 2 ust. 1 pkt 1 ustawy
+  o doradztwie podatkowym, §2 analizy prawnej panelu). Panel mówi, co pokazują jego
+  dane, co stanowi przepis i do kogo iść.
+- **Wariantu odrębnych limitów małżonków nie obsługujemy** — licznik z pełnego brutto
+  to kierunek konserwatywny (ostrzeżenie najwcześniej, jak się da); rozstrzygnięcie,
+  czy limity biegną osobno, należy do księgowego (P6).
+
+**Przy okazji (ta sama analiza, poz. 3 tabeli)**: przy formie SKALA panel i eksport mówią
+teraz wprost, czego nie liczą — zdrowotnej 9% (od dochodu z całej działalności, której
+aplikacja nie zna) i kosztów spoza aplikacji (podstawa może być zawyżona). Wzorzec ADR-023;
+automatu zdrowotnej dla skali świadomie nie budujemy.
+
+**Kiedy wracamy**: proporcja pierwszego roku i pole daty rozpoczęcia — przy sygnale popytu
+z bety (wzorzec ADR-022/023); ust. 11 — gdyby zgłosił się gospodarz wracający do zwolnienia;
+kwota limitu — co roku w rytmie rejestru stawek. Treści karty przed launchem powinien
+przejrzeć prawnik lub doradca podatkowy (zastrzeżenie z analizy legal).
+
+**Weryfikacja**: złote testy z kwotami liczonymi ręcznie w `taxSummary.test.mjs`
+(stany 50% / dokładnie 80% / przekroczenie, flaga czynnego podatnika, pełne brutto przy
+`spouseRental: 'polowa'`) + testy eksportu + e2e w `tax-panel.spec.js`.
+
+**Related ADRs**: ADR-018 (podstawa wynajmu), ADR-021 (współwłasność małżeńska),
+ADR-023 (mówimy, czego nie liczymy).

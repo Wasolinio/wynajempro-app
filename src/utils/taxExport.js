@@ -110,6 +110,19 @@ export function zestawieniePodatkoweCSV(podsumowanie, rentals, miesiace, nazwyMi
   L.push(wiersz('Nie jest deklaracją, wyliczeniem podatku ani poradą podatkową.'));
   L.push(wiersz('Nie uwzględnia przychodów i kosztów spoza aplikacji ani zapłaconych już zaliczek i składek.'));
   L.push(wiersz('VAT od prowizji portali (import usług) jest poza zakresem aplikacji.'));
+  // Licznik limitu z art. 113 — tylko u gospodarza bez statusu czynnego podatnika
+  // (czynnemu zwolnienie podmiotowe jest obojętne). Kwota z pełnego `brutto`,
+  // bez podziału małżeńskiego — jak w karcie panelu (ADR-026).
+  if (!p.vatPlatnik) {
+    L.push(wiersz(`Limit zwolnienia podmiotowego z VAT (art. 113): rezerwacje w aplikacji wykorzystały ${kwota(p.brutto)} zł z ${kwota(p.vatLimit)} zł — pozostała sprzedaż gospodarza także zużywa ten limit.`));
+  }
+  // Skala: mówimy, czego nie liczymy (wzorzec ADR-023) — zdrowotna 9% liczy się
+  // od dochodu z całej działalności, którego aplikacja nie zna, a podstawa
+  // obejmuje wyłącznie koszty zarejestrowane w aplikacji.
+  if (p.forma === 'general') {
+    L.push(wiersz('Składki zdrowotnej przy skali (9% dochodu z całej działalności) nie wyliczamy — aplikacja zna tylko wynajem.'));
+    L.push(wiersz('Podstawa obejmuje wyłącznie koszty zarejestrowane w aplikacji (prowizje, media, opcjonalnie składki społeczne) — bez kosztów spoza niej.'));
+  }
   L.push('');
 
   // ── REZERWACJE ────────────────────────────────────────────────────────────

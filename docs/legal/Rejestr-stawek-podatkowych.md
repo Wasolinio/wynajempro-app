@@ -5,7 +5,7 @@ podatkowym, która **zgnije sama, bez żadnego sygnału**. Wyliczenie policzone 
 stawkami wygląda dokładnie tak samo jak poprawne. Ten rejestr jest dowodem należytej
 staranności — data i źródło każdej weryfikacji.
 
-**Bramka techniczna:** `npm run test:podatki` — złoty zestaw 16 testów w
+**Bramka techniczna:** `npm run test:podatki` — złoty zestaw 19 testów w
 `src/utils/taxSummary.test.mjs`. Kwoty w nim są **wyliczone ręcznie z tekstów ustaw**,
 nie skopiowane z wyjścia kodu, więc cicha zmiana w `constants.js` wywala test zamiast
 przejść niezauważona. Pierwszy test sprawdza wprost wszystkie stawki i progi.
@@ -70,7 +70,7 @@ z poprzedniego roku. Wartości w `constants.js` są nowsze i poprawne.
 
 | Wartość | Ile | Gdzie się przyda |
 |---|---|---|
-| Limit zwolnienia podmiotowego z VAT | 240 000 zł | drugi pasek progu, obok progu ryczałtu — propozycja z analizy §P1 |
+| Limit zwolnienia podmiotowego z VAT | 240 000 zł | drugi pasek progu, obok progu ryczałtu — propozycja z analizy §P1 · ✅ weszło do kodu 2026-08-28 (wpis niżej) |
 | Limit działalności nierejestrowanej | 10 813,50 zł **na kwartał** | gdyby forma wróciła do aplikacji; 225% minimalnego wynagrodzenia (4 806 zł) |
 | Podatek liniowy | 19% od dochodu | gdyby forma wróciła; art. 30c ust. 1 PIT |
 | Minimalne wynagrodzenie 2026 | 4 806 zł | podstawa limitu nierejestrowanej |
@@ -250,3 +250,33 @@ wskazany przez źródło: **25.08.2026**.
 
 ⚠️ Źródła branżowe, nie tekst ustawy. Do wiążącego potwierdzenia przez doradcę podatkowego —
 patrz pytania Q1–Q9 w `Analiza-panel-podatkowy-2026-08-24.md` §11.
+
+---
+
+## 2026-08-28 — limit zwolnienia podmiotowego z VAT wchodzi do kodu
+
+Wdrożenie karty progu z art. 113 (decyzja właściciela 2026-08-28; parametry P1–P8:
+[[Formy-opodatkowania-wynajmu-2026-08-28]] część II; granice: [[Decisions]] ADR-026).
+Wartość zweryfikowana u źródła 2026-08-28 przez agenta `legal` — potwierdzona
+w tekście przepisu i w źródle oficjalnym (podatki.gov.pl).
+
+| Wartość | W kodzie | Potwierdzone | Uwagi |
+|---|---|---|---|
+| Limit zwolnienia podmiotowego z VAT | 240 000 zł (`vatZwolnieniePodmiotowe.limit`) | ✅ | art. 113 ust. 1 ustawy o VAT w brzmieniu od 1.01.2026 — podwyższenie z 200 000 zł ustawą z 24.06.2025 (Dz.U. 2025 poz. 896) |
+| Próg ostrzegania karty | 80% limitu (`progOstrzezenia`) | — | parametr produktowy, nie ustawowy — spójny z ostrzeganiem przy progu ryczałtu |
+
+**Konstrukcja licznika** (P2/P6 analizy): pole `brutto` z `podsumowaniePodatkowe()` —
+pełna wartość sprzedaży z rezerwacji w aplikacji. **Bez** pomniejszania o prowizje portali
+(to zakup, a limit liczy sprzedaż), **bez** podziału małżeńskiego (`spouseRental` to
+mechanika PIT z ustawy o ryczałcie — na VAT się nie przenosi), **bez** odejmowania VAT
+(u zwolnionego w cenie go nie ma; czynnemu podatnikowi karty nie pokazujemy).
+Licznik jest z definicji dolnym oszacowaniem — karta mówi o tym wprost.
+
+Kwota jest roczna i zmienna ustawowo — od tego wpisu objęta rytmem weryfikacji
+„do 31 stycznia". Przepis przejściowy (dla porządku): podatnik, którego sprzedaż w 2025 r.
+przekroczyła 200 000 zł, ale nie 240 000 zł, mógł korzystać ze zwolnienia od 1.01.2026 —
+panel tej historii nie modeluje, licznik pokazuje wyłącznie wybrany rok z aplikacji.
+
+**Źródła:** [art. 113 ustawy o VAT (arslege, stan Dz.U.2025.0.775)](https://arslege.pl/wartosc-sprzedazy-a-zwolnienia-podatkowe/k76/a20259/) ·
+[Zwolnienie podmiotowe od podatku VAT (podatki.gov.pl)](https://www.podatki.gov.pl/podatki-firmowe/vat/poradniki-i-informatory/zwolnienie-podmiotowe-od-podatku-vat) —
+pełna lista źródeł w [[Formy-opodatkowania-wynajmu-2026-08-28]].

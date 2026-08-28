@@ -50,6 +50,27 @@ test('zastrzeżenie prawne jedzie razem z plikiem', () => {
   assert.ok(csv.includes('VAT od prowizji portali (import usług) jest poza zakresem aplikacji'));
 });
 
+test('linia o limicie zwolnienia z VAT jedzie w pliku — ale nie u czynnego podatnika', () => {
+  // Rachunek ręczny: brutto = 62 000 + 46 200 = 108 200 zł z limitu 240 000 zł (art. 113).
+  const { csv } = zrob();
+  assert.ok(csv.includes('Limit zwolnienia podmiotowego z VAT (art. 113): rezerwacje w aplikacji wykorzystały 108200,00 zł z 240000,00 zł'));
+  assert.ok(csv.includes('pozostała sprzedaż gospodarza także zużywa ten limit'));
+
+  // Czynnemu podatnikowi zwolnienie podmiotowe jest obojętne — linia znika.
+  const { csv: vatowiec } = zrob(REZERWACJE, { ...USTAWIENIA, isVatPayer: true });
+  assert.ok(!vatowiec.includes('Limit zwolnienia podmiotowego'), 'czynny podatnik bez linii o limicie');
+});
+
+test('skala: plik mówi, czego nie liczymy — zdrowotnej i kosztów spoza aplikacji', () => {
+  const { csv } = zrob(REZERWACJE, { taxForm: 'general', taxFreeAmount: 0 });
+  assert.ok(csv.includes('Składki zdrowotnej przy skali (9% dochodu z całej działalności) nie wyliczamy'));
+  assert.ok(csv.includes('Podstawa obejmuje wyłącznie koszty zarejestrowane w aplikacji'));
+
+  // Przy ryczałcie te zdania nie mają czego prostować — nie pokazujemy ich.
+  const { csv: ryczalt } = zrob();
+  assert.ok(!ryczalt.includes('Składki zdrowotnej przy skali'), 'zdania o skali tylko przy skali');
+});
+
 test('konwencje polskiego Excela', () => {
   const { csv } = zrob();
   assert.ok(csv.includes(';'), 'separator średnik');

@@ -44,6 +44,10 @@ test('stawki i progi zgadzają się z ustawami — bramka na ciche zmiany w cons
   assert.equal(S.skala.stawkaDoProgu, 0.12);
   assert.equal(S.skala.stawkaPowyzejProgu, 0.32);
   assert.equal(S.vatNoclegi, 0.08);
+  // art. 113 ust. 1 ustawy o VAT w brzmieniu od 1.01.2026 — limit podniesiony
+  // z 200 000 zł ustawą z 24.06.2025 (Dz.U. 2025 poz. 896)
+  assert.equal(S.vatZwolnieniePodmiotowe.limit, 240000);
+  assert.equal(S.vatZwolnieniePodmiotowe.progOstrzezenia, 0.8);
   assert.ok(S.zweryfikowano, 'brak daty weryfikacji stawek');
 });
 
@@ -172,6 +176,66 @@ test('VAT 8% wydzielany tylko czynnemu podatnikowi', () => {
     2026, KONIEC_ROKU);
   grosz(zVat.przychod, 108000 / 1.08, 'przychód netto');   // 100 000,00
   grosz(zVat.vatNalezny, 8000, 'VAT należny');
+});
+
+test('próg zwolnienia z VAT: trzy stany karty, licznik z brutto (art. 113 ust. 1)', () => {
+  const ustawienia = { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private' };
+
+  // Rachunek ręczny: 120 000 z limitu 240 000 → zostaje 120 000, czyli 50% — spokojnie.
+  const spokojny = podsumowaniePodatkowe(rokPrzychodu(120000), ustawienia, 2026, KONIEC_ROKU);
+  assert.equal(spokojny.vatLimit, 240000);
+  grosz(spokojny.vatDoLimitu, 120000, 'zostało do limitu');
+  grosz(spokojny.vatProcentLimitu, 50, 'procent limitu');
+  assert.equal(spokojny.vatLimitPrzekroczony, false);
+  assert.equal(spokojny.vatStan, 'spokojny');
+
+  // Dokładnie 80%: 240 000 × 0,8 = 192 000 — granica należy już do ostrzeżenia,
+  // spójnie z ostrzeganiem „od 80%" przy progu ryczałtu.
+  const naGranicy = podsumowaniePodatkowe(rokPrzychodu(192000), ustawienia, 2026, KONIEC_ROKU);
+  grosz(naGranicy.vatProcentLimitu, 80, 'dokładnie 80%');
+  grosz(naGranicy.vatDoLimitu, 48000, 'zostało 48 000');
+  assert.equal(naGranicy.vatLimitPrzekroczony, false);
+  assert.equal(naGranicy.vatStan, 'ostrzezenie');
+
+  // Przekroczenie: 252 000 → nadwyżka 12 000 (karta liczy ją jako brutto − limit),
+  // „zostało" wynosi 0, a procent jest ścięty do 100 jak przy progu ryczałtu.
+  const ponad = podsumowaniePodatkowe(rokPrzychodu(252000), ustawienia, 2026, KONIEC_ROKU);
+  assert.equal(ponad.vatLimitPrzekroczony, true);
+  assert.equal(ponad.vatStan, 'przekroczony');
+  grosz(ponad.vatDoLimitu, 0, 'nic nie zostało');
+  grosz(ponad.vatProcentLimitu, 100, 'procent ścięty do 100');
+  grosz(ponad.brutto - ponad.vatLimit, 12000, 'nadwyżka ponad limit');
+});
+
+test('próg zwolnienia z VAT: czynny podatnik dostaje flagę, na której widok chowa kartę', () => {
+  // Czynnemu podatnikowi zwolnienie podmiotowe jest obojętne — karta się nie renderuje.
+  // Pola liczymy mimo to (z brutto, nie z przychodu po VAT), żeby jedno źródło prawdy
+  // nie miało dwóch gałęzi.
+  const zVat = podsumowaniePodatkowe(rokPrzychodu(216000),
+    { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', isVatPayer: true },
+    2026, KONIEC_ROKU);
+  assert.equal(zVat.vatPlatnik, true, 'flaga do ukrycia karty');
+  // Licznik z brutto 216 000 (90%), NIE z przychodu netto 200 000 (216 000 / 1,08).
+  grosz(zVat.przychod, 200000, 'przychód po VAT');
+  grosz(zVat.vatProcentLimitu, 90, 'licznik biegnie od brutto');
+
+  const bezVat = podsumowaniePodatkowe(rokPrzychodu(216000),
+    { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private' }, 2026, KONIEC_ROKU);
+  assert.equal(bezVat.vatPlatnik, false, 'domyślnie karta widoczna');
+});
+
+test('próg zwolnienia z VAT: przy współwłasności „polowa" licznik liczy pełne brutto', () => {
+  // Oświadczenie ryczałtowe i podział przychodu to mechanika PIT — na VAT się nie
+  // przenosi (P6 analizy legal). Rachunek ręczny: brutto 200 000, przychód do PIT
+  // 100 000 (połowa), ale licznik VAT: 200 000 / 240 000 = 83,33%, zostało 40 000.
+  const p = podsumowaniePodatkowe(rokPrzychodu(200000),
+    { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'private', spouseRental: 'polowa' },
+    2026, KONIEC_ROKU);
+  grosz(p.przychod, 100000, 'PIT: połowa przychodu');
+  grosz(p.vatDoLimitu, 40000, 'VAT: zostało z pełnego brutto, nie 140 000 z połowy');
+  grosz(p.vatProcentLimitu, 83.3333, 'VAT: procent z pełnego brutto');
+  assert.equal(p.vatStan, 'ostrzezenie', '83% ≥ 80% — ostrzeżenie mimo połowy w PIT');
+  assert.equal(p.vatLimitPrzekroczony, false);
 });
 
 test('rok bez rezerwacji nie produkuje zer udających wyliczenie', () => {

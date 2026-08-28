@@ -280,6 +280,78 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
     </div>
   );
 
+  // ── KARTA LIMITU ZWOLNIENIA Z VAT ───────────────────────────────────────────
+  // Art. 113 ustawy o VAT (ADR-026). Licznik liczy `taxSummary.js` z pełnego `brutto` —
+  // bez podziału małżeńskiego i bez prowizji. Karta TYLKO dla gospodarza bez statusu
+  // czynnego podatnika: jemu zwolnienie podmiotowe jest obojętne i pasek sugerowałby,
+  // że przy limicie coś się dla niego zmienia.
+  //
+  // ⚠️ Mechanika przekroczenia jest INNA niż przy progu ryczałtu: tam od nadwyżki
+  // zmienia się stawka, tu opodatkowana jest CAŁA czynność, którą limit przekroczono
+  // (art. 113 ust. 5). Teksty z analizy legal (P5) — mówią, co stanowi przepis i co
+  // widzi aplikacja, bez kwalifikowania czyjejkolwiek sytuacji podatkowej.
+  const kartaVat = !p.vatPlatnik && (
+    <div className="wpd-panel" style={{ padding: 22 }}>
+      <div className="wpd-prog__head">
+        <p className="wpd-prog__label">Limit zwolnienia z VAT · {liczba(p.vatLimit)} zł</p>
+        <span className={`wpd-prog__pct${p.vatStan !== 'spokojny' ? ' wpd-prog__pct--over' : ''}`}>
+          {procent(p.vatProcentLimitu)} limitu
+        </span>
+      </div>
+
+      {p.vatLimitPrzekroczony ? (
+        <>
+          <p className="wpd-prog__lead">Powyżej limitu o <strong>{zlKrotko(p.brutto - p.vatLimit)}</strong></p>
+          <div className="wpd-prog__track">
+            <div className="wpd-prog__fill wpd-prog__fill--over" style={{ flex: `0 0 ${(p.vatLimit / p.brutto) * 100}%` }} />
+            <div className="wpd-prog__over" style={{ flex: 1 }} />
+          </div>
+          <div className="wpd-prog__scale">
+            <span>{liczba(p.vatLimit)} zł</span>
+            <span style={{ color: 'var(--cynober)' }}>nadwyżka</span>
+          </div>
+          <p className="wpd-prog__note">
+            Rezerwacje w aplikacji przekroczyły {liczba(p.vatLimit)} zł. Od czynności, którą
+            przekroczono limit, sprzedaż nie korzysta już ze zwolnienia podmiotowego
+            (art. 113 ust. 5 ustawy o VAT), a rejestracji VAT-R dokonuje się przed dniem
+            utraty zwolnienia. Skonsultuj rozliczenie z księgowym. Panel nadal nie dolicza
+            VAT do Twoich kwot — do czasu włączenia opcji „jestem czynnym podatnikiem VAT"
+            w ustawieniach.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="wpd-prog__lead">Zostało <strong>{zlKrotko(p.vatDoLimitu)}</strong> wartości sprzedaży</p>
+          <div className="wpd-prog__track">
+            <div className="wpd-prog__fill" style={{ width: `${p.vatProcentLimitu}%` }} />
+          </div>
+          <div className="wpd-prog__scale">
+            <span>0</span><span>{liczba(p.vatLimit / 2)}</span><span>{liczba(p.vatLimit)} zł</span>
+          </div>
+          {p.vatStan === 'ostrzezenie' ? (
+            <p className="wpd-prog__note">
+              Rezerwacje w aplikacji zbliżają się do {liczba(p.vatLimit)} zł. Powyżej tego
+              limitu sprzedaż traci zwolnienie z VAT — począwszy od czynności, którą limit
+              przekroczono — a przepisy wiążą z tym obowiązki rejestracyjne (VAT-R). Czy
+              i kiedy dotyczy to Ciebie, zależy od całej Twojej sprzedaży, nie tylko tej
+              w aplikacji — porozmawiaj z księgowym z wyprzedzeniem.
+            </p>
+          ) : (
+            <p className="wpd-prog__note">
+              Do {liczba(p.vatLimit)} zł wartości sprzedaży rocznie sprzedaż może korzystać
+              ze zwolnienia z VAT (art. 113 ustawy o VAT).
+            </p>
+          )}
+        </>
+      )}
+      <p className="wpd-prog__src">
+        Liczymy tylko przychód z rezerwacji w tej aplikacji — pozostała sprzedaż (inny najem,
+        inna działalność) także zużywa ten limit. W pierwszym roku działalności limit liczy
+        się proporcjonalnie do okresu prowadzonej działalności (art. 113 ust. 9) — tej proporcji nie liczymy.
+      </p>
+    </div>
+  );
+
   // Karta z pytaniem zamiast wiersza zdrowotnej, dopóki nie wiemy, jak gospodarz wynajmuje.
   // Lepiej brak liczby niż liczba nieprawdziwa (analiza §B1 pkt 4).
   const kartaPytanie = ryczalt && p.podstawaWynajmu === null && (
@@ -411,6 +483,8 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
             </div>
           </div>
 
+          {kartaVat && <div style={{ marginTop: 16 }}>{kartaVat}</div>}
+
           {kartaPytanie && <div style={{ marginTop: 16 }}>{kartaPytanie}</div>}
 
           {stopka}
@@ -466,7 +540,10 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                     sub="art. 11 ust. 1a ustawy o ryczałcie · zakładamy, że składka za ten okres jest zapłacona" />
                 )}
 
-                <Wiersz k="Podstawa opodatkowania" v={zl(p.podstawa)} mocny={false} />
+                {/* Przy skali podstawa może być zawyżona — aplikacja zna tylko własne koszty.
+                    Mówimy to wprost (wzorzec ADR-023), zamiast udawać kompletność. */}
+                <Wiersz k="Podstawa opodatkowania" v={zl(p.podstawa)} mocny={false}
+                  sub={!ryczalt ? 'Tylko koszty zarejestrowane w aplikacji (prowizje, media, opcjonalnie składki społeczne) — bez kosztów spoza niej.' : null} />
 
                 <Wiersz
                   k={!ryczalt ? 'Podatek według skali (12% / 32%)'
@@ -485,9 +562,14 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                   <Wiersz k="Składka zdrowotna · najem prywatny" v={<span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)', textTransform: 'uppercase' }}>nie doliczamy</span>} />
                 ) : ryczalt ? (
                   <Wiersz k="Składka zdrowotna" v={<span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)', textTransform: 'uppercase' }}>brak odpowiedzi</span>} />
-                ) : p.zdrowotnaRok > 0 && (
+                ) : p.zdrowotnaRok > 0 ? (
                   <Wiersz k={`Zdrowotna z Twoich ustawień · ${zl(p.zdrowotnaMies)} × ${p.miesiecy}`} v={zl(p.zdrowotnaRok)}
                     sub="Przy skali zależy od dochodu — liczymy z kwoty, którą podałeś w ustawieniach." />
+                ) : (
+                  // Nigdy „0 zł" — mówimy, czego nie liczymy i dlaczego (wzorzec ADR-023).
+                  <Wiersz k="Składka zdrowotna · 9% dochodu"
+                    v={<span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)', textTransform: 'uppercase' }}>nie wyliczamy</span>}
+                    sub="Przy skali liczy się od dochodu z całej Twojej działalności, którego aplikacja nie zna. Jeśli ją opłacasz, wpisz kwotę miesięczną w ustawieniach." />
                 )}
 
                 {p.spoleczneRok > 0
