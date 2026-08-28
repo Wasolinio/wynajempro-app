@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle, XCircle, Edit, Trash2, ArrowDown, ArrowUp, CalendarDays } from 'lucide-react';
 import { propHex } from '../styles';
 import { SourceTag } from '../SourceTag';
+import AddToCalendarButton from '../AddToCalendarButton';
 import { clickableProps } from '../../../utils/a11y';
 
 const fmt = (n) => (n || n === 0 ? new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0)) : '—');
@@ -79,6 +80,11 @@ export default function BookingsView({
                     </td>
                     <td className="wpd-num">
                       <span style={{ display: 'inline-flex', gap: 6, justifyContent: 'flex-end' }}>
+                        {/* E6: zadanie ukończone przycisku nie potrzebuje */}
+                        {!r.isCompleted && (
+                          <AddToCalendarButton dateStr={r.date} text={r.text || r.guest}
+                            property={propName} uid={`${r.id}-manual`} />
+                        )}
                         <button className="wpd-iconbtn" title="Edytuj" onClick={() => openEditModal(r)}><Edit /></button>
                         <button className="wpd-iconbtn wpd-btn--danger" title="Usuń" onClick={() => handleDeleteClick(r.id)}><Trash2 /></button>
                       </span>

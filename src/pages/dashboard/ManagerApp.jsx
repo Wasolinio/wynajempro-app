@@ -18,7 +18,8 @@ import {
 } from '../../utils/constants';
 import { calculateTaxes } from '../../utils/taxCalculator';
 import { toCount, guestsTotal } from '../../utils/guestCount';
-import { isTaskDue, daysToAnchor, isCleaningTemplate, templateTiming } from '../../utils/taskSchedule';
+import { isTaskDue, daysToAnchor, taskDueDate, isCleaningTemplate, templateTiming } from '../../utils/taskSchedule';
+import { toDateStr } from '../../utils/addToCalendar';
 
 // Modale w stylu V4 (własne)
 import ProfitabilityReportModal from './modals/ProfitabilityReportModal';
@@ -211,7 +212,9 @@ export default function ManagerApp() {
             const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
             // X20: termin liczy `taskSchedule` — kotwicą jest przyjazd albo wyjazd
             if (isCompleted || !isTaskDue(r, t)) return;
-            tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: daysToAnchor(r, t), icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
+            // E6: `dueDate` (termin z taskSchedule) jedzie z zadaniem do widoków — przycisk
+            // „Dodaj do kalendarza" nie musi odtwarzać liczenia terminu po swojej stronie
+            tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: daysToAnchor(r, t), dueDate: toDateStr(taskDueDate(r, t)), icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
             // sprzątanie widoczne na liście zadań musi być widoczne także na kaflu,
             // inaczej pulpit sam sobie przeczy (uwaga testera 2026-08-21)
             if (isCleaningTemplate(t) && propNameStr) cleaningProps.add(propNameStr);
@@ -224,7 +227,7 @@ export default function ManagerApp() {
           const tm = new Date(); tm.setHours(0, 0, 0, 0);
           const diffDays = Math.ceil((d - tm) / 86400000);
           if (diffDays <= 0 && diffDays >= -30) {
-            tasks.push({ id: r.id, taskId: 'manual', property: 'Własne zadanie', days: diffDays, text: r.text || 'Brak opisu' });
+            tasks.push({ id: r.id, taskId: 'manual', property: 'Własne zadanie', days: diffDays, dueDate: r.date, text: r.text || 'Brak opisu' });
           }
         }
       }

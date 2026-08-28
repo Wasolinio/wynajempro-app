@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ArrowRight, CheckCircle, ClipboardList, Banknote, PieChart, LogIn, Sparkles, AlertTriangle, Unlink } from 'lucide-react';
 import { SourceTag } from '../SourceTag';
+import AddToCalendarButton from '../AddToCalendarButton';
 import { plural } from '../../../utils/plural';
 import { clickableProps } from '../../../utils/a11y';
 import { useCountUp } from '../useCountUp';
@@ -216,6 +217,11 @@ export default function PulpitView({
                 <div className="wpd-row__name">{t.text}</div>
                 <div className="wpd-row__meta">{t.property}{t.guest ? ` · ${t.guest}` : ''}</div>
               </div>
+              {/* E6: dla zadań własnych `property` to etykieta „Własne zadanie", nie obiekt —
+                  do kalendarza nie ma czego dopisywać */}
+              <AddToCalendarButton small dateStr={t.dueDate} text={t.text}
+                property={t.taskId === 'manual' ? null : t.property} guest={t.guest}
+                uid={`${t.id}-${t.taskId}`} />
               {t.taskId === 'manual' && (
                 <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(t.id, 'manual')}><CheckCircle /></button>
               )}
@@ -228,6 +234,9 @@ export default function PulpitView({
                 <div className="wpd-row__name">{task.text}</div>
                 <div className="wpd-row__meta">{task.date}</div>
               </div>
+              <AddToCalendarButton small dateStr={task.date} text={task.text}
+                property={typeof task.property === 'object' ? task.property?.name : task.property}
+                uid={`${task.id}-manual`} />
               <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(task.id, 'manual')}><CheckCircle /></button>
             </div>
           ))}

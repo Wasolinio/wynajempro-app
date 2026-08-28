@@ -1,8 +1,10 @@
 import React from 'react';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, CheckCircle, ClipboardList, Moon, RefreshCw, Users } from 'lucide-react';
 import { SourceTag } from '../SourceTag';
+import AddToCalendarButton from '../AddToCalendarButton';
 import { plural } from '../../../utils/plural';
 import { taskDueDate, describeTiming } from '../../../utils/taskSchedule';
+import { toDateStr } from '../../../utils/addToCalendar';
 
 const fmt = (n) => new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(Math.round(Number(n) || 0));
 const initials = (name) => (name || 'Gość').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -205,6 +207,11 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                     {t.due ? `Do: ${fmtShort(t.due)}` : ''}{t.due ? ' · ' : ''}{t.timing}{t.overdue ? ' · zaległe' : ''}
                   </div>
                 </div>
+                {/* E6: zadanie ukończone (albo bez terminu) przycisku nie potrzebuje */}
+                {!t.done && (
+                  <AddToCalendarButton small dateStr={toDateStr(t.due)} text={t.text || t.shortName}
+                    property={propName} guest={r.guest} uid={`${r.id}-${t.id}`} />
+                )}
               </div>
             ))}
             {tasks.length === 0 && (

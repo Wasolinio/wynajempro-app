@@ -151,6 +151,19 @@ export const DASHBOARD_CSS = `
 .wpd-iconbtn__badge{ position:absolute; top:-7px; right:-7px; min-width:18px; height:18px; padding:0 4px;
   background:var(--cynober); color:#fff; border-radius:9px; font-family:'IBM Plex Mono', monospace;
   font-size:10px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+/* E6: „Dodaj do kalendarza" przy zadaniu — przycisk w skali wiersza (obok 22px checka
+   pełny 40px iconbtn przygniata listę) + menu dwóch opcji. Menu jest FIXED, bo listy
+   zadań żyją w kontenerach z overflow — patrz komentarz w AddToCalendarButton.jsx.
+   Bez cienia (identyfikacja v2): warstwę oddziela ramka 1px w kolorze tuszu.
+   z-index 75: nad dolnym paskiem mobile (70), pod modalami (80). */
+.wpd-iconbtn--row{ width:26px; height:26px; flex:0 0 26px; }
+.wpd-iconbtn--row svg{ width:14px; height:14px; }
+.wpd-calmenu{ position:fixed; z-index:75; min-width:172px; padding:4px;
+  background:var(--surface); border:1px solid var(--ink); border-radius:3px; }
+.wpd-calmenu__item{ display:flex; width:100%; padding:8px 10px; border:none; background:none;
+  border-radius:3px; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink);
+  cursor:pointer; text-decoration:none; text-align:left; }
+.wpd-calmenu__item:hover{ background:var(--inner); }
 
 /* ── Link akcentowy ── */
 .wpd-alink{ font-weight:600; font-size:13px; color:var(--cynober); text-decoration:none;
