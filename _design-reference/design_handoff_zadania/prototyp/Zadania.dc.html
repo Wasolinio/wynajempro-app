@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,wght@1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin:0; padding:0; background:#F3EFE5; }
+  body { -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#D9492B; text-decoration:none; }
+  a:hover { color:#C23E22; text-decoration:underline; }
+  ::selection { background:#F6E5DF; }
+  @keyframes wpCardIn { from { opacity:0; transform:translateY(7px); } }
+  @keyframes wpRise { from { opacity:0; transform:translateY(10px); } }
+  @keyframes wpPulse { 0%,100% { opacity:1; transform:scaleX(1); } 50% { opacity:.45; transform:scaleX(2.2); } }
+  @keyframes wpDraw { from { stroke-dashoffset:30; } to { stroke-dashoffset:0; } }
+  @keyframes wpStrike { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+  @keyframes wpPop { from { opacity:0; transform:scale(.94) translateY(-6px); } }
+  @keyframes wpSub { from { opacity:0; transform:translateX(-10px); } }
+  @keyframes wpSheet { from { opacity:0; transform:scale(.96) translateY(-10px); } }
+  @keyframes wpFlash { 0% { background:#F6E5DF; border-color:#D9492B; } 100% { background:#FBFAF6; border-color:#DDD5C3; } }
+</style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="display:flex; min-height:100vh; background:#F3EFE5; color:#17150F; font-family:'Schibsted Grotesk', system-ui, sans-serif; line-height:1.5;">
+
+  <div style="flex:0 0 240px; width:240px; background:#17150F; color:#E4DDCE; position:sticky; top:0; height:100vh; display:flex; flex-direction:column;">
+    <div style="display:flex; align-items:center; gap:9px; height:72px; padding:0 24px;">
+      <span style="font-weight:800; font-size:19px; letter-spacing:-.02em; color:#fff;">Wynajem</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:10px; letter-spacing:.10em; color:#fff; background:#D9492B; border-radius:3px; padding:3px 6px;">PRO</span>
+    </div>
+    <div style="display:flex; flex-direction:column; padding:14px 0 0;">
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:transparent; border-left:2px solid transparent; color:#8C8576; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;" style-hover="background:#221F17; color:#E4DDCE"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6B6555; width:16px;">01</span>Pulpit</button>
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:transparent; border-left:2px solid transparent; color:#8C8576; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;" style-hover="background:#221F17; color:#E4DDCE"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6B6555; width:16px;">02</span>Kalendarz</button>
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:transparent; border-left:2px solid transparent; color:#8C8576; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;" style-hover="background:#221F17; color:#E4DDCE"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6B6555; width:16px;">03</span>Obiekty</button>
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:transparent; border-left:2px solid transparent; color:#8C8576; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;" style-hover="background:#221F17; color:#E4DDCE"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6B6555; width:16px;">04</span>Rezerwacje</button>
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:transparent; border-left:2px solid transparent; color:#8C8576; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;" style-hover="background:#221F17; color:#E4DDCE"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6B6555; width:16px;">05</span>Finanse</button>
+      <button style="display:flex; align-items:center; gap:13px; padding:11px 24px; border:none; background:#2C2920; border-left:2px solid #D9492B; color:#fff; font-family:inherit; font-weight:500; font-size:15px; cursor:pointer; text-align:left;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#D9492B; width:16px;">06</span>Zadania</button>
+    </div>
+
+    <div style="margin-top:auto; padding:18px 24px;">
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#6B6555; margin:0 0 12px;">Zadania w tygodniu</p>
+      <div style="display:flex; align-items:center; gap:9px; padding:5px 0;"><span style="width:7px;height:7px;border-radius:2px;background:#D9492B;"></span><span style="font-size:13px; color:#E4DDCE;">Zaległe</span><span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8C8576;">{{ countOver }}</span></div>
+      <div style="display:flex; align-items:center; gap:9px; padding:5px 0;"><span style="width:7px;height:7px;border-radius:2px;background:#C99A2E;"></span><span style="font-size:13px; color:#E4DDCE;">Na dziś</span><span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8C8576;">{{ countToday }}</span></div>
+      <div style="display:flex; align-items:center; gap:9px; padding:5px 0;"><span style="width:7px;height:7px;border-radius:2px;background:#5FB389;"></span><span style="font-size:13px; color:#E4DDCE;">Zrobione</span><span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8C8576;">{{ countDone }}</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:11px; padding:16px 22px; border-top:1px solid #2C2920;">
+      <span style="width:34px;height:34px;border-radius:3px;background:#D9492B;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;flex:0 0 34px;">AN</span>
+      <div><div style="font-size:13.5px; font-weight:600; color:#fff;">Anna Nowak</div><div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:#8C8576; margin-top:1px;">Plan gospodarz</div></div>
+    </div>
+  </div>
+
+  <div style="flex:1 1 auto; min-width:0; display:flex; flex-direction:column;">
+
+    <div style="position:sticky; top:0; z-index:40; background:rgba(243,239,229,.92); backdrop-filter:blur(8px); border-bottom:1px solid #DDD5C3; display:flex; align-items:center; gap:18px; min-height:72px; padding:0 34px;">
+      <div>
+        <h1 style="font-weight:700; font-size:25px; letter-spacing:-.03em; margin:0; line-height:1.1;">Zadania</h1>
+        <p style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:#716951; margin:4px 0 0;">Niedziela, 23 sierpnia 2026</p>
+      </div>
+      <div style="flex:1 1 auto;"></div>
+      <div style="display:flex; align-items:center; gap:9px; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:3px; height:40px; padding:0 13px; width:230px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#716951" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path></svg>
+        <input placeholder="Szukaj zadania…" style="border:none; background:transparent; outline:none; font-family:inherit; font-size:14px; color:#17150F; width:100%;" />
+      </div>
+      <button ref="{{ addBtnRef }}" onClick="{{ openBlank }}" style="display:inline-flex; align-items:center; gap:8px; justify-content:center; font-family:inherit; font-weight:600; font-size:14px; height:40px; padding:0 16px; border-radius:3px; border:1px solid #D9492B; background:#D9492B; color:#fff; cursor:pointer; transition:background .14s, transform .14s cubic-bezier(.22,1,.36,1);" style-hover="background:#C23E22" style-active="transform:scale(.97)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Zadanie
+      </button>
+    </div>
+
+    <div style="padding:26px 34px 90px; max-width:1240px; width:100%; margin:0 auto;">
+
+      <div style="display:flex; align-items:stretch; gap:0; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:4px; margin-bottom:20px; overflow:hidden;">
+        <div style="padding:16px 22px 18px; display:flex; align-items:flex-end; gap:14px; border-right:1px solid #DDD5C3;">
+          <div>
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#746C54; margin:0 0 6px;">Pozostało</p>
+            <div style="display:flex; align-items:center; gap:1px; height:40px; overflow:hidden;">
+              <sc-for list="{{ digits }}" as="dg" hint-placeholder-count="2">
+                <span style="display:inline-flex; height:40px; overflow:hidden;">
+                  <span style="display:flex; flex-direction:column; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:33px; letter-spacing:-.02em; color:#17150F; transition:transform .55s cubic-bezier(.22,1,.36,1); transform:translateY({{ dg.y }});">
+                    <span style="height:40px; line-height:40px;">0</span><span style="height:40px; line-height:40px;">1</span><span style="height:40px; line-height:40px;">2</span><span style="height:40px; line-height:40px;">3</span><span style="height:40px; line-height:40px;">4</span><span style="height:40px; line-height:40px;">5</span><span style="height:40px; line-height:40px;">6</span><span style="height:40px; line-height:40px;">7</span><span style="height:40px; line-height:40px;">8</span><span style="height:40px; line-height:40px;">9</span>
+                  </span>
+                </span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 22px 18px; border-right:1px solid #DDD5C3; min-width:150px;">
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#746C54; margin:0 0 8px;">Zaległe</p>
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:22px; color:#D9492B;">{{ countOver }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#716951;">wymaga decyzji</span>
+          </div>
+        </div>
+        <div style="padding:16px 22px 18px; border-right:1px solid #DDD5C3; min-width:150px;">
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#746C54; margin:0 0 8px;">Bez rezerwacji</p>
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:22px; color:#17150F;">{{ countInbox }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#716951;">do przypisania</span>
+          </div>
+        </div>
+        <div style="flex:1 1 auto; padding:16px 22px; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D9492B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l5-5 4 4 7-7"></path><path d="M14 7h6v6"></path></svg>
+          <span style="font-size:12.5px; color:#524C3F; max-width:290px; text-wrap:pretty;">Przeciągnij kartkę na pasek rezerwacji — zadanie przypnie się do gościa i terminu.</span>
+        </div>
+      </div>
+
+      <div style="background:#FBFAF6; border:1px solid #DDD5C3; border-radius:4px; overflow:hidden; animation:wpRise .45s cubic-bezier(.22,1,.36,1) both;">
+        <div style="display:flex; align-items:center; gap:14px; padding:15px 20px; border-bottom:1px solid #DDD5C3;">
+          <h2 style="font-weight:700; font-size:17px; letter-spacing:-.02em; margin:0;">Oś przypisania</h2>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#716951;">23–29 sierpnia</span>
+          <div style="flex:1 1 auto;"></div>
+          <span style="display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:#524C3F;"><span style="width:14px;height:6px;border-radius:2px;background:#234B7A;"></span>pasek = rezerwacja</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:#524C3F;"><span style="width:14px;height:6px;border-radius:2px;border:1px dashed #DDD5C3;"></span>wolny dzień = sam termin</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:196px 1fr;">
+          <div style="border-right:1px solid #DDD5C3;"></div>
+          <div style="display:grid; grid-template-columns:repeat(7,1fr);">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+              <div style="text-align:center; padding:9px 0 8px; border-left:1px solid #EFE9DA;">
+                <b style="display:block; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; color:{{ d.numColor }};">{{ d.n }}</b>
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:8.5px; text-transform:uppercase; color:{{ d.dowColor }};">{{ d.dow }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-for list="{{ rows }}" as="row" hint-placeholder-count="3">
+          <div style="display:grid; grid-template-columns:196px 1fr; border-top:1px solid #DDD5C3;">
+            <div style="padding:14px 18px; border-right:1px solid #DDD5C3;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px;height:8px;border-radius:2px;background:{{ row.color }};"></span>
+                <span style="font-weight:600; font-size:14px;">{{ row.name }}</span>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:#716951; margin-top:3px;">{{ row.sub }}</div>
+            </div>
+            <div ref="{{ row.trackRef }}" style="position:relative;">
+              <div style="display:grid; grid-template-columns:repeat(7,1fr); min-height:56px; height:100%;">
+                <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="7">
+                  <div data-drop="{{ c.drop }}" data-day="{{ c.day }}" data-prop="{{ c.prop }}" style="position:relative; border-left:1px solid #EFE9DA; background:{{ c.bg }}; cursor:{{ c.cursor }}; transition:background-color .18s;">
+                    <span data-glow="1" style="position:absolute; left:0; right:0; top:0; height:2px; background:#D9492B; transform:scaleX(0); transform-origin:left; transition:transform .22s cubic-bezier(.22,1,.36,1);"></span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ row.bars }}" as="b" hint-placeholder-count="1">
+                <div data-drop="res" data-res="{{ b.id }}" data-prop="{{ b.prop }}" onClick="{{ b.onClick }}" style="position:absolute; top:12px; height:32px; left:{{ b.left }}; width:{{ b.width }}; background:{{ b.color }}; border-radius:{{ b.radius }}; display:flex; align-items:center; gap:8px; padding:0 10px; cursor:pointer; z-index:2; transition:transform .18s cubic-bezier(.22,1,.36,1), filter .18s;" style-hover="filter:brightness(1.12)">
+                  <span style="font-size:12px; font-weight:600; color:#fff; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">{{ b.guest }}</span>
+                  <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; flex:0 0 auto;">
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.72);">{{ b.src }}</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:22px; align-items:flex-start;">
+
+        <div style="flex:1 1 560px; min-width:0;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+            <div style="position:relative;">
+              <button onClick="{{ toggleSel }}" style="display:inline-flex; align-items:center; gap:11px; height:38px; padding:0 13px; background:#FBFAF6; border:1px solid {{ selBorder }}; border-radius:3px; cursor:pointer; font-family:inherit; transition:border-color .16s;" style-hover="border-color:#17150F">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:#746C54;">Obiekt</span>
+                <span style="display:inline-flex; align-items:center; gap:7px;">
+                  <span style="width:7px;height:7px;border-radius:2px;background:{{ filterColor }};"></span>
+                  <span style="font-size:13.5px; font-weight:600; color:#17150F;">{{ filterLabel }}</span>
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#716951" stroke-width="2" stroke-linecap="round" style="transform:{{ selChev }}; transition:transform .24s cubic-bezier(.22,1,.36,1);"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{ selOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; top:calc(100% + 6px); left:0; width:262px; background:#FBFAF6; border:1px solid #17150F; border-radius:4px; padding:5px; z-index:60; transform-origin:top left; animation:wpPop .24s cubic-bezier(.22,1,.36,1) both;">
+                  <sc-for list="{{ propOptions }}" as="o" hint-placeholder-count="4">
+                    <button onClick="{{ o.onPick }}" style="display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; background:{{ o.bg }}; border:none; border-radius:3px; cursor:pointer; font-family:inherit; text-align:left; animation:wpSub .3s cubic-bezier(.22,1,.36,1) both; animation-delay:{{ o.delay }}; transition:background-color .14s;" style-hover="background:#EFE9DA">
+                      <span style="width:8px;height:8px;border-radius:2px;background:{{ o.color }}; flex:0 0 8px;"></span>
+                      <span style="font-size:13.5px; font-weight:{{ o.weight }}; color:#17150F;">{{ o.name }}</span>
+                      <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#716951;">{{ o.count }}</span>
+                      <sc-if value="{{ o.active }}" hint-placeholder-val="{{ false }}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D9492B" stroke-width="2.4" stroke-linecap="round"><path d="M4 12.5l5.2 5.2L20 6.8"></path></svg>
+                      </sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:#716951;">{{ visibleLabel }}</span>
+          </div>
+
+          <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+            <div style="margin-bottom:26px;">
+              <div style="display:flex; align-items:baseline; gap:12px; padding:0 2px 9px; border-bottom:1px solid {{ sec.rule }};">
+                <span style="font-size:18px; font-weight:700; letter-spacing:-.025em; color:{{ sec.color }};">{{ sec.label }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#746C54;">{{ sec.sub }}</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:{{ sec.color }};">{{ sec.count }}</span>
+              </div>
+              <sc-for list="{{ sec.groups }}" as="grp" hint-placeholder-count="2">
+                <div style="margin-top:15px;">
+                  <div style="display:flex; align-items:center; gap:9px; margin-bottom:9px;">
+                    <span style="width:8px;height:8px;border-radius:2px;background:{{ grp.color }}; flex:0 0 8px;"></span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#524C3F;">{{ grp.name }}</span>
+                    <span style="flex:1 1 auto; height:1px; background:#DDD5C3;"></span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <sc-for list="{{ grp.tasks }}" as="t" hint-placeholder-count="2">
+                      <div data-task="{{ t.id }}" onPointerDown="{{ t.onDown }}" style="position:relative; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:4px; padding:13px 16px 13px 20px; cursor:grab; touch-action:none; animation:wpCardIn .34s cubic-bezier(.22,1,.36,1) both; transition:border-color .16s, background-color .3s;" style-hover="border-color:#17150F">
+                        <span style="position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; background:{{ t.prioColor }}; transform-origin:left; animation:{{ t.pulse }};"></span>
+                        <div style="display:flex; align-items:flex-start; gap:13px;">
+                          <button data-nodrag="1" onClick="{{ t.onToggle }}" title="{{ t.checkTitle }}" style="width:22px; height:22px; flex:0 0 22px; border:1px solid {{ t.checkBorder }}; background:{{ t.checkBg }}; border-radius:3px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; margin-top:1px; transition:border-color .16s, background-color .16s;" style-hover="border-color:#2F6B53">
+                            <sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.2 5.2L20 6.8" style="stroke-dasharray:30; animation:wpDraw .42s cubic-bezier(.22,1,.36,1) both;"></path></svg>
+                            </sc-if>
+                          </button>
+                          <div style="flex:1 1 auto; min-width:0;">
+                            <div style="position:relative; display:inline-block; max-width:100%;">
+                              <span style="font-size:14.5px; font-weight:600; letter-spacing:-.01em; color:{{ t.textColor }}; line-height:1.35;">{{ t.text }}</span>
+                              <sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}">
+                                <span style="position:absolute; left:0; right:0; top:53%; height:1px; background:#716951; transform-origin:left; animation:wpStrike .3s cubic-bezier(.22,1,.36,1) both;"></span>
+                              </sc-if>
+                            </div>
+                            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:11px; margin-top:8px;">
+                              <sc-if value="{{ t.overLabel }}" hint-placeholder-val="{{ false }}">
+                                <span style="display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:#D9492B; background:#F6E5DF; border:1px solid #EBD3CB; border-radius:3px; padding:3px 7px;">{{ t.overLabel }}</span>
+                              </sc-if>
+                              <sc-if value="{{ t.time }}" hint-placeholder-val="{{ true }}">
+                                <span style="display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#524C3F;">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#716951" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>{{ t.time }}
+                                </span>
+                              </sc-if>
+                              <sc-if value="{{ t.hasRes }}" hint-placeholder-val="{{ true }}">
+                                <span style="display:inline-flex; align-items:center; gap:6px; background:#EFE9DA; border:1px solid #DDD5C3; border-radius:3px; padding:3px 8px 3px 7px;">
+                                  <span style="width:7px;height:7px;border-radius:2px;background:{{ t.resColor }};"></span>
+                                  <span style="font-size:11.5px; font-weight:600; color:#17150F;">{{ t.resGuest }}</span>
+                                  <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#716951;">{{ t.resSrc }}</span>
+                                </span>
+                              </sc-if>
+                              <sc-if value="{{ t.auto }}" hint-placeholder-val="{{ false }}">
+                                <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:#746C54; border:1px solid #DDD5C3; border-radius:3px; padding:3px 6px;">z szablonu</span>
+                              </sc-if>
+                              <sc-if value="{{ t.recur }}" hint-placeholder-val="{{ false }}">
+                                <span style="display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:#716951;">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#716951" stroke-width="1.9" stroke-linecap="round"><path d="M4 11a8 8 0 0113.7-5.3M20 13a8 8 0 01-13.7 5.3"></path><path d="M18 4v4h-4M6 20v-4h4"></path></svg>{{ t.recur }}
+                                </span>
+                              </sc-if>
+                              <sc-if value="{{ t.hasSubs }}" hint-placeholder-val="{{ true }}">
+                                <button data-nodrag="1" onClick="{{ t.onOpen }}" style="display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid #DDD5C3; border-radius:3px; padding:3px 7px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; color:#524C3F; transition:border-color .14s, color .14s;" style-hover="border-color:#17150F; color:#17150F">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1.2 1.2L7 5.2M4 12l1.2 1.2L7 11.2"></path></svg>
+                                  {{ t.subsLabel }}
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="transform:{{ t.chev }}; transition:transform .26s cubic-bezier(.22,1,.36,1);"><path d="M6 9l6 6 6-6"></path></svg>
+                                </button>
+                              </sc-if>
+                              <sc-if value="{{ t.photo }}" hint-placeholder-val="{{ false }}">
+                                <span style="display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:#716951;">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#716951" stroke-width="1.75" stroke-linecap="round"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.9l1.3-2h6.6l1.3 2h1.9A2.5 2.5 0 0121 8.5v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5z"></path><circle cx="12" cy="13" r="3.4"></circle></svg>zdjęcie
+                                </span>
+                              </sc-if>
+                            </div>
+                            <sc-if value="{{ t.note }}" hint-placeholder-val="{{ false }}">
+                              <p style="font-family:'Newsreader', serif; font-style:italic; font-size:14px; color:#524C3F; margin:9px 0 0; padding-left:11px; border-left:1px solid #DDD5C3; line-height:1.5; text-wrap:pretty;">{{ t.note }}</p>
+                            </sc-if>
+                            <sc-if value="{{ t.subsOpen }}" hint-placeholder-val="{{ false }}">
+                              <div style="margin-top:11px; padding-top:11px; border-top:1px solid #DDD5C3; display:flex; flex-direction:column; gap:2px;">
+                                <sc-for list="{{ t.subs }}" as="s" hint-placeholder-count="3">
+                                  <button data-nodrag="1" onClick="{{ s.onToggle }}" style="display:flex; align-items:center; gap:10px; background:transparent; border:none; padding:5px 0; cursor:pointer; text-align:left; font-family:inherit; animation:wpSub .38s cubic-bezier(.34,1.56,.64,1) both; animation-delay:{{ s.delay }};">
+                                    <span style="width:16px; height:16px; flex:0 0 16px; border:1px solid {{ s.border }}; background:{{ s.bg }}; border-radius:2px; display:flex; align-items:center; justify-content:center;">
+                                      <sc-if value="{{ s.d }}" hint-placeholder-val="{{ false }}">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M4 12.5l5.2 5.2L20 6.8"></path></svg>
+                                      </sc-if>
+                                    </span>
+                                    <span style="font-size:13px; color:{{ s.color }}; text-decoration:{{ s.deco }};">{{ s.t }}</span>
+                                  </button>
+                                </sc-for>
+                              </div>
+                            </sc-if>
+                          </div>
+                          <div style="flex:0 0 14px; display:flex; align-items:center; padding-top:4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DDD5C3" stroke-width="2.6" stroke-linecap="round"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="flex:1 1 300px; max-width:340px; position:sticky; top:96px; display:flex; flex-direction:column; gap:14px;">
+          <div style="background:#FBFAF6; border:1px solid #17150F; border-radius:4px; overflow:hidden;">
+            <div style="display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #DDD5C3;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D9492B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"></path><path d="M4 12h4l1.5 2.5h5L16 12h4"></path></svg>
+              <h2 style="font-weight:700; font-size:15px; letter-spacing:-.02em; margin:0;">Do przypisania</h2>
+              <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#716951;">{{ countInbox }}</span>
+            </div>
+            <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <sc-for list="{{ inbox }}" as="t" hint-placeholder-count="4">
+                <div data-task="{{ t.id }}" onPointerDown="{{ t.onDown }}" style="position:relative; background:#F3EFE5; border:1px solid #DDD5C3; border-radius:4px; padding:11px 12px 11px 17px; cursor:grab; touch-action:none; animation:wpCardIn .34s cubic-bezier(.22,1,.36,1) both; transition:border-color .16s, transform .16s cubic-bezier(.22,1,.36,1);" style-hover="border-color:#17150F; transform:translateX(2px)">
+                  <span style="position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; background:{{ t.prioColor }};"></span>
+                  <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="flex:1 1 auto; min-width:0;">
+                      <div style="font-size:13.5px; font-weight:600; letter-spacing:-.01em; color:#17150F; line-height:1.4; text-wrap:pretty;">{{ t.text }}</div>
+                      <div style="display:flex; align-items:center; gap:9px; margin-top:6px;">
+                        <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.07em; text-transform:uppercase; color:{{ t.prioTextColor }};">{{ t.prioLabel }}</span>
+                        <sc-if value="{{ t.hasSubs }}" hint-placeholder-val="{{ false }}">
+                          <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.05em; text-transform:uppercase; color:#716951;">{{ t.subsLabel }} kroki</span>
+                        </sc-if>
+                        <sc-if value="{{ t.photo }}" hint-placeholder-val="{{ false }}">
+                          <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.05em; text-transform:uppercase; color:#716951;">zdjęcie</span>
+                        </sc-if>
+                      </div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DDD5C3" stroke-width="2.6" stroke-linecap="round" style="flex:0 0 14px; margin-top:2px;"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px dashed #DDD5C3; border-radius:4px; padding:22px 14px; text-align:center;">
+                  <p style="font-family:'Newsreader', serif; font-style:italic; font-size:15px; color:#716951; margin:0;">Wszystko przypisane.</p>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="background:#17150F; border-radius:4px; padding:16px 18px;">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#6B6555; margin:0 0 12px;">Jak przypisać</p>
+            <div style="display:flex; gap:10px; padding:7px 0;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#D9492B; flex:0 0 14px;">01</span>
+              <span style="font-size:12.5px; color:#E4DDCE; line-height:1.5;">Kartkę na <b style="color:#fff; font-weight:600;">pasek rezerwacji</b> — bierze gościa i dzień, na który spadła.</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:7px 0;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#D9492B; flex:0 0 14px;">02</span>
+              <span style="font-size:12.5px; color:#E4DDCE; line-height:1.5;">Na <b style="color:#fff; font-weight:600;">wolny dzień</b> — bierze sam termin i obiekt.</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:7px 0;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#D9492B; flex:0 0 14px;">03</span>
+              <span style="font-size:12.5px; color:#E4DDCE; line-height:1.5;">Klik w pasek otwiera <b style="color:#fff; font-weight:600;">szybkie zadanie</b> przy tej rezerwacji.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div ref="{{ layerRef }}" style="position:fixed; inset:0; pointer-events:none; z-index:900;"></div>
+
+<sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeQuick }}" style="position:fixed; inset:0; background:rgba(23,21,15,.28); z-index:920;"></div>
+  <div style="position:fixed; top:{{ quickTop }}; left:{{ quickLeft }}; width:352px; max-height:{{ quickMaxH }}; background:#F3EFE5; border:1px solid #17150F; border-radius:4px; z-index:930; overflow:hidden; display:flex; flex-direction:column; transform-origin:top left; animation:wpSheet .26s cubic-bezier(.22,1,.36,1) both;">
+    <div style="flex:0 0 auto; display:flex; align-items:flex-start; gap:12px; padding:15px 16px; background:#FBFAF6; border-bottom:1px solid #DDD5C3;">
+      <span style="width:34px; height:34px; flex:0 0 34px; border:1px solid #DDD5C3; border-radius:3px; background:#F3EFE5; display:flex; align-items:center; justify-content:center;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D9492B" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"></path><path d="M5 4h14v16H5z"></path></svg>
+      </span>
+      <div style="flex:1 1 auto; min-width:0;">
+        <h3 style="font-weight:700; font-size:15.5px; letter-spacing:-.02em; margin:0;">Szybkie zadanie</h3>
+        <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; color:#716951; margin:3px 0 0;">{{ quickCtx }}</p>
+      </div>
+      <button onClick="{{ closeQuick }}" style="width:30px; height:30px; flex:0 0 30px; border:1px solid #DDD5C3; background:transparent; border-radius:3px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:border-color .14s;" style-hover="border-color:#17150F">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#524C3F" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+
+    <div style="flex:1 1 auto; min-height:0; overflow-y:auto; padding:15px 16px;">
+      <input ref="{{ quickInputRef }}" value="{{ quickText }}" onChange="{{ onQuickText }}" placeholder="np. dowieźć ręczniki" style="width:100%; padding:11px 13px; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:3px; font-family:inherit; font-size:14px; color:#17150F; outline:none;" />
+
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:#746C54; margin:15px 0 7px;">Termin</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        <sc-for list="{{ quickChips }}" as="ch" hint-placeholder-count="3">
+          <button onClick="{{ ch.onPick }}" style="display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; background:{{ ch.bg }}; border:1px solid {{ ch.border }}; border-radius:3px; cursor:pointer; font-family:inherit; font-size:12px; font-weight:600; color:{{ ch.color }}; transition:border-color .14s, background-color .14s;" style-hover="border-color:#17150F">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.07em; text-transform:uppercase; opacity:.72;">{{ ch.kind }}</span>{{ ch.label }}
+          </button>
+        </sc-for>
+        <button onClick="{{ toggleCal }}" style="display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 10px; background:{{ calBg }}; border:1px solid {{ calBorder }}; border-radius:3px; cursor:pointer; font-family:inherit; font-size:12px; font-weight:600; color:{{ calColor }};" style-hover="border-color:#17150F">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"><path d="M4 6h16v14H4z"></path><path d="M4 10h16M9 4v3M15 4v3"></path></svg>Kalendarz
+        </button>
+      </div>
+
+      <sc-if value="{{ calOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11px; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:4px; padding:12px; animation:wpPop .26s cubic-bezier(.22,1,.36,1) both; transform-origin:top center;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-weight:700; font-size:14px; letter-spacing:-.02em;">Sierpień 2026</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; color:#716951;">{{ calProp }}</span>
+            <div style="flex:1 1 auto;"></div>
+            <span style="display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.05em; text-transform:uppercase; color:#716951;"><span style="width:10px; height:10px; border-radius:2px; background:#EFE9DA; border:1px solid #DDD5C3;"></span>zajęte</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px;">
+            <sc-for list="{{ dowHeads }}" as="h" hint-placeholder-count="7">
+              <span style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.06em; text-transform:uppercase; color:{{ h.color }};">{{ h.t }}</span>
+            </sc-for>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;">
+            <sc-for list="{{ calDays }}" as="d" hint-placeholder-count="35">
+              <button onClick="{{ d.onPick }}" title="{{ d.title }}" style="position:relative; height:34px; border:1px solid {{ d.border }}; background:{{ d.bg }}; border-radius:3px; cursor:{{ d.cursor }}; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:{{ d.weight }}; color:{{ d.color }}; padding:0; transition:border-color .14s, background-color .14s, transform .14s cubic-bezier(.22,1,.36,1);" style-hover="border-color:#17150F; transform:scale(1.06)">
+                {{ d.n }}
+                <sc-if value="{{ d.busy }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute; left:4px; right:4px; bottom:3px; height:2px; border-radius:1px; background:{{ d.busyColor }};"></span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; color:#524C3F; margin:10px 0 0; line-height:1.5; min-height:15px;">{{ calHint }}</p>
+        </div>
+      </sc-if>
+
+      <div style="display:grid; grid-template-columns:1fr 104px; gap:12px; margin-top:15px;">
+        <div>
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:#746C54; margin:0 0 7px;">Priorytet</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; background:#EFE9DA; border:1px solid #DDD5C3; border-radius:3px; padding:3px;">
+            <sc-for list="{{ prios }}" as="p" hint-placeholder-count="3">
+              <button onClick="{{ p.onPick }}" style="border:none; background:{{ p.bg }}; color:{{ p.color }}; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; padding:8px 2px; border-radius:2px; transition:background-color .16s, color .16s;">{{ p.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:#746C54; margin:0 0 7px;">Godzina</p>
+          <input value="{{ quickTime }}" onChange="{{ onQuickTime }}" placeholder="--:--" style="width:100%; padding:9px 11px; background:#FBFAF6; border:1px solid #DDD5C3; border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#17150F; outline:none;" />
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:0 0 auto; display:flex; gap:10px; padding:13px 16px; border-top:1px solid #DDD5C3; background:#FBFAF6;">
+      <button onClick="{{ closeQuick }}" style="flex:1; height:40px; border:1px solid #DDD5C3; background:#FBFAF6; border-radius:3px; font-family:inherit; font-weight:600; font-size:14px; color:#17150F; cursor:pointer; transition:border-color .14s;" style-hover="border-color:#17150F">Anuluj</button>
+      <button onClick="{{ addQuick }}" style="flex:1.4; height:40px; border:1px solid #D9492B; background:#D9492B; border-radius:3px; font-family:inherit; font-weight:600; font-size:14px; color:#fff; cursor:pointer; transition:background-color .14s, transform .14s cubic-bezier(.22,1,.36,1);" style-hover="background:#C23E22" style-active="transform:scale(.97)">Dodaj zadanie</button>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Efektowny&quot;,&quot;Oszczędny&quot;],&quot;default&quot;:&quot;Efektowny&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ruch&quot;},&quot;dragTilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:0,&quot;max&quot;:16,&quot;step&quot;:1,&quot;unit&quot;:&quot;°&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Ruch&quot;},&quot;snapPreview&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ruch&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  layerRef = React.createRef();
+  quickInputRef = React.createRef();
+  addBtnRef = React.createRef();
+
+  PROPS = [
+    { id: 'p1', name: 'Domek nad jeziorem', sub: 'RUŚ · 6 OSÓB', color: '#234B7A' },
+    { id: 'p2', name: 'Apartament Centrum', sub: 'OLSZTYN · 4 OSOBY', color: '#2F6B53' },
+    { id: 'p3', name: 'Studio Ruś', sub: 'RUŚ · 2 OSOBY', color: '#C99A2E' },
+  ];
+
+  DAYS = [
+    { k: '08-23', n: '23', dow: 'ND', label: 'Dziś', sub: 'niedziela, 23 sierpnia', today: true, weekend: true },
+    { k: '08-24', n: '24', dow: 'PN', label: 'Jutro', sub: 'poniedziałek, 24 sierpnia' },
+    { k: '08-25', n: '25', dow: 'WT', label: 'Wtorek', sub: '25 sierpnia' },
+    { k: '08-26', n: '26', dow: 'ŚR', label: 'Środa', sub: '26 sierpnia' },
+    { k: '08-27', n: '27', dow: 'CZ', label: 'Czwartek', sub: '27 sierpnia' },
+    { k: '08-28', n: '28', dow: 'PT', label: 'Piątek', sub: '28 sierpnia' },
+    { k: '08-29', n: '29', dow: 'SB', label: 'Sobota', sub: '29 sierpnia', weekend: true },
+  ];
+
+  RES = [
+    { id: 'r1', prop: 'p1', guest: 'Rodzina Lewandowskich', src: 'Direct', srcColor: '#2F6B53', d1: 21, d2: 25, nights: 4, price: '1 680 zł', s: -1, e: 2 },
+    { id: 'r2', prop: 'p1', guest: 'Kowalscy', src: 'Airbnb', srcColor: '#D9492B', d1: 27, d2: 31, nights: 4, price: '1 720 zł', s: 4, e: 7 },
+    { id: 'r3', prop: 'p2', guest: 'Anna Nowak', src: 'Airbnb', srcColor: '#D9492B', d1: 23, d2: 26, nights: 3, price: '1 350 zł', s: 0, e: 3 },
+    { id: 'r4', prop: 'p3', guest: 'Marek Zieliński', src: 'Booking', srcColor: '#234B7A', d1: 24, d2: 28, nights: 4, price: '1 240 zł', s: 1, e: 5 },
+  ];
+
+  PAST = [
+    { prop: 'p1', guest: 'Nowakowie', d1: 8, d2: 12, nights: 4, price: '1 400 zł' },
+    { prop: 'p2', guest: 'M. Wróbel', d1: 14, d2: 17, nights: 3, price: '1 020 zł' },
+  ];
+
+  state = {
+    tasks: [
+      { id: 't1', text: 'Wysłać kod do skrytki z kluczami', prop: 'p2', res: 'r3', day: '08-22', time: '09:00', prio: 'wysoki', auto: true, subs: [] },
+      { id: 't2', text: 'Wymienić żarówkę w sypialni na piętrze', prop: 'p1', res: null, day: '08-20', time: '', prio: 'normalny', note: 'Ciepła barwa, E27 — dwie zostały w szafce w pralni.', subs: [] },
+      { id: 't3', text: 'Sprzątanie po wyjeździe', prop: 'p1', res: 'r1', day: '08-23', time: '10:00', prio: 'wysoki', auto: true, recur: 'po wyjeździe', subs: [{ t: 'Pościel i ręczniki', d: true }, { t: 'Łazienka i kuchnia', d: true }, { t: 'Odkurzyć piętro', d: false }, { t: 'Uzupełnić kapsułki i papier', d: false }] },
+      { id: 't4', text: 'Przekazać klucze i pokazać domek', prop: 'p2', res: 'r3', day: '08-23', time: '15:00', prio: 'wysoki', photo: true, note: 'Gość przyjeżdża z psem — miska i legowisko w szafce pod schodami.', subs: [] },
+      { id: 't5', text: 'Odczyt licznika prądu', prop: 'p3', res: null, day: '08-23', time: '18:00', prio: 'niski', recur: 'co miesiąc', subs: [] },
+      { id: 't6', text: 'Odpisać na wiadomość z Booking.com', prop: 'p3', res: 'r4', day: '08-23', time: '', prio: 'normalny', done: true, subs: [] },
+      { id: 't7', text: 'Sprawdzić czystość przed przyjazdem', prop: 'p3', res: 'r4', day: '08-24', time: '12:00', prio: 'wysoki', auto: true, subs: [] },
+      { id: 't8', text: 'Zamówić drewno do kominka', prop: 'p1', res: null, day: '08-24', time: '', prio: 'niski', note: '2 mp brzozy, ten sam dostawca co w maju.', subs: [] },
+      { id: 't9', text: 'Sprzątanie po Lewandowskich', prop: 'p1', res: 'r1', day: '08-25', time: '11:00', prio: 'wysoki', auto: true, subs: [{ t: 'Pościel i ręczniki', d: false }, { t: 'Grill i taras', d: false }, { t: 'Sprawdzić kajak', d: false }] },
+      { id: 'i1', text: 'Wymiana pościeli — komplet dla 4 osób', prop: null, res: null, day: null, prio: 'normalny', subs: [{ t: 'Odebrać z pralni', d: false }, { t: 'Rozwieźć do domków', d: false }] },
+      { id: 'i2', text: 'Serwis kosiarki przed końcem sezonu', prop: null, res: null, day: null, prio: 'niski', subs: [] },
+      { id: 'i3', text: 'Zawieźć klucze zapasowe do ekipy', prop: null, res: null, day: null, prio: 'wysoki', subs: [] },
+      { id: 'i4', text: 'Zdjęcia po remoncie łazienki', prop: null, res: null, day: null, prio: 'normalny', photo: true, subs: [] },
+    ],
+    open: {},
+    filter: 'all',
+    selOpen: false,
+    quick: null,
+    quickText: '',
+    quickTime: '',
+    quickPrio: 'normalny',
+    quickDay: null,
+    calOpen: false,
+    calHover: null,
+  };
+
+  /* ── pomocnicze ── */
+  prop = (id) => this.PROPS.find((p) => p.id === id) || null;
+  res = (id) => this.RES.find((r) => r.id === id) || null;
+  dayIdx = (k) => this.DAYS.findIndex((d) => d.k === k);
+  dayNum = (k) => (k ? Number(String(k).slice(3)) : null);
+  prioColor = (p) => (p === 'wysoki' ? '#D9492B' : p === 'normalny' ? '#C99A2E' : '#DDD5C3');
+  prioTextColor = (p) => (p === 'wysoki' ? '#D9492B' : p === 'normalny' ? '#7E6119' : '#716951');
+  nightsPl = (n) => n + (n === 1 ? ' noc' : n % 10 >= 2 && n % 10 <= 4 && (n < 12 || n > 14) ? ' noce' : ' nocy');
+  motionOn = () => (this.props.motion ?? 'Efektowny') === 'Efektowny';
+
+  busyOn = (propId, num) => {
+    const all = this.RES.concat(this.PAST);
+    return all.find((r) => r.prop === propId && num >= r.d1 && num < r.d2) || null;
+  };
+
+  /* ── akcje ── */
+  toggleDone = (id) => this.setState((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) }));
+  toggleOpen = (id) => this.setState((s) => ({ open: { ...s.open, [id]: !s.open[id] } }));
+  toggleSub = (id, i) => this.setState((s) => ({
+    tasks: s.tasks.map((t) => (t.id === id ? { ...t, subs: t.subs.map((x, j) => (j === i ? { ...x, d: !x.d } : x)) } : t)),
+  }));
+
+  /* ── przeciąganie ── */
+  beginDrag = (e, id) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest && e.target.closest('[data-nodrag]')) return;
+    if (this.drag) return;
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const clone = card.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.margin = '0';
+    clone.style.zIndex = '910';
+    clone.style.pointerEvents = 'none';
+    clone.style.background = '#FBFAF6';
+    clone.style.borderColor = '#17150F';
+    clone.style.animation = 'none';
+    clone.style.willChange = 'transform';
+    this.layerRef.current.appendChild(clone);
+    card.style.opacity = '.22';
+
+    const label = document.createElement('div');
+    label.style.cssText = 'position:fixed; z-index:915; pointer-events:none; opacity:0; transform:translateY(4px); transition:opacity .16s, transform .16s; background:#17150F; color:#fff; border-radius:3px; padding:6px 9px; font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;';
+    this.layerRef.current.appendChild(label);
+
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    this.drag = {
+      id, card, clone, label, rect,
+      ox: e.clientX - rect.left, oy: e.clientY - rect.top,
+      x: e.clientX, y: e.clientY, sdx: 0, sdy: 0, tilt: 0, target: null, drop: null,
+    };
+    window.addEventListener('pointermove', this.onMove);
+    window.addEventListener('pointerup', this.onUp);
+    this.raf = requestAnimationFrame(this.tick);
+  };
+
+  tick = () => {
+    const d = this.drag;
+    if (!d) return;
+    const tdx = d.x - d.ox - d.rect.left;
+    const tdy = d.y - d.oy - d.rect.top;
+    const ease = this.motionOn() ? 0.26 : 0.55;
+    const lag = tdx - d.sdx;
+    d.sdx += lag * ease;
+    d.sdy += (tdy - d.sdy) * ease;
+    const maxTilt = this.motionOn() ? Number(this.props.dragTilt ?? 9) : 0;
+    const want = Math.max(-1, Math.min(1, lag / 42)) * maxTilt;
+    d.tilt += (want - d.tilt) * 0.22;
+    const sc = this.motionOn() ? 1.035 : 1.01;
+    d.clone.style.transform = 'translate3d(' + d.sdx.toFixed(2) + 'px,' + d.sdy.toFixed(2) + 'px,0) rotate(' + d.tilt.toFixed(2) + 'deg) scale(' + sc + ')';
+    if (d.label && d.labelText) {
+      d.label.style.left = (d.x + 16) + 'px';
+      d.label.style.top = (d.y + 18) + 'px';
+    }
+    this.raf = requestAnimationFrame(this.tick);
+  };
+
+  onMove = (e) => {
+    const d = this.drag;
+    if (!d) return;
+    d.x = e.clientX; d.y = e.clientY;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const hit = el && el.closest ? el.closest('[data-drop]') : null;
+    if (hit !== d.target) {
+      this.paint(d.target, false);
+      d.target = hit;
+      this.paint(hit, true);
+      this.snapLabel(hit);
+    }
+  };
+
+  paint = (el, on) => {
+    if (!el) return;
+    const kind = el.getAttribute('data-drop');
+    const glow = el.querySelector('[data-glow]');
+    if (on) {
+      if (kind === 'res') {
+        el.style.transform = 'scale(1.045)';
+        el.style.outline = '1px solid #D9492B';
+        el.style.outlineOffset = '2px';
+      } else {
+        el.style.backgroundColor = '#F6E5DF';
+        if (glow) glow.style.transform = 'scaleX(1)';
+      }
+    } else {
+      if (kind === 'res') {
+        el.style.transform = '';
+        el.style.outline = '';
+        el.style.outlineOffset = '';
+      } else {
+        el.style.backgroundColor = '';
+        if (glow) glow.style.transform = 'scaleX(0)';
+      }
+    }
+  };
+
+  resolveDrop = (el, x) => {
+    if (!el) return null;
+    const kind = el.getAttribute('data-drop');
+    if (kind === 'res') {
+      const r = this.res(el.getAttribute('data-res'));
+      const track = el.parentElement;
+      const box = track.getBoundingClientRect();
+      let i = Math.floor((x - box.left) / (box.width / 7));
+      i = Math.max(0, Math.min(6, i));
+      const day = this.DAYS[i];
+      const inside = r && i >= Math.max(0, r.s) && i <= Math.min(6, r.e);
+      return { res: r ? r.id : null, prop: el.getAttribute('data-prop'), day: (inside ? day.k : (r && r.s >= 0 ? this.DAYS[r.s].k : this.DAYS[0].k)), guest: r ? r.guest : '' };
+    }
+    if (kind === 'day') {
+      return { res: null, prop: el.getAttribute('data-prop'), day: el.getAttribute('data-day'), guest: '' };
+    }
+    return null;
+  };
+
+  snapLabel = (el) => {
+    const d = this.drag;
+    if (!d || !d.label) return;
+    if (!el || !(this.props.snapPreview ?? true)) {
+      d.labelText = '';
+      d.label.style.opacity = '0';
+      return;
+    }
+    const info = this.resolveDrop(el, d.x);
+    if (!info) { d.label.style.opacity = '0'; return; }
+    const day = this.DAYS[this.dayIdx(info.day)];
+    const dayTxt = day ? day.n + ' sie · ' + day.dow : '';
+    d.labelText = info.res ? dayTxt + ' → ' + info.guest : dayTxt + ' → ' + (this.prop(info.prop) || {}).name;
+    d.label.textContent = d.labelText;
+    d.label.style.left = (d.x + 16) + 'px';
+    d.label.style.top = (d.y + 18) + 'px';
+    d.label.style.opacity = '1';
+    d.label.style.transform = 'translateY(0)';
+  };
+
+  onUp = () => {
+    const d = this.drag;
+    if (!d) return;
+    window.removeEventListener('pointermove', this.onMove);
+    window.removeEventListener('pointerup', this.onUp);
+    cancelAnimationFrame(this.raf);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    if (d.label) d.label.remove();
+
+    const info = this.resolveDrop(d.target, d.x);
+    const dur = this.motionOn() ? 300 : 180;
+    if (info) {
+      const tr = d.target.getBoundingClientRect();
+      const cx = tr.left + tr.width / 2 - (d.rect.left + d.rect.width / 2);
+      const cy = tr.top + tr.height / 2 - (d.rect.top + d.rect.height / 2);
+      d.clone.style.transition = 'transform ' + dur + 'ms cubic-bezier(.22,1,.36,1), opacity ' + dur + 'ms ease';
+      d.clone.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0) rotate(0deg) scale(.72)';
+      d.clone.style.opacity = '.06';
+      d.target.style.transition = 'transform .26s cubic-bezier(.34,1.56,.64,1), outline-color .2s, background-color .2s';
+      if (d.target.getAttribute('data-drop') === 'res') d.target.style.transform = 'scale(1.09)';
+      const tgt = d.target;
+      setTimeout(() => { this.paint(tgt, false); }, 260);
+      setTimeout(() => {
+        d.clone.remove();
+        d.card.style.opacity = '';
+        this.flash = d.id;
+        this.setState((s) => ({
+          tasks: s.tasks.map((t) => (t.id === d.id ? { ...t, day: info.day, res: info.res, prop: info.prop || t.prop } : t)),
+        }));
+      }, dur - 40);
+    } else {
+      d.clone.style.transition = 'transform ' + dur + 'ms cubic-bezier(.22,1,.36,1), opacity ' + dur + 'ms ease';
+      d.clone.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
+      d.clone.style.opacity = '0';
+      setTimeout(() => { d.clone.remove(); d.card.style.opacity = ''; }, dur);
+    }
+    this.drag = null;
+  };
+
+  componentDidUpdate() {
+    if (this.flash) {
+      const el = this.rootRef.current && this.rootRef.current.querySelector('[data-task="' + this.flash + '"]');
+      if (el) {
+        el.style.animation = 'wpFlash .95s ease-out both';
+        setTimeout(() => { if (el) el.style.animation = ''; }, 1000);
+      }
+      this.flash = null;
+    }
+    if (this.state.quick && this.focusQuick) {
+      this.focusQuick = false;
+      const el = this.quickInputRef.current;
+      if (el) el.focus();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this.onMove);
+    window.removeEventListener('pointerup', this.onUp);
+    cancelAnimationFrame(this.raf);
+  }
+
+  /* ── szybkie zadanie ── */
+  openQuick = (resId, ev) => {
+    const box = ev.currentTarget.getBoundingClientRect();
+    const r = this.res(resId);
+    const wish = Math.min(560, window.innerHeight - 24);
+    const top = Math.max(12, Math.min(box.bottom + 10, window.innerHeight - wish - 12));
+    const left = Math.min(Math.max(12, box.left), window.innerWidth - 372);
+    this.focusQuick = true;
+    this.setState({
+      quick: { res: resId, prop: r ? r.prop : null, top, left, maxH: (window.innerHeight - top - 16) + 'px' },
+      quickText: '', quickTime: '', quickPrio: 'normalny', quickDay: r && r.s >= 0 ? this.DAYS[r.s].k : '08-23',
+      calOpen: false, calHover: null, selOpen: false,
+    });
+  };
+
+  openBlank = (ev) => {
+    const box = ev.currentTarget.getBoundingClientRect();
+    const top = Math.max(12, box.bottom + 10);
+    this.focusQuick = true;
+    this.setState({
+      quick: { res: null, prop: null, top, left: Math.max(12, box.right - 352), maxH: (window.innerHeight - top - 16) + 'px' },
+      quickText: '', quickTime: '', quickPrio: 'normalny', quickDay: null, calOpen: false, selOpen: false,
+    });
+  };
+
+  closeQuick = () => this.setState({ quick: null, calOpen: false });
+
+  addQuick = () => {
+    const q = this.state.quick;
+    if (!q) return;
+    const text = (this.state.quickText || '').trim();
+    if (!text) { const el = this.quickInputRef.current; if (el) el.focus(); return; }
+    const id = 'n' + Date.now();
+    this.flash = id;
+    this.setState((s) => ({
+      tasks: s.tasks.concat([{ id, text, prop: q.prop, res: q.res, day: s.quickDay, time: s.quickTime, prio: s.quickPrio, subs: [] }]),
+      quick: null, calOpen: false, quickText: '',
+    }));
+  };
+
+  renderVals() {
+    const st = this.state;
+    const tasks = st.tasks;
+    const remaining = tasks.filter((t) => !t.done).length;
+    const pad = String(Math.min(99, remaining)).padStart(2, '0');
+    const digits = pad.split('').map((c) => ({ y: '-' + Number(c) * 40 + 'px' }));
+
+    const overOf = (t) => {
+      if (!t.day || this.dayIdx(t.day) >= 0) return 0;
+      const n = this.dayNum(t.day);
+      return n < 23 ? 23 - n : 0;
+    };
+
+    const mapSub = (t) => t.subs.map((s, i) => ({
+      t: s.t, d: s.d,
+      delay: (i * 55) + 'ms',
+      bg: s.d ? '#2F6B53' : 'transparent',
+      border: s.d ? '#2F6B53' : '#DDD5C3',
+      color: s.d ? '#716951' : '#17150F',
+      deco: s.d ? 'line-through' : 'none',
+      onToggle: () => this.toggleSub(t.id, i),
+    }));
+
+    const map = (t) => {
+      const p = this.prop(t.prop);
+      const r = this.res(t.res);
+      const over = overOf(t);
+      const done = t.subs.filter((s) => s.d).length;
+      return {
+        id: t.id, text: t.text, done: !!t.done, time: t.time || '', note: t.note || '',
+        auto: !!t.auto, photo: !!t.photo, recur: t.recur || '',
+        prioColor: this.prioColor(t.prio),
+        prioTextColor: this.prioTextColor(t.prio),
+        prioLabel: t.prio === 'wysoki' ? 'Pilne' : t.prio === 'normalny' ? 'Zwykłe' : 'Kiedyś',
+        pulse: over > 0 && this.motionOn() ? 'wpPulse 1.8s ease-in-out infinite' : 'none',
+        hasRes: !!r, resGuest: r ? r.guest : '', resSrc: r ? r.src : '', resColor: r ? r.srcColor : '#716951',
+        propName: p ? p.name : 'Bez obiektu', propColor: p ? p.color : '#716951',
+        hasSubs: t.subs.length > 0, subsLabel: done + '/' + t.subs.length, subs: mapSub(t),
+        subsOpen: !!st.open[t.id], chev: st.open[t.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+        overLabel: over ? (over === 1 ? '1 dzień po terminie' : over + ' dni po terminie') : '',
+        checkBg: t.done ? '#2F6B53' : 'transparent',
+        checkBorder: t.done ? '#2F6B53' : '#DDD5C3',
+        checkTitle: t.done ? 'Odznacz' : 'Oznacz jako wykonane',
+        textColor: t.done ? '#716951' : '#17150F',
+        onDown: (e) => this.beginDrag(e, t.id),
+        onToggle: () => this.toggleDone(t.id),
+        onOpen: () => this.toggleOpen(t.id),
+      };
+    };
+
+    const inFilter = (t) => st.filter === 'all' || t.prop === st.filter;
+    const groupBy = (list) => this.PROPS.map((p) => ({
+      name: p.name, color: p.color, tasks: list.filter((t) => t.prop === p.id).map(map),
+    })).concat([{ name: 'Bez obiektu', color: '#716951', tasks: list.filter((t) => !t.prop).map(map) }])
+      .filter((g) => g.tasks.length > 0);
+
+    const listed = tasks.filter((t) => t.day && inFilter(t));
+    const sections = [];
+    const overdue = listed.filter((t) => overOf(t) > 0);
+    if (overdue.length) {
+      sections.push({ id: 'over', label: 'Zaległe', sub: 'przed 23 sierpnia', count: overdue.length, color: '#D9492B', rule: '#D9492B', groups: groupBy(overdue) });
+    }
+    this.DAYS.forEach((d) => {
+      const inDay = listed.filter((t) => t.day === d.k);
+      if (!inDay.length) return;
+      sections.push({ id: d.k, label: d.label, sub: d.sub, count: inDay.length, color: '#17150F', rule: '#DDD5C3', groups: groupBy(inDay) });
+    });
+    const later = listed.filter((t) => this.dayIdx(t.day) < 0 && overOf(t) === 0);
+    if (later.length) {
+      sections.push({ id: 'later', label: 'Później', sub: 'po 29 sierpnia', count: later.length, color: '#524C3F', rule: '#DDD5C3', groups: groupBy(later) });
+    }
+
+    const inboxTasks = tasks.filter((t) => !t.day && !t.done);
+    const rows = this.PROPS.map((p) => {
+      const bars = this.RES.filter((r) => r.prop === p.id).map((r) => {
+        const l = r.s < 0 ? 0 : (r.s + 0.5) / 7 * 100;
+        const rt = r.e > 6 ? 100 : (r.e + 0.5) / 7 * 100;
+        return {
+          id: r.id, prop: p.id, guest: r.guest, src: r.src, color: p.color,
+          left: l.toFixed(2) + '%', width: (rt - l).toFixed(2) + '%',
+          radius: (r.s < 0 ? '0 3px 3px 0' : r.e > 6 ? '3px 0 0 3px' : '3px'),
+          onClick: (e) => this.openQuick(r.id, e),
+        };
+      });
+      const busy = {};
+      this.RES.filter((r) => r.prop === p.id).forEach((r) => {
+        for (let i = Math.max(0, r.s); i <= Math.min(6, r.e); i += 1) busy[i] = true;
+      });
+      const cells = this.DAYS.map((d, i) => ({
+        day: d.k, prop: p.id,
+        drop: busy[i] ? 'busy' : 'day',
+        bg: busy[i] ? 'transparent' : (d.weekend ? '#F7F3E9' : 'transparent'),
+        cursor: busy[i] ? 'default' : 'cell',
+      }));
+      return { name: p.name, sub: p.sub, color: p.color, cells, bars, trackRef: React.createRef() };
+    });
+
+    const q = st.quick;
+    const qres = q ? this.res(q.res) : null;
+    const qprop = q ? this.prop(q.prop) : null;
+    const chips = [];
+    if (q) {
+      if (qres) {
+        const a = this.DAYS[Math.max(0, qres.s)];
+        const b = this.DAYS[Math.min(6, qres.e)];
+        chips.push({ kind: 'przyjazd', label: qres.d1 + '.08', onPick: () => this.setState({ quickDay: a.k, calOpen: false }), sel: st.quickDay === a.k });
+        chips.push({ kind: 'wyjazd', label: qres.d2 + '.08', onPick: () => this.setState({ quickDay: b.k, calOpen: false }), sel: st.quickDay === b.k });
+      }
+      chips.push({ kind: 'dziś', label: '23.08', onPick: () => this.setState({ quickDay: '08-23', calOpen: false }), sel: st.quickDay === '08-23' });
+      chips.push({ kind: 'bez', label: 'terminu', onPick: () => this.setState({ quickDay: null, calOpen: false }), sel: st.quickDay === null });
+    }
+    const quickChips = chips.map((c) => ({
+      kind: c.kind, label: c.label,
+      bg: c.sel ? '#17150F' : '#FBFAF6',
+      border: c.sel ? '#17150F' : '#DDD5C3',
+      color: c.sel ? '#FBFAF6' : '#17150F',
+      onPick: c.onPick,
+    }));
+
+    const calProp = qprop || this.PROPS[0];
+    const firstDow = 5; // 1 sierpnia 2026 = sobota (tydzień od poniedziałku)
+    const calDays = [];
+    for (let i = 0; i < firstDow; i += 1) calDays.push({ n: '', bg: 'transparent', border: 'transparent', color: 'transparent', cursor: 'default', weight: '400', busy: false, onPick: () => {}, title: '' });
+    for (let n = 1; n <= 31; n += 1) {
+      const b = q ? this.busyOn(calProp.id, n) : null;
+      const key = '08-' + String(n).padStart(2, '0');
+      const sel = st.quickDay === key;
+      const holiday = n === 15;
+      const dow = (firstDow + n - 1) % 7;
+      const weekend = dow >= 5;
+      calDays.push({
+        n: String(n), busy: !!b, busyColor: calProp.color,
+        bg: sel ? '#17150F' : b ? '#EFE9DA' : 'transparent',
+        border: sel ? '#17150F' : n === 23 ? '#D9492B' : '#DDD5C3',
+        color: sel ? '#FBFAF6' : holiday ? '#D9492B' : weekend ? '#524C3F' : '#17150F',
+        weight: n === 23 || sel ? '600' : '400',
+        cursor: 'pointer',
+        title: b ? b.guest + ' · ' + this.nightsPl(b.nights) + ' · ' + b.price : '',
+        onPick: () => this.setState({ quickDay: key, calHover: n }),
+      });
+    }
+    const hoverN = st.calHover || (st.quickDay ? this.dayNum(st.quickDay) : null);
+    const hoverBusy = hoverN ? this.busyOn(calProp.id, hoverN) : null;
+    const DOW_PL = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota', 'niedziela'];
+    const calHint = hoverN
+      ? (hoverN + ' sierpnia · ' + DOW_PL[(firstDow + hoverN - 1) % 7] + (hoverN === 15 ? ' · Wniebowzięcie NMP' : '')
+        + (hoverBusy ? ' — zajęte: ' + hoverBusy.guest + ', ' + this.nightsPl(hoverBusy.nights) + ', ' + hoverBusy.price : ' — wolne'))
+      : 'Wybierz dzień, żeby zobaczyć zajętość obiektu.';
+
+    const prios = ['wysoki', 'normalny', 'niski'].map((p) => ({
+      label: p === 'wysoki' ? 'Pilne' : p === 'normalny' ? 'Zwykłe' : 'Kiedyś',
+      bg: st.quickPrio === p ? '#17150F' : 'transparent',
+      color: st.quickPrio === p ? '#fff' : '#524C3F',
+      onPick: () => this.setState({ quickPrio: p }),
+    }));
+
+    const propOptions = [{ id: 'all', name: 'Wszystkie obiekty', color: '#716951' }].concat(this.PROPS).map((o) => ({
+      name: o.name, color: o.color,
+      count: o.id === 'all' ? tasks.filter((t) => t.day).length : tasks.filter((t) => t.day && t.prop === o.id).length,
+      active: st.filter === o.id,
+      weight: st.filter === o.id ? '600' : '500',
+      bg: st.filter === o.id ? '#EFE9DA' : 'transparent',
+      delay: (this.PROPS.findIndex((p) => p.id === o.id) + 1) * 35 + 'ms',
+      onPick: () => this.setState({ filter: o.id, selOpen: false }),
+    }));
+    const cur = st.filter === 'all' ? { name: 'Wszystkie', color: '#716951' } : this.prop(st.filter);
+    const visibleCount = listed.length;
+
+    return {
+      rootRef: this.rootRef, layerRef: this.layerRef, quickInputRef: this.quickInputRef, addBtnRef: this.addBtnRef,
+      digits,
+      countOver: overdue.length,
+      countToday: tasks.filter((t) => t.day === '08-23' && !t.done).length,
+      countDone: tasks.filter((t) => t.done).length,
+      countInbox: inboxTasks.length,
+      days: this.DAYS.map((d) => ({ n: d.n, dow: d.dow, numColor: d.today ? '#D9492B' : '#524C3F', dowColor: d.today ? '#D9492B' : '#716951' })),
+      rows, sections, inbox: inboxTasks.map(map), inboxEmpty: inboxTasks.length === 0,
+      selOpen: st.selOpen, toggleSel: () => this.setState({ selOpen: !st.selOpen }),
+      selBorder: st.selOpen ? '#17150F' : '#DDD5C3',
+      selChev: st.selOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      filterLabel: cur.name, filterColor: cur.color, propOptions,
+      visibleLabel: visibleCount + (visibleCount === 1 ? ' zadanie w widoku' : ' zadania w widoku'),
+      quickOpen: !!q,
+      quickTop: q ? q.top + 'px' : '0px',
+      quickLeft: q ? q.left + 'px' : '0px',
+      quickMaxH: q ? q.maxH : 'none',
+      quickCtx: q ? (qres ? qres.guest + ' · ' + (qprop ? qprop.name : '') : 'bez rezerwacji · trafi do skrzynki') : '',
+      quickText: st.quickText, quickTime: st.quickTime,
+      onQuickText: (e) => this.setState({ quickText: e.target.value }),
+      onQuickTime: (e) => this.setState({ quickTime: e.target.value }),
+      quickChips, prios,
+      calOpen: st.calOpen, toggleCal: () => this.setState({ calOpen: !st.calOpen }),
+      calBg: st.calOpen ? '#17150F' : '#FBFAF6',
+      calBorder: st.calOpen ? '#17150F' : '#DDD5C3',
+      calColor: st.calOpen ? '#FBFAF6' : '#17150F',
+      calProp: calProp.name, calDays, calHint,
+      dowHeads: ['PN', 'WT', 'ŚR', 'CZ', 'PT', 'SB', 'ND'].map((t, i) => ({ t, color: i >= 5 ? '#D9492B' : '#746C54' })),
+      openBlank: this.openBlank, closeQuick: this.closeQuick, addQuick: this.addQuick,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

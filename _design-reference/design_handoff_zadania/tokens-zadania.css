@@ -1,0 +1,328 @@
+/*
+  Moduł „Zadania” — blok CSS do dopisania w `src/pages/dashboard/styles.js`
+  (na końcu szablonu DASHBOARD_CSS, PRZED sekcją „Responsywność”).
+  Namespace `.wpd`, wyłącznie tokeny var(--…) z tego arkusza, zero cieni i gradientów,
+  radius 3px kontrolki / 4px panele. Klasy z animacjami dopisać też do bloku
+  @media (prefers-reduced-motion: reduce) — lista na końcu pliku.
+
+  UWAGA: styles.js to szablon JS w odwróconych apostrofach — bez znaku ` w komentarzach.
+*/
+
+/* ── Pasek liczników ── */
+.wpd-tk-bar{ display:flex; align-items:stretch; background:var(--surface);
+  border:1px solid var(--hairline); border-radius:4px; margin-bottom:20px; overflow:hidden; }
+.wpd-tk-bar__cell{ padding:16px 22px 18px; border-right:1px solid var(--hairline); min-width:150px; }
+.wpd-tk-bar__hint{ flex:1 1 auto; padding:16px 22px; display:flex; align-items:center;
+  justify-content:flex-end; gap:10px; }
+.wpd-tk-bar__hint p{ font-size:12.5px; color:var(--muted); max-width:290px; margin:0; text-wrap:pretty; }
+.wpd-tk-bar__hint svg{ width:17px; height:17px; color:var(--cynober); flex:0 0 17px; }
+.wpd-tk-num{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:22px; color:var(--ink); }
+.wpd-tk-num--over{ color:var(--cynober); }
+
+/* licznik przewijający cyfry: kolumna 0-9 przesuwana o -cyfra × 40px (transform z JS) */
+.wpd-tk-roll{ display:flex; align-items:center; gap:1px; height:40px; overflow:hidden; }
+.wpd-tk-roll__col{ display:inline-flex; height:40px; overflow:hidden; }
+.wpd-tk-roll__strip{ display:flex; flex-direction:column;
+  font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:33px; letter-spacing:-.02em;
+  color:var(--ink); transition:transform .55s cubic-bezier(.22,1,.36,1); }
+.wpd-tk-roll__strip span{ height:40px; line-height:40px; }
+
+/* ── Oś przypisania ── */
+.wpd-tk-axis__head{ display:flex; align-items:center; gap:14px; padding:15px 20px;
+  border-bottom:1px solid var(--hairline); }
+.wpd-tk-axis__leg{ display:inline-flex; align-items:center; gap:6px;
+  font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--muted); }
+.wpd-tk-axis__swatch{ width:14px; height:6px; border-radius:2px; }
+.wpd-tk-axis__swatch--free{ border:1px dashed var(--hairline); }
+.wpd-tk-axis__headrow, .wpd-tk-axis__row{ display:grid; grid-template-columns:196px 1fr; }
+.wpd-tk-axis__row{ border-top:1px solid var(--hairline); }
+.wpd-tk-axis__corner{ border-right:1px solid var(--hairline); }
+.wpd-tk-axis__dnum{ text-align:center; padding:9px 0 8px; border-left:1px solid var(--inner); }
+.wpd-tk-axis__dnum b{ display:block; font-family:'IBM Plex Mono', monospace; font-size:12px;
+  font-weight:500; color:var(--muted); }
+.wpd-tk-axis__dnum span{ font-family:'IBM Plex Mono', monospace; font-size:8.5px;
+  text-transform:uppercase; color:var(--faint); }
+.wpd-tk-axis__dnum--today b, .wpd-tk-axis__dnum--today span{ color:var(--cynober); font-weight:600; }
+.wpd-tk-axis__label{ padding:14px 18px; border-right:1px solid var(--hairline); position:relative; }
+.wpd-tk-axis__objname{ font-weight:600; font-size:14px; }
+.wpd-tk-axis__objsub{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--faint); margin-top:3px; }
+.wpd-tk-axis__track{ position:relative; }
+.wpd-tk-axis__cells{ display:grid; grid-template-columns:repeat(7,1fr); min-height:56px; height:100%; }
+.wpd-tk-cell{ position:relative; border-left:1px solid var(--inner); transition:background-color .18s; }
+.wpd-tk-cell--free{ cursor:cell; }
+.wpd-tk-cell--weekend{ background:color-mix(in srgb, var(--inner) 45%, var(--surface)); }
+.wpd-tk-cell__glow{ position:absolute; left:0; right:0; top:0; height:2px; background:var(--cynober);
+  transform:scaleX(0); transform-origin:left; transition:transform .22s cubic-bezier(.22,1,.36,1); }
+/* stan celu przeciągania — ustawiany klasą z JS, nie hoverem */
+.wpd-tk-cell--target{ background:var(--tint-cynober); }
+.wpd-tk-cell--target .wpd-tk-cell__glow{ transform:scaleX(1); }
+
+.wpd-tk-bar-res{ position:absolute; top:12px; height:32px; border-radius:3px; display:flex;
+  align-items:center; gap:8px; padding:0 10px; cursor:pointer; z-index:2;
+  transition:transform .18s cubic-bezier(.22,1,.36,1), filter .18s; }
+.wpd-tk-bar-res:hover{ filter:brightness(1.12); }
+.wpd-tk-bar-res--clipL{ border-radius:0 3px 3px 0; }
+.wpd-tk-bar-res--clipR{ border-radius:3px 0 0 3px; }
+.wpd-tk-bar-res__guest{ font-size:12px; font-weight:600; color:#fff; overflow:hidden;
+  white-space:nowrap; text-overflow:ellipsis; }
+.wpd-tk-bar-res__src{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.06em;
+  text-transform:uppercase; color:rgba(255,255,255,.72); }
+.wpd-tk-bar-res__add{ margin-left:auto; display:inline-flex; align-items:center; gap:5px; flex:0 0 auto; }
+.wpd-tk-bar-res__add svg{ width:13px; height:13px; color:rgba(255,255,255,.85); }
+.wpd-tk-bar-res--target{ transform:scale(1.045); outline:1px solid var(--cynober); outline-offset:2px; }
+/* klawiaturowa ścieżka przypisania — ten sam idiom co .wpd-cal__add */
+.wpd-tk-axis__add{ position:absolute; top:50%; right:12px; transform:translateY(-50%); width:24px;
+  height:24px; border:1px solid var(--hairline); background:var(--surface); border-radius:3px;
+  color:var(--muted); display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+  opacity:0; transition:opacity .14s; }
+.wpd-tk-axis__row:hover .wpd-tk-axis__add, .wpd-tk-axis__add:focus-visible{ opacity:1; }
+@media (hover:none){ .wpd-tk-axis__add{ opacity:1; } }
+
+/* ── Układ listy + skrzynki ── */
+/* flex-wrap, nie sztywne kolumny: przy panelu ~900px kolumna listy schodziła do 265px
+   i kartki nachodziły na siebie (tekst łamał się po jednym słowie). */
+.wpd-tk-layout{ display:flex; flex-wrap:wrap; gap:20px; margin-top:22px; align-items:flex-start; }
+.wpd-tk-list{ flex:1 1 560px; min-width:0; }
+.wpd-tk-side{ flex:1 1 300px; max-width:340px; position:sticky; top:96px;
+  display:flex; flex-direction:column; gap:14px; }
+
+/* ── Sekcje dnia i podgrupy obiektów ── */
+.wpd-tk-sec{ margin-bottom:26px; }
+.wpd-tk-sec__head{ display:flex; align-items:baseline; gap:12px; padding:0 2px 9px;
+  border-bottom:1px solid var(--hairline); }
+.wpd-tk-sec__title{ font-size:18px; font-weight:700; letter-spacing:-.025em; }
+.wpd-tk-sec__sub{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--label); }
+.wpd-tk-sec__count{ margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:11px;
+  color:var(--muted); }
+.wpd-tk-sec--over{ }
+.wpd-tk-sec--over .wpd-tk-sec__head{ border-bottom-color:var(--cynober); }
+.wpd-tk-sec--over .wpd-tk-sec__title, .wpd-tk-sec--over .wpd-tk-sec__count{ color:var(--cynober); }
+.wpd-tk-grp{ margin-top:15px; }
+.wpd-tk-grp__head{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.wpd-tk-grp__name{ font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:500;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.wpd-tk-grp__rule{ flex:1 1 auto; height:1px; background:var(--hairline); }
+.wpd-tk-grp__items{ display:flex; flex-direction:column; gap:8px; }
+.wpd-tk-dot{ width:8px; height:8px; border-radius:2px; flex:0 0 8px; }
+
+/* ── Kartka zadania ── */
+.wpd-tk-card{ position:relative; background:var(--surface); border:1px solid var(--hairline);
+  border-radius:4px; padding:13px 16px 13px 20px; cursor:grab; touch-action:none;
+  animation:wpd-tk-in .34s cubic-bezier(.22,1,.36,1) both;
+  transition:border-color .16s, background-color .3s; }
+.wpd-tk-card:hover{ border-color:var(--ink); }
+.wpd-tk-card--flash{ animation:wpd-tk-flash .95s ease-out both; }
+.wpd-tk-card__prio{ position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px;
+  transform-origin:left; }
+.wpd-tk-card__prio--hi{ background:var(--cynober); }
+.wpd-tk-card__prio--mid{ background:var(--amber); }
+.wpd-tk-card__prio--low{ background:var(--hairline); }
+.wpd-tk-card__prio--pulse{ animation:wpd-tk-pulse 1.8s ease-in-out infinite; }
+.wpd-tk-card__body{ display:flex; align-items:flex-start; gap:13px; }
+.wpd-tk-card__main{ flex:1 1 auto; min-width:0; }
+.wpd-tk-card__grip{ flex:0 0 14px; display:flex; align-items:center; padding-top:4px; }
+.wpd-tk-card__grip svg{ width:14px; height:14px; color:var(--hairline); }
+.wpd-tk-card__titlewrap{ position:relative; display:inline-block; max-width:100%; }
+.wpd-tk-card__title{ font-size:14.5px; font-weight:600; letter-spacing:-.01em; line-height:1.35;
+  color:var(--ink); }
+.wpd-tk-card--done .wpd-tk-card__title{ color:var(--faint); }
+.wpd-tk-card__strike{ position:absolute; left:0; right:0; top:53%; height:1px; background:var(--faint);
+  transform-origin:left; animation:wpd-tk-strike .3s cubic-bezier(.22,1,.36,1) both; }
+.wpd-tk-card__meta{ display:flex; align-items:center; flex-wrap:wrap; gap:11px; margin-top:8px; }
+.wpd-tk-card__note{ font-family:'Newsreader', serif; font-style:italic; font-size:14px;
+  color:var(--muted); margin:9px 0 0; padding-left:11px; border-left:1px solid var(--hairline);
+  line-height:1.5; text-wrap:pretty; }
+
+/* checkbox zadania (ptaszek rysowany) */
+.wpd-tk-check{ width:22px; height:22px; flex:0 0 22px; border:1px solid var(--hairline);
+  background:transparent; border-radius:3px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; padding:0; margin-top:1px; transition:border-color .16s, background-color .16s; }
+.wpd-tk-check:hover{ border-color:var(--green); }
+.wpd-tk-check--on{ background:var(--green); border-color:var(--green); }
+.wpd-tk-check svg{ width:13px; height:13px; }
+.wpd-tk-check__path{ stroke-dasharray:30; animation:wpd-tk-draw .42s cubic-bezier(.22,1,.36,1) both; }
+
+/* mikro-elementy wiersza meta */
+.wpd-tk-time{ display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono', monospace;
+  font-size:11px; color:var(--muted); }
+.wpd-tk-time svg{ width:12px; height:12px; color:var(--faint); }
+.wpd-tk-over{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--cynober); background:var(--tint-cynober);
+  border:1px solid #EBD3CB; border-radius:3px; padding:3px 7px; }
+.wpd-tk-res{ display:inline-flex; align-items:center; gap:6px; background:var(--inner);
+  border:1px solid var(--hairline); border-radius:3px; padding:3px 8px 3px 7px; }
+.wpd-tk-res__dot{ width:7px; height:7px; border-radius:2px; }
+.wpd-tk-res__guest{ font-size:11.5px; font-weight:600; color:var(--ink); }
+.wpd-tk-res__src{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--faint); }
+.wpd-tk-tag{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--label); border:1px solid var(--hairline); border-radius:3px;
+  padding:3px 6px; }
+.wpd-tk-mini{ display:inline-flex; align-items:center; gap:5px; font-family:'IBM Plex Mono', monospace;
+  font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint); }
+.wpd-tk-mini svg{ width:12px; height:12px; }
+/* etykieta priorytetu: --hairline jako TEKST daje 1,2:1 — używać tylko na pasku 3px */
+.wpd-tk-prio{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.07em;
+  text-transform:uppercase; }
+.wpd-tk-prio--hi{ color:var(--cynober); }
+.wpd-tk-prio--mid{ color:var(--amber-ink); }
+.wpd-tk-prio--low{ color:var(--faint); }
+
+/* checklista */
+.wpd-tk-subs__btn{ display:inline-flex; align-items:center; gap:6px; background:transparent;
+  border:1px solid var(--hairline); border-radius:3px; padding:3px 7px; cursor:pointer;
+  font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em; color:var(--muted);
+  transition:border-color .14s, color .14s; }
+.wpd-tk-subs__btn:hover{ border-color:var(--ink); color:var(--ink); }
+.wpd-tk-subs__btn svg{ width:12px; height:12px; }
+.wpd-tk-subs__chev{ transition:transform .26s cubic-bezier(.22,1,.36,1); }
+.wpd-tk-subs__btn--open .wpd-tk-subs__chev{ transform:rotate(180deg); }
+.wpd-tk-subs{ margin-top:11px; padding-top:11px; border-top:1px solid var(--hairline);
+  display:flex; flex-direction:column; gap:2px; }
+/* kaskada: opóźnienie ustawiane inline style={{ animationDelay: i*55 + 'ms' }} */
+.wpd-tk-sub{ display:flex; align-items:center; gap:10px; background:transparent; border:none;
+  padding:5px 0; cursor:pointer; text-align:left; font-family:inherit;
+  animation:wpd-tk-sub .38s cubic-bezier(.34,1.56,.64,1) both; }
+.wpd-tk-sub__box{ width:16px; height:16px; flex:0 0 16px; border:1px solid var(--hairline);
+  border-radius:2px; display:flex; align-items:center; justify-content:center; }
+.wpd-tk-sub__box--on{ background:var(--green); border-color:var(--green); }
+.wpd-tk-sub__box svg{ width:10px; height:10px; }
+.wpd-tk-sub__txt{ font-size:13px; color:var(--ink); }
+.wpd-tk-sub--done .wpd-tk-sub__txt{ color:var(--faint); text-decoration:line-through; }
+
+/* ── Skrzynka „Do przypisania” ── */
+.wpd-tk-inbox{ background:var(--surface); border:1px solid var(--ink); border-radius:4px; overflow:hidden; }
+.wpd-tk-inbox__head{ display:flex; align-items:center; gap:10px; padding:14px 16px;
+  border-bottom:1px solid var(--hairline); }
+.wpd-tk-inbox__head svg{ width:16px; height:16px; color:var(--cynober); }
+.wpd-tk-inbox__body{ padding:12px; display:flex; flex-direction:column; gap:8px; }
+.wpd-tk-inbox__empty{ border:1px dashed var(--hairline); border-radius:4px; padding:22px 14px;
+  text-align:center; font-family:'Newsreader', serif; font-style:italic; font-size:15px; color:var(--faint); }
+.wpd-tk-card--compact{ background:var(--paper); padding:11px 12px 11px 17px; }
+.wpd-tk-card--compact:hover{ transform:translateX(2px); }
+.wpd-tk-card--compact .wpd-tk-card__title{ font-size:13.5px; line-height:1.4; }
+
+/* kafel instrukcji */
+.wpd-tk-howto{ background:var(--ink); border-radius:4px; padding:16px 18px; }
+.wpd-tk-howto__title{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--on-side-label); margin:0 0 12px; }
+.wpd-tk-howto__row{ display:flex; gap:10px; padding:7px 0; }
+.wpd-tk-howto__num{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--cynober);
+  flex:0 0 14px; }
+.wpd-tk-howto__txt{ font-size:12.5px; color:var(--on-side); line-height:1.5; }
+.wpd-tk-howto__txt b{ color:#fff; font-weight:600; }
+
+/* ── Przeciąganie: klon i plakietka celu (tworzone z JS w warstwie fixed) ── */
+.wpd-tk-layer{ position:fixed; inset:0; pointer-events:none; z-index:900; }
+.wpd-tk-ghost{ position:fixed; z-index:910; pointer-events:none; background:var(--surface);
+  border-color:var(--ink); animation:none; will-change:transform; }
+.wpd-tk-snap{ position:fixed; z-index:915; pointer-events:none; background:var(--ink); color:#fff;
+  border-radius:3px; padding:6px 9px; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+  letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; opacity:0;
+  transform:translateY(4px); transition:opacity .16s, transform .16s; }
+.wpd-tk-snap--on{ opacity:1; transform:translateY(0); }
+
+/* ── Szybkie zadanie (popover) ── */
+.wpd-tk-pop__scrim{ position:fixed; inset:0; background:rgba(23,21,15,.28); z-index:920; }
+/* top/left/max-height liczone w JS: max-height = innerHeight - top - 16 */
+.wpd-tk-pop{ position:fixed; width:352px; background:var(--paper); border:1px solid var(--ink);
+  border-radius:4px; z-index:930; overflow:hidden; display:flex; flex-direction:column;
+  transform-origin:top left; animation:wpd-tk-pop .26s cubic-bezier(.22,1,.36,1) both; }
+.wpd-tk-pop__head{ flex:0 0 auto; display:flex; align-items:flex-start; gap:12px; padding:15px 16px;
+  background:var(--surface); border-bottom:1px solid var(--hairline); }
+/* środek przewijalny, stopka przyklejona — inaczej „Dodaj zadanie” wychodzi poza ekran
+   przy otwartym kalendarzu */
+.wpd-tk-pop__body{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:15px 16px; }
+.wpd-tk-pop__foot{ flex:0 0 auto; display:flex; gap:10px; padding:13px 16px;
+  border-top:1px solid var(--hairline); background:var(--surface); }
+.wpd-tk-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.wpd-tk-chip{ display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px;
+  background:var(--surface); border:1px solid var(--hairline); border-radius:3px; cursor:pointer;
+  font-family:inherit; font-size:12px; font-weight:600; color:var(--ink);
+  transition:border-color .14s, background-color .14s; }
+.wpd-tk-chip:hover{ border-color:var(--ink); }
+.wpd-tk-chip__kind{ font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.07em;
+  text-transform:uppercase; opacity:.72; }
+.wpd-tk-chip--on{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+
+/* ── Kalendarz z zajętością ── */
+.wpd-tk-cal{ margin-top:11px; background:var(--surface); border:1px solid var(--hairline);
+  border-radius:4px; padding:12px; animation:wpd-tk-pop .26s cubic-bezier(.22,1,.36,1) both;
+  transform-origin:top center; }
+.wpd-tk-cal__head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.wpd-tk-cal__month{ font-weight:700; font-size:14px; letter-spacing:-.02em; }
+.wpd-tk-cal__dows, .wpd-tk-cal__grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.wpd-tk-cal__dow{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:8.5px;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--label); }
+.wpd-tk-cal__dow--we{ color:var(--cynober); }
+.wpd-tk-cal__day{ position:relative; height:34px; border:1px solid var(--hairline);
+  background:transparent; border-radius:3px; cursor:pointer; padding:0;
+  font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink);
+  transition:border-color .14s, background-color .14s, transform .14s cubic-bezier(.22,1,.36,1); }
+.wpd-tk-cal__day:hover{ border-color:var(--ink); transform:scale(1.06); }
+.wpd-tk-cal__day--pad{ border-color:transparent; cursor:default; }
+.wpd-tk-cal__day--busy{ background:var(--inner); }
+.wpd-tk-cal__day--today{ border-color:var(--cynober); font-weight:600; }
+.wpd-tk-cal__day--we{ color:var(--muted); }
+.wpd-tk-cal__day--holiday{ color:var(--cynober); }
+.wpd-tk-cal__day--on{ background:var(--ink); border-color:var(--ink); color:var(--surface); font-weight:600; }
+.wpd-tk-cal__busybar{ position:absolute; left:4px; right:4px; bottom:3px; height:2px; border-radius:1px; }
+.wpd-tk-cal__hint{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.04em;
+  color:var(--muted); margin:10px 0 0; line-height:1.5; min-height:15px; }
+
+/* ── Custom select (zamiennik .wpd-select) ── */
+.wpd-sel{ position:relative; }
+.wpd-sel__btn{ display:inline-flex; align-items:center; gap:11px; height:38px; padding:0 13px;
+  background:var(--surface); border:1px solid var(--hairline); border-radius:3px; cursor:pointer;
+  font-family:inherit; transition:border-color .16s; }
+.wpd-sel__btn:hover, .wpd-sel__btn--open{ border-color:var(--ink); }
+.wpd-sel__label{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--label); }
+.wpd-sel__value{ font-size:13.5px; font-weight:600; color:var(--ink); }
+.wpd-sel__chev{ width:13px; height:13px; color:var(--faint);
+  transition:transform .24s cubic-bezier(.22,1,.36,1); }
+.wpd-sel__btn--open .wpd-sel__chev{ transform:rotate(180deg); }
+.wpd-sel__menu{ position:absolute; top:calc(100% + 6px); left:0; width:262px; background:var(--surface);
+  border:1px solid var(--ink); border-radius:4px; padding:5px; z-index:60; transform-origin:top left;
+  animation:wpd-tk-pop .24s cubic-bezier(.22,1,.36,1) both; }
+/* kaskada pozycji: style={{ animationDelay: i*35 + 'ms' }} */
+.wpd-sel__opt{ display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px;
+  background:transparent; border:none; border-radius:3px; cursor:pointer; font-family:inherit;
+  text-align:left; animation:wpd-tk-sub .3s cubic-bezier(.22,1,.36,1) both;
+  transition:background-color .14s; }
+.wpd-sel__opt:hover{ background:var(--inner); }
+.wpd-sel__opt--on{ background:var(--inner); }
+.wpd-sel__opt--on .wpd-sel__optname{ font-weight:600; }
+.wpd-sel__optname{ font-size:13.5px; font-weight:500; color:var(--ink); }
+.wpd-sel__optcount{ margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+  color:var(--faint); }
+.wpd-sel__check{ width:13px; height:13px; color:var(--cynober); }
+
+/* ── Klatki kluczowe ── */
+@keyframes wpd-tk-in{ from{ opacity:0; transform:translateY(7px); } }
+@keyframes wpd-tk-pulse{ 0%,100%{ opacity:1; transform:scaleX(1); } 50%{ opacity:.45; transform:scaleX(2.2); } }
+@keyframes wpd-tk-draw{ from{ stroke-dashoffset:30; } to{ stroke-dashoffset:0; } }
+@keyframes wpd-tk-strike{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+@keyframes wpd-tk-pop{ from{ opacity:0; transform:scale(.94) translateY(-6px); } }
+@keyframes wpd-tk-sub{ from{ opacity:0; transform:translateX(-10px); } }
+@keyframes wpd-tk-sheet{ from{ opacity:0; transform:scale(.96) translateY(-10px); } }
+@keyframes wpd-tk-flash{ 0%{ background:var(--tint-cynober); border-color:var(--cynober); }
+  100%{ background:var(--surface); border-color:var(--hairline); } }
+
+/*
+  DO DOPISANIA w istniejącym bloku @media (prefers-reduced-motion: reduce) w styles.js:
+
+  .wpd-tk-card, .wpd-tk-pop, .wpd-tk-cal, .wpd-sel__menu, .wpd-sel__opt, .wpd-tk-sub{
+    animation:none !important; }
+  .wpd-tk-card__prio--pulse{ animation:none !important; }
+  .wpd-tk-card__strike, .wpd-tk-check__path{ animation:none !important; }
+  .wpd-tk-roll__strip{ transition:none !important; }
+  .wpd-tk-cal__day:hover{ transform:none !important; }
+  .wpd-tk-card--compact:hover{ transform:none !important; }
+
+  W JS (useTaskDrag): przy prefers-reduced-motion ustawić przechył na 0deg,
+  doganianie kursora na .55 i skalę klonu na 1.01.
+*/
