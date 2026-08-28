@@ -395,7 +395,7 @@ zawężoną i zapisywaną w dzienniku. Ale nie jest zmianą neutralną dokumenta
 | Co | Dlaczego to Twoja decyzja | Kiedy najpóźniej |
 |---|---|---|
 | **Okres przechowywania dziennika dostępu** | Wdrożyłem 12 miesięcy, bo brak jakiejkolwiek granicy jest naruszeniem od pierwszego wpisu. Ale to propozycja do potwierdzenia — wariant 24 miesiące, jeśli dziennik ma służyć obronie przed roszczeniami. | przed deployem funkcji |
-| **Ścieżka retencji dla kont po „Nadaj dostęp" i „Odbierz"** | Oba stany żyją dziś bezterminowo. Panel pokazuje je w „Porządku", ale nie kasuje — bo nie wiadomo, po jakim czasie ma kasować. | przed zaproszeniem pierwszego testera |
+| **Ścieżka retencji dla kont po „Nadaj dostęp" i „Odbierz"** | ✅ **ROZSTRZYGNIĘTE 2026-08-27** (decyzja właściciela): po „Odbierz" — 90 dni, spójnie z retencją porzuconych triali; nadane dostępy — bez automatu do końca bety, przegląd ręczny w „Porządku". Mechanizm kasowania po „Odbierz" do wdrożenia (`dev`), rekomendowana ścieżka: istniejący purge porzuconych triali (`trialEndsAt`). | — (mechanizm: zanim pierwsze konto po „Odbierz" osiągnie 90 dni) |
 | **Wiersz o dzienniku w Polityce prywatności §2** | To publikowany dokument prawny — nie dopisuję do niego nic bez Ciebie. Ocena zawiera gotowy projekt wiersza. | przed deployem |
 | **Pola obsługi zgłoszenia w Polityce §2** | Panel dokłada do zgłoszeń status i notatkę; Polityka ich nie wymienia. | przed deployem |
 | **Warunki bety w Regulaminie §6** | Wciąż `[DO UZUPEŁNIENIA]` — to zobowiązanie wobec konsumenta. | przed zaproszeniem pierwszego testera |

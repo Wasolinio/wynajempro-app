@@ -4,7 +4,29 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-28
+
+### Decyzja E3: zakładka Zadania bez eksportu — pytanie otwarte z 24.08 zamknięte
+- 🎯 **E3 czekało na jedną decyzję:** co eksportujemy z zakładki Zadania i do jakiego formatu (CSV/PDF/iCal). Właściciel rozstrzygnął: **nie eksportujemy nic** — jedyną formą eksportu wartą wprowadzenia byłaby integracja z kalendarzem telefonu, pozwalająca ustawić dodatkowe powiadomienie i przypomnienie o zadaniu.
+- ✅ **Skutek dla planu:** E3 przestaje być zablokowane — design gotowy (`design_handoff_identyfikacja_v2`), zakres = sama zakładka; element eksportu z handoffu (jeśli jest) pomijamy przy wdrożeniu. Naniesione w [[Projects/Roadmap]] (wiersz E3 + lista otwartych pytań: zostały E2 i E5).
+- 📌 **Integracja z kalendarzem telefonu → [[Projects/Backlog]]** jako pomysł niezaplanowany (do roadmapy wejdzie osobną decyzją, zgodnie z metodologią). Zapisana z naturalną ścieżką techniczną — kanał subskrypcyjny iCal na wzór istniejącego `exportIcal` dla rezerwacji — i z granicą do zbadania przed jakąkolwiek obietnicą: interwał odświeżania subskrybowanego kalendarza narzuca aplikacja kalendarza, a przypomnienia z pliku część aplikacji ignoruje.
+- ⚖️ **Czego decyzja nie zmienia:** eksport rezerwacji iCal (`exportIcal`) i eksport CSV/PDF raportu dla księgowego działają jak dotąd — decyzja dotyczy wyłącznie zakładki Zadania.
+
 ## 2026-08-27
+
+### Brief dla Coworka: wyszukanie 20–40 kandydatów na testerów — profil, sygnały rozpoznawcze, granice
+- 🎯 **Zlecenie właściciela:** samowystarczalny brief dla sesji Cowork, która ma znaleźć w internecie gospodarzy wynajmujących „podobnie do nas", żeby produkt do nich trafił. Plik: `docs/marketing/Brief-cowork-nabor-testerow-2026-08-27.md` + `.docx`; pełna treść podana w czacie do wklejenia.
+- ✅ **Profil zbudowany na źródłach, nie na wyobrażeniu:** rdzeń ICP z `Brief-produktowy-WynajemPRO.md` (1–5 obiektów, obsługa samodzielna, Booking/Airbnb/bezpośrednio, dziś Excel — sekcja 2), anty-profil stamtąd (hotele z recepcją, firmy zarządzające, najem długoterminowy) rozszerzony o rozpoznawalne ślady wdrożonego systemu (silnik Hotres/IdoSell/Profitroom = odpada); segment A = domki turystyczne, najbliżej Domków Ruś. Twarde wymagania klienta spisane z produktu: e-mail/Google + weryfikacja, przeglądarka, iCal z portali dla wartości synchronizacji, decyzyjny właściciel.
+- 🛡️ **Granice wpisane do briefu jako sekcja bezwzględna:** Cowork niczego nie wysyła i z nikim się nie kontaktuje (kontakt = właściciel, indywidualnie); zbiera wyłącznie dane publikowane w celach biznesowych (minimalizacja, RODO); lista nie jest bazą do masowej wysyłki; zakaz pisania o produkcie gdziekolwiek — zasada „grupy nie znoszą autopromocji" z K1 planu marketingowego przeniesiona wprost. Informacje o ofercie (darmowa beta, founding members) oznaczone jako kontekst, nie treść do komunikowania.
+- 📌 **Format wyniku zdefiniowany z góry** (tabela: obiekt, lokalizacja, skala, kanały, „dlaczego pasuje" z konkretnym sygnałem, kontakt publiczny, link źródłowy, segment A/B/C + druga tabela grup i forów) — żeby wynik dał się od razu skleić z listą naboru i szkicem zaproszenia z tego samego dnia.
+
+### Decyzja B2 zatwierdzona i szkice na otwarcie bety — ostatnia bramka przed zaproszeniami zdjęta
+- 🎯 **Beta jest ścieżką krytyczną, a B2 było jedyną pozycją z klauzulą „przed pierwszym testerem".** Właściciel zatwierdził rekomendację bez zmian.
+- ✅ **Decyzja B2 (właściciel, 2026-08-27):** konta po „Odbierz" — retencja **90 dni**, spójnie z retencją porzuconych triali (Polityka §2, Regulamin §11 ust. 2); konta z nadanym dostępem — **bez automatu do końca bety**, ręczny przegląd w raporcie „Porządek". Naniesione w [[Projects/Roadmap]] (B2 ✅) i [[Panel-administratora]] (tabela decyzji).
+- ⏳ **Ogon dla `dev` (nie blokuje zaproszeń):** mechanizm kasowania po „Odbierz" — rekomendowana ścieżka to istniejący purge porzuconych triali (`trialEndsAt`), bo wtedy obecna treść Polityki pokrywa przypadek bez zmian w dokumencie (wzorzec „deklaracja bez mechanizmu" odwrócony: tu mechanizm dostaje istniejącą deklarację). Termin realny: zanim pierwsze konto po „Odbierz" osiągnie 90 dni — najwcześniej koniec listopada 2026.
+- ✅ **Szkice dwóch wiadomości gotowe** (skill `humanizer`, kalibracja `PL.md`; wysyła właściciel): (1) zaproszenie do bety dla gospodarzy z listy naboru, (2) grzecznościowa wiadomość do obecnych testerów o dokumentach obowiązujących od 26.08 — domyka obowiązek operacyjny z dnia publikacji. Każdy fakt w tekstach zweryfikowany w źródle przed użyciem: trial 14 dni bez karty (`pierwsze-kroki.md`), retencja 90 dni (§11 ust. 2 + B2), founding members (§6 ust. 5: cena z dnia startu na 12 mies., nabór do ogłoszenia zakończenia), tryb zmian §10 (e-mail + panel, 14 dni). Plik: `docs/marketing/Zaproszenie-beta-i-regulamin-2026-08-27.md` + `.docx`; pełna treść podana w czacie (zasada „najpierw czat").
+- ⚖️ **Czego szkice nie obiecują:** działających płatności (ścieżka A wstrzymana — zaproszenie mówi o founding members jako o ofercie na przyszłość, bez terminu) ani daty końca bety.
+- 📌 Przy okazji: nieaktualny ogon F7 w Roadmapie domknięty (wieczorny deploy `hosting:app` 26.08 zawierał `222c656` — potwierdzone `git merge-base --is-ancestor`).
 
 ### Trzy nowe skille projektu: `testy`, `dokument`, `porzadek` — procedury przestają żyć tylko w dzienniku
 - 🎯 **Decyzja właściciela po porządkach: „napisz wszystkie trzy".** Każdy skill zamyka wiedzę, którą sesje dotąd odtwarzały z Activity-Logu, Known-Issues albo z pamięci — a której brak kosztował realny czas (flaki w CI, rozjechane kopie `.docx`, 7 tygodni nieaktualnych indeksów vaulta).
