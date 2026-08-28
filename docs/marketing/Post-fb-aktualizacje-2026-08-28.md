@@ -41,8 +41,9 @@ piszemy o tym wprost.
 
 Podatki. Pytaliście, gdzie VAT, ZUS i import usług. Uczciwa odpowiedź: aplikacja nie
 zastępuje księgowej i nie udaje, że liczy wszystko. Panel liczy ryczałt 8,5% / 12,5%
-z podziałem podstawy między stawki, pilnuje progu 100 000 zł, ogarnia skalę, VAT od
-noclegów i współwłasność małżeńską. Do tego doszedł przycisk „Pobierz dla księgowej":
+z podziałem podstawy między stawki, skalę i podatek liniowy 19%, ogarnia VAT od
+noclegów i współwłasność małżeńską, pilnuje progu 100 000 zł ryczałtu i limitu
+240 000 zł zwolnienia z VAT. Do tego doszedł przycisk „Pobierz dla księgowej":
 plik z rezerwacjami, prowizjami portali, kosztami i rozkładem miesięcznym. W nagłówku
 pliku stoi czarno na białym, że prowizje Booking i Airbnb to import usług do rozliczenia
 po stronie księgowej. Tego, czego nie liczymy, nie ukrywamy.
