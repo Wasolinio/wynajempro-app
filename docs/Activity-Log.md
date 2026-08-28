@@ -6,6 +6,11 @@ Project timeline and key milestones.
 
 ## 2026-08-28
 
+### Seria „NOWE W PANELU" — pierwsze grafiki z szablonu handoffu, start C2
+- 🎯 **Pytanie właściciela:** czy agent może korzystać z zasobów Claude Design (projekt postów z aktualizacjami). Odpowiedź: tak — projekt postów żyje w repo jako szablon `#feature-post` w handoffie `_design-reference/design_handoff_identyfikacja_v2` (sekcja 14 README: trzy elementy stałe serii + trzy podmieniane), a opublikowane artefakty konta widać z sesji (m.in. „Identyfikacja wizualna marki" z 21.08).
+- ✅ **Trzy grafiki 1080×1080 pod dzisiejszy post FB** (commit `87eafd1`, agent `designer`): „Synchronizacja co godzinę", „Zadania w telefonie" (nazwa skorygowana przez designera — reguła sekcji 14: rzeczownik, nie tryb rozkazujący przycisku), „Podatek liniowy 19%". Szablon 1:1 z handoffu (fonty pilnowane bramką `document.fonts.check` w skrypcie renderu Playwright), dane przykładowe bez osób, zero emoji, kolory kanałów z sekcji 12, kwoty na grafice podatkowej spójne matematycznie (86 400 → 86% progu ryczałtu i 36% limitu VAT; 19% × 65 250 = 12 397,50). Źródła HTML w `docs/marketing/grafiki/src/` — kolejne odcinki serii to podmiana treści, nie budowa od zera.
+- 📌 To pierwszy realny eksport z zakresu C2 (13 formatów) — status C2 w [[Projects/Roadmap]] przestawiony na 🔄.
+
 ### Liniowy 19% wraca (ADR-027) i jedno wydanie E7 na produkcję — próg VAT + liniowy razem
 - 🎯 **Decyzja właściciela w locie, podczas deployu progu VAT:** „dopracuj Liniowy 19% i wdróż już teraz" — nadpisała rekomendację „przy popycie" z przeglądu form. Deploy wstrzymany, zamiast dwóch wydań w godzinę poszło jedno z oboma zmianami.
 - ✅ **Specyfikacja legal (L1–L9, dopisana do raportu form):** 19% od dochodu **netto** (art. 30c ust. 1; kontrast z licznikiem VAT, który idzie z brutto), automat zdrowotnej 4,9% świadomie NIE zbudowany (liczy się od dochodu z całej działalności, której panel nie zna — granica jak przy skali), odliczenie wpisanej zdrowotnej do limitu **14 100 zł** (obwieszczenie MF z 17.12.2025 — najbardziej „psująca się" stała, w rytmie 31 stycznia), bez kwoty wolnej, liniowy = wyłącznie DG (ukryte pytanie o podstawę wynajmu i współwłasność).

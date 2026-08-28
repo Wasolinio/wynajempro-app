@@ -107,7 +107,7 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 | # | Co | Kto |
 |---|---|---|
 | **C1** | **Z-5** — hero (1440 × 560) i pas CTA (1440 × 280) jako **żywe sekcje HTML** w `LandingPage.jsx`, namespace `.wp4`, nie obrazki | agent |
-| **C2** | Eksport banerów social — 13 formatów (IG post/story, FB cover/post, LinkedIn cover/post, „nowa funkcja", Google Ads ×3, OG danymi) | agent |
+| **C2** | Eksport banerów social — 13 formatów (IG post/story, FB cover/post, LinkedIn cover/post, „nowa funkcja", Google Ads ×3, OG danymi). 🔄 **START 2026-08-28**: szablon „nowa funkcja" (`#feature-post`) uruchomiony produkcyjnie — 3 grafiki serii „NOWE W PANELU" pod post z aktualizacjami (`87eafd1`, agent `designer`; źródła HTML w `docs/marketing/grafiki/src/` do kolejnych odcinków). Pozostałe 12 formatów do wyeksportowania | agent `designer` |
 | **C3** | Podmiana placeholderów w wizytówce i sygnaturze e-mail na prawdziwe dane | właściciel podaje dane, agent składa |
 
 ### Ścieżka D — weryfikacja i dług
