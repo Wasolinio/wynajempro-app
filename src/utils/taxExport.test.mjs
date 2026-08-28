@@ -71,6 +71,28 @@ test('skala: plik mówi, czego nie liczymy — zdrowotnej i kosztów spoza aplik
   assert.ok(!ryczalt.includes('Składki zdrowotnej przy skali'), 'zdania o skali tylko przy skali');
 });
 
+test('liniowy: forma nazwana, dopisek granic i odliczenie zdrowotnej z limitem w pliku', () => {
+  // Rachunek ręczny: brutto 108 200 − prowizje 11 700 − media 5 620 − odliczenie
+  // zdrowotnej 14 100 (ucięte z 18 000 = 1 500 × 12) = podstawa 76 780 → podatek
+  // 14 588,20. RAZEM = 14 588,20 + 18 000 składki = 32 588,20.
+  const { csv, p } = zrob(REZERWACJE, { taxForm: 'linear', zusHealth: 1500, zusSocial: 0 });
+
+  assert.ok(csv.includes('Podatek liniowy 19%'), 'forma w nagłówku');
+  assert.ok(csv.includes('Nie uwzględniamy kosztów spoza aplikacji'), 'dopisek granic (L8)');
+  assert.ok(csv.includes('strat z lat ubiegłych, wpłat na IKZE ani daniny solidarnościowej'));
+  assert.ok(csv.includes('do rocznego limitu 14100,00 zł'), 'limit nazwany');
+  assert.ok(csv.includes('Odliczenie zapłaconej składki zdrowotnej (art. 30c ust. 2'), 'wiersz odliczenia');
+  assert.ok(csv.includes('76780,00'), 'podstawa po odliczeniach');
+  assert.ok(csv.includes('14588,20'), 'podatek 19%');
+  assert.ok(csv.includes('Składka zdrowotna z ustawień (1500,00 x 12 mies.)'), 'składka widoczna w podsumowaniu');
+  assert.ok(csv.includes('32588,20'), 'razem do odłożenia');
+  assert.ok(Math.abs(p.podatek - 14588.20) < 0.01, `podatek liczbowo: ${p.podatek}`);
+
+  // Liniowy = wyłącznie działalność — nagłówek nie pyta o podstawę wynajmu ani próg ryczałtu.
+  assert.ok(!csv.includes('Podstawa wynajmu'), 'bez pytania o podstawę wynajmu');
+  assert.ok(!csv.includes('Próg ryczałtu'), 'bez progu ryczałtu');
+});
+
 test('konwencje polskiego Excela', () => {
   const { csv } = zrob();
   assert.ok(csv.includes(';'), 'separator średnik');

@@ -44,6 +44,10 @@ test('stawki i progi zgadzają się z ustawami — bramka na ciche zmiany w cons
   assert.equal(S.skala.stawkaDoProgu, 0.12);
   assert.equal(S.skala.stawkaPowyzejProgu, 0.32);
   assert.equal(S.vatNoclegi, 0.08);
+  // art. 30c ust. 1 PIT — 19% płasko; limit odliczenia zdrowotnej od dochodu
+  // (art. 30c ust. 2 pkt 2) z obwieszczenia MF z 17.12.2025 — zmienia się CO ROKU
+  assert.equal(S.liniowy.stawka, 0.19);
+  assert.equal(S.liniowy.limitOdliczeniaZdrowotnej, 14100);
   // art. 113 ust. 1 ustawy o VAT w brzmieniu od 1.01.2026 — limit podniesiony
   // z 200 000 zł ustawą z 24.06.2025 (Dz.U. 2025 poz. 896)
   assert.equal(S.vatZwolnieniePodmiotowe.limit, 240000);
@@ -153,10 +157,11 @@ test('współwłasność nie działa poza ryczałtem i najmem prywatnym', () => 
 });
 
 test('nieznana forma nie dostaje liczby', () => {
-  // Formy `linear` i `unregistered` usunięte (ADR-020) — obie były liczone stawką
-  // ryczałtu bez podstawy prawnej. Liczba policzona „jakąś" stawką wygląda tak samo
-  // wiarygodnie jak prawdziwa.
-  for (const forma of ['linear', 'unregistered', 'cokolwiek']) {
+  // `unregistered` usunięta na stałe (ADR-020) — była liczona stawką ryczałtu bez
+  // podstawy prawnej. Liczba policzona „jakąś" stawką wygląda tak samo wiarygodnie
+  // jak prawdziwa. (`linear` wypadł z tej listy 2026-08-28 — wrócił jako pełnoprawna
+  // forma z własną gałęzią 19%, ADR-027.)
+  for (const forma of ['unregistered', 'cokolwiek']) {
     const p = podsumowaniePodatkowe(rokPrzychodu(80000),
       { taxForm: forma, autoThreshold: true }, 2026, KONIEC_ROKU);
     assert.equal(p.podatek, null, `${forma}: podatek`);
@@ -238,6 +243,77 @@ test('próg zwolnienia z VAT: przy współwłasności „polowa" licznik liczy p
   assert.equal(p.vatLimitPrzekroczony, false);
 });
 
+test('liniowy: 19% płasko od dochodu, kwota wolna nieczytana (art. 30c ust. 1)', () => {
+  // Rachunek ręczny: 100 000 dochodu × 19% = 19 000 — od pierwszej złotówki,
+  // bez kwoty wolnej (ta należy do skali, art. 27 ust. 1 PIT).
+  const p = podsumowaniePodatkowe(rokPrzychodu(100000),
+    { taxForm: 'linear', zusHealth: 0, zusSocial: 0 }, 2026, KONIEC_ROKU);
+  assert.equal(p.formaZnana, true, 'liniowy jest formą znaną — dostaje liczbę');
+  grosz(p.podstawa, 100000, 'podstawa = dochód');
+  grosz(p.podatek, 19000, 'podatek 19%');
+  grosz(p.lacznieDoZaplaty, 19000, 'łącznie');
+
+  // Kontrola: wpisana kwota wolna 30 000 niczego nie zmienia — pole jest nieczytane.
+  const zWolna = podsumowaniePodatkowe(rokPrzychodu(100000),
+    { taxForm: 'linear', taxFreeAmount: 30000, zusHealth: 0, zusSocial: 0 }, 2026, KONIEC_ROKU);
+  grosz(zWolna.podatek, 19000, 'kwota wolna nie obniża liniowego');
+});
+
+test('liniowy: odliczenie zdrowotnej ucięte na limicie 14 100 zł (art. 30c ust. 2 pkt 2)', () => {
+  // Rachunek ręczny: 1 500 × 12 = 18 000 zapłaconej zdrowotnej, ale odliczyć można
+  // najwyżej 14 100. Podstawa 200 000 − 14 100 = 185 900 → podatek 35 321,00.
+  const uciete = podsumowaniePodatkowe(rokPrzychodu(200000),
+    { taxForm: 'linear', zusHealth: 1500, zusSocial: 0 }, 2026, KONIEC_ROKU);
+  grosz(uciete.zdrowotnaRok, 18000, 'zapłacona zdrowotna');
+  grosz(uciete.zdrowotnaOdliczana, 14100, 'odliczenie ucięte limitem');
+  grosz(uciete.podstawa, 185900, 'podstawa po odliczeniu');
+  grosz(uciete.podatek, 35321, 'podatek');
+  grosz(uciete.lacznieDoZaplaty, 35321 + 18000, 'łącznie: podatek + pełna składka');
+
+  // Poniżej limitu odlicza się całość: 500 × 12 = 6 000 → podstawa 194 000 → 36 860.
+  const cale = podsumowaniePodatkowe(rokPrzychodu(200000),
+    { taxForm: 'linear', zusHealth: 500, zusSocial: 0 }, 2026, KONIEC_ROKU);
+  grosz(cale.zdrowotnaOdliczana, 6000, 'poniżej limitu bez ucięcia');
+  grosz(cale.podatek, 36860, 'podatek');
+});
+
+test('liniowy: składki społeczne odejmowane RAZ, przełącznik kosztów bez wpływu', () => {
+  // Art. 30c ust. 2 pozwala na koszt ALBO odliczenie — nigdy oba. Rachunek ręczny:
+  // 150 000 − 12 000 = 138 000 → 26 220,00 (podwójne odjęcie dałoby 126 000 → 23 940).
+  const baza = { taxForm: 'linear', zusHealth: 0, zusSocial: 1000 };
+  const wKosztach = podsumowaniePodatkowe(rokPrzychodu(150000),
+    { ...baza, includeZusInCosts: true }, 2026, KONIEC_ROKU);
+  grosz(wKosztach.podstawa, 138000, 'społeczne odjęte raz');
+  grosz(wKosztach.podatek, 26220, 'podatek');
+
+  // Przy płaskiej stawce „w koszty" i „od dochodu" to ta sama kwota — wynik identyczny.
+  const bezKosztow = podsumowaniePodatkowe(rokPrzychodu(150000),
+    { ...baza, includeZusInCosts: false }, 2026, KONIEC_ROKU);
+  grosz(bezKosztow.podatek, wKosztach.podatek, 'przełącznik nie zmienia liniowego');
+});
+
+test('liniowy: dochód ujemny daje podatek 0, nie ujemny', () => {
+  // 12 000 przychodu, 2 000 × 12 = 24 000 społecznych → dochód ujemny. Straty nie
+  // przenosimy (świadomie, ADR-027) — podstawa max(0, …), podatek 0.
+  const p = podsumowaniePodatkowe(rokPrzychodu(12000),
+    { taxForm: 'linear', zusHealth: 0, zusSocial: 2000 }, 2026, KONIEC_ROKU);
+  grosz(p.podstawa, 0, 'podstawa ścięta do zera');
+  grosz(p.podatek, 0, 'podatek 0');
+  grosz(p.lacznieDoZaplaty, 24000, 'zostają same składki');
+});
+
+test('liniowy u vatowca: 19% od netto, ale licznik limitu VAT nadal z brutto', () => {
+  // Art. 14 ust. 1 PIT: u czynnego podatnika przychodem jest kwota bez VAT należnego.
+  // Rachunek ręczny: brutto 108 000 → netto 100 000 → podatek 19 000. Licznik art. 113
+  // to INNE pojęcie: idzie z brutto (108 000 / 240 000 = 45%).
+  const p = podsumowaniePodatkowe(rokPrzychodu(108000),
+    { taxForm: 'linear', isVatPayer: true, zusHealth: 0, zusSocial: 0 }, 2026, KONIEC_ROKU);
+  grosz(p.przychod, 100000, 'przychód netto');
+  grosz(p.podatek, 19000, 'podatek od netto');
+  grosz(p.vatProcentLimitu, 45, 'licznik VAT z brutto');
+  assert.equal(p.vatPlatnik, true);
+});
+
 test('rok bez rezerwacji nie produkuje zer udających wyliczenie', () => {
   const p = podsumowaniePodatkowe([], { taxForm: 'lump_sum', rentalBasis: 'private' }, 2026, KONIEC_ROKU);
   assert.equal(p.liczbaRezerwacji, 0);
@@ -286,6 +362,7 @@ test('progi i widełki składki zdrowotnej', () => {
 
 test('domyślny tryb wynika z formy opodatkowania', () => {
   assert.equal(domyslnyTryb({ taxForm: 'general' }), 'szczegolowy');
+  assert.equal(domyslnyTryb({ taxForm: 'linear' }), 'szczegolowy', 'formy od dochodu pokazują koszty');
   assert.equal(domyslnyTryb({ taxForm: 'lump_sum' }), 'prosty');
   assert.equal(domyslnyTryb(null), 'prosty', 'brak ustawień nie może wysypać panelu');
 });

@@ -55,6 +55,7 @@ const wiersz = (...pola) => pola.map(pole).join(SEP);
 const OPIS_FORMY = {
   lump_sum: 'Ryczałt od przychodów ewidencjonowanych',
   general: 'Zasady ogólne (skala podatkowa)',
+  linear: 'Podatek liniowy 19%',
 };
 const OPIS_PODSTAWY = {
   private: 'najem prywatny (poza działalnością gospodarczą)',
@@ -123,6 +124,13 @@ export function zestawieniePodatkoweCSV(podsumowanie, rentals, miesiace, nazwyMi
     L.push(wiersz('Składki zdrowotnej przy skali (9% dochodu z całej działalności) nie wyliczamy — aplikacja zna tylko wynajem.'));
     L.push(wiersz('Podstawa obejmuje wyłącznie koszty zarejestrowane w aplikacji (prowizje, media, opcjonalnie składki społeczne) — bez kosztów spoza niej.'));
   }
+  // Liniowy: dopisek granic z L8 analizy legal (ADR-027) — bez końcowego zdania
+  // o szacunku, bo blok UWAGA mówi to dwa wiersze wyżej.
+  if (p.forma === 'linear') {
+    L.push(wiersz('Szacunek dla podatku liniowego liczy 19% od dochodu z danych w tej aplikacji: przychody z rezerwacji minus prowizje, zarejestrowane koszty i wpisane składki.'));
+    L.push(wiersz('Nie uwzględniamy kosztów spoza aplikacji (np. amortyzacja, wyposażenie, odsetki), strat z lat ubiegłych, wpłat na IKZE ani daniny solidarnościowej.'));
+    L.push(wiersz(`Składki zdrowotnej nie wyliczamy — zależy od dochodu z całej działalności; wpisaną kwotę odliczamy od dochodu do rocznego limitu ${kwota(STAWKI_PODATKOWE.liniowy.limitOdliczeniaZdrowotnej)} zł.`));
+  }
   L.push('');
 
   // ── REZERWACJE ────────────────────────────────────────────────────────────
@@ -181,6 +189,11 @@ export function zestawieniePodatkoweCSV(podsumowanie, rentals, miesiace, nazwyMi
   if (p.zdrowotnaLiczona) {
     L.push(wiersz('Odliczenie 50% składki zdrowotnej (art. 11 ust. 1a)', kwota(p.przychod - p.podstawa)));
   }
+  // Liniowy: odliczenie wpisanej zdrowotnej od dochodu, z ucięciem na rocznym limicie
+  // (art. 30c ust. 2 pkt 2) — bez tego wiersza księgowa nie zobaczy, skąd podstawa.
+  if (p.forma === 'linear' && p.zdrowotnaOdliczana > 0) {
+    L.push(wiersz(`Odliczenie zapłaconej składki zdrowotnej (art. 30c ust. 2, do limitu ${kwota(STAWKI_PODATKOWE.liniowy.limitOdliczeniaZdrowotnej)} zł)`, kwota(p.zdrowotnaOdliczana)));
+  }
   L.push(wiersz('Podstawa opodatkowania', kwota(p.podstawa)));
   L.push(wiersz('Podatek dochodowy', p.formaZnana ? kwota(p.podatek) : 'nie policzono'));
 
@@ -190,6 +203,10 @@ export function zestawieniePodatkoweCSV(podsumowanie, rentals, miesiace, nazwyMi
   } else if (p.forma === 'lump_sum') {
     L.push(wiersz('Składka zdrowotna', p.podstawaWynajmu === 'private'
       ? 'nie doliczamy — najem prywatny' : 'nie doliczamy — brak odpowiedzi w ustawieniach'));
+  } else if (p.zdrowotnaRok > 0) {
+    // Skala i liniowy: kwota z ręcznego pola — bez tego wiersza suma „RAZEM" zawierałaby
+    // składnik, którego nie widać w żadnej pozycji pliku.
+    L.push(wiersz(`Składka zdrowotna z ustawień (${kwota(p.zdrowotnaMies)} x ${p.miesiecy} mies.)`, kwota(p.zdrowotnaRok)));
   }
   L.push(wiersz('Składki społeczne', p.spoleczneRok > 0
     ? kwota(p.spoleczneRok) : 'nie podano w ustawieniach'));

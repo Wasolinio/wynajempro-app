@@ -90,6 +90,30 @@ test('Zakładka Podatki mieści się na 375 px', async ({ page }) => {
   expect(szerokosc, 'strona rozpycha się w poziomie').toBeLessThanOrEqual(375);
 });
 
+test('Liniowy w ustawieniach: bez pytania o podstawę wynajmu i bez martwych pól', async ({ page }) => {
+  const dialog = await otworzPodatki(page);
+
+  await expect(dialog.getByText('Podatek liniowy 19%')).toBeVisible();
+  await dialog.getByText('Podatek liniowy 19%').click();
+
+  // Liniowy istnieje wyłącznie w działalności (art. 9a ust. 2 PIT) — pytanie znika.
+  await expect(dialog.getByText('Jak wynajmujesz', { exact: true })).toHaveCount(0);
+  await expect(dialog.getByText('Współwłasność małżeńska', { exact: true })).toHaveCount(0);
+  // Kwota wolna należy do skali — pola nie ma.
+  await expect(dialog.getByText(/Kwota wolna od podatku/)).toHaveCount(0);
+  // Przełącznik ZUS-w-kosztach niczego by przy płaskiej stawce nie robił — ukryty.
+  await expect(dialog.getByText(/Uwzględniaj składki ZUS w kosztach/)).toHaveCount(0);
+
+  // Opis zdrowotnej mówi, dlaczego panel nie liczy sam — bez kwalifikowania obowiązku.
+  await expect(dialog.getByText(/Panel nie wylicza składki zdrowotnej przy podatku liniowym/)).toBeVisible();
+  await expect(dialog.getByText(/Składka zdrowotna, którą faktycznie płacisz/)).toBeVisible();
+  await expect(dialog.getByText(/musisz/)).toHaveCount(0);
+
+  // Powrót na ryczałt przywraca pytanie o podstawę wynajmu.
+  await dialog.getByText('Ryczałt', { exact: true }).click();
+  await expect(dialog.getByText('Jak wynajmujesz', { exact: true })).toBeVisible();
+});
+
 test('Współwłasność małżeńska: trzy stany, tylko przy najmie prywatnym', async ({ page }) => {
   const dialog = await otworzPodatki(page);
 

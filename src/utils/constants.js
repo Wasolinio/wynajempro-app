@@ -105,6 +105,20 @@ export const STAWKI_PODATKOWE = {
     stawkaPowyzejProgu: 0.32,
   },
 
+  // Podatek liniowy — art. 30c ust. 1 PIT: 19% podstawy, płasko, bez kwoty wolnej.
+  // Limit odliczenia zapłaconej składki zdrowotnej od dochodu (art. 30c ust. 2 pkt 2,
+  // wspólny z zaliczeniem do kosztów z art. 23 ust. 1 pkt 58): ogłaszany CO ROKU
+  // obwieszczeniem Ministra Finansów — na 2026 r. 14 100 zł (obwieszczenie MF
+  // z 17.12.2025, M.P.). To najbardziej „psująca się" stała tej formy — obwieszczenie
+  // wychodzi w grudniu, wchodzi do rytmu rejestru „do 31 stycznia".
+  // ⚠️ NIE mylić z ryczałtem: tam odlicza się 50% składki OD PRZYCHODU (art. 11
+  // ust. 1a ustawy o ryczałcie), tu kwotę do limitu OD DOCHODU. Dwie różne mechaniki.
+  // Zweryfikowano u źródła 2026-08-28 (analiza legal, [[Rejestr-stawek-podatkowych]]).
+  liniowy: {
+    stawka: 0.19,
+    limitOdliczeniaZdrowotnej: 14100,
+  },
+
   vatNoclegi: 0.08,
 
   // Zwolnienie podmiotowe z VAT — art. 113 ust. 1 ustawy o VAT w brzmieniu od 1.01.2026:

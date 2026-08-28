@@ -131,7 +131,11 @@ function SettingsModal(props) {
               {/* X25: podstawa wynajmu przed formą opodatkowania — od niej zależy,
                   czy w ogóle doliczamy składkę zdrowotną i odliczenie 50%. Bez wartości
                   domyślnej: zgadywanie cudzego statusu podatkowego kosztuje realne pieniądze
-                  w obie strony (analiza prawna 2026-08-24, §B1). */}
+                  w obie strony (analiza prawna 2026-08-24, §B1).
+                  Przy liniowym pytania NIE zadajemy: liniowy istnieje wyłącznie w działalności
+                  gospodarczej (art. 9a ust. 2 PIT), więc „najem prywatny na liniowym" nie ma
+                  czego wybierać (ADR-027). */}
+              {ts.taxForm !== 'linear' && (
               <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
                 <p className="wpd-fieldset__title">Jak wynajmujesz</p>
                 <div className="wpd-fgrid">
@@ -150,6 +154,7 @@ function SettingsModal(props) {
                   Jeśli masz wątpliwości, zapytaj księgową.
                 </p>
               </div>
+              )}
 
               {/* Współwłasność małżeńska — art. 12 ust. 5, 6 i 13 ustawy o ryczałcie.
                   Pokazujemy TYLKO przy najmie prywatnym i ryczałcie, bo ust. 6 mówi
@@ -200,6 +205,9 @@ function SettingsModal(props) {
                 <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
                   <input type="radio" checked={ts.taxForm === 'general'} onChange={() => setTs({ taxForm: 'general' })} /> Zasady ogólne (skala)
                 </label>
+                <label className="wpd-listrow wpd-checkrow" style={{ margin: 0 }}>
+                  <input type="radio" checked={ts.taxForm === 'linear'} onChange={() => setTs({ taxForm: 'linear' })} /> Podatek liniowy 19%
+                </label>
               </div>
               <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
                 <p className="wpd-fieldset__title">Status VAT</p>
@@ -207,10 +215,16 @@ function SettingsModal(props) {
                   <input type="checkbox" checked={!!ts.isVatPayer} onChange={(e) => setTs({ isVatPayer: e.target.checked })} />
                   Czynny podatnik VAT — podatek liczony od kwoty netto
                 </label>
-                <label className="wpd-checkrow">
-                  <input type="checkbox" checked={!!ts.includeZusInCosts} onChange={(e) => setTs({ includeZusInCosts: e.target.checked })} />
-                  Uwzględniaj składki ZUS w kosztach obniżających podatek
-                </label>
+                {/* Przy liniowym przełącznik NIC by nie robił: składki społeczne odejmuje się
+                    tam zawsze — jako koszt albo odliczenie od dochodu, przy płaskiej stawce
+                    to ta sama kwota (art. 30c ust. 2 PIT). Kontrolka bez skutku to wzorzec
+                    „martwego inputu", który X25 stąd wyniósł — więc jej nie pokazujemy. */}
+                {ts.taxForm !== 'linear' && (
+                  <label className="wpd-checkrow">
+                    <input type="checkbox" checked={!!ts.includeZusInCosts} onChange={(e) => setTs({ includeZusInCosts: e.target.checked })} />
+                    Uwzględniaj składki ZUS w kosztach obniżających podatek
+                  </label>
+                )}
               </div>
               {ts.taxForm === 'general' && (
                 <div className="wpd-fieldset" style={{ marginBottom: 14 }}>
@@ -274,16 +288,32 @@ function SettingsModal(props) {
                   </div>
                 </div>
               ) : (
-                <div className="wpd-fgrid">
-                  <div className="wpd-field">
-                    <label className="wpd-flabel">Składka ZUS zdrowotna (mies.)</label>
-                    <input className="wpd-input wpd-input--num" type="number" value={ts.zusHealth} onChange={(e) => setTs({ zusHealth: Number(e.target.value) })} />
+                <>
+                  {/* L8 z analizy legal: opis mówi, DLACZEGO panel nie liczy sam — bez zdań
+                      o obowiązku konkretnej osoby („Twoja składka wynosi…", „musisz płacić…"). */}
+                  {ts.taxForm === 'linear' && (
+                    <p className="wpd-fhint" style={{ marginBottom: 8 }}>
+                      Panel nie wylicza składki zdrowotnej przy podatku liniowym — wynosi 4,9%
+                      dochodu z całej działalności, którego aplikacja nie zna, nie mniej niż
+                      minimum ustawowe. Wpisz kwotę, którą płacisz; wysokość potwierdź
+                      z księgowym. Wpisaną kwotę odliczamy od dochodu do rocznego limitu.
+                    </p>
+                  )}
+                  <div className="wpd-fgrid">
+                    <div className="wpd-field">
+                      <label className="wpd-flabel">
+                        {ts.taxForm === 'linear'
+                          ? 'Składka zdrowotna, którą faktycznie płacisz (mies.)'
+                          : 'Składka ZUS zdrowotna (mies.)'}
+                      </label>
+                      <input className="wpd-input wpd-input--num" type="number" value={ts.zusHealth} onChange={(e) => setTs({ zusHealth: Number(e.target.value) })} />
+                    </div>
+                    <div className="wpd-field">
+                      <label className="wpd-flabel">Składka ZUS społeczna (mies.)</label>
+                      <input className="wpd-input wpd-input--num" type="number" value={ts.zusSocial} onChange={(e) => setTs({ zusSocial: Number(e.target.value) })} />
+                    </div>
                   </div>
-                  <div className="wpd-field">
-                    <label className="wpd-flabel">Składka ZUS społeczna (mies.)</label>
-                    <input className="wpd-input wpd-input--num" type="number" value={ts.zusSocial} onChange={(e) => setTs({ zusSocial: Number(e.target.value) })} />
-                  </div>
-                </div>
+                </>
               )}
 
               {/* Wybór trybu — drugie miejsce obok samego widoku podatków. Tutaj, bo
@@ -303,7 +333,7 @@ function SettingsModal(props) {
                   Szczegóły dla księgowego — rozbicie kwot i rozkład miesięczny
                 </label>
                 <p className="wpd-fhint wpd-mono" style={{ marginTop: 8 }}>
-                  Domyślnie: ryczałt → Podsumowanie, zasady ogólne → Szczegóły
+                  Domyślnie: ryczałt → Podsumowanie, skala i liniowy → Szczegóły
                 </p>
               </div>
             </>

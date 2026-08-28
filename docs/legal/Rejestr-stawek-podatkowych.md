@@ -5,7 +5,7 @@ podatkowym, która **zgnije sama, bez żadnego sygnału**. Wyliczenie policzone 
 stawkami wygląda dokładnie tak samo jak poprawne. Ten rejestr jest dowodem należytej
 staranności — data i źródło każdej weryfikacji.
 
-**Bramka techniczna:** `npm run test:podatki` — złoty zestaw 19 testów w
+**Bramka techniczna:** `npm run test:podatki` — złoty zestaw 24 testów w
 `src/utils/taxSummary.test.mjs`. Kwoty w nim są **wyliczone ręcznie z tekstów ustaw**,
 nie skopiowane z wyjścia kodu, więc cicha zmiana w `constants.js` wywala test zamiast
 przejść niezauważona. Pierwszy test sprawdza wprost wszystkie stawki i progi.
@@ -72,7 +72,7 @@ z poprzedniego roku. Wartości w `constants.js` są nowsze i poprawne.
 |---|---|---|
 | Limit zwolnienia podmiotowego z VAT | 240 000 zł | drugi pasek progu, obok progu ryczałtu — propozycja z analizy §P1 · ✅ weszło do kodu 2026-08-28 (wpis niżej) |
 | Limit działalności nierejestrowanej | 10 813,50 zł **na kwartał** | gdyby forma wróciła do aplikacji; 225% minimalnego wynagrodzenia (4 806 zł) |
-| Podatek liniowy | 19% od dochodu | gdyby forma wróciła; art. 30c ust. 1 PIT |
+| Podatek liniowy | 19% od dochodu | gdyby forma wróciła; art. 30c ust. 1 PIT · ✅ forma wróciła do kodu 2026-08-28 (wpis niżej) |
 | Minimalne wynagrodzenie 2026 | 4 806 zł | podstawa limitu nierejestrowanej |
 
 ### Czego ta weryfikacja NIE rozstrzyga
@@ -279,4 +279,34 @@ panel tej historii nie modeluje, licznik pokazuje wyłącznie wybrany rok z apli
 
 **Źródła:** [art. 113 ustawy o VAT (arslege, stan Dz.U.2025.0.775)](https://arslege.pl/wartosc-sprzedazy-a-zwolnienia-podatkowe/k76/a20259/) ·
 [Zwolnienie podmiotowe od podatku VAT (podatki.gov.pl)](https://www.podatki.gov.pl/podatki-firmowe/vat/poradniki-i-informatory/zwolnienie-podmiotowe-od-podatku-vat) —
+pełna lista źródeł w [[Formy-opodatkowania-wynajmu-2026-08-28]].
+
+---
+
+## 2026-08-28 — podatek liniowy 19% wchodzi do kodu
+
+Wdrożenie formy `linear` (decyzja właściciela 2026-08-28; parametry L1–L9:
+[[Formy-opodatkowania-wynajmu-2026-08-28]] część III; granice: [[Decisions]] ADR-027 —
+następca ADR-020, który liniowy usuwał, bo liczył się błędną gałęzią 8,5%).
+Wartości zweryfikowane u źródła 2026-08-28 przez agenta `legal`.
+
+| Wartość | W kodzie | Potwierdzone | Uwagi |
+|---|---|---|---|
+| Stawka liniowego | 19% (`liniowy.stawka`) | ✅ | art. 30c ust. 1 PIT — płasko, bez kwoty wolnej i progów; stabilna, ale rejestrowana |
+| Limit odliczenia zdrowotnej od dochodu | 14 100 zł (`liniowy.limitOdliczeniaZdrowotnej`) | ✅ | art. 30c ust. 2 pkt 2 PIT (wspólny z kosztem z art. 23 ust. 1 pkt 58); obwieszczenie MF z 17.12.2025 (M.P.) — **zmienia się CO ROKU**, obwieszczenie wychodzi w grudniu. Najbardziej „psująca się" stała tej formy |
+
+**Konstrukcja** (L2/L4): `podstawa = max(0, przychod − prowizje − media − spoleczneRok −
+min(zusHealth × miesiące, limit))`; podatek = podstawa × 19%. Dochód od **netto**
+(`przychod`, art. 14 ust. 1 PIT) — kontrast z licznikiem limitu VAT, który idzie z `brutto`.
+Zdrowotnej 4,9% **nie wyliczamy** (ta sama granica co przy skali — dochód całej
+działalności jest poza wiedzą aplikacji); pole ręczne, minimalnej 432,54 zł nie
+podpowiadamy. ⚠️ Nie mylić mechanik odliczenia: ryczałt = 50% składki **od przychodu**,
+liniowy = kwota do limitu **od dochodu**.
+
+**Do rytmu „do 31 stycznia" dochodzą dwie pozycje:** stawka 19% i limit odliczenia
+zdrowotnej (nowe obwieszczenie MF co grudzień).
+
+**Źródła:** [art. 30c ustawy o PIT (arslege)](https://arslege.pl/podatek-dochodowy-od-dochodow-z-pozarolniczej-dzialalnosci-gospodarczej-lub-dzialow-specjalnych-produkcji-rolnej/k71/a18913/) ·
+[Limit odliczenia składki zdrowotnej na liniowym 2026 (ifirma.pl)](https://www.ifirma.pl/blog/limit-odliczenia-skladki-zdrowotnej-na-podatku-liniowym-2026/) ·
+[Nowy limit odliczenia składki zdrowotnej w 2026 (infakt.pl)](https://www.infakt.pl/blog/nowy-limit-odliczenia-skladki-zdrowotnej-w-2026-roku/) —
 pełna lista źródeł w [[Formy-opodatkowania-wynajmu-2026-08-28]].

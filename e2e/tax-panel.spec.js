@@ -148,6 +148,31 @@ test('Przekroczenie limitu VAT: karta mówi o całej czynności, nie o stawce od
   await expect(kartaVat.getByText(/musisz/)).toHaveCount(0);
 });
 
+test('Liniowy 19%: karta wyniku bez karty progu ryczałtu, karta VAT zostaje', async ({ page }) => {
+  await otworzPodatki(page, { taxForm: 'linear', zusHealth: 800, zusSocial: 0, viewMode: 'szczegolowy' });
+
+  // Rachunek nazywa formę i pokazuje odliczenie wpisanej zdrowotnej (kwoty zależne
+  // od bieżącego miesiąca — złote liczby pilnuje test:podatki, tu treści i widoczność).
+  await expect(page.getByText('Podatek liniowy 19% od podstawy')).toBeVisible();
+  await expect(page.getByText(/Odliczenie zapłaconej składki zdrowotnej/)).toBeVisible();
+  await expect(page.getByText(/art\. 30c ust\. 2 pkt 2 PIT/)).toBeVisible();
+
+  // Kwota wolna należy do skali — przy liniowym nie ma jej nawet informacyjnie.
+  await expect(page.getByText(/kwota wolna z Twoich ustawień/)).toHaveCount(0);
+
+  // Dopisek granic (L8): czego nie liczymy.
+  await expect(page.getByText(/Nie uwzględniamy kosztów spoza aplikacji/)).toBeVisible();
+  await expect(page.getByText(/strat z lat ubiegłych, wpłat na IKZE ani daniny solidarnościowej/)).toBeVisible();
+
+  // Progu ryczałtu nie ma (liniowy nie ma progu)…
+  await page.getByRole('tab', { name: 'Podsumowanie' }).click();
+  await expect(page.getByText(/Próg ryczałtu/)).toHaveCount(0);
+  // …ale limit zwolnienia z VAT zostaje — jest niezależny od formy dochodowej (L5).
+  await expect(page.getByText(/Limit zwolnienia z VAT · 240\s?000 zł/)).toBeVisible();
+  // Pytania o podstawę wynajmu nie zadajemy — liniowy to wyłącznie działalność.
+  await expect(page.getByText('Zanim doliczymy składkę zdrowotną')).toHaveCount(0);
+});
+
 test('Eksport CSV: przycisk działa i plik niesie zastrzeżenie', async ({ page }) => {
   await otworzPodatki(page, { taxForm: 'lump_sum', autoThreshold: true, rentalBasis: 'business' });
 

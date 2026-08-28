@@ -135,6 +135,12 @@ function podatekDochodowy(podstawa, przychodDoProgu, settings, prog = STAWKI_POD
          + wPasmieWyzszym * poOdliczeniu * stawkaPowyzejProgu;
   }
 
+  // Podatek liniowy — art. 30c ust. 1 PIT: 19% podstawy, płasko od pierwszej złotówki.
+  // Bez kwoty wolnej (ta należy do skali, art. 27 ust. 1) i bez progów — dlatego
+  // `taxFreeAmount` jest tu CELOWO nieczytane. Odliczenia (społeczne, zdrowotna do
+  // limitu) siedzą już w podstawie — liczy je `podsumowaniePodatkowe()`.
+  if (forma === 'linear') return podstawa * S.liniowy.stawka;
+
   if (forma === 'general') {
     const { kwotaWolna, prog, stawkaDoProgu, stawkaPowyzejProgu } = S.skala;
     // `??`, nie `||` — zero jest tu poprawną odpowiedzią („kwotę wolną rozlicza mi
@@ -149,9 +155,9 @@ function podatekDochodowy(podstawa, przychodDoProgu, settings, prog = STAWKI_POD
 
   // Ryczałt ze stałą stawką (gospodarz wyłączył automatyczny próg) — jedyny przypadek,
   // który tu dochodzi. Formy `linear` i `unregistered` liczyły się kiedyś tą samą gałęzią
-  // i były przez to liczone stawką 8,5% bez podstawy prawnej: liniowy to 19% od DOCHODU
-  // (art. 30c ust. 1 PIT), a działalność nierejestrowana rozlicza się według SKALI jako
-  // przychód z innych źródeł (art. 20 ust. 1ba PIT). Usunięte 2026-08-25, [[Decisions]] ADR-020.
+  // i były przez to liczone stawką 8,5% bez podstawy prawnej — usunięte 2026-08-25
+  // (ADR-020). Liniowy WRÓCIŁ 2026-08-28 z własną gałęzią 19% od dochodu (wyżej,
+  // ADR-027); działalność nierejestrowana jest usunięta na stałe.
   if (forma === 'lump_sum') return podstawa * ((Number(settings.rate) || 8.5) / 100);
 
   // Nieznana forma opodatkowania. Nie zgadujemy stawki — liczba policzona „jakąś" stawką
@@ -213,6 +219,17 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   const zdrowotnaRok = zdrowotnaMies * miesiecyWRoku;
   const spoleczneRok = (Number(ustawienia.zusSocial) || 0) * miesiecyWRoku;
 
+  // LINIOWY: wpisaną składkę zdrowotną odliczamy od dochodu do rocznego limitu
+  // (art. 30c ust. 2 pkt 2 PIT; limit z obwieszczenia MF, co roku inny). To INNA
+  // mechanika niż w ryczałcie (tam 50% od przychodu, art. 11 ust. 1a ustawy
+  // o ryczałcie) — dwie różne stałe, nie mieszać. Ścieżki „odliczenie od dochodu"
+  // i „zaliczenie do kosztów" mają wspólny limit i przy płaskiej stawce dają ten sam
+  // wynik — liczymy jedną, bez pytania gospodarza o wariant.
+  const liniowy = ustawienia.taxForm === 'linear';
+  const zdrowotnaOdliczana = liniowy
+    ? Math.min(zdrowotnaRok, S.liniowy.limitOdliczeniaZdrowotnej)
+    : 0;
+
   // Podstawa opodatkowania
   let podstawa;
   if (ryczalt) {
@@ -225,6 +242,14 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
   } else if (ustawienia.taxForm === 'general') {
     podstawa = Math.max(0, przychod - sumaProwizji - sumaMediow
       - (ustawienia.includeZusInCosts ? spoleczneRok : 0));
+  } else if (liniowy) {
+    // Art. 30c ust. 2 PIT: dochód pomniejszony o składki społeczne i zdrowotne
+    // do limitu. Od `przychod`, nie od `brutto` — u czynnego podatnika VAT przychodem
+    // podatkowym jest kwota netto (art. 14 ust. 1 PIT); kontrast z licznikiem limitu
+    // VAT wyżej, który bierze brutto. Społeczne odejmujemy ZAWSZE, bez czytania
+    // `includeZusInCosts`: przy płaskiej stawce „w koszty" i „odliczenie od dochodu"
+    // to ta sama kwota, więc przełącznik niczego by tu nie zmieniał (a odjęte są raz).
+    podstawa = Math.max(0, przychod - sumaProwizji - sumaMediow - spoleczneRok - zdrowotnaOdliczana);
   } else {
     podstawa = przychod;
   }
@@ -301,6 +326,9 @@ export function podsumowaniePodatkowe(rentals, settings, rokWejscie = new Date()
     formaZnana,
 
     zdrowotnaMies, zdrowotnaRok, spoleczneRok,
+    // Liniowy: ile z wpisanej zdrowotnej faktycznie odliczono (po ucięciu limitem) —
+    // widok i eksport pokazują tę kwotę, nie liczą jej po swojemu. 0 przy innych formach.
+    zdrowotnaOdliczana,
     miesiecy: miesiecyWRoku,
     lacznieDoZaplaty: formaZnana ? podatek + zdrowotnaRok + spoleczneRok : null,
 
@@ -370,7 +398,8 @@ export function podsumowanieMiesieczne(rentals, settings, rokWejscie = new Date(
  * Wybór jest odwracalny jednym kliknięciem, więc zły domyślny tryb nic nie kosztuje.
  */
 export function domyslnyTryb(settings) {
-  // `linear` wypadło stąd razem z resztą podatku liniowego (ADR-020) — aplikacja
-  // obsługuje dwie formy: ryczałt i zasady ogólne.
-  return ((settings || {}).taxForm === 'general') ? 'szczegolowy' : 'prosty';
+  // Formy liczone od DOCHODU (skala, liniowy — ten wrócił w ADR-027) pokazują koszty,
+  // więc startują w trybie szczegółowym. Ryczałt liczy od przychodu → tryb prosty.
+  const forma = (settings || {}).taxForm;
+  return (forma === 'general' || forma === 'linear') ? 'szczegolowy' : 'prosty';
 }

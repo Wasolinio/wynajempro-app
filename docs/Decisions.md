@@ -811,3 +811,72 @@ przejrzeć prawnik lub doradca podatkowy (zastrzeżenie z analizy legal).
 
 **Related ADRs**: ADR-018 (podstawa wynajmu), ADR-021 (współwłasność małżeńska),
 ADR-023 (mówimy, czego nie liczymy).
+
+---
+
+## ADR-027: Podatek liniowy wraca — z poprawną mechaniką, nierejestrowana usunięta na stałe
+
+**Data**: 2026-08-28
+**Status**: ACCEPTED (decyzja właściciela) — następca ADR-020 w części dotyczącej liniowego
+**Kontekst**: ADR-020 usunął liniowy z aplikacji, bo liczył się błędną gałęzią 8,5% od
+przychodu zamiast 19% od dochodu — i słusznie: lepszy brak liczby niż liczba nieprawdziwa.
+Analiza legal z 2026-08-28 ([[legal/Formy-opodatkowania-wynajmu-2026-08-28]], część I pkt 4)
+wskazała liniowy jako właściwe pierwsze rozszerzenie, gdy przyjdzie sygnał — silnik skali
+liczy już dochód, więc różnice są małe. Właściciel zdecydował: wdrażamy od razu, w jednym
+wydaniu z progiem VAT (ADR-026), wg parametrów L1–L9 (część III analizy).
+
+**Decyzja — co liczymy**:
+- **19% od dochodu** (art. 30c ust. 1 PIT): `podstawa = max(0, przychod − prowizje −
+  media − spoleczneRok − zdrowotnaOdliczana)`. Od `przychod` (netto u vatowca, art. 14
+  ust. 1 PIT) — kontrast z licznikiem limitu VAT z ADR-026, który idzie z `brutto`.
+- **Bez kwoty wolnej i progów** — `taxFreeAmount` nieczytane w liczeniu i ukryte w UI;
+  karta progu ryczałtu nie renderuje się; **karta limitu VAT renderuje się nadal**
+  (limit z art. 113 jest niezależny od formy dochodowej).
+- **Odliczenie wpisanej zdrowotnej od dochodu do limitu** (art. 30c ust. 2 pkt 2):
+  `min(zusHealth × miesiące, 14 100 zł)`; limit z obwieszczenia MF, **co roku inny** —
+  nowa stała `liniowy.limitOdliczeniaZdrowotnej` w rytmie rejestru stawek. Ścieżki
+  „odliczenie" i „koszt" mają wspólny limit i przy płaskiej stawce ten sam wynik —
+  liczymy jedną, bez pytania. ⚠️ Inna mechanika niż ryczałtowe 50% od przychodu.
+- **Składki społeczne odejmowane zawsze, raz** — przełącznik `includeZusInCosts` przy
+  liniowym niczego nie zmienia (koszt albo odliczenie to ta sama kwota), więc w UI jest
+  ukryty (zasada martwego inputu z X25), a formuła go nie czyta.
+- **Liniowy = wyłącznie działalność gospodarcza** (art. 9a ust. 2 PIT): pytanie
+  o `rentalBasis` i pole `spouseRental` ukryte; `domyslnyTryb()` → szczegółowy.
+- **Gałąź per rezerwacja w `taxCalculator.js`** (przyrostowa, jak przy skali), żeby pola
+  `tax` przy rezerwacjach się wypełniały i ostrzeżenie `rozjazd` działało jak przy
+  pozostałych formach. `SettingsModal` po raz pierwszy OFERUJE tę formę — poprzednio
+  gałąź była martwa, bo nie dało się jej wybrać.
+
+**Czego świadomie NIE robimy** (granice z L3/L6/L7 analizy):
+- **Automatu zdrowotnej 4,9% nie budujemy** — liczy się od dochodu z całej działalności
+  gospodarza, a panel widzi tylko wynajem; automat z niepełnych danych wyglądałby
+  wiarygodnie i byłby nieprawdziwy (dokładnie błąd, który ADR-020 usuwał). Pole ręczne;
+  minimalnej 432,54 zł nie podpowiadamy — to byłoby zgadywanie cudzej sytuacji.
+- **Daniny solidarnościowej nie liczymy** (art. 30h PIT, 4% od nadwyżki sumy dochodów
+  ponad 1 000 000 zł) — dotyczy tak samo skali; suma dochodów z wielu źródeł jest poza
+  wiedzą aplikacji, a komunikat przy dochodzie 80 000 zł byłby szumem. Bez wzmianki w UI.
+- **Strat z lat ubiegłych nie przenosimy** (dochód ujemny → podatek 0, `max(0, …)`),
+  **IKZE i ulgi B+R nie odliczamy** — dane spoza aplikacji i spoza bieżącego roku.
+  Pokrywa to dopisek granic (L8) w karcie wyniku i eksporcie.
+- **Nie kwalifikujemy obowiązku**: żadnego „Twoja składka wynosi…", „musisz płacić co
+  najmniej 432,54 zł" (granica z §2 analizy prawnej panelu).
+- **Działalność nierejestrowana zostaje usunięta NA STAŁE** — potwierdzenie ADR-020
+  w tej części: limit kwartalny 10 813,50 zł czyni formę bezużyteczną dla ICP,
+  a kwalifikacja jest sporna. Nieznana forma nadal nie dostaje liczby.
+
+**Konsekwencja przybliżenia, zapisana świadomie**: mnożenie `zusHealth × miesiące`
+zakłada składkę płaconą co miesiąc w tej samej kwocie — to przybliżenie tej samej natury
+co `spoleczneRok`; odliczeniu podlegają składki zapłacone, stąd opis pola „którą
+faktycznie płacisz". Per-rezerwacja liczy przyrostowo z numeru miesiąca rezerwacji, więc
+suma zapisanych kwot może się minimalnie różnić od rocznej — od tego jest alert `rozjazd`.
+
+**Kiedy wracamy**: limit odliczenia — co roku w rytmie rejestru (obwieszczenie MF
+w grudniu); danina/straty/IKZE — przy sygnale popytu z bety (wzorzec ADR-022/023).
+Treści dopisków przed launchem powinien przejrzeć prawnik lub doradca (zastrzeżenie legal).
+
+**Weryfikacja**: złote testy z kwotami ręcznymi w `taxSummary.test.mjs` (19% płasko
+i kwota wolna nieczytana; ucięcie odliczenia na 14 100 zł; społeczne raz; dochód ujemny
+→ 0; vatowiec od netto z licznikiem VAT z brutto) + test eksportu + e2e panelu i ustawień.
+
+**Related ADRs**: ADR-020 (poprzednik — usunięcie), ADR-023 (mówimy, czego nie liczymy),
+ADR-026 (próg VAT — wspólne wydanie).

@@ -43,11 +43,13 @@ function rezerwacje(n) {
   return 'rezerwacji';
 }
 
-// Dwie formy, bo tyle aplikacja liczy poprawnie. Podatek liniowy i działalność
-// nierejestrowana wypadły 2026-08-25 (ADR-020) — obie były liczone stawką ryczałtu.
+// Trzy formy, bo tyle aplikacja liczy poprawnie. Liniowy i nierejestrowana wypadły
+// 2026-08-25 (ADR-020 — obie liczone stawką ryczałtu); liniowy wrócił 2026-08-28
+// z własną mechaniką 19% od dochodu (ADR-027), nierejestrowana usunięta na stałe.
 const NAZWY_FORM = {
   lump_sum: 'Ryczałt',
   general: 'Zasady ogólne (skala)',
+  linear: 'Podatek liniowy 19%',
 };
 
 /** Etykieta widełek składki zdrowotnej — przedział od–do, nigdy sama górna granica. */
@@ -85,6 +87,9 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
 
   const aktywnyTryb = tryb || domyslnyTryb(taxSettings);
   const ryczalt = p.forma === 'lump_sum';
+  // Liniowy = wyłącznie działalność gospodarcza (art. 9a ust. 2 PIT) — karta pytania
+  // o podstawę wynajmu i wątek małżeński go nie dotyczą (warunki niżej idą po `ryczalt`).
+  const liniowy = p.forma === 'linear';
   const zProgiem = ryczalt && taxSettings?.autoThreshold;
 
   // Miesiące bez żadnego ruchu pomijamy — pusty wiersz nic nie mówi, a wydłuża tabelę.
@@ -367,6 +372,22 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
     </div>
   );
 
+  // Dopisek granic dla liniowego (L8 analizy legal, wzorzec ADR-023): mówimy, czego
+  // nie liczymy, zamiast udawać kompletność. Bez końcowego zdania „to szacunek, nie
+  // deklaracja" z propozycji legal — zastrzeżenie prawne stoi w tym panelu DOKŁADNIE
+  // RAZ, w stopce (twarda zasada nr 2 z nagłówka pliku).
+  const dopisekLiniowy = liniowy && (
+    <div className="wpd-note wpd-note--info" style={{ marginTop: 16 }}>
+      <Info style={{ width: 14, height: 14, display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />
+      Szacunek dla podatku liniowego liczy 19% od dochodu z danych w tej aplikacji:
+      przychody z rezerwacji minus prowizje, zarejestrowane koszty i wpisane składki.
+      Nie uwzględniamy kosztów spoza aplikacji (np. amortyzacja, wyposażenie, odsetki),
+      strat z lat ubiegłych, wpłat na IKZE ani daniny solidarnościowej. Składki zdrowotnej
+      nie wyliczamy — zależy od dochodu z całej Twojej działalności; wpisaną kwotę
+      odliczamy od dochodu do rocznego limitu {liczba(STAWKI_PODATKOWE.liniowy.limitOdliczeniaZdrowotnej)} zł ({p.rokStawek}).
+    </div>
+  );
+
   return (
     <div className="wpd-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
@@ -410,7 +431,8 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                   {zProgiem && p.progPrzekroczony ? 'Podatek ryczałtowy 8,5% i 12,5%'
                     : zProgiem ? 'Podatek ryczałtowy 8,5%'
                       : ryczalt ? `Podatek ryczałtowy ${taxSettings?.rate ?? 8.5}%`
-                        : 'Podatek według skali'}
+                        : liniowy ? 'Podatek liniowy 19%'
+                          : 'Podatek według skali'}
                 </span>
                 <span className="wpd-hero__v">{zl(p.podatek)}</span>
               </div>
@@ -425,10 +447,17 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                   <span className="wpd-hero__k">Składka zdrowotna</span>
                   <span className="wpd-hero__v wpd-hero__v--muted">przy najmie prywatnym nie doliczamy</span>
                 </div>
-              ) : ryczalt && (
+              ) : ryczalt ? (
                 <div className="wpd-hero__row">
                   <span className="wpd-hero__k">Składka zdrowotna</span>
                   <span className="wpd-hero__v wpd-hero__v--muted">brak odpowiedzi w ustawieniach</span>
+                </div>
+              ) : p.zdrowotnaRok > 0 && (
+                // Skala i liniowy: kwota z ręcznego pola w ustawieniach. Bez tego wiersza
+                // suma w hero zawierałaby składnik, którego nigdzie nie widać.
+                <div className="wpd-hero__row">
+                  <span className="wpd-hero__k">Zdrowotna z ustawień {zl(p.zdrowotnaMies)} × {p.miesiecy} mies.</span>
+                  <span className="wpd-hero__v">{zl(p.zdrowotnaRok)}</span>
                 </div>
               )}
 
@@ -444,8 +473,11 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
             </div>
           </div>
 
+          {/* Gdy karta progu ryczałtu nie istnieje (skala, liniowy, ryczałt bez progu),
+              lewy slot siatki bierze karta limitu VAT — inaczej stałby pusty. Przy
+              ryczałcie z progiem karta VAT schodzi pod siatkę, na pełną szerokość. */}
           <div className="wpd-grid-2" style={{ marginTop: 16, alignItems: 'stretch' }}>
-            {kartaProgu || <div />}
+            {kartaProgu || kartaVat || <div />}
 
             <div className="wpd-panel" style={{ padding: 22, display: 'flex', flexDirection: 'column' }}>
               <h3 className="wpd-h2" style={{ fontSize: 17, marginBottom: 12 }}>Przychód i co go zjadło</h3>
@@ -483,9 +515,11 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
             </div>
           </div>
 
-          {kartaVat && <div style={{ marginTop: 16 }}>{kartaVat}</div>}
+          {kartaProgu && kartaVat && <div style={{ marginTop: 16 }}>{kartaVat}</div>}
 
           {kartaPytanie && <div style={{ marginTop: 16 }}>{kartaPytanie}</div>}
+
+          {dopisekLiniowy}
 
           {stopka}
         </>
@@ -540,18 +574,29 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                     sub="art. 11 ust. 1a ustawy o ryczałcie · zakładamy, że składka za ten okres jest zapłacona" />
                 )}
 
-                {/* Przy skali podstawa może być zawyżona — aplikacja zna tylko własne koszty.
-                    Mówimy to wprost (wzorzec ADR-023), zamiast udawać kompletność. */}
+                {/* Liniowy: odliczenie wpisanej zdrowotnej od dochodu — z ucięciem na limicie.
+                    Bez tego wiersza ucięcie byłoby niewidzialne, a rachunek by się nie spinał. */}
+                {liniowy && p.zdrowotnaOdliczana > 0 && (
+                  <Wiersz k={`Odliczenie zapłaconej składki zdrowotnej · do limitu ${liczba(STAWKI_PODATKOWE.liniowy.limitOdliczeniaZdrowotnej)} zł`}
+                    v={`− ${zl(p.zdrowotnaOdliczana)}`}
+                    sub="art. 30c ust. 2 pkt 2 PIT · odliczamy wpisaną kwotę od dochodu — to inna mechanika niż 50% od przychodu w ryczałcie" />
+                )}
+
+                {/* Przy formach od dochodu podstawa może być zawyżona — aplikacja zna tylko
+                    własne koszty. Mówimy to wprost (wzorzec ADR-023), zamiast udawać kompletność. */}
                 <Wiersz k="Podstawa opodatkowania" v={zl(p.podstawa)} mocny={false}
                   sub={!ryczalt ? 'Tylko koszty zarejestrowane w aplikacji (prowizje, media, opcjonalnie składki społeczne) — bez kosztów spoza niej.' : null} />
 
                 <Wiersz
-                  k={!ryczalt ? 'Podatek według skali (12% / 32%)'
-                    : !zProgiem ? `Ryczałt ${taxSettings?.rate ?? 8.5}% od podstawy, bez progu`
-                      : p.progPrzekroczony ? 'Ryczałt 8,5% i 12,5% od podstawy'
-                        : 'Ryczałt 8,5% od podstawy'}
+                  k={liniowy ? 'Podatek liniowy 19% od podstawy'
+                    : !ryczalt ? 'Podatek według skali (12% / 32%)'
+                      : !zProgiem ? `Ryczałt ${taxSettings?.rate ?? 8.5}% od podstawy, bez progu`
+                        : p.progPrzekroczony ? 'Ryczałt 8,5% i 12,5% od podstawy'
+                          : 'Ryczałt 8,5% od podstawy'}
                   v={zl(p.podatek)}
-                  sub={!ryczalt ? `kwota wolna z Twoich ustawień: ${zl(taxSettings?.taxFreeAmount || 0)}` : null}
+                  // Kwota wolna należy do skali (art. 27 ust. 1 PIT) — przy liniowym nie
+                  // istnieje, więc jej nie pokazujemy nawet informacyjnie.
+                  sub={p.forma === 'general' ? `kwota wolna z Twoich ustawień: ${zl(taxSettings?.taxFreeAmount || 0)}` : null}
                 />
 
                 {p.zdrowotnaLiczona ? (
@@ -564,12 +609,16 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
                   <Wiersz k="Składka zdrowotna" v={<span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)', textTransform: 'uppercase' }}>brak odpowiedzi</span>} />
                 ) : p.zdrowotnaRok > 0 ? (
                   <Wiersz k={`Zdrowotna z Twoich ustawień · ${zl(p.zdrowotnaMies)} × ${p.miesiecy}`} v={zl(p.zdrowotnaRok)}
-                    sub="Przy skali zależy od dochodu — liczymy z kwoty, którą podałeś w ustawieniach." />
+                    sub={liniowy
+                      ? 'Przy liniowym wynosi 4,9% dochodu z całej działalności — liczymy z kwoty, którą podałeś w ustawieniach.'
+                      : 'Przy skali zależy od dochodu — liczymy z kwoty, którą podałeś w ustawieniach.'} />
                 ) : (
                   // Nigdy „0 zł" — mówimy, czego nie liczymy i dlaczego (wzorzec ADR-023).
-                  <Wiersz k="Składka zdrowotna · 9% dochodu"
+                  <Wiersz k={`Składka zdrowotna · ${liniowy ? '4,9%' : '9%'} dochodu`}
                     v={<span className="wpd-mono" style={{ fontSize: 11, color: 'var(--faint)', textTransform: 'uppercase' }}>nie wyliczamy</span>}
-                    sub="Przy skali liczy się od dochodu z całej Twojej działalności, którego aplikacja nie zna. Jeśli ją opłacasz, wpisz kwotę miesięczną w ustawieniach." />
+                    sub={liniowy
+                      ? 'Liczy się od dochodu z całej Twojej działalności, którego aplikacja nie zna, nie mniej niż minimum ustawowe. Wpisz w ustawieniach kwotę, którą płacisz; wysokość potwierdź z księgowym.'
+                      : 'Przy skali liczy się od dochodu z całej Twojej działalności, którego aplikacja nie zna. Jeśli ją opłacasz, wpisz kwotę miesięczną w ustawieniach.'} />
                 )}
 
                 {p.spoleczneRok > 0
@@ -718,6 +767,8 @@ export default function TaxesView({ rentals, taxSettings, selectedYear, tryb, on
               </table>
             </div>
           </div>
+
+          {dopisekLiniowy}
 
           {stopka}
         </>

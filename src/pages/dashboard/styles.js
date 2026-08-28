@@ -601,6 +601,11 @@ export const DASHBOARD_CSS = `
   text-transform:uppercase; color:var(--label); margin-bottom:5px; }
 .wpd-cell__val{ font-weight:600; font-size:15px; }
 .wpd-cell__val--accent{ color:var(--cynober); }
+/* Komórka KPI na ciemnym tle („Do odłożenia" w podatkach): bez tych reguł wartość
+   dziedziczy kolor atramentu i znika na tle --ink — lustrzane odbicie stylu
+   .wpd-stat--dark .wpd-stat__label/__value wyżej. */
+.wpd-stat--dark .wpd-cell__label{ color:var(--on-side-faint); }
+.wpd-stat--dark .wpd-cell__val{ color:var(--green-dot); }
 .wpd-settle__row{ display:flex; align-items:baseline; justify-content:space-between; padding:11px 0;
   border-bottom:1px solid var(--hairline); }
 .wpd-settle__row:last-child{ border-bottom:none; }
