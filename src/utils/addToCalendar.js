@@ -106,11 +106,39 @@ export const buildGoogleCalendarUrl = ({ dateStr, summary, details }) => {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-// Pobranie pliku: Blob + tymczasowy <a download> — jedyny fragment dotykający DOM.
+// Wykrycie iOS: iPhone/iPad/iPod w UA + iPadOS udający Maca (platforma Mac z ekranem
+// dotykowym). Prawdziwy Mac ma maxTouchPoints 0.
+export const isIOS = (nav = navigator) => (
+  /iPhone|iPad|iPod/.test(nav.userAgent || '') ||
+  (/Mac/.test(nav.platform || '') && (nav.maxTouchPoints || 0) > 1)
+);
+
+/*
+  Dostarczenie pliku .ics — jedyny fragment dotykający DOM.
+
+  Desktop i Android: Blob + tymczasowy <a download> (działa — potwierdzone).
+
+  iOS: anchor z `download` NIE prowadzi do Kalendarza — Safari zapisuje .ics jak zwykły
+  plik (pasek „Pobieranie zakończone", arkusz udostępniania bez żadnej ścieżki „Dodaj do
+  Kalendarza"); potwierdzone na iPhonie właściciela 2026-08-28, funkcja była realnie
+  martwa. Natywny podgląd wydarzenia z przyciskiem „Dodaj wszystkie" Safari pokazuje
+  przy NAWIGACJI do zasobu .ics, dlatego na iOS nawigujemy do blob: w BIEŻĄCEJ karcie
+  (window.open ryzykuje blokadę popupu). revokeObjectURL odłożony w czasie, żeby nie
+  ubić podglądu, zanim się wyrenderuje. ⚠️ Zachowanie nawigacji do blob: wymaga
+  potwierdzenia na urządzeniu przez właściciela — nie mamy iPhone'a w środowisku.
+*/
 export const downloadIcs = (icsText, filename) => {
   if (!icsText) return;
   const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
+  if (isIOS()) {
+    window.location.href = url;
+    // Gdy nawigacja dojdzie do skutku, dokument się wyładowuje i ten timer ginie razem
+    // z nim (blob sprząta się z dokumentem) — realnie chroni tylko wariant, w którym
+    // Safari zrobiło pobieranie i strona żyje dalej. To nie jest zepsuty timer.
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    return;
+  }
   const a = document.createElement('a');
   a.href = url;
   a.download = filename || 'zadanie.ics';

@@ -200,6 +200,41 @@ test('E6 Zadanie zaległe dostaje wydarzenie DZIŚ, nie w przeszłości', async 
   expect(new URL(href).searchParams.get('dates')).toBe(`${compact(isoInDays(0))}/${compact(isoInDays(1))}`);
 });
 
+/*
+  iOS: anchor z `download` zapisuje .ics jak zwykły plik bez ścieżki do Kalendarza
+  (potwierdzone na iPhonie właściciela 2026-08-28) — ścieżka Apple musi tam NAWIGOWAĆ
+  do blob:, bo podgląd wydarzenia z „Dodaj wszystkie" Safari pokazuje przy nawigacji.
+  Emulujemy UA iPhone'a; sam podgląd Safari potwierdzi właściciel na urządzeniu.
+*/
+test.describe('iOS', () => {
+  test.use({
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+    viewport: { width: 375, height: 812 },
+  });
+
+  test('E6 iOS: opcja Apple nawiguje do blob: zamiast używać atrybutu download', async ({ page }) => {
+    await setupFirebaseMocks(page, { user: mockUser, dbData: wlasneZadanie });
+    await page.goto('/dashboard');
+
+    const pobrania = [];
+    page.on('download', (d) => pobrania.push(d.suggestedFilename()));
+
+    await wierszZadania(page, 'Kupić żarówki').getByTitle('Dodaj do kalendarza').click();
+    await page.getByRole('menuitem', { name: 'Apple / plik .ics' }).click();
+
+    /*
+      Chromium nie umie pokazać podglądu Safari — nawigację do blob: zamienia na
+      pobranie nazwane UUID-em bloba (np. '3e346fc7-….ics'). To wystarcza za dowód,
+      że poszła NAWIGACJA, nie anchor z atrybutem download: tamta ścieżka nadaje
+      plikowi nazwę 'zadanie_YYYY-MM-DD.ics'. Sam podgląd „Dodaj wszystkie"
+      potwierdza właściciel na urządzeniu.
+    */
+    await expect.poll(() => pobrania.length, { timeout: 10000 }).toBeGreaterThan(0);
+    expect(pobrania[0]).toMatch(/\.ics$/);
+    expect(pobrania[0]).not.toMatch(/^zadanie_/);
+  });
+});
+
 test('E6 375px: menu mieści się w oknie telefonu', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await setupFirebaseMocks(page, { user: mockUser, dbData: wlasneZadanie });
