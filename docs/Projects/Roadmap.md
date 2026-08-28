@@ -139,7 +139,7 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 **Otwarte pytania (blokują start E2 i E5):**
 1. **E2** — czy dane liczymy z konta produkcyjnego właściciela, i za jaki okres?
 2. ~~**E3** — co dokładnie eksportujemy z zakładki Zadania i do jakiego formatu?~~ ✅ rozstrzygnięte 2026-08-28: nie eksportujemy nic (patrz wiersz E3)
-3. **E5** — które kanały (IG / FB / LinkedIn / TikTok) i kto naciska „publikuj"?
+3. **E5** — które kanały (IG / FB / LinkedIn / TikTok) i kto naciska „publikuj"? 📌 częściowo rozstrzygnięte praktyką 2026-08-28: **FB (grupy) + firmowy LinkedIn, publikuje właściciel** (post z aktualizacjami wrzucony na FB, wersja LinkedIn przygotowana na prośbę). Otwarte zostaje: IG / TikTok i ewentualna regularność.
 
 ### Gdyby tydzień miał wystarczyć tylko na jedno
 
