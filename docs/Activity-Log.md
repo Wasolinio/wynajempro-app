@@ -13,6 +13,7 @@ Project timeline and key milestones.
 - 🛡️ **Zostaje świadomie:** pole `photos` w allowliście `firestore.rules` (bo `addTask` zapisuje puste `[]`, a `hasOnly` odrzuciłoby dokument z polem spoza listy — zostawienie oszczędza deploy reguł przy powrocie i nic nie kosztuje, skoro upload jest niemożliwy) oraz kasowanie prefiksu Storage przy usuwaniu konta (tanie, sprząta po ewentualnych plikach z okresu, gdy funkcja była wydana).
 - 📌 **Wzorzec ten sam co ADR-022** (mikrorachunek skreślony — „niech odezwie się popyt"): nie utrzymujemy powierzchni prawnej i technicznej dla hipotezy. Powrót = funkcja + rozstrzygnięta prywatność (`getBlob` + CORS bucketu albo świadome pozostanie przy tokenie, opisane w Polityce). Decyzja: [[Decisions]] ADR-028.
 - ✅ **Weryfikacja:** lint 0 · build OK · **e2e 234/234** · functions 73/73 (2026-08-29).
+- ✅ **WYDANE NA PRODUKCJĘ 2026-08-29** (`hosting:app` + `storage`, za zgodą właściciela). Weryfikacja odczytem z produkcji: reguła Storage dla `users/{uid}/tasks/**` **USUNIĘTA** (blok przewodników nietknięty), a chunk panelu pobrany z `wynajempro.com` **nie zawiera ani jednego śladu zdjęć** (`wpd-tk-photo`, „Zdjęcia zadania" — zero trafień) przy zachowanym przycisku „Usuń zadanie". Konsola czysta poza znanym App Check 403.
 - 🧹 **Przy okazji:** ubity serwer deweloperski Vite, który wisiał 5 h 22 min po przebiegu testów e2e (Playwright zostawia webServer) — zajmował port i pamięć, nic nie robił.
 
 ### Usuwanie zadań w module — luka zgłoszona przez właściciela przy pierwszym użyciu
