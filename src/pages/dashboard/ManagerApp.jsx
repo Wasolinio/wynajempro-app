@@ -874,7 +874,7 @@ export default function ManagerApp() {
               />
             )}
             {renderView === 'tasks' && (
-              <TasksView registerQuickAdd={registerTasksQuickAdd} />
+              <TasksView registerQuickAdd={registerTasksQuickAdd} onDeleteTask={handleDeleteClick} />
             )}
             {renderView === 'guides' && (
               <GuideBuilder user={user} properties={properties} />

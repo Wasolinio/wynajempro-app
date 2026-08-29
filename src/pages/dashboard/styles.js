@@ -1171,6 +1171,17 @@ export const DASHBOARD_CSS = `
   opacity:0; transition:opacity .14s, border-color .14s, color .14s; }
 .wpd-tk-card:hover .wpd-tk-card__assign, .wpd-tk-card__assign:focus-visible{ opacity:1; }
 .wpd-tk-card__assign:hover{ border-color:var(--ink); color:var(--ink); }
+/* usuwanie zadania — ten sam kształt co „Przypisz", ostrzegawczy dopiero na hover,
+   żeby kosz nie krzyczał z każdej kartki listy */
+.wpd-tk-card__del:hover{ border-color:var(--cynober); color:var(--cynober); }
+/* skrzynka: kosz przy uchwycie, sama ikona — środek kartki musi zostać wolny pod chwyt */
+.wpd-tk-card__side{ display:flex; align-items:flex-start; gap:6px; }
+.wpd-tk-card__delicon{ background:transparent; border:none; padding:2px; cursor:pointer;
+  color:var(--hairline); opacity:0; transition:opacity .14s, color .14s; }
+.wpd-tk-card:hover .wpd-tk-card__delicon, .wpd-tk-card__delicon:focus-visible{ opacity:1; }
+.wpd-tk-card__delicon:hover{ color:var(--cynober); }
+.wpd-tk-card__delicon svg{ width:13px; height:13px; }
+@media (hover:none){ .wpd-tk-card__delicon{ opacity:1; } }
 .wpd-tk-card__assign svg{ width:11px; height:11px; }
 @media (hover:none){ .wpd-tk-card__assign{ opacity:1; } }
 
@@ -1405,11 +1416,12 @@ export const DASHBOARD_CSS = `
 
 /* dotykowe pola co najmniej 40px — konwencja z audytu poz. 5 */
 .wpd-tk-check, .wpd-tk-subs__btn, .wpd-tk-sub__box, .wpd-tk-axis__add, .wpd-tk-card__assign,
-.wpd-tk-pop__close{ position:relative; }
+.wpd-tk-card__delicon, .wpd-tk-pop__close{ position:relative; }
 .wpd-tk-check::after{ content:''; position:absolute; inset:-9px; }
 .wpd-tk-subs__btn::after{ content:''; position:absolute; inset:-7px; }
 .wpd-tk-axis__add::after{ content:''; position:absolute; inset:-8px; }
 .wpd-tk-card__assign::after{ content:''; position:absolute; inset:-7px; }
+.wpd-tk-card__delicon::after{ content:''; position:absolute; inset:-11px; }
 .wpd-tk-pop__close::after{ content:''; position:absolute; inset:-5px; }
 
 /* ── Klatki kluczowe ── */

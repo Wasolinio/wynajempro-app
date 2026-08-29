@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Clock, RefreshCw, ListChecks, ChevronDown, Camera, GripVertical, CalendarClock } from 'lucide-react';
+import { Check, Clock, RefreshCw, ListChecks, ChevronDown, Camera, GripVertical, CalendarClock, Trash2 } from 'lucide-react';
 import { channelColor } from '../styles';
 import { plural } from '../../../utils/plural';
 
@@ -23,7 +23,7 @@ const PRIO_LABEL = { wysoki: 'Pilne', normalny: 'Zwykłe', niski: 'Kiedyś' };
 
 function TaskCard({
   task, compact = false, flash = false, checklistOpen = false,
-  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign, onOpenPhotos,
+  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign, onOpenPhotos, onDelete,
 }) {
   const t = task;
   const overdue = t.overdueDays > 0 && !t.done;
@@ -52,6 +52,28 @@ function TaskCard({
       <Camera />Zdjęcia
     </button>
   );
+  // Usuwanie: tylko zadania będące DOKUMENTEM (kolekcja `tasks` albo legacy z `rentals`).
+  // Zadania z szablonu nie są dokumentami — kasuje się je zmieniając szablon w Ustawieniach,
+  // więc kosz przy nich obiecywałby operację, której nie da się wykonać.
+  // Handoff nie przewidywał żadnej akcji usuwania (ani README, ani prototyp); brak wyszedł
+  // przy pierwszym użyciu panelu przez właściciela 2026-08-29 — z widoku Zadania nie dało
+  // się usunąć zadania, które się w nim tworzy.
+  const usuwalne = (t.source === 'task' || t.source === 'legacy') && onDelete;
+  const deleteBtn = usuwalne && (
+    <button type="button" className="wpd-tk-card__assign wpd-tk-card__del" data-nodrag="1"
+      onClick={() => onDelete(t)}
+      aria-label={`Usuń zadanie: ${t.text}`}>
+      <Trash2 />Usuń
+    </button>
+  );
+  // wariant skrzynki: sama ikona przy uchwycie (etykieta zostaje dla czytnika ekranu)
+  const deleteIconBtn = usuwalne && (
+    <button type="button" className="wpd-tk-card__delicon" data-nodrag="1"
+      onClick={() => onDelete(t)} title="Usuń zadanie"
+      aria-label={`Usuń zadanie: ${t.text}`}>
+      <Trash2 />
+    </button>
+  );
 
   if (compact) {
     return (
@@ -68,7 +90,14 @@ function TaskCard({
               {assignBtn}
             </div>
           </div>
-          <span className="wpd-tk-card__grip" style={{ paddingTop: 2 }}><GripVertical /></span>
+          {/* W skrzynce kosz stoi przy UCHWYCIE, nie w rzędzie akcji: kartka jest tu niska,
+              a jej geometryczny środek to naturalne miejsce chwytu do przeciągania.
+              Drugi przycisk w rzędzie zamieniał środek w martwą strefę (`data-nodrag`)
+              i kartka przestawała się przeciągać — złapane pomiarem 2026-08-29. */}
+          <span className="wpd-tk-card__side">
+            {deleteIconBtn}
+            <span className="wpd-tk-card__grip" style={{ paddingTop: 2 }}><GripVertical /></span>
+          </span>
         </div>
       </div>
     );
@@ -131,6 +160,7 @@ function TaskCard({
             )}
             {assignBtn}
             {photosBtn}
+            {deleteBtn}
           </div>
 
           {t.note && <p className="wpd-tk-card__note">{t.note}</p>}

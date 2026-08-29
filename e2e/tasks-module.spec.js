@@ -466,3 +466,37 @@ test('Zrzuty do przeglądu: desktop i 375 px', async ({ page }, testInfo) => {
   await page.waitForTimeout(400);
   await page.screenshot({ path: testInfo.outputPath('zadania-mobile-375.png'), fullPage: true });
 });
+
+/*
+  P2 — usuwanie zadania z widoku Zadania.
+
+  Regresja na lukę zgłoszoną przez właściciela przy pierwszym użyciu panelu (2026-08-29):
+  handoff nie przewidywał ŻADNEJ akcji usuwania (ani README, ani prototyp), więc z widoku,
+  w którym zadania się tworzy, nie dało się ich skasować — jedyne usuwanie żyło w zakładce
+  Rezerwacje → Zadania. Test pilnuje obecności przycisku, przejścia przez wspólny dialog
+  potwierdzenia i FAKTYCZNEGO zniknięcia dokumentu z kolekcji.
+*/
+test('P2 usuwanie: kartka ma „Usuń", potwierdzenie kasuje dokument; szablon kosza nie ma', async ({ page }) => {
+  await openTasks(page);
+
+  const przed = (await tasksDocs(page)).length;
+  const card = page.locator('.wpd-tk-card', { hasText: 'Odczyt licznika prądu' });
+  const kosz = card.locator('.wpd-tk-card__del');
+  await expect(kosz).toHaveCount(1);
+
+  // Anulowanie NIE może niczego skasować — dialog jest jedyną barierą przed utratą wpisu.
+  await kosz.click();
+  await page.locator('.wpd-dialog__foot .wpd-btn', { hasText: 'Anuluj' }).click();
+  await expect.poll(async () => (await tasksDocs(page)).length, { timeout: 3000 }).toBe(przed);
+  await expect(card).toBeVisible();
+
+  await kosz.click();
+  await page.locator('.wpd-dialog__foot .wpd-btn', { hasText: 'Tak, usuń' }).click();
+
+  await expect.poll(async () => (await tasksDocs(page)).length, { timeout: 5000 }).toBe(przed - 1);
+  await expect(page.locator('.wpd-tk-card', { hasText: 'Odczyt licznika prądu' })).toHaveCount(0);
+
+  // Zadanie z SZABLONU nie jest dokumentem — kosz obiecywałby operację niewykonalną.
+  const szablonowa = page.locator('.wpd-tk-card', { hasText: 'z szablonu' }).first();
+  if (await szablonowa.count()) await expect(szablonowa.locator('.wpd-tk-card__del')).toHaveCount(0);
+});

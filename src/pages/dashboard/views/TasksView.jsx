@@ -37,7 +37,7 @@ function RollCounter({ value }) {
   );
 }
 
-export default function TasksView({ registerQuickAdd }) {
+export default function TasksView({ registerQuickAdd, onDeleteTask }) {
   const {
     tasks, rentals, templates, properties,
     addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask,
@@ -248,7 +248,10 @@ export default function TasksView({ registerQuickAdd }) {
       onOpenChecklist={handleOpenChecklist}
       onDragStart={begin}
       onAssign={openAssign}
-      onOpenPhotos={(task) => setPhotosTaskId(task.id)} />
+      onOpenPhotos={(task) => setPhotosTaskId(task.id)}
+      // usuwanie idzie wspólnym dialogiem potwierdzenia panelu; flaga mówi, w której
+      // kolekcji leży dokument (tasks vs legacy rentals)
+      onDelete={onDeleteTask ? (task) => onDeleteTask(task.id, task.source === 'task') : undefined} />
   );
 
   // dialog zdjęć czyta zadanie NA ŻYWO z planszy — po uploadzie/usunięciu snapshot
