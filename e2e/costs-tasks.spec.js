@@ -81,7 +81,9 @@ test('#10 Zadania jednorazowe mają własną zakładkę z edycją i usuwaniem', 
   await page.goto('/dashboard');
 
   await page.locator('.wpd-nav__item', { hasText: 'Rezerwacje' }).first().click();
-  await page.getByRole('button', { name: /Zadania/ }).click();
+  // celujemy w przycisk SEGMENTU filtrów — od E3 w sidebarze też jest przycisk „Zadania"
+  // (moduł Zadania, poz. 06) i ogólny selektor role=button był dwuznaczny
+  await page.locator('.wpd-seg__btn', { hasText: 'Zadania' }).click();
 
   const row = page.locator('tr', { hasText: 'Wymienić żarówkę w salonie' });
   await expect(row).toBeVisible();

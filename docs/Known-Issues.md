@@ -2,6 +2,16 @@
 
 ## Critical Issues
 
+### 21. Widoki liczone z `rentals` nie widzą przełomu roku — oś Zadań i zadania szablonowe gubią styczniowe przyjazdy pod koniec grudnia (2026-08-29, OTWARTE, zastane)
+
+**Objaw:** subskrypcja `rentals` w `useFirebaseData.js` filtruje po roku (`where('date','>=',yearStart)`),
+więc pod koniec grudnia siedmiodniowe okno osi przypisania w module Zadania nie pokaże pasków
+styczniowych przyjazdów ani zadań szablonowych z nich liczonych; zaległe zadania legacy
+z poprzedniego roku znikają z listy. **Klasa ograniczenia istniała przed E3** (dotyczy tak samo
+pulpitu i kalendarza) — moduł Zadania tylko czyni ją bardziej widoczną. Znalezione przy przeglądzie
+partii 1 E3 (2026-08-29); świadomie NIE naprawiane w tej partii. Kierunek: subskrypcja obejmująca
+grudzień+styczeń albo drugi rok w oknie — do decyzji przy partii 2.
+
 ### 20. Landing na 375 px bywa o 6 px za szeroki po otwarciu menu — niestabilne w CI (2026-08-25, OTWARTE)
 
 **Objaw:** `ui-scaling.spec.js:106` („Test mobile navigation menu hamburger toggle on mobile

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useCallback, useEf
 import toast from 'react-hot-toast';
 import { auth, db, functions } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { defaultTaxSettings, defaultHostProfile } from '../utils/constants';
@@ -21,7 +21,7 @@ export const WynajemProvider = ({ children }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   
   // Custom Hook pobierający dane (wymaga useEffect/onAuthStateChanged powyżej? Lepiej wewnątrz)
-  const { rentals, settings, profile, loading } = useFirebaseData(user, selectedYear);
+  const { rentals, settings, profile, tasks, loading } = useFirebaseData(user, selectedYear);
 
   // STANY SUBSKRYPCJI
   const accountStatus = profile?.accountStatus;
@@ -84,6 +84,93 @@ export const WynajemProvider = ({ children }) => {
     if (taskId === 'directions') updates.directionsSent = !currentValue;
     if (taskId === 'keycode') updates.keycodeSent = !currentValue;
     await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
+  }, [user]);
+
+  // AKCJE DLA ZADAŃ — kolekcja users/{uid}/tasks (E3, moduł Zadania; wzór jak wyżej).
+  // Id nadaje addDoc — NIE Date.now().toString(): dwa zadania w tej samej milisekundzie
+  // nadpisałyby się (pułapka z IMPLEMENTACJA.md §6). Wszystkie „braki" zapisujemy jako
+  // null/'' jawnie, bo model traktuje null jako stan (date:null = skrzynka do przypisania).
+  const addTask = useCallback(async (draft) => {
+    if (!user) return null;
+    try {
+      const docRef = await addDoc(collection(db, 'users', user.uid, 'tasks'), {
+        text: (draft.text || '').trim(),
+        propertyName: draft.propertyName ?? null,
+        rentalId: draft.rentalId ?? null,
+        templateId: draft.templateId ?? null,
+        date: draft.date ?? null,
+        time: draft.time || '',
+        priority: draft.priority || 'normalny',
+        note: draft.note || '',
+        subtasks: draft.subtasks || [],
+        recurrence: draft.recurrence ?? null,
+        photos: draft.photos || [],
+        done: false,
+        doneAt: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      toast.success('Zadanie dodane');
+      return docRef.id;
+    } catch (err) {
+      console.error('Błąd dodawania zadania:', err);
+      toast.error('Nie udało się dodać zadania');
+      return null;
+    }
+  }, [user]);
+
+  const updateTask = useCallback(async (id, updates) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { ...updates, updatedAt: serverTimestamp() });
+    } catch (err) {
+      console.error('Błąd aktualizacji zadania:', err);
+      toast.error('Nie udało się zapisać zmiany zadania');
+    }
+  }, [user]);
+
+  // Przypisanie z osi: pasek rezerwacji daje date+rentalId+propertyName,
+  // wolny dzień daje date+propertyName (rentalId=null). Null jest tu wartością, nie brakiem.
+  const assignTask = useCallback(async (id, { date, rentalId, propertyName }) => {
+    await updateTask(id, { date: date ?? null, rentalId: rentalId ?? null, propertyName: propertyName ?? null });
+  }, [updateTask]);
+
+  const toggleTaskDone = useCallback(async (task) => {
+    // zadanie zostaje na liście po odhaczeniu (decyzja właściciela w handoffie) —
+    // stąd toggle, nie kasowanie; doneAt czyścimy przy cofnięciu
+    await updateTask(task.id, { done: !task.done, doneAt: task.done ? null : serverTimestamp() });
+  }, [updateTask]);
+
+  const toggleSubtask = useCallback(async (task, index) => {
+    const subtasks = (task.subtasks || []).map((s, i) => (i === index ? { ...s, done: !s.done } : s));
+    await updateTask(task.id, { subtasks });
+  }, [updateTask]);
+
+  // LEGACY (okres zgodnościowy do migracji w partii 2): jednorazowe zadanie z `rentals`
+  // (type:'reminder') przypisujemy aktualizując jego własny dokument — `date` i `property`
+  // są w allowliście isValidRental. Linku do rezerwacji ten model nie ma, więc upuszczenie
+  // na pasek zapisuje wyłącznie termin i obiekt.
+  const assignLegacyReminder = useCallback(async (id, { date, propertyName }) => {
+    if (!user || !date) return;
+    try {
+      const updates = { date };
+      if (propertyName) updates.property = propertyName;
+      await updateDoc(doc(db, 'users', user.uid, 'rentals', id), updates);
+    } catch (err) {
+      console.error('Błąd przypisania zadania (legacy):', err);
+      toast.error('Nie udało się przypisać zadania');
+    }
+  }, [user]);
+
+  const deleteTask = useCallback(async (id) => {
+    if (!user) return;
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'tasks', id));
+      toast.success('Zadanie usunięte');
+    } catch (err) {
+      console.error('Błąd usuwania zadania:', err);
+      toast.error('Nie udało się usunąć zadania');
+    }
   }, [user]);
 
   // STRIPE / PAYWALL
@@ -182,22 +269,24 @@ export const WynajemProvider = ({ children }) => {
   }, [user, syncLinks]);
 
   const value = useMemo(() => ({
-    user, loading, rentals, settings, profile,
+    user, loading, rentals, settings, profile, tasks,
     accountStatus, trialEndsAt, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
+    addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask, deleteTask, assignLegacyReminder,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
     db // Wystawienie DB jeśli modal będzie robił bezpośredni update (lepiej nie, ale na razie tak)
   }), [
-    user, loading, rentals, settings, profile,
+    user, loading, rentals, settings, profile, tasks,
     accountStatus, trialEndsAt, scheduledDeletionAt,
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
+    addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask, deleteTask, assignLegacyReminder,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     handleSyncCalendars, isSyncing
   ]);

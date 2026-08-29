@@ -52,11 +52,15 @@ async function cleanupUserData(uid) {
   // przeżywałyby żądanie usunięcia konta — ta sama klasa problemu, którą audyt N5 zamknął
   // dla `guides/*/signatures`.
   const syncStateDeleted = await deleteSubcollection(userRef, "syncState");
+  // E3 (moduł Zadania): `users/{uid}/tasks/*` zawiera treści zadań i nazwiska gości
+  // w powiązaniu z rezerwacjami (RODO art. 17) — czyszczone razem z resztą subkolekcji,
+  // ta sama lekcja co przy syncState wyżej.
+  const tasksDeleted = await deleteSubcollection(userRef, "tasks");
 
   console.log(
     `🧹 Dane użytkownika ${uid} wyczyszczone: ` +
     `${rentalsDeleted} rezerwacji, ${settingsDeleted} ustawień, ${checkoutDeleted} sesji checkout, ` +
-    `${syncStateDeleted} stanów synchronizacji`
+    `${syncStateDeleted} stanów synchronizacji, ${tasksDeleted} zadań`
   );
 
   // Czyścimy pola Stripe z profilu, ale zostawiamy sam dokument
@@ -67,7 +71,7 @@ async function cleanupUserData(uid) {
     dataCleanedAt: Timestamp.now(),
   });
 
-  return { rentalsDeleted, settingsDeleted, checkoutDeleted, syncStateDeleted };
+  return { rentalsDeleted, settingsDeleted, checkoutDeleted, syncStateDeleted, tasksDeleted };
 }
 
 // =============================================================================

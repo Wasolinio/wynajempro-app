@@ -14,8 +14,10 @@ firestore-database/
 │       │   ├── properties         ← The property list (array)
 │       │   ├── tax                ← Tax settings
 │       │   └── hostProfile        ← Host information
-│       └── rentals/
-│           └── {entryId}          ← All calendar entries (bookings, utilities, reminders)
+│       ├── rentals/
+│       │   └── {entryId}          ← All calendar entries (bookings, utilities, reminders)
+│       └── tasks/
+│           └── {taskId}           ← Zadania gospodarza (moduł Zadania, E3)
 ├── guides/
 │   └── {guideId}                  ← Publicly readable guest guides
 │       ├── secrets/data           ← Hidden codes
@@ -114,6 +116,43 @@ Contains all calendar entries: bookings, utility costs, and reminders.
   
   // Financial specifics
   currency: "PLN"
+}
+```
+
+---
+
+### Subcollection: `users/{uid}/tasks` (moduł Zadania, E3)
+
+Zadania gospodarza — osobna kolekcja, bo zadanie bez daty (skrzynka „do przypisania")
+nie przeszłoby przez roczny filtr `where('date', ...)` subskrypcji `rentals`.
+Model wg `_design-reference/design_handoff_zadania/IMPLEMENTACJA.md` §1.
+Id nadaje `addDoc` (NIE `Date.now()`). Reguły: blok `tasks` w `firestore.rules`
+(`isValidTask`, limity `subtasks` ≤ 50 i `photos` ≤ 10). Czyszczone przy usuwaniu
+konta w `cleanupUserData` (`functions/index.js`).
+
+Zadania z szablonów NIE są tu zapisywane — liczy je w locie `useTasksBoard`
+(syntetyczne id `tpl:{rentalId}:{templateId}`, wykonanie w `rentals.completedTasks`).
+Wpisy `rentals` z `type: 'reminder'` czytane zgodnościowo do migracji (partia 2).
+
+#### Document: `users/{uid}/tasks/{taskId}`
+
+```javascript
+{
+  text: "Dowieźć ręczniki",
+  propertyName: "Domek nad jeziorem", // nazwa obiektu (nie id) | null
+  rentalId: "1755900000000",          // link do users/{uid}/rentals/{id} | null
+  templateId: null,                   // tylko dla zadań zmaterializowanych z szablonu
+  date: "2026-08-25",                 // 'YYYY-MM-DD' lokalnie | null = skrzynka
+  time: "11:00",                      // '' gdy brak
+  priority: "wysoki",                 // 'wysoki' | 'normalny' | 'niski'
+  note: "",
+  subtasks: [{ text: "Pościel i ręczniki", done: true }], // max 50
+  recurrence: null,                   // null | { kind, label } (rozwijanie = partia 2)
+  photos: [],                         // max 10; upload do Storage = partia 2
+  done: false,
+  doneAt: null,                       // Timestamp | null
+  createdAt: Timestamp,
+  updatedAt: Timestamp,
 }
 ```
 

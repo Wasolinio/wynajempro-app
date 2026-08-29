@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   LayoutDashboard, CalendarDays, Building2, List, BarChart3, BookOpen,
   Search, Bell, Plus, Settings, Power, RefreshCw, ChevronLeft, ChevronRight,
-  Mail, Key, MessageSquare, Phone, CheckSquare,
+  Mail, Key, MessageSquare, Phone, CheckSquare, ClipboardList,
   MoreHorizontal, Star, User as UserIcon, LifeBuoy,
 } from 'lucide-react';
 import { useDialogA11y } from './modals/useDialogA11y';
@@ -38,6 +38,7 @@ import CalendarView from './views/CalendarView';
 import ObjectsView from './views/ObjectsView';
 import BookingDetailView from './views/BookingDetailView';
 import FinanceHub from './views/FinanceHub';
+import TasksView from './views/TasksView';
 import ContractGeneratorView from './views/ContractGeneratorView';
 import GuideBuilder from './GuideBuilder';
 import ReviewBuilder from './ReviewBuilder';
@@ -63,11 +64,14 @@ const NAV = [
   // Finanse (05) — fuzja Finanse+Analityka (X4): jeden moduł z podzakładkami
   // Przegląd · Koszty i opłaty · Raporty. Dawna osobna „Analityka" (06) wchłonięta.
   { key: 'finance', num: '05', label: 'Finanse', icon: BarChart3 },
-  { key: 'guides', num: '06', label: 'Przewodniki', icon: BookOpen },
+  // E3: moduł Zadania — nowa pozycja pod Finansami (design_handoff_zadania);
+  // Przewodniki i Opinie schodzą o numer niżej
+  { key: 'tasks', num: '06', label: 'Zadania', icon: ClipboardList },
+  { key: 'guides', num: '07', label: 'Przewodniki', icon: BookOpen },
   // Generator umów WYŁĄCZONY decyzją właściciela 2026-07-15 (X16): wzorce umów
   // czekają na akceptację prawnika (N4). Kod widoku zostaje — po akceptacji
-  // przywrócić wpis: { key: 'contracts', num: '08', label: 'Generator umów', icon: FileSignature }
-  { key: 'reviews', num: '07', label: 'Opinie', icon: Star },
+  // przywrócić wpis: { key: 'contracts', num: '09', label: 'Generator umów', icon: FileSignature }
+  { key: 'reviews', num: '08', label: 'Opinie', icon: Star },
 ];
 
 /* Dolny pasek mobile (X12): 4 pozycje pod kciukiem — decyzja właściciela 2026-07-04;
@@ -84,6 +88,7 @@ const VIEW_META = {
   objects: { title: 'Obiekty', sub: 'Twoje miejsca na wynajem' },
   bookings: { title: 'Rezerwacje', sub: 'Wszystkie rezerwacje' },
   finance: { title: 'Finanse', sub: 'Przegląd, koszty i raporty rentowności' },
+  tasks: { title: 'Zadania', sub: todaySubtitle() },
   guides: { title: 'Przewodniki', sub: 'Cyfrowe informatory dla gości' },
   contracts: { title: 'Generator umów', sub: 'Umowy najmu z danych rezerwacji' },
   reviews: { title: 'Opinie', sub: 'Podziękowania i prośby o opinie po pobycie' },
@@ -97,6 +102,7 @@ export default function ManagerApp() {
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
+    addTask,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
   } = useWynajem();
@@ -156,6 +162,12 @@ export default function ManagerApp() {
   const [detailId, setDetailId] = useState(null);
   const openBookingDetail = useCallback((r) => { setDetailId(r.id); }, []);
 
+  // E3: topbar na widoku Zadań pokazuje „+ Zadanie" i otwiera popover szybkiego zadania,
+  // który żyje wewnątrz TasksView — widok rejestruje tu swój otwieracz (ref, nie stan:
+  // rejestracja nie ma przerysowywać powłoki).
+  const tasksQuickAddRef = useRef(null);
+  const registerTasksQuickAdd = useCallback((fn) => { tasksQuickAddRef.current = fn; }, []);
+
   const changeView = useCallback((v) => { setActiveView(v); setCurrentPage(1); setDetailId(null); }, []);
   const changeBookingFilter = useCallback((f) => { setBookingFilter(f); setCurrentPage(1); }, []);
   const changeBookingSortOrder = useCallback((u) => { setBookingSortOrder(u); setCurrentPage(1); }, []);
@@ -167,6 +179,9 @@ export default function ManagerApp() {
     adults: '', children: '', pets: '', // X14: rozbicie gości; `guests` wyliczane przy zapisie
     date: new Date().toISOString().split('T')[0], endDate: '', income: '', advancePayment: '', isAdvancePaid: false, commission: '',
     utilities: '', tax: '', vat: '', isPaid: false, isCompleted: false, completedTasks: {}, syncId: '',
+    // E3: pola zakładki „Zadanie" (piszą do users/{uid}/tasks, NIE do rentals) —
+    // przed zapisem rezerwacji/kosztu są odcinane w handleAddRental
+    taskTime: '', taskPriority: 'normalny', taskNote: '',
   }), [sources, properties, categories]);
 
   const [newRental, setNewRental] = useState(getDefaultRentalState());
@@ -279,7 +294,7 @@ export default function ManagerApp() {
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Gdy szukamy — pokazujemy wyniki w widoku Rezerwacje
-  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides', 'contracts'].includes(activeView) ? 'bookings' : activeView;
+  const renderView = searchQuery && ['calendar', 'objects', 'finance', 'pulpit', 'guides', 'contracts', 'tasks'].includes(activeView) ? 'bookings' : activeView;
   const paginatedBookings = getPaginated(displayedBookings);
   const currentTotalPages = Math.ceil(displayedBookings.length / ITEMS_PER_PAGE) || 1;
 
@@ -396,7 +411,25 @@ export default function ManagerApp() {
   const handleAddRental = async (e) => {
     e.preventDefault();
     if (!user) return;
-    const { id: _id, ...entry } = newRental;
+    // E3: pola zakładki „Zadanie" nie należą do modelu rentals (allowlista isValidRental
+    // by je odrzuciła) — odcinamy je zawsze, a przy nowym zadaniu zużywamy niżej
+    const { id: _id, taskTime, taskPriority, taskNote, ...entry } = newRental;
+
+    // NOWE zadanie pisze do users/{uid}/tasks — jedna ścieżka tworzenia z modułem Zadania
+    // (E3); edycja istniejącego wpisu type:'reminder' zostaje na rentals do czasu migracji
+    // (partia 2, odczyt zgodnościowy w useTasksBoard).
+    if (entry.type === 'reminder' && !editingId) {
+      const id = await addTask({
+        text: entry.text || '',
+        date: entry.date || null,
+        time: taskTime || '',
+        priority: taskPriority || 'normalny',
+        note: taskNote || '',
+        propertyName: entry.property || null,
+      });
+      if (id) handleCloseModal();
+      return;
+    }
     // X14: `guests` jest polem WYLICZANYM — suma osób (dorośli + dzieci). Zwierzęta
     // mają własne pole `pets` i do sumy nie wchodzą. Puste rozbicie → puste `guests`.
     const totalGuests = guestsTotal(entry.adults, entry.children);
@@ -645,9 +678,18 @@ export default function ManagerApp() {
             <button className="wpd-iconbtn" title="Raport dzienny" onClick={() => setShowDailyReportModal(true)}>
               <Bell />{dailyReport.total > 0 && <span className="wpd-iconbtn__dot" />}
             </button>
-            <button className="wpd-btn wpd-btn--primary" title="Nowa rezerwacja" onClick={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}>
-              <Plus /><span className="wpd-top__btnlabel">Rezerwacja</span>
-            </button>
+            {/* E3: na widoku Zadań przycisk główny to „+ Zadanie" (popover szybkiego
+                zadania z TasksView); wszędzie indziej — „+ Rezerwacja" jak dotąd */}
+            {activeView === 'tasks' && !detailBooking && !searchQuery ? (
+              <button className="wpd-btn wpd-btn--primary" title="Nowe zadanie"
+                onClick={(e) => tasksQuickAddRef.current?.(e.currentTarget)}>
+                <Plus /><span className="wpd-top__btnlabel">Zadanie</span>
+              </button>
+            ) : (
+              <button className="wpd-btn wpd-btn--primary" title="Nowa rezerwacja" onClick={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}>
+                <Plus /><span className="wpd-top__btnlabel">Rezerwacja</span>
+              </button>
+            )}
           </header>
 
           <main className="wpd-content">
@@ -715,6 +757,9 @@ export default function ManagerApp() {
                 onDodajRezerwacje={() => { setNewRental(getDefaultRentalState()); setShowAddModal(true); }}
                 onOtworzUstawienia={openSettingsOn}
               />
+            )}
+            {renderView === 'tasks' && (
+              <TasksView registerQuickAdd={registerTasksQuickAdd} />
             )}
             {renderView === 'guides' && (
               <GuideBuilder user={user} properties={properties} />

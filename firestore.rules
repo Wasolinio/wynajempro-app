@@ -96,6 +96,38 @@ service cloud.firestore {
           && (!('completedTasks' in data) || data.completedTasks is map);
     }
 
+    // Pole opcjonalne, które wolno zapisać też jako null (moduł Zadania trzyma
+    // null jako jawny stan: `date: null` = skrzynka „do przypisania",
+    // `rentalId: null` = zadanie bez rezerwacji).
+    function optStrN(data, k, max) {
+      return !(k in data) || data[k] == null || (data[k] is string && data[k].size() <= max);
+    }
+
+    // E3 (moduł Zadania): users/{uid}/tasks — model wg design_handoff_zadania/IMPLEMENTACJA.md §1.
+    // `subtasks` i `photos` mają twarde limity rozmiaru (reguły nie umieją iterować po liście,
+    // więc kształt pozycji pilnuje front; limit odcina dokumenty-worki). Wymagany jest sam
+    // `text` — reszta pól opcjonalna, ale o pilnowanym typie (ten sam idiom co isValidRental).
+    function isValidTask(data) {
+      return data.keys().hasOnly(['text', 'propertyName', 'rentalId', 'templateId', 'date',
+              'time', 'priority', 'note', 'subtasks', 'recurrence', 'photos', 'done', 'doneAt',
+              'createdAt', 'updatedAt'])
+          && data.text is string && data.text.size() > 0 && data.text.size() <= 5000
+          && optStrN(data, 'propertyName', 300)
+          && optStrN(data, 'rentalId', 100)
+          && optStrN(data, 'templateId', 100)
+          && optStrN(data, 'date', 30)
+          && optStr(data, 'time', 20)
+          && (!('priority' in data) || data.priority in ['wysoki', 'normalny', 'niski'])
+          && optStr(data, 'note', 5000)
+          && (!('subtasks' in data) || (data.subtasks is list && data.subtasks.size() <= 50))
+          && (!('recurrence' in data) || data.recurrence == null || data.recurrence is map)
+          && (!('photos' in data) || (data.photos is list && data.photos.size() <= 10))
+          && optBool(data, 'done')
+          && (!('doneAt' in data) || data.doneAt == null || data.doneAt is timestamp)
+          && (!('createdAt' in data) || data.createdAt is timestamp)
+          && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
     function isValidSettings(docId, data) {
       let knownIds = ['reminders', 'properties', 'sources', 'categories', 'syncLinks', 'tax', 'hostProfile', 'publicContact', 'recurringCosts'];
       return docId in knownIds
@@ -178,6 +210,14 @@ service cloud.firestore {
       match /rentals/{docId} {
         allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
         allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidRental(request.resource.data);
+        allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+      }
+
+      // E3: zadania gospodarza (moduł Zadania) — blok wzorem `rentals`:
+      // właściciel + weryfikacja + subskrypcja + walidacja schematu.
+      match /tasks/{docId} {
+        allow read: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
+        allow create, update: if isOwnerAndVerified(userId) && hasActiveSubscription(userId) && isValidTask(request.resource.data);
         allow delete: if isOwnerAndVerified(userId) && hasActiveSubscription(userId);
       }
 

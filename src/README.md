@@ -24,10 +24,11 @@ src/
 │   │   └── LoginPanel.jsx .......... Logowanie/rejestracja „/login” (e-mail, Google, weryfikacja, trial)
 │   │
 │   ├── dashboard/ ................. ⭐ PRODUKCYJNY panel zarządzania „/dashboard” (namespace CSS .wpd)
-│   │   ├── ManagerApp.jsx ......... Powłoka: sidebar 01–06, topbar, stan, akcje Firestore
+│   │   ├── ManagerApp.jsx ......... Powłoka: sidebar 01–08, topbar, stan, akcje Firestore
 │   │   ├── styles.js .............. System designu .wpd (DASHBOARD_CSS + helpery kolorów)
 │   │   ├── GuideBuilder.jsx ....... Kreator przewodników dla gości (upload do 10 MB, QR, sekrety)
-│   │   ├── views/ ................. Widoki: Pulpit, Rezerwacje, Kalendarz, Obiekty, Finanse, szczegóły rezerwacji
+│   │   ├── views/ ................. Widoki: Pulpit, Rezerwacje, Kalendarz, Obiekty, Finanse, Zadania, szczegóły rezerwacji
+│   │   ├── tasks/ ................. Moduł Zadania (E3): oś przypisania, kartki, popover, drag&drop, useTasksBoard
 │   │   └── modals/ ................ Modale V4: dodaj/edytuj wpis, ustawienia, raporty, usuwanie
 │   │
 │   ├── admin/ ..................... PANEL ADMINISTRATORA "/admin" (namespace .wpd + dodatek .wpa)
@@ -42,6 +43,8 @@ src/
 │   └── BlogListPage / BlogPostPage .......... Blog
 │
 ├── components/ ..................... Współdzielone, WCIĄŻ używane:
+│   ├── WpdSelect.jsx .............. Custom select .wpd-sel (wzorzec z modułu Zadania; docelowo zamiennik .wpd-select)
+│   ├── WpdDatePicker.jsx .......... Mini kalendarz z zajętością obiektu (wzorzec z modułu Zadania)
 │   ├── ConsentNotice.jsx .......... Baner zgody na cookies
 │   ├── PaywallScreen.jsx .......... Ekran blokady (brak aktywnej subskrypcji)
 │   ├── CompleteProfileScreen.jsx .. Uzupełnienie profilu gospodarza

@@ -70,6 +70,16 @@ export const useFirebaseData = (user, selectedYear) => {
     enabled: !!user,
   });
 
+  // E3 (moduł Zadania): zadania gospodarza. BEZ filtra roku — zadanie bez `date`
+  // (skrzynka „do przypisania") nigdy nie przeszłoby przez warunek where('date', ...),
+  // dokładnie ten problem zablokował trzymanie zadań w `rentals` (IMPLEMENTACJA.md §1).
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks', user?.uid],
+    queryFn: zachowaj(['tasks', user?.uid], []),
+    staleTime: Infinity,
+    enabled: !!user,
+  });
+
   useEffect(() => {
     if (!user) return;
     
@@ -138,7 +148,16 @@ export const useFirebaseData = (user, selectedYear) => {
       console.warn('Brak dostępu do ustawień (subskrypcja nieaktywna):', error.code);
     });
 
-    return () => { unsubSettings(); unsubProfile(); };
+    // Subskrypcja Zadań (E3) — cała kolekcja na żywo, jak settings (bez zapytania z warunkami)
+    const unsubTasks = onSnapshot(collection(db, 'users', user.uid, 'tasks'), (snapshot) => {
+      const data = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+      queryClient.setQueryData(['tasks', user.uid], data);
+    }, (error) => {
+      console.warn('Brak dostępu do zadań (subskrypcja nieaktywna):', error.code);
+      queryClient.setQueryData(['tasks', user.uid], []);
+    });
+
+    return () => { unsubSettings(); unsubProfile(); unsubTasks(); };
   }, [user, queryClient]);
 
   useEffect(() => {
@@ -179,5 +198,5 @@ export const useFirebaseData = (user, selectedYear) => {
     };
   }, [user, queryClient, selectedYear]);
 
-  return { rentals, settings, profile, loading };
+  return { rentals, settings, profile, tasks, loading };
 };

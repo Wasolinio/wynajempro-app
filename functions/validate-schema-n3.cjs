@@ -8,10 +8,6 @@
 
   Uruchomienie: cd functions && GOOGLE_APPLICATION_CREDENTIALS=/ścieżka/klucz.json node validate-schema-n3.cjs
 */
-const admin = require('firebase-admin');
-admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: 'moje-domki-6c77d' });
-const db = admin.firestore();
-
 // ── Lustro helperów z firestore.rules ──
 const isStr = (v) => typeof v === 'string';
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -22,6 +18,10 @@ const optStr = (d, k, max) => !(k in d) || (isStr(d[k]) && d[k].length <= max);
 const optNum = (d, k) => !(k in d) || isNum(d[k]);
 const optBool = (d, k) => !(k in d) || isBool(d[k]);
 const hasOnly = (d, allowed) => Object.keys(d).every((k) => allowed.includes(k));
+// E3: lustro optStrN — pole opcjonalne, które wolno zapisać też jako null (moduł Zadania)
+const optStrN = (d, k, max) => !(k in d) || d[k] == null || (isStr(d[k]) && d[k].length <= max);
+// Timestamp z Admin SDK ma metodę toDate; serverTimestamp w zapisanym dokumencie to już Timestamp
+const isTimestamp = (v) => v !== null && typeof v === 'object' && typeof v.toDate === 'function';
 
 // ── Lustro isValidRental ──
 const RENTAL_KEYS = ['type', 'source', 'property', 'category', 'guest', 'email', 'phone',
@@ -46,6 +46,29 @@ function whyInvalidRental(d) {
   }
   if ('syncStatus' in d && !['active', 'vanished'].includes(d.syncStatus)) return `syncStatus='${d.syncStatus}'`;
   if ('completedTasks' in d && !isMap(d.completedTasks)) return 'completedTasks nie jest mapą';
+  return null;
+}
+
+// ── Lustro isValidTask (E3, moduł Zadania) ──
+const TASK_KEYS = ['text', 'propertyName', 'rentalId', 'templateId', 'date', 'time',
+  'priority', 'note', 'subtasks', 'recurrence', 'photos', 'done', 'doneAt',
+  'createdAt', 'updatedAt'];
+function whyInvalidTask(d) {
+  if (!hasOnly(d, TASK_KEYS)) return `nieznane pola: ${Object.keys(d).filter((k) => !TASK_KEYS.includes(k)).join(',')}`;
+  if (!(isStr(d.text) && d.text.length > 0 && d.text.length <= 5000)) return `text: ${typeof d.text}`;
+  for (const [k, m] of [['propertyName', 300], ['rentalId', 100], ['templateId', 100], ['date', 30]]) {
+    if (!optStrN(d, k, m)) return `${k}: ${typeof d[k]} (${JSON.stringify(d[k])})`;
+  }
+  if (!optStr(d, 'time', 20)) return `time: ${typeof d.time}`;
+  if ('priority' in d && !['wysoki', 'normalny', 'niski'].includes(d.priority)) return `priority='${d.priority}'`;
+  if (!optStr(d, 'note', 5000)) return `note: ${typeof d.note}`;
+  if ('subtasks' in d && !(isList(d.subtasks) && d.subtasks.length <= 50)) return `subtasks: ${isList(d.subtasks) ? `lista ${d.subtasks.length} > 50` : typeof d.subtasks}`;
+  if ('recurrence' in d && d.recurrence !== null && !isMap(d.recurrence)) return `recurrence: ${typeof d.recurrence}`;
+  if ('photos' in d && !(isList(d.photos) && d.photos.length <= 10)) return `photos: ${isList(d.photos) ? `lista ${d.photos.length} > 10` : typeof d.photos}`;
+  if (!optBool(d, 'done')) return `done: ${typeof d.done}`;
+  if ('doneAt' in d && d.doneAt !== null && !isTimestamp(d.doneAt)) return `doneAt: ${typeof d.doneAt}`;
+  if ('createdAt' in d && !isTimestamp(d.createdAt)) return `createdAt: ${typeof d.createdAt}`;
+  if ('updatedAt' in d && !isTimestamp(d.updatedAt)) return `updatedAt: ${typeof d.updatedAt}`;
   return null;
 }
 
@@ -99,24 +122,40 @@ function whyInvalidGuide(d) {
   return null;
 }
 
-(async () => {
-  let checked = 0; let failed = 0;
-  const report = (path, why) => { failed++; console.log(`✗ ${path} — ${why}`); };
+// Predykaty wystawione na zewnątrz: przebieg „na sucho" na fixture'ach (bez klucza
+// serwisowego) robi z nich użytek — patrz E3, moduł Zadania. Pełny przebieg po produkcji
+// nadal wymaga GOOGLE_APPLICATION_CREDENTIALS i uruchomienia pliku wprost.
+module.exports = { whyInvalidRental, whyInvalidSettings, whyInvalidGuide, whyInvalidTask };
 
-  for (const u of (await db.collection('users').get()).docs) {
-    for (const r of (await u.ref.collection('rentals').get()).docs) {
-      checked++; const why = whyInvalidRental(r.data()); if (why) report(`users/${u.id}/rentals/${r.id}`, why);
-    }
-    for (const s of (await u.ref.collection('settings').get()).docs) {
-      checked++; const why = whyInvalidSettings(s.id, s.data()); if (why) report(`users/${u.id}/settings/${s.id}`, why);
-    }
-  }
-  for (const g of (await db.collection('guides').get()).docs) {
-    checked++; const why = whyInvalidGuide(g.data()); if (why) report(`guides/${g.id}`, why);
-  }
+if (require.main === module) {
+  (async () => {
+    const admin = require('firebase-admin');
+    admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: 'moje-domki-6c77d' });
+    const db = admin.firestore();
 
-  console.log(`\nSprawdzono: ${checked} dokumentów. ${failed === 0
-    ? '✓ WSZYSTKIE przechodzą walidację N3 — deploy bezpieczny dla istniejących danych.'
-    : `⚠ ${failed} NIE przechodzi — dopasuj reguły albo napraw dane przed deployem.`}`);
-  process.exit(failed === 0 ? 0 : 2);
-})().catch((e) => { console.error(e); process.exit(1); });
+    let checked = 0; let failed = 0;
+    const report = (path, why) => { failed++; console.log(`✗ ${path} — ${why}`); };
+
+    for (const u of (await db.collection('users').get()).docs) {
+      for (const r of (await u.ref.collection('rentals').get()).docs) {
+        checked++; const why = whyInvalidRental(r.data()); if (why) report(`users/${u.id}/rentals/${r.id}`, why);
+      }
+      for (const s of (await u.ref.collection('settings').get()).docs) {
+        checked++; const why = whyInvalidSettings(s.id, s.data()); if (why) report(`users/${u.id}/settings/${s.id}`, why);
+      }
+      // E3: zadania modułu Zadania — kolekcja świeża, więc zwykle pusta; pętla zostaje,
+      // żeby każdy przyszły przebieg przed deployem reguł obejmował też te dokumenty.
+      for (const t of (await u.ref.collection('tasks').get()).docs) {
+        checked++; const why = whyInvalidTask(t.data()); if (why) report(`users/${u.id}/tasks/${t.id}`, why);
+      }
+    }
+    for (const g of (await db.collection('guides').get()).docs) {
+      checked++; const why = whyInvalidGuide(g.data()); if (why) report(`guides/${g.id}`, why);
+    }
+
+    console.log(`\nSprawdzono: ${checked} dokumentów. ${failed === 0
+      ? '✓ WSZYSTKIE przechodzą walidację N3 — deploy bezpieczny dla istniejących danych.'
+      : `⚠ ${failed} NIE przechodzi — dopasuj reguły albo napraw dane przed deployem.`}`);
+    process.exit(failed === 0 ? 0 : 2);
+  })().catch((e) => { console.error(e); process.exit(1); });
+}

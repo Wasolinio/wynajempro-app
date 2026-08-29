@@ -157,14 +157,51 @@ function AddEditEntryModal({
 
             {newRental.type === 'reminder' && (
               <>
-                <div className="wpd-field">
-                  <label className="wpd-flabel">Data przypomnienia</label>
-                  <input className="wpd-input wpd-input--num" required type="date" value={newRental.date} onChange={(e) => handleRentalChange('date', e.target.value)} />
-                </div>
+                {/* E3: NOWE zadanie zapisuje się do users/{uid}/tasks (jedna ścieżka
+                    z modułem Zadania) — stąd priorytet, godzina, notatka i obiekt.
+                    Edycja istniejącego wpisu legacy (rentals) ignoruje te pola do migracji. */}
                 <div className="wpd-field">
                   <label className="wpd-flabel">Treść zadania</label>
                   <input className="wpd-input" required placeholder="np. zawieźć klucze, sprawdzić żarówki" value={newRental.text || ''} onChange={(e) => handleRentalChange('text', e.target.value)} />
                 </div>
+                <div className="wpd-fgrid">
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Data przypomnienia</label>
+                    <input className="wpd-input wpd-input--num" required type="date" value={newRental.date} onChange={(e) => handleRentalChange('date', e.target.value)} />
+                  </div>
+                  <div className="wpd-field">
+                    <label className="wpd-flabel">Obiekt (opcjonalnie)</label>
+                    <select className="wpd-select" value={newRental.property || ''} onChange={(e) => handleRentalChange('property', e.target.value)}>
+                      <option value="">Bez obiektu</option>
+                      {properties.map((p) => <option key={propName(p)} value={propName(p)}>{propName(p)}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {/* Godzina/Priorytet/Notatka TYLKO przy nowym zadaniu: edycja istniejącego wpisu
+                    legacy pisze do rentals, gdzie tych pól nie ma — pokazywanie ich obiecywałoby
+                    zapis, który po cichu przepada (przegląd code-reviewera, partia 1 E3) */}
+                {!editingId && (
+                  <>
+                    <div className="wpd-fgrid">
+                      <div className="wpd-field">
+                        <label className="wpd-flabel">Godzina (opcjonalnie)</label>
+                        <input className="wpd-input wpd-input--num" type="time" value={newRental.taskTime || ''} onChange={(e) => handleRentalChange('taskTime', e.target.value)} />
+                      </div>
+                      <div className="wpd-field">
+                        <label className="wpd-flabel">Priorytet</label>
+                        <select className="wpd-select" value={newRental.taskPriority || 'normalny'} onChange={(e) => handleRentalChange('taskPriority', e.target.value)}>
+                          <option value="wysoki">Pilne</option>
+                          <option value="normalny">Zwykłe</option>
+                          <option value="niski">Kiedyś</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="wpd-field">
+                      <label className="wpd-flabel">Notatka (opcjonalnie)</label>
+                      <textarea className="wpd-textarea" rows="2" placeholder="np. ciepła barwa, E27 — dwie zostały w szafce" value={newRental.taskNote || ''} onChange={(e) => handleRentalChange('taskNote', e.target.value)} />
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
