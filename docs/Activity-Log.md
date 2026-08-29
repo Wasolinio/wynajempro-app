@@ -6,6 +6,15 @@ Project timeline and key milestones.
 
 ## 2026-08-29
 
+### Zdjęcia przy zadaniach zdjęte — funkcja bez ani jednego użytkownika nie warta długu prawnego (ADR-028)
+- 🎯 **Decyzja właściciela** po wyjaśnieniu sprawy prywatności: „jak ktoś z testerów zgłosi, że tego potrzebuje, wtedy będziemy myśleć, aby to dodać". Funkcja weszła i została wydana tego samego dnia, więc **nie zdążył jej użyć ani jeden gospodarz** — a ciągnęła za sobą rozstrzygnięcie modelu prywatności i trzy zmiany w opublikowanych dokumentach.
+- ⚖️ **Sedno problemu, dla którego to zdejmujemy:** prywatność zdjęć opierała się nie na regule Storage, tylko na nieodgadywalności adresu — klient zapisuje wynik `getDownloadURL()`, a taki adres działa **bez logowania** (inaczej miniatury w dialogu w ogóle by się nie renderowały). Przy zdjęciach wnętrz i rzeczy gości to pytanie do `legal`, nie detal techniczny. Do tego trzy braki w dokumentach: Polityka opisuje „dostęp po linku" wyłącznie dla przewodników, lista danych kasowanych przy usunięciu konta nie wymienia zadań, DPA nie ma zdjęć w kategoriach powierzonych.
+- ✅ **Usunięte:** dialog zdjęć (`TaskPhotos.jsx`), akcje `addTaskPhoto`/`removeTaskPhoto` w kontekście, przycisk i chip na kartce, style, **oraz reguła Storage dla `users/{uid}/tasks/**`** — bez UI byłaby samą powierzchnią do pilnowania.
+- 🛡️ **Zostaje świadomie:** pole `photos` w allowliście `firestore.rules` (bo `addTask` zapisuje puste `[]`, a `hasOnly` odrzuciłoby dokument z polem spoza listy — zostawienie oszczędza deploy reguł przy powrocie i nic nie kosztuje, skoro upload jest niemożliwy) oraz kasowanie prefiksu Storage przy usuwaniu konta (tanie, sprząta po ewentualnych plikach z okresu, gdy funkcja była wydana).
+- 📌 **Wzorzec ten sam co ADR-022** (mikrorachunek skreślony — „niech odezwie się popyt"): nie utrzymujemy powierzchni prawnej i technicznej dla hipotezy. Powrót = funkcja + rozstrzygnięta prywatność (`getBlob` + CORS bucketu albo świadome pozostanie przy tokenie, opisane w Polityce). Decyzja: [[Decisions]] ADR-028.
+- ✅ **Weryfikacja:** lint 0 · build OK · **e2e 234/234** · functions 73/73 (2026-08-29).
+- 🧹 **Przy okazji:** ubity serwer deweloperski Vite, który wisiał 5 h 22 min po przebiegu testów e2e (Playwright zostawia webServer) — zajmował port i pamięć, nic nie robił.
+
 ### Usuwanie zadań w module — luka zgłoszona przez właściciela przy pierwszym użyciu
 - 🎯 **Zgłoszenie właściciela przy smoke teście po wydaniu:** „nie ma przycisku do usuwania zadań". Sprawdzone w kodzie: `TaskCard` nie miał ŻADNEJ akcji kasowania, a `TasksView` w ogóle nie znało `deleteTask` — usuwanie żyło wyłącznie w zakładce Rezerwacje → Zadania. Czyli z widoku, w którym zadania się tworzy, nie dało się ich usunąć.
 - ⚖️ **To nie było pominięcie przy wdrożeniu — brakowało tego w PROJEKCIE.** Ani `README.md` handoffu (sekcja kartki wymienia checkbox, tytuł, meta, chipy, checklistę, notatkę, uchwyt), ani prototyp nie zawierają żadnej akcji usuwania; grep po „usu/kosz/trash" w obu plikach nie daje nic. Wdrożenie odtworzyło projekt wiernie — i dlatego luka wyszła dopiero przy pierwszym prawdziwym użyciu panelu, a nie w testach.

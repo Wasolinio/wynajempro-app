@@ -6,7 +6,6 @@ import { useTasksBoard, wordDate, axisDate } from '../tasks/useTasksBoard';
 import TaskCard from '../tasks/TaskCard';
 import AssignAxis from '../tasks/AssignAxis';
 import QuickTaskPopover from '../tasks/QuickTaskPopover';
-import TaskPhotos from '../tasks/TaskPhotos';
 import { useTaskDrag } from '../tasks/useTaskDrag';
 import WpdSelect from '../../../components/WpdSelect';
 import { plural } from '../../../utils/plural';
@@ -42,7 +41,6 @@ export default function TasksView({ registerQuickAdd, onDeleteTask }) {
     tasks, rentals, templates, properties,
     addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask,
     toggleDynamicTask, toggleStatus, assignLegacyReminder,
-    addTaskPhoto, removeTaskPhoto,
   } = useWynajem();
 
   const [filter, setFilter] = useState('all');
@@ -52,7 +50,6 @@ export default function TasksView({ registerQuickAdd, onDeleteTask }) {
   const [quick, setQuick] = useState(null); // { context, task, initialDay, anchor }
   const [flashId, setFlashId] = useState(null);
   const [announce, setAnnounce] = useState('');
-  const [photosTaskId, setPhotosTaskId] = useState(null); // dialog zdjęć (partia 2)
 
   useEffect(() => {
     if (!flashId) return undefined;
@@ -248,15 +245,11 @@ export default function TasksView({ registerQuickAdd, onDeleteTask }) {
       onOpenChecklist={handleOpenChecklist}
       onDragStart={begin}
       onAssign={openAssign}
-      onOpenPhotos={(task) => setPhotosTaskId(task.id)}
       // usuwanie idzie wspólnym dialogiem potwierdzenia panelu; flaga mówi, w której
       // kolekcji leży dokument (tasks vs legacy rentals)
       onDelete={onDeleteTask ? (task) => onDeleteTask(task.id, task.source === 'task') : undefined} />
   );
 
-  // dialog zdjęć czyta zadanie NA ŻYWO z planszy — po uploadzie/usunięciu snapshot
-  // odświeża photos bez zamykania dialogu
-  const photosTask = photosTaskId ? taskById.get(photosTaskId) : null;
 
   return (
     <div>
@@ -369,11 +362,6 @@ export default function TasksView({ registerQuickAdd, onDeleteTask }) {
           position:fixed — popover renderowany w środku zjeżdżałby o wysokość topbara
           i paddingu (zmierzone: 98 px w dół, stopka poza ekranem). Korzeń .wpd nie ma
           transformu, a trzyma tokeny var(--...) — dlatego on, nie document.body. */}
-      {photosTask && createPortal(
-        <TaskPhotos task={photosTask} onAdd={addTaskPhoto} onRemove={removeTaskPhoto}
-          onClose={() => setPhotosTaskId(null)} />,
-        document.querySelector('.wpd') || document.body,
-      )}
 
       {quick && createPortal(
         <QuickTaskPopover

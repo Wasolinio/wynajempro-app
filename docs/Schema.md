@@ -127,7 +127,8 @@ Zadania gospodarza — osobna kolekcja, bo zadanie bez daty (skrzynka „do przy
 nie przeszłoby przez roczny filtr `where('date', ...)` subskrypcji `rentals`.
 Model wg `_design-reference/design_handoff_zadania/IMPLEMENTACJA.md` §1.
 Id nadaje `addDoc` (NIE `Date.now()`). Reguły: blok `tasks` w `firestore.rules`
-(`isValidTask`, limity `subtasks` ≤ 50 i `photos` ≤ 10). Czyszczone przy usuwaniu
+(`isValidTask`, limity `subtasks` ≤ 50 i `photos` ≤ 10 — pole `photos` zostaje w modelu
+mimo zdjęcia funkcji zdjęć, patrz ADR-028). Czyszczone przy usuwaniu
 konta w `cleanupUserData` (`functions/index.js`).
 
 Zadania z szablonów NIE są tu zapisywane — liczy je w locie `useTasksBoard`
@@ -153,7 +154,8 @@ Wpisy `rentals` z `type: 'reminder'` czytane zgodnościowo do przebiegu migracji
   subtasks: [{ text: "Pościel i ręczniki", done: true }], // max 50
   recurrence: null,                   // null | { kind: 'weekly'|'monthly'|'afterCheckout', label }
                                       // odhaczenie tworzy następne wystąpienie (utils/taskRecurrence)
-  photos: [],                         // max 10; [{ path, url }] — Storage users/{uid}/tasks/{taskId}/
+  photos: [],                         // ⛔ ZAWSZE puste — funkcja zdjęć zdjęta 2026-08-29 (ADR-028);
+                                      //    pole zostaje w allowliście reguł na wypadek powrotu
   done: false,
   doneAt: null,                       // Timestamp | null
   createdAt: Timestamp,
@@ -226,9 +228,6 @@ gs://wynajempro-app.appspot.com/
     └── {uid}/
         └── tasks/
             └── {taskId}/
-                └── {uuid}.jpg     ← zdjęcia zadań (E3 partia 2; PRYWATNE — tylko właściciel,
-                                      < 10 MB, image/*; nazwa pliku = UUID, nie nazwa z dysku)
-```
 *Note: These are deleted when the `deleteUserAccount` Cloud Function runs
 (guides per przewodnik, `users/{uid}/tasks/` prefiksem w `cleanupUserData`).*
 

@@ -1398,18 +1398,6 @@ export const DASHBOARD_CSS = `
   color:var(--faint); }
 .wpd-sel__check{ width:13px; height:13px; color:var(--cynober); }
 
-/* ── Zdjęcia zadania (partia 2) ── */
-.wpd-tk-photos{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-.wpd-tk-photo{ position:relative; margin:0; border:1px solid var(--hairline); border-radius:4px;
-  overflow:hidden; background:var(--inner); }
-.wpd-tk-photo img{ display:block; width:100%; height:96px; object-fit:cover; }
-.wpd-tk-photo__del{ position:absolute; top:6px; right:6px; width:26px; height:26px;
-  border:1px solid var(--hairline); background:var(--surface); border-radius:3px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; color:var(--muted);
-  transition:border-color .14s, color .14s; }
-.wpd-tk-photo__del:hover{ border-color:var(--cynober); color:var(--cynober); }
-.wpd-tk-photo__del svg{ width:13px; height:13px; }
-
 /* komunikaty dla czytnika ekranu (aria-live po przypisaniu) */
 .wpd-tk-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
   clip:rect(0,0,0,0); white-space:nowrap; border:0; }

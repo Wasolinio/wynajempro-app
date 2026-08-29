@@ -1,7 +1,6 @@
 import React from 'react';
-import { Check, Clock, RefreshCw, ListChecks, ChevronDown, Camera, GripVertical, CalendarClock, Trash2 } from 'lucide-react';
+import { Check, Clock, RefreshCw, ListChecks, ChevronDown, GripVertical, CalendarClock, Trash2 } from 'lucide-react';
 import { channelColor } from '../styles';
-import { plural } from '../../../utils/plural';
 
 /*
   Kartka zadania (moduł Zadania, E3) — wariant pełny (lista dzienna) i `compact`
@@ -12,8 +11,7 @@ import { plural } from '../../../utils/plural';
   MATERIALIZUJE zadanie: powstaje dokument w `tasks` z templateId i przesuniętym `date`,
   a wyliczanie tej pary (rentalId, templateId) jest pomijane (useTasksBoard).
   Ścieżka klawiaturowa: przycisk „Przypisz" (widoczny na hover/focus) otwiera ten sam
-  popover co klik w pasek osi. Zdjęcia (tylko source 'task'): przycisk aparatu obok
-  „Przypisz" i chip liczby zdjęć otwierają dialog TaskPhotos.
+  popover co klik w pasek osi.
 */
 
 const PRIO_BAR = { wysoki: 'wpd-tk-card__prio--hi', normalny: 'wpd-tk-card__prio--mid', niski: 'wpd-tk-card__prio--low' };
@@ -23,7 +21,7 @@ const PRIO_LABEL = { wysoki: 'Pilne', normalny: 'Zwykłe', niski: 'Kiedyś' };
 
 function TaskCard({
   task, compact = false, flash = false, checklistOpen = false,
-  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign, onOpenPhotos, onDelete,
+  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign, onDelete,
 }) {
   const t = task;
   const overdue = t.overdueDays > 0 && !t.done;
@@ -41,15 +39,6 @@ function TaskCard({
       onClick={(e) => onAssign(t, e.currentTarget)}
       aria-label={`Przypisz zadanie: ${t.text}`}>
       <CalendarClock />Przypisz
-    </button>
-  );
-  // zdjęcia tylko dla dokumentów z kolekcji tasks — legacy i szablony nie mają
-  // dokumentu, na którym dałoby się je trwale zapisać
-  const photosBtn = t.source === 'task' && onOpenPhotos && (
-    <button type="button" className="wpd-tk-card__assign" data-nodrag="1"
-      onClick={() => onOpenPhotos(t)}
-      aria-label={`Zdjęcia zadania: ${t.text}`}>
-      <Camera />Zdjęcia
     </button>
   );
   // Usuwanie: tylko zadania będące DOKUMENTEM (kolekcja `tasks` albo legacy z `rentals`).
@@ -86,7 +75,6 @@ function TaskCard({
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 6 }}>
               <span className={`wpd-tk-prio ${PRIO_TXT[t.priority] || PRIO_TXT.normalny}`}>{PRIO_LABEL[t.priority] || PRIO_LABEL.normalny}</span>
               {hasSubs && <span className="wpd-tk-prio wpd-tk-prio--low">{subsDone}/{t.subtasks.length} kroki</span>}
-              {t.photos?.length > 0 && <span className="wpd-tk-prio wpd-tk-prio--low">zdjęcie</span>}
               {assignBtn}
             </div>
           </div>
@@ -148,18 +136,7 @@ function TaskCard({
                 <ChevronDown className="wpd-tk-subs__chev" />
               </button>
             )}
-            {t.photos?.length > 0 && (
-              onOpenPhotos && t.source === 'task' ? (
-                <button type="button" className="wpd-tk-mini" data-nodrag="1"
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                  onClick={() => onOpenPhotos(t)}
-                  aria-label={`Pokaż zdjęcia zadania: ${t.text}`}>
-                  <Camera />{t.photos.length > 1 ? `${t.photos.length} ` : ''}{plural(t.photos.length, ['zdjęcie', 'zdjęcia', 'zdjęć'])}
-                </button>
-              ) : <span className="wpd-tk-mini"><Camera />{plural(t.photos.length, ['zdjęcie', 'zdjęcia', 'zdjęć'])}</span>
-            )}
             {assignBtn}
-            {photosBtn}
             {deleteBtn}
           </div>
 

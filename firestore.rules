@@ -104,6 +104,10 @@ service cloud.firestore {
     }
 
     // E3 (moduł Zadania): users/{uid}/tasks — model wg design_handoff_zadania/IMPLEMENTACJA.md §1.
+    // ⛔ `photos` ZOSTAJE w allowliście, choć funkcja zdjęć została zdjęta 2026-08-29 (ADR-028):
+    // `addTask` nadal zapisuje puste `photos: []`, a `hasOnly` odrzuciłoby dokument z polem
+    // spoza listy. Zostawienie pola nic nie kosztuje (upload jest niemożliwy — reguła Storage
+    // usunięta) i oszczędza deploy reguł, gdyby funkcja wróciła na życzenie testerów.
     // `subtasks` i `photos` mają twarde limity rozmiaru (reguły nie umieją iterować po liście,
     // więc kształt pozycji pilnuje front; limit odcina dokumenty-worki). Wymagany jest sam
     // `text` — reszta pól opcjonalna, ale o pilnowanym typie (ten sam idiom co isValidRental).

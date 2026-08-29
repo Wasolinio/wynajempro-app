@@ -880,3 +880,39 @@ i kwota wolna nieczytana; ucięcie odliczenia na 14 100 zł; społeczne raz; doc
 
 **Related ADRs**: ADR-020 (poprzednik — usunięcie), ADR-023 (mówimy, czego nie liczymy),
 ADR-026 (próg VAT — wspólne wydanie).
+
+## ADR-028: Zdjęcia przy zadaniach zdjęte — wracają na sygnał od testerów
+
+**Data**: 2026-08-29
+**Status**: ACCEPTED (decyzja właściciela)
+**Kontekst**: Zdjęcia zadań weszły w partii 2 modułu Zadania i zostały wydane na produkcję
+tego samego dnia. Przegląd wykazał, że ich prywatność opiera się nie na regule Storage,
+lecz na nieodgadywalności adresu pobrania: klient zapisuje przy zdjęciu wynik
+`getDownloadURL()`, a taki adres działa **bez uwierzytelnienia** (inaczej miniatury
+w dialogu w ogóle by się nie renderowały). Zdjęcia zadań to z natury wnętrza, usterki
+i rzeczy zostawione przez gości, więc sprawa wracała jako pytanie do `legal` wraz
+z trzema brakami w dokumentach (Polityka opisuje „dostęp po linku" tylko dla przewodników;
+lista danych kasowanych przy usunięciu konta nie wymienia zadań; DPA nie ma zdjęć
+w kategoriach powierzonych).
+
+**Decyzja**: **funkcja zdjęć zdjęta z aplikacji.** Zamiast rozstrzygać model prywatności
+i aktualizować trzy dokumenty dla funkcji, której **nie użył jeszcze ani jeden gospodarz**,
+usuwamy ją i czekamy na sygnał. Wraca, gdy poprosi o nią tester — wtedy z rozstrzygniętą
+prywatnością (pobieranie uwierzytelnione `getBlob` + CORS bucketu albo świadome pozostanie
+przy tokenie, opisane w Polityce).
+
+To ten sam wzorzec co **ADR-022** (mikrorachunek i tytuły przelewów skreślone, „niech odezwie
+się popyt"): nie utrzymujemy powierzchni prawnej i technicznej dla hipotezy.
+
+**Co zostaje w kodzie i dlaczego**:
+- pole `photos` w allowliście `firestore.rules` i w modelu — `addTask` zapisuje puste `[]`,
+  a `hasOnly` odrzuciłoby dokument z polem spoza listy; zostawienie oszczędza deploy reguł
+  przy powrocie i nic nie kosztuje, bo upload jest niemożliwy,
+- kasowanie prefiksu `users/{uid}/tasks/` w Storage przy usuwaniu konta (`cleanupUserData`) —
+  tanie, a sprząta po ewentualnych plikach z okresu, gdy funkcja była wydana.
+
+**Co znika**: reguła Storage dla `users/{uid}/tasks/**` (bez UI byłaby samą powierzchnią),
+dialog zdjęć, akcje `addTaskPhoto`/`removeTaskPhoto`, style i chip liczby zdjęć na kartce.
+
+**Kiedy wrócić**: pierwszy tester, który powie, że chce dokumentować zadanie zdjęciem.
+Wtedy razem z funkcją wraca decyzja o modelu prywatności i wpisy w Polityce oraz DPA.
