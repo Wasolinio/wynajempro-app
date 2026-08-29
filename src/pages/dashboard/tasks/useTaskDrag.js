@@ -168,6 +168,11 @@ function createDragEngine(cbRef) {
   function begin(e, task) {
     if (e.button !== undefined && e.button !== 0) return;
     if (e.target.closest && e.target.closest('[data-nodrag]')) return;
+    // < 980 px (mobile, partia 2): przeciąganie palcem wyłączone — pointerdown na kartce
+    // zjadałby przewijanie listy, a README daje na dotyk równoważną drogę: przycisk
+    // „Przypisz" → arkusz od dołu. Długie przytrzymanie („opcjonalnie" w README)
+    // świadomie pominięte. Mysz/piórko działają też na wąskim oknie.
+    if (e.pointerType === 'touch' && window.matchMedia('(max-width: 980px)').matches) return;
     if (drag) return;
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();

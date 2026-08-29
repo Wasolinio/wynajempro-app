@@ -5,14 +5,17 @@ import { guestsTotal } from '../../../utils/guestCount';
 
 const propName = (p) => (typeof p === 'object' ? p.name : p);
 
-/* Dodaj/edytuj wpis (rezerwacja / koszt / zadanie) — styl V4. Kontrakt propsów 1:1 z oryginałem. */
+/* Dodaj/edytuj wpis (rezerwacja / koszt / zadanie) — styl V4. Kontrakt propsów 1:1 z oryginałem.
+   Partia 2 (E3): editingTaskId = edycja dokumentu z kolekcji tasks — w odróżnieniu od
+   edycji legacy (rentals) wszystkie pola zadania są tu trwałe, więc się pokazują. */
 function AddEditEntryModal({
-  showAddModal, handleCloseModal, handleAddRental, editingId,
+  showAddModal, handleCloseModal, handleAddRental, editingId, editingTaskId = null,
   newRental, setNewRental, handleRentalChange, properties, sources, categories,
 }) {
   const dialogA11y = useDialogA11y(showAddModal, handleCloseModal);
   if (!showAddModal) return null;
 
+  const isEdit = !!(editingId || editingTaskId);
   // X14: podgląd tego, co trafi do pola `guests` — suma osób (dorośli + dzieci).
   const personsTotal = guestsTotal(newRental.adults, newRental.children);
 
@@ -22,8 +25,8 @@ function AddEditEntryModal({
         <div className="wpd-dialog__head">
           <span className="wpd-dialog__ic"><Edit /></span>
           <div>
-            <h2 className="wpd-h2">{editingId ? 'Edytuj wpis' : 'Nowy wpis'}</h2>
-            <p className="wpd-dialog__sub">{editingId ? 'Aktualizacja' : 'Dodawanie'} · {newRental.type === 'booking' ? 'Rezerwacja' : newRental.type === 'utility' ? 'Koszt' : 'Zadanie'}</p>
+            <h2 className="wpd-h2">{isEdit ? 'Edytuj wpis' : 'Nowy wpis'}</h2>
+            <p className="wpd-dialog__sub">{isEdit ? 'Aktualizacja' : 'Dodawanie'} · {newRental.type === 'booking' ? 'Rezerwacja' : newRental.type === 'utility' ? 'Koszt' : 'Zadanie'}</p>
           </div>
           <button className="wpd-dialog__close" onClick={handleCloseModal}><X /></button>
         </div>
@@ -166,8 +169,10 @@ function AddEditEntryModal({
                 </div>
                 <div className="wpd-fgrid">
                   <div className="wpd-field">
-                    <label className="wpd-flabel">Data przypomnienia</label>
-                    <input className="wpd-input wpd-input--num" required type="date" value={newRental.date} onChange={(e) => handleRentalChange('date', e.target.value)} />
+                    <label className="wpd-flabel">Data przypomnienia{editingTaskId ? ' (opcjonalnie)' : ''}</label>
+                    {/* przy edycji zadania z kolekcji data może być pusta — zadanie wraca
+                        wtedy do skrzynki „do przypisania" (date: null) */}
+                    <input className="wpd-input wpd-input--num" required={!editingTaskId} type="date" value={newRental.date} onChange={(e) => handleRentalChange('date', e.target.value)} />
                   </div>
                   <div className="wpd-field">
                     <label className="wpd-flabel">Obiekt (opcjonalnie)</label>
@@ -177,9 +182,10 @@ function AddEditEntryModal({
                     </select>
                   </div>
                 </div>
-                {/* Godzina/Priorytet/Notatka TYLKO przy nowym zadaniu: edycja istniejącego wpisu
-                    legacy pisze do rentals, gdzie tych pól nie ma — pokazywanie ich obiecywałoby
-                    zapis, który po cichu przepada (przegląd code-reviewera, partia 1 E3) */}
+                {/* Godzina/Priorytet/Notatka/Powtarzalność przy nowym zadaniu ORAZ przy edycji
+                    zadania z kolekcji tasks (tam wszystkie pola są trwałe). Ukryte wyłącznie
+                    przy edycji legacy (editingId, zapis do rentals) — pokazywanie ich
+                    obiecywałoby zapis, który po cichu przepada (przegląd code-reviewera). */}
                 {!editingId && (
                   <>
                     <div className="wpd-fgrid">
@@ -196,9 +202,22 @@ function AddEditEntryModal({
                         </select>
                       </div>
                     </div>
-                    <div className="wpd-field">
-                      <label className="wpd-flabel">Notatka (opcjonalnie)</label>
-                      <textarea className="wpd-textarea" rows="2" placeholder="np. ciepła barwa, E27 — dwie zostały w szafce" value={newRental.taskNote || ''} onChange={(e) => handleRentalChange('taskNote', e.target.value)} />
+                    <div className="wpd-fgrid">
+                      <div className="wpd-field">
+                        <label className="wpd-flabel">Powtarzalność</label>
+                        {/* partia 2: odhaczenie powtarzalnego zadania tworzy następne
+                            wystąpienie (utils/taskRecurrence) */}
+                        <select className="wpd-select" value={newRental.taskRecurrence || 'none'} onChange={(e) => handleRentalChange('taskRecurrence', e.target.value)}>
+                          <option value="none">Jednorazowe</option>
+                          <option value="weekly">Co tydzień</option>
+                          <option value="monthly">Co miesiąc</option>
+                          <option value="afterCheckout">Po wyjeździe gościa</option>
+                        </select>
+                      </div>
+                      <div className="wpd-field">
+                        <label className="wpd-flabel">Notatka (opcjonalnie)</label>
+                        <textarea className="wpd-textarea" rows="1" placeholder="np. ciepła barwa, E27" value={newRental.taskNote || ''} onChange={(e) => handleRentalChange('taskNote', e.target.value)} />
+                      </div>
                     </div>
                   </>
                 )}

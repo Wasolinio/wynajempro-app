@@ -1387,6 +1387,18 @@ export const DASHBOARD_CSS = `
   color:var(--faint); }
 .wpd-sel__check{ width:13px; height:13px; color:var(--cynober); }
 
+/* ── Zdjęcia zadania (partia 2) ── */
+.wpd-tk-photos{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.wpd-tk-photo{ position:relative; margin:0; border:1px solid var(--hairline); border-radius:4px;
+  overflow:hidden; background:var(--inner); }
+.wpd-tk-photo img{ display:block; width:100%; height:96px; object-fit:cover; }
+.wpd-tk-photo__del{ position:absolute; top:6px; right:6px; width:26px; height:26px;
+  border:1px solid var(--hairline); background:var(--surface); border-radius:3px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:var(--muted);
+  transition:border-color .14s, color .14s; }
+.wpd-tk-photo__del:hover{ border-color:var(--cynober); color:var(--cynober); }
+.wpd-tk-photo__del svg{ width:13px; height:13px; }
+
 /* komunikaty dla czytnika ekranu (aria-live po przypisaniu) */
 .wpd-tk-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
   clip:rect(0,0,0,0); white-space:nowrap; border:0; }
@@ -1451,11 +1463,28 @@ export const DASHBOARD_CSS = `
   .wpd-bottombar__item--active svg{ color:var(--cynober); }
   /* widget zadań nad paskiem */
   .wpd-taskwidget{ bottom:86px !important; }
-  /* moduł Zadania: skrzynka spada pod listę i nie klei się do góry */
-  .wpd-tk-side{ position:static; max-width:none; }
+  /* ── moduł Zadania < 980 px (partia 2, README §Responsywność) ── */
   .wpd-tk-bar{ flex-wrap:wrap; }
   .wpd-tk-bar__hint{ border-top:1px solid var(--hairline); justify-content:flex-start; }
   .wpd-tk-axis__head{ flex-wrap:wrap; row-gap:6px; }
+  /* skrzynka NAD listą jako poziomy pasek kartek (order, nie zmiana DOM) */
+  .wpd-tk-layout{ flex-direction:column; }
+  .wpd-tk-side{ position:static; max-width:none; order:-1; width:100%; }
+  .wpd-tk-inbox__body{ flex-direction:row; overflow-x:auto; }
+  .wpd-tk-inbox__body .wpd-tk-card--compact{ flex:0 0 240px; }
+  .wpd-tk-inbox__empty{ flex:1 1 auto; }
+  /* kafel JAK PRZYPISAĆ opisuje przeciąganie myszą — na dotyku przypisuje przycisk
+     „Przypisz", więc instrukcja schodzi z ekranu (decyzja partii 2) */
+  .wpd-tk-howto{ display:none; }
+  /* kartki mają przewijać listę palcem; przeciąganie dotykiem wyłącza useTaskDrag */
+  .wpd-tk-card{ touch-action:pan-y; }
+  /* popover „Szybkie zadanie" jako arkusz od dołu (.wpd-sheet, wpd-sheet-in);
+     top/left liczone w JS pod desktop — stąd twarde nadpisania */
+  .wpd-tk-pop{ top:auto !important; left:0 !important; right:0; bottom:0; width:auto;
+    max-height:min(80vh, 100%) !important; border-left:none; border-right:none; border-bottom:none;
+    border-radius:4px 4px 0 0; transform-origin:bottom center;
+    animation:wpd-sheet-in .22s cubic-bezier(.22,1,.36,1) both;
+    padding-bottom:env(safe-area-inset-bottom); }
   .wpd-stats{ grid-template-columns:repeat(2,1fr); }
   .wpd-kpi{ grid-template-columns:repeat(2,1fr); }
   .wpd-grid-2{ grid-template-columns:1fr; }

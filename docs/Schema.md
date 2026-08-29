@@ -132,7 +132,11 @@ konta w `cleanupUserData` (`functions/index.js`).
 
 Zadania z szablonów NIE są tu zapisywane — liczy je w locie `useTasksBoard`
 (syntetyczne id `tpl:{rentalId}:{templateId}`, wykonanie w `rentals.completedTasks`).
-Wpisy `rentals` z `type: 'reminder'` czytane zgodnościowo do migracji (partia 2).
+Wyjątek (partia 2): para przeciągnięta na inny termin jest MATERIALIZOWANA —
+dokument z `templateId` + `rentalId` pobytu-matki i przesuniętym `date`; taka para
+jest odtąd pomijana w wyliczaniu (klucz `rentalId|templateId`).
+Wpisy `rentals` z `type: 'reminder'` czytane zgodnościowo do przebiegu migracji
+(`functions/migrate-reminders-to-tasks.cjs`, dry-run domyślnie, --fix przenosi).
 
 #### Document: `users/{uid}/tasks/{taskId}`
 
@@ -147,8 +151,9 @@ Wpisy `rentals` z `type: 'reminder'` czytane zgodnościowo do migracji (partia 2
   priority: "wysoki",                 // 'wysoki' | 'normalny' | 'niski'
   note: "",
   subtasks: [{ text: "Pościel i ręczniki", done: true }], // max 50
-  recurrence: null,                   // null | { kind, label } (rozwijanie = partia 2)
-  photos: [],                         // max 10; upload do Storage = partia 2
+  recurrence: null,                   // null | { kind: 'weekly'|'monthly'|'afterCheckout', label }
+                                      // odhaczenie tworzy następne wystąpienie (utils/taskRecurrence)
+  photos: [],                         // max 10; [{ path, url }] — Storage users/{uid}/tasks/{taskId}/
   done: false,
   doneAt: null,                       // Timestamp | null
   createdAt: Timestamp,
@@ -212,13 +217,20 @@ Contains proof of signature allowing access to secrets.
 
 ```
 gs://wynajempro-app.appspot.com/
-└── guides/
-    └── {guideId}/
-        ├── cover.jpg
-        └── attachments/
-            └── House_Rules.pdf
+├── guides/
+│   └── {guideId}/
+│       ├── cover.jpg
+│       └── attachments/
+│           └── House_Rules.pdf
+└── users/
+    └── {uid}/
+        └── tasks/
+            └── {taskId}/
+                └── {uuid}.jpg     ← zdjęcia zadań (E3 partia 2; PRYWATNE — tylko właściciel,
+                                      < 10 MB, image/*; nazwa pliku = UUID, nie nazwa z dysku)
 ```
-*Note: These are deleted when the `deleteUserAccount` Cloud Function runs.*
+*Note: These are deleted when the `deleteUserAccount` Cloud Function runs
+(guides per przewodnik, `users/{uid}/tasks/` prefiksem w `cleanupUserData`).*
 
 ---
 

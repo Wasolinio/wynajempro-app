@@ -31,7 +31,7 @@ const fmtShort = (d) => {
   kontakt (klikalne tel:/mailto:) i rozliczenie. Prawa: zadania i przypomnienia
   z szablonów (templates) z odhaczaniem — stan w rentals.completedTasks.
 */
-export default function BookingDetailView({ booking: r, templates = [], toggleDynamicTask, onBack, onEdit, onDelete }) {
+export default function BookingDetailView({ booking: r, templates = [], toggleDynamicTask, linkedTasks = [], onToggleTask, onBack, onEdit, onDelete }) {
   if (!r) return null;
   const propName = typeof r.property === 'object' ? r.property?.name : r.property;
   const income = Number(r.income) || 0;
@@ -67,15 +67,19 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
   const payLabel = r.isPaid ? 'Opłacona' : advance > 0 && r.isAdvancePaid ? 'Zaliczka wpłacona' : 'Do opłacenia';
   const telHref = r.phone ? `tel:${String(r.phone).replace(/[^\d+]/g, '')}` : null;
 
-  // Zadania z szablonów — stan ukończenia jak w dailyReport/tabeli rezerwacji
+  // Zadania z szablonów — stan ukończenia jak w dailyReport/tabeli rezerwacji.
+  // Partia 2: para zmaterializowana przeciągnięciem (dokument tasks z templateId)
+  // znika z wyliczania — jej stan niesie już dokument w linkedTasks poniżej.
   const isDone = (t) => !!(r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent));
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tasks = templates.map((t) => {
+  const materialized = new Set(linkedTasks.filter((t) => t.templateId).map((t) => t.templateId));
+  const tasks = templates.filter((t) => !materialized.has(t.id)).map((t) => {
     // X20: termin liczy `taskSchedule` — kotwicą jest przyjazd albo wyjazd
     const due = taskDueDate(r, t);
     return { ...t, done: isDone(t), due, timing: describeTiming(t), overdue: due && due < today && !isDone(t) };
   });
-  const doneCount = tasks.filter((t) => t.done).length;
+  const doneCount = tasks.filter((t) => t.done).length + linkedTasks.filter((t) => t.done).length;
+  const allCount = tasks.length + linkedTasks.length;
 
   const contactLink = { fontFamily: 'inherit', fontWeight: 600, color: 'var(--cynober)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 };
 
@@ -191,9 +195,30 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
           <div className="wpd-panel__head">
             <ClipboardList style={{ width: 16, height: 16, color: 'var(--cynober)' }} />
             <h2 className="wpd-h2" style={{ fontSize: 15 }}>Zadania i przypomnienia</h2>
-            <span className="wpd-rep__count" style={{ marginLeft: 'auto' }}>{doneCount}/{tasks.length}</span>
+            <span className="wpd-rep__count" style={{ marginLeft: 'auto' }}>{doneCount}/{allCount}</span>
           </div>
           <div className="wpd-list">
+            {/* partia 2: zadania z kolekcji tasks przypięte do TEJ rezerwacji
+                (przeciągnięte na jej pasek, dodane z popovera albo zmaterializowane) */}
+            {linkedTasks.map((t) => (
+              <div className="wpd-row" key={t.id}>
+                <button
+                  className={`wpd-check ${t.done ? 'wpd-check--on' : 'wpd-check--off'}`}
+                  title={t.done ? 'Oznacz jako niewykonane' : 'Oznacz jako wykonane'}
+                  onClick={() => onToggleTask?.(t)}
+                ><CheckCircle /></button>
+                <div className="wpd-row__main">
+                  <div className="wpd-row__name" style={t.done ? { textDecoration: 'line-through', color: 'var(--faint)' } : undefined}>{t.text}</div>
+                  <div className="wpd-row__meta">
+                    {t.date ? `Do: ${fmtShort(t.date)}` : 'bez terminu'}{t.time ? ` · ${t.time}` : ''}{t.templateId ? ' · z szablonu' : ''}
+                  </div>
+                </div>
+                {!t.done && t.date && (
+                  <AddToCalendarButton small dateStr={t.date} text={t.text}
+                    property={propName} guest={r.guest} uid={`${r.id}-${t.id}`} />
+                )}
+              </div>
+            ))}
             {tasks.map((t) => (
               <div className="wpd-row" key={t.id}>
                 <button
@@ -214,7 +239,7 @@ export default function BookingDetailView({ booking: r, templates = [], toggleDy
                 )}
               </div>
             ))}
-            {tasks.length === 0 && (
+            {allCount === 0 && (
               <div className="wpd-empty">
                 <p>Brak szablonów zadań.<br />Dodaj je w Ustawieniach → Powiadomienia.</p>
               </div>

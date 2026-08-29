@@ -8,11 +8,12 @@ import { plural } from '../../../utils/plural';
   (skrzynka „Do przypisania"). Wartości 1:1 z design_handoff_zadania/README.md.
 
   Przeciąganie: pointerdown na kartce (elementy z data-nodrag są ignorowane w hooku).
-  Kartki szablonowe (source: 'template') NIE mają uchwytu ani pointerdown — materializacja
-  zadania z szablonu przy przeciągnięciu to partia 2 (IMPLEMENTACJA.md §3 pkt 6);
-  do tego czasu przeciągać można tylko dokumenty z kolekcji `tasks` i legacy-remindery.
+  Od partii 2 przeciągać można też kartki szablonowe (source: 'template') — upuszczenie
+  MATERIALIZUJE zadanie: powstaje dokument w `tasks` z templateId i przesuniętym `date`,
+  a wyliczanie tej pary (rentalId, templateId) jest pomijane (useTasksBoard).
   Ścieżka klawiaturowa: przycisk „Przypisz" (widoczny na hover/focus) otwiera ten sam
-  popover co klik w pasek osi.
+  popover co klik w pasek osi. Zdjęcia (tylko source 'task'): przycisk aparatu obok
+  „Przypisz" i chip liczby zdjęć otwierają dialog TaskPhotos.
 */
 
 const PRIO_BAR = { wysoki: 'wpd-tk-card__prio--hi', normalny: 'wpd-tk-card__prio--mid', niski: 'wpd-tk-card__prio--low' };
@@ -22,7 +23,7 @@ const PRIO_LABEL = { wysoki: 'Pilne', normalny: 'Zwykłe', niski: 'Kiedyś' };
 
 function TaskCard({
   task, compact = false, flash = false, checklistOpen = false,
-  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign,
+  onToggleDone, onToggleSubtask, onOpenChecklist, onDragStart, onAssign, onOpenPhotos,
 }) {
   const t = task;
   const overdue = t.overdueDays > 0 && !t.done;
@@ -40,6 +41,15 @@ function TaskCard({
       onClick={(e) => onAssign(t, e.currentTarget)}
       aria-label={`Przypisz zadanie: ${t.text}`}>
       <CalendarClock />Przypisz
+    </button>
+  );
+  // zdjęcia tylko dla dokumentów z kolekcji tasks — legacy i szablony nie mają
+  // dokumentu, na którym dałoby się je trwale zapisać
+  const photosBtn = t.source === 'task' && onOpenPhotos && (
+    <button type="button" className="wpd-tk-card__assign" data-nodrag="1"
+      onClick={() => onOpenPhotos(t)}
+      aria-label={`Zdjęcia zadania: ${t.text}`}>
+      <Camera />Zdjęcia
     </button>
   );
 
@@ -109,8 +119,18 @@ function TaskCard({
                 <ChevronDown className="wpd-tk-subs__chev" />
               </button>
             )}
-            {t.photos?.length > 0 && <span className="wpd-tk-mini"><Camera />{plural(t.photos.length, ['zdjęcie', 'zdjęcia', 'zdjęć'])}</span>}
+            {t.photos?.length > 0 && (
+              onOpenPhotos && t.source === 'task' ? (
+                <button type="button" className="wpd-tk-mini" data-nodrag="1"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  onClick={() => onOpenPhotos(t)}
+                  aria-label={`Pokaż zdjęcia zadania: ${t.text}`}>
+                  <Camera />{t.photos.length > 1 ? `${t.photos.length} ` : ''}{plural(t.photos.length, ['zdjęcie', 'zdjęcia', 'zdjęć'])}
+                </button>
+              ) : <span className="wpd-tk-mini"><Camera />{plural(t.photos.length, ['zdjęcie', 'zdjęcia', 'zdjęć'])}</span>
+            )}
             {assignBtn}
+            {photosBtn}
           </div>
 
           {t.note && <p className="wpd-tk-card__note">{t.note}</p>}

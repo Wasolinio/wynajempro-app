@@ -13,6 +13,44 @@ service firebase.storage {
               && docData.trialEndsAt > request.time);
     }
 
+    // Zdjęcia zadań (moduł Zadania, E3 partia 2): users/{uid}/tasks/{taskId}/{plik}.
+    // Dostęp PO ŚCIEŻCE (przez SDK) ma wyłącznie właściciel — w odróżnieniu od guides/
+    // nie ma tu publicznego odczytu.
+    //
+    // ⚠️ CZEGO TA REGUŁA NIE CHRONI, a co łatwo jej przypisać: klient zapisuje przy
+    // zdjęciu wynik `getDownloadURL()` (WynajemContext.addTaskPhoto), a taki adres niesie
+    // token pobrania i działa BEZ uwierzytelnienia — inaczej kafelki `<img src=...>`
+    // w dialogu w ogóle by się nie renderowały. Kto zna adres, ten widzi plik: reguła
+    // `read` zabezpiecza ścieżkę, prywatności pilnuje nieodgadywalność tokenu.
+    // Dlatego kasowanie zdjęcia i usunięcie zadania MUSZĄ realnie kasować plik
+    // (token żyje tak długo jak obiekt) — patrz deleteTask w WynajemContext.
+    // Zdjęcia bywają wnętrzami i rzeczami gości → do oceny przez `legal`, czy zostajemy
+    // przy tokenie, czy przechodzimy na pobieranie uwierzytelnione (getBlob + CORS bucketu).
+    //
+    // Zapis jak w guides/: zweryfikowany subskrybent, < 10 MB, ale WYŁĄCZNIE obrazy.
+    // 🛡️ create/update i delete rozdzielone ŚWIADOMIE: jeden blok `write` z gałęzią
+    // `request.resource == null` opierałby kasowanie na niepotwierdzonym założeniu
+    // (dokumentacja wymienia request.resource jako dostępny także przy delete), a Storage
+    // nie ma w tym projekcie lustrzanego testera, więc pomyłka wyszłaby dopiero na
+    // produkcji — jako ciche „nie da się usunąć zdjęcia" (przegląd 2026-08-29).
+    // Czyszczenie przy usuwaniu konta: cleanupUserData w functions/index.js kasuje
+    // cały prefiks users/{uid}/tasks/ (RODO art. 17).
+    match /users/{uid}/tasks/{taskId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.auth.token.get('email_verified', false) == true
+                   && (request.auth.token.get('stripeStatus', '') == 'active'
+                       || hasActiveSubscriptionDoc(uid))
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.auth.token.get('email_verified', false) == true
+                    && (request.auth.token.get('stripeStatus', '') == 'active'
+                        || hasActiveSubscriptionDoc(uid));
+    }
+
     match /guides/{guideId}/{fileName} {
       // Publiczny odczyt zdjęć i dokumentów w przewodnikach (goście potrzebują dostępu)
       allow read: if true;

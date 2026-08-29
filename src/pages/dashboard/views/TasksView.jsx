@@ -6,6 +6,7 @@ import { useTasksBoard, wordDate, axisDate } from '../tasks/useTasksBoard';
 import TaskCard from '../tasks/TaskCard';
 import AssignAxis from '../tasks/AssignAxis';
 import QuickTaskPopover from '../tasks/QuickTaskPopover';
+import TaskPhotos from '../tasks/TaskPhotos';
 import { useTaskDrag } from '../tasks/useTaskDrag';
 import WpdSelect from '../../../components/WpdSelect';
 import { plural } from '../../../utils/plural';
@@ -41,6 +42,7 @@ export default function TasksView({ registerQuickAdd }) {
     tasks, rentals, templates, properties,
     addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask,
     toggleDynamicTask, toggleStatus, assignLegacyReminder,
+    addTaskPhoto, removeTaskPhoto,
   } = useWynajem();
 
   const [filter, setFilter] = useState('all');
@@ -50,6 +52,7 @@ export default function TasksView({ registerQuickAdd }) {
   const [quick, setQuick] = useState(null); // { context, task, initialDay, anchor }
   const [flashId, setFlashId] = useState(null);
   const [announce, setAnnounce] = useState('');
+  const [photosTaskId, setPhotosTaskId] = useState(null); // dialog zdjęć (partia 2)
 
   useEffect(() => {
     if (!flashId) return undefined;
@@ -117,12 +120,36 @@ export default function TasksView({ registerQuickAdd }) {
     setAnnounce(date ? `Zadanie przypisane: ${who}, ${wordDate(date)}` : `Zadanie dodane: ${who}`);
   }, []);
 
+  // Materializacja zadania z szablonu (partia 2, krok 6): powstaje dokument w `tasks`
+  // z templateId i PRZESUNIĘTYM date; gość, obiekt i rezerwacja zostają z pobytu-matki —
+  // zadanie z szablonu dotyczy TEGO pobytu, przeciągnięcie zmienia mu termin, nie
+  // właściciela (decyzja własna, raportowana). Board pomija odtąd wyliczanie tej pary.
+  const materializeTemplate = useCallback(async (task, { date, time = '', priority = null, text = null }) => {
+    const id = await addTask({
+      text: text ?? task.text,
+      propertyName: task.propertyName,
+      rentalId: task.rentalId,
+      templateId: task.templateId,
+      date: date ?? null,
+      time,
+      priority: priority || task.priority || 'normalny',
+    });
+    if (id) {
+      setFlashId(id);
+      announceAssigned(task.guest || task.propertyName || 'zadanie', date);
+    }
+  }, [addTask, announceAssigned]);
+
   const submitQuick = useCallback(async (draft) => {
     const q = quick;
     setQuick(null);
     if (!q) return;
     if (q.task) {
       // tryb „Przypisz" z kartki: aktualizacja istniejącego zadania (bez zmiany rezerwacji)
+      if (q.task.source === 'template') {
+        await materializeTemplate(q.task, draft);
+        return;
+      }
       if (q.task.source === 'legacy') {
         await assignLegacyReminder(q.task.id, { date: draft.date, propertyName: q.task.propertyName });
       } else {
@@ -141,7 +168,7 @@ export default function TasksView({ registerQuickAdd }) {
       setFlashId(id);
       if (q.context) announceAssigned(q.context.guest || q.context.propertyName, draft.date);
     }
-  }, [quick, addTask, updateTask, assignLegacyReminder, announceAssigned]);
+  }, [quick, addTask, updateTask, assignLegacyReminder, announceAssigned, materializeTemplate]);
 
   /* ── przeciąganie ── */
   const resolveDrop = useCallback((el, x) => {
@@ -174,6 +201,10 @@ export default function TasksView({ registerQuickAdd }) {
   const onDrop = useCallback(async (taskId, info) => {
     const task = taskById.get(taskId);
     if (!task) return;
+    if (task.source === 'template') {
+      await materializeTemplate(task, { date: info.date });
+      return;
+    }
     if (task.source === 'legacy') {
       await assignLegacyReminder(taskId, { date: info.date, propertyName: info.propertyName });
       // legacy nie zapisuje linku do rezerwacji — komunikat uczciwie mówi o obiekcie
@@ -184,7 +215,7 @@ export default function TasksView({ registerQuickAdd }) {
       announceAssigned(info.guest || info.propertyName, info.date);
     }
     setFlashId(taskId);
-  }, [taskById, assignTask, assignLegacyReminder, announceAssigned]);
+  }, [taskById, assignTask, assignLegacyReminder, announceAssigned, materializeTemplate]);
 
   const { begin } = useTaskDrag({ resolveDrop, labelFor, onDrop });
 
@@ -216,8 +247,13 @@ export default function TasksView({ registerQuickAdd }) {
       onToggleSubtask={handleToggleSubtask}
       onOpenChecklist={handleOpenChecklist}
       onDragStart={begin}
-      onAssign={openAssign} />
+      onAssign={openAssign}
+      onOpenPhotos={(task) => setPhotosTaskId(task.id)} />
   );
+
+  // dialog zdjęć czyta zadanie NA ŻYWO z planszy — po uploadzie/usunięciu snapshot
+  // odświeża photos bez zamykania dialogu
+  const photosTask = photosTaskId ? taskById.get(photosTaskId) : null;
 
   return (
     <div>
@@ -330,6 +366,12 @@ export default function TasksView({ registerQuickAdd }) {
           position:fixed — popover renderowany w środku zjeżdżałby o wysokość topbara
           i paddingu (zmierzone: 98 px w dół, stopka poza ekranem). Korzeń .wpd nie ma
           transformu, a trzyma tokeny var(--...) — dlatego on, nie document.body. */}
+      {photosTask && createPortal(
+        <TaskPhotos task={photosTask} onAdd={addTaskPhoto} onRemove={removeTaskPhoto}
+          onClose={() => setPhotosTaskId(null)} />,
+        document.querySelector('.wpd') || document.body,
+      )}
+
       {quick && createPortal(
         <QuickTaskPopover
           anchor={quick.anchor}

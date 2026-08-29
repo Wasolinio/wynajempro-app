@@ -94,12 +94,19 @@ export function useTasksBoard({ tasks, rentals, templates, properties, filter = 
       photos: t.photos || [], done: !!t.done,
     }));
     const dedupKeys = new Set(fromCollection.map((t) => `${t.text}|${t.date || ''}|${t.propertyName || ''}`));
+    // Materializacja (partia 2): dokument z templateId+rentalId oznacza, że para
+    // (rezerwacja, szablon) została przeciągnięta na inny termin — wyliczanie jej
+    // POMIJA, inaczej zadanie by się zdublowało (IMPLEMENTACJA.md §1, pole-klucz).
+    const materialized = new Set(fromCollection
+      .filter((t) => t.templateId && t.rentalId)
+      .map((t) => `${t.rentalId}|${t.templateId}`));
 
     /* ── 2. zadania z szablonów, liczone w locie ── */
     const fromTemplates = [];
     bookings.forEach((r) => {
       const rPropName = propName(r.property) || null;
       (templates || []).forEach((t) => {
+        if (materialized.has(`${r.id}|${t.id}`)) return;
         const due = taskDueDate(r, t);
         if (!due) return;
         const dueStr = localDayStr(due);
@@ -108,7 +115,9 @@ export function useTasksBoard({ tasks, rentals, templates, properties, filter = 
         // przyszłość: bez ograniczeń — rok i tak przycina subskrypcja rentals
         if (dueStr < todayStr && !isTaskDue(r, t, now)) return;
         fromTemplates.push({
-          id: `tpl:${r.id}:${t.id}`, source: 'template', draggable: false,
+          // draggable: przeciągnięcie MATERIALIZUJE zadanie (dokument w tasks
+          // z templateId i przesuniętym date) — obsługa w TasksView.onDrop
+          id: `tpl:${r.id}:${t.id}`, source: 'template', draggable: true,
           text: t.text || t.shortName || '', propertyName: rPropName,
           rentalId: r.id, templateId: t.id,
           date: dueStr, time: '', priority: 'normalny', note: '', subtasks: [],

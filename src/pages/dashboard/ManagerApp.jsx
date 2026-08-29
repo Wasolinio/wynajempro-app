@@ -19,6 +19,7 @@ import {
 import { calculateTaxes } from '../../utils/taxCalculator';
 import { toCount, guestsTotal } from '../../utils/guestCount';
 import { isTaskDue, daysToAnchor, taskDueDate, isCleaningTemplate, templateTiming } from '../../utils/taskSchedule';
+import { recurrenceLabel } from '../../utils/taskRecurrence';
 import { toDateStr } from '../../utils/addToCalendar';
 
 // Modale w stylu V4 (własne)
@@ -102,7 +103,7 @@ export default function ManagerApp() {
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
-    addTask,
+    tasks, addTask, updateTask, deleteTask, toggleTaskDone,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
   } = useWynajem();
@@ -121,6 +122,7 @@ export default function ManagerApp() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [editingId, setEditingId] = useState(null);
+  const [editingTaskId, setEditingTaskId] = useState(null); // edycja dokumentu z kolekcji tasks (partia 2)
   const [bookingFilter, setBookingFilter] = useState('upcoming');
   const [bookingSortOrder, setBookingSortOrder] = useState('upcoming');
   const [utilitySortOrder] = useState('desc');
@@ -181,7 +183,7 @@ export default function ManagerApp() {
     utilities: '', tax: '', vat: '', isPaid: false, isCompleted: false, completedTasks: {}, syncId: '',
     // E3: pola zakładki „Zadanie" (piszą do users/{uid}/tasks, NIE do rentals) —
     // przed zapisem rezerwacji/kosztu są odcinane w handleAddRental
-    taskTime: '', taskPriority: 'normalny', taskNote: '',
+    taskTime: '', taskPriority: 'normalny', taskNote: '', taskRecurrence: 'none',
   }), [sources, properties, categories]);
 
   const [newRental, setNewRental] = useState(getDefaultRentalState());
@@ -210,10 +212,34 @@ export default function ManagerApp() {
   const dailyReport = useMemo(() => {
     const today = new Date();
     const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const arrivals = []; const departures = []; const tasks = [];
+    const arrivals = []; const departures = []; const reportTasks = [];
     // X21: „Do posprzątania" liczy OBIEKTY do posprzątania dziś, nie wyjazdy. Wyjazd i przyjazd
     // tego samego dnia w tym samym domku to jedno sprzątanie — stąd zbiór, nie licznik.
     const cleaningProps = new Set();
+
+    // Partia 2 (finding 3 przeglądu): raport dzienny czyta też kolekcję `tasks` —
+    // nowe zadania mają być widoczne wszędzie tam, gdzie stare. Klucz dedup i skip
+    // zmaterializowanych par (rentalId|templateId) takie same jak w useTasksBoard.
+    const taskKeys = new Set();
+    const materialized = new Set(tasks.filter((t) => t.templateId && t.rentalId).map((t) => `${t.rentalId}|${t.templateId}`));
+    tasks.forEach((t) => {
+      if (!t.date) return;
+      taskKeys.add(`${t.text || ''}|${t.date}|${t.propertyName || ''}`);
+      if (t.done) return;
+      const d = new Date(t.date);
+      if (isNaN(d.getTime())) return;
+      d.setHours(0, 0, 0, 0);
+      const tm = new Date(); tm.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil((d - tm) / 86400000);
+      if (diffDays <= 0 && diffDays >= -30) {
+        reportTasks.push({
+          id: t.id, taskId: 'task', property: t.propertyName || 'Własne zadanie',
+          propertyName: t.propertyName || null, days: diffDays, dueDate: t.date,
+          text: t.text || 'Brak opisu',
+        });
+      }
+    });
+
     rentals.forEach((r) => {
       if (r.type === 'booking') {
         const propNameStr = typeof r.property === 'object' ? r.property.name : r.property;
@@ -224,34 +250,40 @@ export default function ManagerApp() {
         }
         if (r.date) {
           templates.forEach((t) => {
+            // partia 2: para zmaterializowana przeciągnięciem żyje już w `tasks` —
+            // wyliczanie jej tutaj dublowałoby zadanie w raporcie
+            if (materialized.has(`${r.id}|${t.id}`)) return;
             const isCompleted = r.completedTasks?.[t.id] || (t.id === 'directions' && r.directionsSent) || (t.id === 'keycode' && r.keycodeSent);
             // X20: termin liczy `taskSchedule` — kotwicą jest przyjazd albo wyjazd
             if (isCompleted || !isTaskDue(r, t)) return;
             // E6: `dueDate` (termin z taskSchedule) jedzie z zadaniem do widoków — przycisk
             // „Dodaj do kalendarza" nie musi odtwarzać liczenia terminu po swojej stronie
-            tasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: daysToAnchor(r, t), dueDate: toDateStr(taskDueDate(r, t)), icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
+            reportTasks.push({ id: r.id, taskId: t.id, guest: r.guest, property: propNameStr, days: daysToAnchor(r, t), dueDate: toDateStr(taskDueDate(r, t)), icon: getIconComponent(t.icon || 'Bell'), text: t.text || t.shortName });
             // sprzątanie widoczne na liście zadań musi być widoczne także na kaflu,
             // inaczej pulpit sam sobie przeczy (uwaga testera 2026-08-21)
             if (isCleaningTemplate(t) && propNameStr) cleaningProps.add(propNameStr);
           });
         }
       } else if (r.type === 'reminder' && !r.isCompleted && r.date) {
+        // dedup z kolekcją tasks (okres zgodnościowy) — ten sam klucz co w useTasksBoard
+        const legacyProp = typeof r.property === 'object' ? r.property?.name : r.property;
+        if (taskKeys.has(`${r.text || 'Brak opisu'}|${r.date}|${legacyProp || ''}`)) return;
         const d = new Date(r.date);
         if (!isNaN(d.getTime())) {
           d.setHours(0, 0, 0, 0);
           const tm = new Date(); tm.setHours(0, 0, 0, 0);
           const diffDays = Math.ceil((d - tm) / 86400000);
           if (diffDays <= 0 && diffDays >= -30) {
-            tasks.push({ id: r.id, taskId: 'manual', property: 'Własne zadanie', days: diffDays, dueDate: r.date, text: r.text || 'Brak opisu' });
+            reportTasks.push({ id: r.id, taskId: 'manual', property: 'Własne zadanie', days: diffDays, dueDate: r.date, text: r.text || 'Brak opisu' });
           }
         }
       }
     });
     return {
-      arrivals, departures, tasks, cleaningProps: Array.from(cleaningProps),
-      total: arrivals.length + departures.length + tasks.length, dateStr: localTodayStr,
+      arrivals, departures, tasks: reportTasks, cleaningProps: Array.from(cleaningProps),
+      total: arrivals.length + departures.length + reportTasks.length, dateStr: localTodayStr,
     };
-  }, [rentals, templates]);
+  }, [rentals, templates, tasks]);
 
   const displayedRentals = useMemo(() => rentals.filter((r) => {
     if (searchQuery.trim()) {
@@ -285,11 +317,33 @@ export default function ManagerApp() {
     };
   }, [displayedRentals, bookingSortOrder, utilitySortOrder]);
 
+  // Zakładka Rezerwacje → Zadania (partia 2): legacy + kolekcja tasks w jednej tabeli.
+  // Zadania bez daty (skrzynka) też są widoczne — z pustym terminem; filtr roku
+  // obejmuje tylko datowane (jak displayedRentals), szukajka działa po treści i obiekcie.
+  const tasksTabList = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const fromTasks = tasks
+      .filter((t) => (q
+        ? ((t.text || '').toLowerCase().includes(q) || (t.propertyName || '').toLowerCase().includes(q))
+        : (!t.date || new Date(t.date).getFullYear().toString() === selectedYear)))
+      .map((t) => ({
+        id: t.id, date: t.date || '', text: t.text || 'Brak opisu',
+        property: t.propertyName || '', isCompleted: !!t.done, __task: true,
+      }));
+    const keys = new Set(tasks.map((t) => `${t.text || ''}|${t.date || ''}|${t.propertyName || ''}`));
+    const legacy = remindersList.filter((r) => {
+      const legacyProp = typeof r.property === 'object' ? r.property?.name : r.property;
+      return !keys.has(`${r.text || 'Brak opisu'}|${r.date || ''}|${legacyProp || ''}`);
+    });
+    // sort jak remindersList (utilitySortOrder 'desc'): najnowsze u góry, bez daty na końcu
+    return [...legacy, ...fromTasks].sort((a, b) => (new Date(b.date).getTime() || 0) - (new Date(a.date).getTime() || 0));
+  }, [tasks, remindersList, searchQuery, selectedYear]);
+
   // Zakładka „Zadania" udostępnia wpisy `type: 'reminder'` — dotąd żyły wyłącznie
   // w pływającym widgecie, więc nie dało się ich poprawić ani skasować (Known-Issues #10).
   const displayedBookings = bookingFilter === 'all' ? allBookings
     : bookingFilter === 'upcoming' ? upcomingBookings
-      : bookingFilter === 'tasks' ? remindersList
+      : bookingFilter === 'tasks' ? tasksTabList
         : archivedBookings;
   const getPaginated = (list) => list.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -319,8 +373,32 @@ export default function ManagerApp() {
 
   const weekReminders = useMemo(() => {
     const limit = new Date(new Date().setDate(new Date().getDate() + 7));
-    return remindersList.filter((r) => !r.isCompleted && new Date(r.date) <= limit);
-  }, [remindersList]);
+    // partia 2: kolekcja tasks obok legacy-reminderów (ten sam horyzont: do 7 dni w przód);
+    // legacy zdublowane z tasks odsiewa klucz jak w useTasksBoard
+    const keys = new Set(tasks.filter((t) => t.date).map((t) => `${t.text || ''}|${t.date}|${t.propertyName || ''}`));
+    const legacy = remindersList.filter((r) => {
+      const legacyProp = typeof r.property === 'object' ? r.property?.name : r.property;
+      return !r.isCompleted && new Date(r.date) <= limit
+        && !keys.has(`${r.text || 'Brak opisu'}|${r.date || ''}|${legacyProp || ''}`);
+    });
+    const fromTasks = tasks
+      .filter((t) => !t.done && t.date && new Date(t.date) <= limit)
+      .map((t) => ({ id: t.id, text: t.text || 'Brak opisu', date: t.date, property: t.propertyName || '', __task: true }));
+    return [...legacy, ...fromTasks];
+  }, [remindersList, tasks]);
+
+  // Odhaczanie z raportu dziennego i pulpitu — jedna trasa dla trzech źródeł:
+  // 'task' = dokument kolekcji tasks (przez toggleTaskDone, z mechaniką recurrence),
+  // 'manual' = legacy reminder w rentals, reszta = szablon (completedTasks).
+  const completeReportTask = useCallback((id, taskId, current) => {
+    if (taskId === 'task') {
+      const t = tasks.find((x) => x.id === id);
+      if (t && !t.done) toggleTaskDone(t);
+      return;
+    }
+    completeTask(id, taskId, current);
+  }, [tasks, toggleTaskDone, completeTask]);
+
 
   // Metryki Pulpitu (obłożenie, przychód miesiąca, wykres 7 dni)
   const pulpit = useMemo(() => {
@@ -373,9 +451,25 @@ export default function ManagerApp() {
   const detailBooking = detailId ? rentals.find((r) => r.id === detailId) : null;
 
   // ── Akcje ──
-  const handleCloseModal = useCallback(() => { setShowAddModal(false); setEditingId(null); setNewRental(getDefaultRentalState()); }, [getDefaultRentalState]);
+  const handleCloseModal = useCallback(() => { setShowAddModal(false); setEditingId(null); setEditingTaskId(null); setNewRental(getDefaultRentalState()); }, [getDefaultRentalState]);
 
   const openEditModal = useCallback((r) => {
+    // Partia 2: wiersz z kolekcji tasks (zakładka Zadania) edytuje się tym samym modalem,
+    // ale zapis idzie przez updateTask — wszystkie pola zadania są tu trwałe,
+    // w odróżnieniu od edycji legacy (rentals), która zna tylko datę/treść/obiekt.
+    if (r.__task) {
+      const t = tasks.find((x) => x.id === r.id);
+      setEditingTaskId(r.id);
+      setNewRental({
+        ...getDefaultRentalState(),
+        type: 'reminder', text: t?.text || r.text || '', date: t?.date || '',
+        property: t?.propertyName || '',
+        taskTime: t?.time || '', taskPriority: t?.priority || 'normalny',
+        taskNote: t?.note || '', taskRecurrence: t?.recurrence?.kind || 'none',
+      });
+      setShowAddModal(true);
+      return;
+    }
     setEditingId(r.id);
     // X14: rezerwacje sprzed rozbicia mają samo `guests`. Ponieważ `guests` jest teraz
     // wyliczane (dorośli + dzieci), bez tej migracji otwarcie i zapis takiego wpisu
@@ -387,9 +481,10 @@ export default function ManagerApp() {
       adults: r.adults ?? legacyGuests, children: r.children ?? '', pets: r.pets ?? '',
     });
     setShowAddModal(true);
-  }, []);
+  }, [tasks, getDefaultRentalState]);
 
-  const handleDeleteClick = useCallback((id) => setItemToDelete(id), []);
+  // partia 2: usuwanie z zakładki Zadania obsługuje też dokumenty kolekcji tasks
+  const handleDeleteClick = useCallback((id, isTask = false) => setItemToDelete({ id, isTask }), []);
 
   /* X22: rezerwacja prosto z kalendarza. Zaznaczenie w siatce daje obiekt i obie daty,
      resztę formularz wypełnia domyślnymi wartościami jak przy „+ Rezerwacja". */
@@ -413,20 +508,31 @@ export default function ManagerApp() {
     if (!user) return;
     // E3: pola zakładki „Zadanie" nie należą do modelu rentals (allowlista isValidRental
     // by je odrzuciła) — odcinamy je zawsze, a przy nowym zadaniu zużywamy niżej
-    const { id: _id, taskTime, taskPriority, taskNote, ...entry } = newRental;
+    const { id: _id, taskTime, taskPriority, taskNote, taskRecurrence, ...entry } = newRental;
 
-    // NOWE zadanie pisze do users/{uid}/tasks — jedna ścieżka tworzenia z modułem Zadania
-    // (E3); edycja istniejącego wpisu type:'reminder' zostaje na rentals do czasu migracji
-    // (partia 2, odczyt zgodnościowy w useTasksBoard).
+    // NOWE zadanie i EDYCJA zadania z kolekcji piszą do users/{uid}/tasks — jedna ścieżka
+    // z modułem Zadania (E3); edycja istniejącego wpisu legacy type:'reminder' zostaje
+    // na rentals do czasu migracji (odczyt zgodnościowy w useTasksBoard).
     if (entry.type === 'reminder' && !editingId) {
-      const id = await addTask({
+      const recurrence = taskRecurrence && taskRecurrence !== 'none'
+        ? { kind: taskRecurrence, label: recurrenceLabel(taskRecurrence) }
+        : null;
+      const draft = {
         text: entry.text || '',
         date: entry.date || null,
         time: taskTime || '',
         priority: taskPriority || 'normalny',
         note: taskNote || '',
         propertyName: entry.property || null,
-      });
+        recurrence,
+      };
+      if (editingTaskId) {
+        await updateTask(editingTaskId, draft);
+        toast.success('Zaktualizowano zadanie');
+        handleCloseModal();
+        return;
+      }
+      const id = await addTask(draft);
       if (id) handleCloseModal();
       return;
     }
@@ -458,10 +564,16 @@ export default function ManagerApp() {
 
   const confirmDelete = useCallback(async () => {
     if (!user || !itemToDelete) return;
-    try { await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete)); toast.success('Pomyślnie usunięto wpis'); }
-    catch (err) { console.error(err); toast.error('Błąd podczas usuwania'); }
+    try {
+      if (itemToDelete.isTask) {
+        await deleteTask(itemToDelete.id); // kolekcja tasks (deleteTask sam toastuje)
+      } else {
+        await deleteDoc(doc(db, 'users', user.uid, 'rentals', itemToDelete.id));
+        toast.success('Pomyślnie usunięto wpis');
+      }
+    } catch (err) { console.error(err); toast.error('Błąd podczas usuwania'); }
     finally { setItemToDelete(null); }
-  }, [user, itemToDelete]);
+  }, [user, itemToDelete, deleteTask]);
 
   const openSettingsModal = useCallback(() => {
     setEditingTemplates(JSON.parse(JSON.stringify(templates)));
@@ -697,6 +809,8 @@ export default function ManagerApp() {
             {detailBooking ? (
               <BookingDetailView
                 booking={detailBooking} templates={templates} toggleDynamicTask={toggleDynamicTask}
+                linkedTasks={tasks.filter((t) => t.rentalId === detailBooking.id)}
+                onToggleTask={toggleTaskDone}
                 onBack={() => setDetailId(null)} onEdit={openEditModal}
                 onDelete={(id) => { setDetailId(null); handleDeleteClick(id); }}
               />
@@ -708,7 +822,7 @@ export default function ManagerApp() {
                 upcoming={upcomingBookings} rentals={rentals}
                 onOpenStats={() => setShowStatsModal(true)} onGoCalendar={() => changeView('calendar')}
                 onOpenDailyReport={() => setShowDailyReportModal(true)}
-                onEditRental={openBookingDetail} completeTask={completeTask} getDayName={getDayName}
+                onEditRental={openBookingDetail} completeTask={completeReportTask} getDayName={getDayName}
               />
             )}
 
@@ -717,9 +831,10 @@ export default function ManagerApp() {
                 <BookingsView
                   paginatedBookings={paginatedBookings} properties={properties}
                   bookingFilter={bookingFilter} changeBookingFilter={changeBookingFilter}
-                  counts={{ all: allBookings.length, upcoming: upcomingBookings.length, archived: archivedBookings.length, tasks: remindersList.length }}
+                  counts={{ all: allBookings.length, upcoming: upcomingBookings.length, archived: archivedBookings.length, tasks: tasksTabList.length }}
                   bookingSortOrder={bookingSortOrder} changeBookingSortOrder={changeBookingSortOrder}
                   toggleStatus={toggleStatus} openEditModal={openEditModal} handleDeleteClick={handleDeleteClick}
+                  onToggleTask={(row) => { const t = tasks.find((x) => x.id === row.id); if (t) toggleTaskDone(t); }}
                   onOpenDetail={openBookingDetail}
                 />
                 <div className="wpd-pager">
@@ -782,7 +897,7 @@ export default function ManagerApp() {
         selectedYear={selectedYear} handleYearChange={handleYearChange} availableYears={availableYears}
         rentals={rentals} recurringCosts={recurringCosts} hostProfile={hostProfile} />
       <DailyReportModal showDailyReportModal={showDailyReportModal} setShowDailyReportModal={setShowDailyReportModal}
-        dailyReport={dailyReport} completeTask={completeTask} />
+        dailyReport={dailyReport} completeTask={completeReportTask} />
       <SettingsModal
         showSettingsModal={showSettingsModal} setShowSettingsModal={setShowSettingsModal}
         settingsTab={settingsTab} setSettingsTab={setSettingsTab}
@@ -805,7 +920,7 @@ export default function ManagerApp() {
         accountStatus={accountStatus} handleManageSubscription={handleManageSubscription}
         isBillingPortalLoading={isBillingPortalLoading} saveAccount={saveAccount} />
       <AddEditEntryModal showAddModal={showAddModal} handleCloseModal={handleCloseModal} handleAddRental={handleAddRental}
-        editingId={editingId} newRental={newRental} setNewRental={setNewRental} handleRentalChange={handleRentalChange}
+        editingId={editingId} editingTaskId={editingTaskId} newRental={newRental} setNewRental={setNewRental} handleRentalChange={handleRentalChange}
         properties={properties} sources={sources} categories={categories} />
       {itemToDelete && <DeleteConfirmModal onCancel={() => setItemToDelete(null)} onConfirm={confirmDelete} />}
 

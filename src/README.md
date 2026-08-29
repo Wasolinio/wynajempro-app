@@ -53,6 +53,7 @@ src/
 ├── utils/
 │   ├── constants.js ............... Stałe (kolory obiektów, domyślne ustawienia, paginacja)
 │   ├── taskSchedule.js ........... Terminy zadań z szablonów (kotwica przyjazd/wyjazd, opis słowny)
+│   ├── taskRecurrence.js ......... Powtarzalność zadań (weekly/monthly/afterCheckout → następne wystąpienie)
 │   └── taxCalculator.js .......... Logika podatkowa (ryczałt / skala / VAT)
 │
 └── data/

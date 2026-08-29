@@ -56,6 +56,10 @@ async function cleanupUserData(uid) {
   // w powiązaniu z rezerwacjami (RODO art. 17) — czyszczone razem z resztą subkolekcji,
   // ta sama lekcja co przy syncState wyżej.
   const tasksDeleted = await deleteSubcollection(userRef, "tasks");
+  // Partia 2: zdjęcia zadań w Storage pod prefiksem users/{uid}/tasks/ — kasowane
+  // PRZED wyjściem z funkcji i bez połykania błędu (idiom deleteGuideCompletely, C.1):
+  // gdyby delete plików padł, dokument users przeżywa i kolejny przebieg dokończy.
+  await getStorage(app).bucket().deleteFiles({ prefix: `users/${uid}/tasks/` });
 
   console.log(
     `🧹 Dane użytkownika ${uid} wyczyszczone: ` +

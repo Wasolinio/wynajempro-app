@@ -123,12 +123,13 @@ test('1. Nawigacja 06 Zadania: oś, lista w kolejności Zaległe→Dziś→Jutro
   // legacy-reminder z rentals widoczny w Dziś (odczyt zgodnościowy)
   await expect(page.locator('.wpd-tk-card', { hasText: 'Stare zadanie z rentals' })).toBeVisible();
 
-  // zadania z szablonu (po jednym na rezerwację): tag „z szablonu", bez uchwytu
-  // przeciągania (materializacja = partia 2)
+  // zadania z szablonu (po jednym na rezerwację): tag „z szablonu"; OD PARTII 2 mają
+  // uchwyt przeciągania (upuszczenie materializuje) — stary kontrakt --static wygasł
   const tpls = page.locator('.wpd-tk-card', { hasText: 'Zleć sprzątanie' });
   await expect(tpls).toHaveCount(2);
   await expect(tpls.first()).toContainText('z szablonu');
-  await expect(tpls.first()).toHaveClass(/wpd-tk-card--static/);
+  await expect(tpls.first()).not.toHaveClass(/wpd-tk-card--static/);
+  await expect(tpls.first().locator('.wpd-tk-card__grip')).toBeVisible();
 
   // oś: 7 dni, dzisiejsza kolumna wyróżniona, paski obu rezerwacji
   await expect(page.locator('.wpd-tk-axis__dnum')).toHaveCount(7);
@@ -297,6 +298,162 @@ test('9. prefers-reduced-motion: pasek priorytetu zaległego zadania nie pulsuje
   await expect(overdueCard).toBeVisible();
   const anim = await overdueCard.locator('.wpd-tk-card__prio').evaluate((el) => getComputedStyle(el).animationName);
   expect(anim).toBe('none');
+});
+
+/* ═══ PARTIA 2 ═══════════════════════════════════════════════════════════════ */
+
+test('P2 materializacja: drag kartki szablonowej tworzy dokument z templateId, duplikat wyliczany znika', async ({ page }) => {
+  // kartka szablonowa leży nisko (sekcja Środa), a cel to komórka osi u góry —
+  // oba końce przeciągania muszą być w kadrze naraz, stąd wysoki viewport
+  await page.setViewportSize({ width: 1280, height: 1600 });
+  // tylko rezerwacja Anny + szablon sprzątania → dokładnie jedna kartka szablonowa
+  const db = { ...baseDb };
+  delete db['users/uid-test/rentals/r-marek'];
+  db['users/uid-test/settings/reminders'] = {
+    items: [{ id: 'cleaning', text: 'Zleć sprzątanie', shortName: 'Sprzątanie', anchor: 'departure', daysBefore: 0, icon: 'CheckSquare' }],
+  };
+  await openTasks(page, db);
+
+  const tpl = page.locator('.wpd-tk-card', { hasText: 'Zleć sprzątanie' });
+  await expect(tpl).toHaveCount(1);
+
+  // 27.08 to wolny dzień Apartamentu (Anna wyjeżdża 26.08). Ciągniemy za UCHWYT —
+  // geometryczny środek tej kartki trafia w odsłaniany hoverem przycisk „Przypisz"
+  // (data-nodrag), który słusznie nie zaczyna przeciągania
+  await dragTo(page, tpl.locator('.wpd-tk-card__grip'),
+    page.locator('[data-drop="day"][data-prop="Apartament Centrum"][data-day="2026-08-27"]'));
+
+  await expect.poll(async () => {
+    const docs = await tasksDocs(page);
+    const doc = docs.find((d) => d.templateId === 'cleaning');
+    return doc ? { rentalId: doc.rentalId, date: doc.date, done: doc.done } : null;
+  }, { timeout: 5000 }).toEqual({ rentalId: 'r-anna', date: '2026-08-27', done: false });
+
+  // wyliczana para (r-anna, cleaning) jest odtąd pomijana — kartka jest JEDNA
+  // (zmaterializowana, już bez taga „z szablonu") i niesie chip gościa z pobytu-matki
+  await expect(tpl).toHaveCount(1);
+  await expect(tpl).not.toContainText('z szablonu');
+  await expect(tpl.locator('.wpd-tk-res__guest')).toHaveText('Anna Nowak');
+});
+
+test('P2 powtarzalność: odhaczenie tworzy następne wystąpienie tydzień później', async ({ page }) => {
+  await openTasks(page, {
+    ...baseDb,
+    'users/uid-test/tasks/t-rec': taskDoc({
+      text: 'Podlać kwiaty na tarasie', propertyName: 'Domek nad Jeziorem',
+      date: '2026-08-23', priority: 'niski', recurrence: { kind: 'weekly', label: 'co tydzień' },
+    }),
+  });
+
+  const card = page.locator('.wpd-tk-card', { hasText: 'Podlać kwiaty' }).first();
+  await expect(card).toContainText('co tydzień');
+  await card.locator('.wpd-tk-check').click();
+
+  await expect.poll(async () => {
+    const docs = (await tasksDocs(page)).filter((d) => d.text === 'Podlać kwiaty na tarasie');
+    return docs.map((d) => ({ date: d.date, done: d.done })).sort((a, b) => (a.date < b.date ? -1 : 1));
+  }, { timeout: 5000 }).toEqual([
+    { date: '2026-08-23', done: true },
+    { date: '2026-08-30', done: false }, // +7 dni, powtarzalność jedzie dalej
+  ]);
+});
+
+test('P2 konsumenci: zadanie z kolekcji widać na pulpicie, w raporcie dziennym i w zakładce Zadania', async ({ page }) => {
+  await setupFirebaseMocks(page, { user: mockUser, dbData: baseDb });
+  await page.clock.setFixedTime(TODAY);
+  await page.goto('/dashboard');
+
+  // Pulpit „Zadania na dziś": kolekcja tasks (t-today) i legacy obok siebie
+  const pulpit = page.locator('.wpd-panel', { hasText: 'Zadania na dziś' });
+  await expect(pulpit).toContainText('Odczyt licznika prądu');
+  await expect(pulpit).toContainText('Stare zadanie z rentals');
+
+  // Raport dnia (dzwonek): to samo źródło; odhaczenie z raportu pisze do tasks
+  await page.locator('button[title="Raport dzienny"]').click();
+  const dialog = page.locator('[role="dialog"]');
+  await expect(dialog).toContainText('Odczyt licznika prądu');
+  await dialog.locator('.wpd-rep__item', { hasText: 'Odczyt licznika prądu' })
+    .getByTitle('Oznacz jako wykonane').click();
+  await expect.poll(async () => {
+    const docs = await tasksDocs(page);
+    return docs.find((d) => d.text === 'Odczyt licznika prądu')?.done ?? null;
+  }, { timeout: 5000 }).toBe(true);
+  await expect(dialog).not.toContainText('Odczyt licznika prądu');
+  await page.keyboard.press('Escape');
+
+  // Rezerwacje → Zadania: legacy + kolekcja (także skrzynka, z pustym terminem)
+  await page.locator('.wpd-nav__item', { hasText: 'Rezerwacje' }).first().click();
+  await page.locator('.wpd-seg__btn', { hasText: 'Zadania' }).click();
+  await expect(page.locator('tr', { hasText: 'Stare zadanie z rentals' })).toBeVisible();
+  await expect(page.locator('tr', { hasText: 'Odczyt licznika prądu' })).toBeVisible();
+  await expect(page.locator('tr', { hasText: 'Zawieźć klucze zapasowe' })).toBeVisible();
+});
+
+test('P2 szczegóły rezerwacji: zadanie przypięte do rezerwacji widać i można odhaczyć', async ({ page }) => {
+  await setupFirebaseMocks(page, {
+    user: mockUser,
+    dbData: {
+      ...baseDb,
+      'users/uid-test/tasks/t-linked': taskDoc({
+        text: 'Sprawdzić ręczniki przed przyjazdem', propertyName: 'Apartament Centrum',
+        rentalId: 'r-anna', date: '2026-08-23', priority: 'wysoki',
+      }),
+    },
+  });
+  await page.clock.setFixedTime(TODAY);
+  await page.goto('/dashboard');
+
+  await page.locator('.wpd-nav__item', { hasText: 'Rezerwacje' }).first().click();
+  await page.locator('tr', { hasText: 'Anna Nowak' }).click();
+
+  const panel = page.locator('.wpd-panel', { hasText: 'Zadania i przypomnienia' });
+  await expect(panel).toContainText('Sprawdzić ręczniki przed przyjazdem');
+
+  await panel.locator('.wpd-row', { hasText: 'Sprawdzić ręczniki' })
+    .getByTitle('Oznacz jako wykonane').click();
+  await expect.poll(async () => {
+    const docs = await tasksDocs(page);
+    return docs.find((d) => d.text === 'Sprawdzić ręczniki przed przyjazdem')?.done ?? null;
+  }, { timeout: 5000 }).toBe(true);
+});
+
+test('P2 mobile 375: skrzynka nad listą, oś przewijana poziomo, popover jako arkusz od dołu', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await setupFirebaseMocks(page, { user: mockUser, dbData: baseDb });
+  await page.clock.setFixedTime(TODAY);
+  await page.goto('/dashboard');
+
+  // nawigacja mobilna: Zadania żyją w arkuszu „Więcej" (MOBILE_BAR = 4 pozycje, X12)
+  await page.locator('.wpd-bottombar__item', { hasText: 'Więcej' }).click();
+  await page.locator('.wpd-sheet .wpd-nav__item', { hasText: 'Zadania' }).click();
+  await expect(page.locator('h2', { hasText: 'Oś przypisania' })).toBeVisible();
+
+  // oś przewija się u siebie (min-width 720 przy oknie 375), strona stoi
+  const scroll = await page.locator('.wpd-tk-axis__scroll').evaluate((el) => ({
+    scrollable: el.scrollWidth > el.clientWidth,
+  }));
+  expect(scroll.scrollable).toBe(true);
+
+  // skrzynka „Do przypisania" NAD listą (order:-1), jako poziomy pasek
+  const inboxBox = await page.locator('.wpd-tk-inbox').boundingBox();
+  const listBox = await page.locator('.wpd-tk-list').boundingBox();
+  expect(inboxBox.y).toBeLessThan(listBox.y);
+
+  // klik w pasek rezerwacji → popover jako arkusz od dołu (przyklejony do dołu ekranu)
+  await page.locator('[data-res="r-anna"]').scrollIntoViewIfNeeded();
+  await page.locator('[data-res="r-anna"]').click();
+  const pop = page.locator('.wpd-tk-pop');
+  await expect(pop).toBeVisible();
+  // poll: wejście arkusza animuje translateY (wpd-sheet-in) — pomiar dopiero po dojechaniu
+  await expect.poll(async () => {
+    const b = await pop.boundingBox();
+    return { x: Math.round(b.x), w: Math.round(b.width), bottom: Math.round(b.y + b.height) };
+  }, { timeout: 3000 }).toEqual({ x: 0, w: 375, bottom: 812 });
+  const radius = await pop.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { top: cs.borderTopLeftRadius, bottom: cs.borderBottomLeftRadius };
+  });
+  expect(radius).toEqual({ top: '4px', bottom: '0px' });
 });
 
 test('Zrzuty do przeglądu: desktop i 375 px', async ({ page }, testInfo) => {

@@ -17,6 +17,7 @@ export default function BookingsView({
   bookingFilter, changeBookingFilter, counts,
   bookingSortOrder, changeBookingSortOrder,
   toggleStatus, openEditModal, handleDeleteClick, onOpenDetail,
+  onToggleTask,
 }) {
   const propColor = (name) => {
     const p = properties.find((x) => x.name === name);
@@ -72,21 +73,23 @@ export default function BookingsView({
                       ) : <span style={{ color: 'var(--faint)' }}>—</span>}
                     </td>
                     <td>
+                      {/* partia 2: wiersz __task pochodzi z kolekcji tasks — inna trasa
+                          odhaczania (toggleTaskDone przez ManagerApp) i usuwania */}
                       <button
                         className={`wpd-check ${r.isCompleted ? 'wpd-check--on' : 'wpd-check--off'}`}
                         title={r.isCompleted ? 'Zrobione' : 'Oznacz jako zrobione'}
-                        onClick={() => toggleStatus(r.id, 'isCompleted')}
+                        onClick={() => (r.__task ? onToggleTask?.(r) : toggleStatus(r.id, 'isCompleted'))}
                       >{r.isCompleted ? <CheckCircle /> : <XCircle style={{ opacity: 0 }} />}</button>
                     </td>
                     <td className="wpd-num">
                       <span style={{ display: 'inline-flex', gap: 6, justifyContent: 'flex-end' }}>
-                        {/* E6: zadanie ukończone przycisku nie potrzebuje */}
-                        {!r.isCompleted && (
+                        {/* E6: zadanie ukończone (albo bez terminu) przycisku nie potrzebuje */}
+                        {!r.isCompleted && r.date && (
                           <AddToCalendarButton dateStr={r.date} text={r.text || r.guest}
                             property={propName} uid={`${r.id}-manual`} />
                         )}
                         <button className="wpd-iconbtn" title="Edytuj" onClick={() => openEditModal(r)}><Edit /></button>
-                        <button className="wpd-iconbtn wpd-btn--danger" title="Usuń" onClick={() => handleDeleteClick(r.id)}><Trash2 /></button>
+                        <button className="wpd-iconbtn wpd-btn--danger" title="Usuń" onClick={() => handleDeleteClick(r.id, !!r.__task)}><Trash2 /></button>
                       </span>
                     </td>
                   </tr>

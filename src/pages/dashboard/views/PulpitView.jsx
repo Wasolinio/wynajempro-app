@@ -218,12 +218,13 @@ export default function PulpitView({
                 <div className="wpd-row__meta">{t.property}{t.guest ? ` · ${t.guest}` : ''}</div>
               </div>
               {/* E6: dla zadań własnych `property` to etykieta „Własne zadanie", nie obiekt —
-                  do kalendarza nie ma czego dopisywać */}
+                  do kalendarza nie ma czego dopisywać. Wpisy 'task' (kolekcja tasks, partia 2)
+                  niosą surowy obiekt w `propertyName`. */}
               <AddToCalendarButton small dateStr={t.dueDate} text={t.text}
-                property={t.taskId === 'manual' ? null : t.property} guest={t.guest}
+                property={t.taskId === 'manual' ? null : t.taskId === 'task' ? (t.propertyName ?? null) : t.property} guest={t.guest}
                 uid={`${t.id}-${t.taskId}`} />
-              {t.taskId === 'manual' && (
-                <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(t.id, 'manual')}><CheckCircle /></button>
+              {(t.taskId === 'manual' || t.taskId === 'task') && (
+                <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(t.id, t.taskId)}><CheckCircle /></button>
               )}
             </div>
           ))}
@@ -237,7 +238,8 @@ export default function PulpitView({
               <AddToCalendarButton small dateStr={task.date} text={task.text}
                 property={typeof task.property === 'object' ? task.property?.name : task.property}
                 uid={`${task.id}-manual`} />
-              <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(task.id, 'manual')}><CheckCircle /></button>
+              {/* partia 2: wpis __task pochodzi z kolekcji tasks — inna trasa odhaczenia */}
+              <button className="wpd-check wpd-check--off" title="Oznacz jako zrobione" onClick={() => completeTask(task.id, task.__task ? 'task' : 'manual')}><CheckCircle /></button>
             </div>
           ))}
           {tasksToday.length === 0 && weekReminders.length === 0 && (

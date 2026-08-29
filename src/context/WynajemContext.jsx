@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { auth, db, functions } from '../firebase';
+import { auth, db, functions, storage } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, updateDoc, collection, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { defaultTaxSettings, defaultHostProfile } from '../utils/constants';
+import { nextOccurrence } from '../utils/taskRecurrence';
 import { plural } from '../utils/plural';
 
 const EMPTY_ARRAY = [];
@@ -15,6 +17,10 @@ const WynajemContext = createContext();
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useWynajem = () => useContext(WynajemContext);
+
+// Rozszerzenie pliku zdjęcia wyprowadzamy z typu MIME, nigdy z nazwy pliku
+// użytkownika (patrz komentarz przy addTaskPhoto).
+const EXT_OBRAZU = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic', 'image/heif': 'heif', 'image/gif': 'gif' };
 
 export const WynajemProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -119,13 +125,20 @@ export const WynajemProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Zwraca `true` przy zapisanej zmianie, `false` przy błędzie — wywołujący, którzy
+  // po zapisie ruszają PLIKI (addTaskPhoto/removeTaskPhoto), muszą odróżnić jedno od
+  // drugiego. Bez tego kasowały plik mimo odrzuconego zapisu dokumentu i zostawiały
+  // w zadaniu martwy kafelek nie do usunięcia (przegląd 2026-08-29). Pozostali
+  // wywołujący wartość ignorują — zachowanie bez zmian.
   const updateTask = useCallback(async (id, updates) => {
-    if (!user) return;
+    if (!user) return false;
     try {
       await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { ...updates, updatedAt: serverTimestamp() });
+      return true;
     } catch (err) {
       console.error('Błąd aktualizacji zadania:', err);
       toast.error('Nie udało się zapisać zmiany zadania');
+      return false;
     }
   }, [user]);
 
@@ -138,13 +151,111 @@ export const WynajemProvider = ({ children }) => {
   const toggleTaskDone = useCallback(async (task) => {
     // zadanie zostaje na liście po odhaczeniu (decyzja właściciela w handoffie) —
     // stąd toggle, nie kasowanie; doneAt czyścimy przy cofnięciu
-    await updateTask(task.id, { done: !task.done, doneAt: task.done ? null : serverTimestamp() });
-  }, [updateTask]);
+    const markingDone = !task.done;
+    await updateTask(task.id, { done: markingDone, doneAt: markingDone ? serverTimestamp() : null });
+    // Powtarzalność (partia 2): odhaczenie zadania z `recurrence` tworzy następne
+    // wystąpienie (taskRecurrence liczy termin; afterCheckout dostaje też rezerwację).
+    // Cofnięcie odhaczenia niczego nie tworzy ani nie kasuje. Podzadania wracają
+    // nieodhaczone, zdjęcia NIE jadą dalej (dokumentują konkretne wykonanie).
+    if (markingDone && task.recurrence?.kind && user) {
+      const next = nextOccurrence(task, { rentals });
+      if (next) {
+        try {
+          await addDoc(collection(db, 'users', user.uid, 'tasks'), {
+            text: task.text,
+            propertyName: task.propertyName ?? null,
+            rentalId: next.rentalId ?? null,
+            templateId: null,
+            date: next.date,
+            time: task.time || '',
+            priority: task.priority || 'normalny',
+            note: task.note || '',
+            subtasks: (task.subtasks || []).map((s) => ({ ...s, done: false })),
+            recurrence: task.recurrence,
+            photos: [],
+            done: false,
+            doneAt: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+          toast.success('Powtarzalne — utworzono następne wystąpienie');
+        } catch (err) {
+          console.error('Błąd tworzenia następnego wystąpienia:', err);
+          toast.error('Nie udało się utworzyć następnego wystąpienia');
+        }
+      }
+    }
+  }, [updateTask, user, rentals]);
 
   const toggleSubtask = useCallback(async (task, index) => {
     const subtasks = (task.subtasks || []).map((s, i) => (i === index ? { ...s, done: !s.done } : s));
     await updateTask(task.id, { subtasks });
   }, [updateTask]);
+
+  // ZDJĘCIA ZADAŃ (partia 2, krok 7): Storage users/{uid}/tasks/{taskId}/{uuid}.{ext}.
+  // Limit 10 zdjęć pilnowany tu i w regułach Firestore (photos <= 10); rozmiar i typ
+  // pilnują storage.rules, a rozmiar dodatkowo my — po to, żeby użytkownik dostał
+  // konkretny powód zamiast ogólnej porażki po minucie wysyłania (idiom GuideBuilder).
+  //
+  // ⚠️ Rozszerzenie bierzemy z `file.type`, NIGDY z `file.name`: nazwa bez kropki
+  // (typowa po zrzucie z komunikatora, np. „Anna Kowalska") trafiała w całości
+  // do nazwy obiektu, a stamtąd do publicznego adresu pobrania — czyli dokładnie
+  // tam, gdzie komentarz obiecywał, że danych osobowych nie ma (przegląd 2026-08-29).
+  const addTaskPhoto = useCallback(async (taskId, file, existingPhotos = []) => {
+    if (!user || !file) return false;
+    if ((existingPhotos || []).length >= 10) {
+      toast.error('Zadanie może mieć najwyżej 10 zdjęć');
+      return false;
+    }
+    if (!String(file.type || '').startsWith('image/')) {
+      toast.error('Dodać można tylko zdjęcie');
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Zdjęcie może mieć najwyżej 10 MB');
+      return false;
+    }
+    let path = null;
+    try {
+      const ext = EXT_OBRAZU[file.type] || 'jpg';
+      const id = window.crypto?.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).slice(2);
+      path = `users/${user.uid}/tasks/${taskId}/${id}.${ext}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      // Zapis dokumentu jest tym, co czyni plik widocznym. Gdy się nie uda, plik
+      // sprzątamy od razu — inaczej zostaje w Storage z żywym adresem pobrania,
+      // niewidoczny w żadnym UI, więc nie do usunięcia przez gospodarza.
+      const zapisano = await updateTask(taskId, { photos: [...(existingPhotos || []), { path, url }] });
+      if (!zapisano) {
+        await deleteObject(ref(storage, path)).catch(() => {});
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Błąd dodawania zdjęcia:', err);
+      toast.error('Nie udało się dodać zdjęcia');
+      if (path) await deleteObject(ref(storage, path)).catch(() => {});
+      return false;
+    }
+  }, [user, updateTask]);
+
+  const removeTaskPhoto = useCallback(async (task, index) => {
+    if (!user) return;
+    const photo = (task.photos || [])[index];
+    if (!photo) return;
+    try {
+      // Najpierw dokument (źródło prawdy dla UI), plik TYLKO po potwierdzonym zapisie:
+      // przy odrzuconym zapisie skasowany plik zostawiałby w zadaniu kafelek
+      // z martwym adresem, którego nie da się już usunąć.
+      const zapisano = await updateTask(task.id, { photos: task.photos.filter((_, i) => i !== index) });
+      if (!zapisano) return;
+      if (photo.path) await deleteObject(ref(storage, photo.path)).catch((err) => console.warn('Plik zdjęcia nie dał się usunąć:', err?.code));
+    } catch (err) {
+      console.error('Błąd usuwania zdjęcia:', err);
+      toast.error('Nie udało się usunąć zdjęcia');
+    }
+  }, [user, updateTask]);
 
   // LEGACY (okres zgodnościowy do migracji w partii 2): jednorazowe zadanie z `rentals`
   // (type:'reminder') przypisujemy aktualizując jego własny dokument — `date` i `property`
@@ -162,16 +273,26 @@ export const WynajemProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Kasujemy ZDJĘCIA PRZED dokumentem — dokument jest jedynym tropicielem plików,
+  // więc usunięty pierwszy zostawiłby je w Storage z żywymi adresami pobrania i bez
+  // żadnego UI do ich usunięcia (dialog zdjęć otwiera się tylko z kartki zadania).
+  // Dokładnie ta klasa błędu wyszła w audycie N5 przy przewodnikach (finding F3),
+  // stąd ta sama kolejność co w deleteGuideCompletely: pliki → dokument, a błąd
+  // Storage NIE jest połykany, żeby kolejna próba mogła dokończyć.
   const deleteTask = useCallback(async (id) => {
     if (!user) return;
     try {
+      const zadanie = (tasks || []).find((t) => t.id === id);
+      for (const photo of (zadanie?.photos || [])) {
+        if (photo?.path) await deleteObject(ref(storage, photo.path));
+      }
       await deleteDoc(doc(db, 'users', user.uid, 'tasks', id));
       toast.success('Zadanie usunięte');
     } catch (err) {
       console.error('Błąd usuwania zadania:', err);
       toast.error('Nie udało się usunąć zadania');
     }
-  }, [user]);
+  }, [user, tasks]);
 
   // STRIPE / PAYWALL
   const isAccessLocked = useCallback(() => {
@@ -276,6 +397,7 @@ export const WynajemProvider = ({ children }) => {
     selectedYear, setSelectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask, deleteTask, assignLegacyReminder,
+    addTaskPhoto, removeTaskPhoto,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
     db // Wystawienie DB jeśli modal będzie robił bezpośredni update (lepiej nie, ale na razie tak)
@@ -287,6 +409,7 @@ export const WynajemProvider = ({ children }) => {
     selectedYear,
     handleLogout, toggleStatus, completeTask, toggleDynamicTask,
     addTask, updateTask, assignTask, toggleTaskDone, toggleSubtask, deleteTask, assignLegacyReminder,
+    addTaskPhoto, removeTaskPhoto,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     handleSyncCalendars, isSyncing
   ]);
