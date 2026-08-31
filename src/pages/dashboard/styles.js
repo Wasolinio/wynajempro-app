@@ -532,6 +532,20 @@ export const DASHBOARD_CSS = `
 .wpd-rep__meta{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em;
   text-transform:uppercase; color:var(--faint); margin-top:3px; }
 
+/* popup patch notów „Co nowego" (E4) — sekcja = jeden wpis: data, tytuł, punkty */
+.wpd-pn__sec{ margin-bottom:24px; }
+.wpd-pn__sec:last-child{ margin-bottom:0; }
+.wpd-pn__date{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--faint); margin:0 0 5px; }
+.wpd-pn__title{ font-weight:700; font-size:15px; margin:0 0 10px; }
+.wpd-pn__list{ list-style:none; margin:0; padding:0; }
+.wpd-pn__item{ position:relative; padding-left:18px; margin-bottom:7px; font-size:13.5px;
+  line-height:1.6; color:var(--muted); }
+.wpd-pn__item:last-child{ margin-bottom:0; }
+/* marker punktu: linia 1 px w cynobrze — zgodnie z identyfikacją (bez kropek i dingbatów) */
+.wpd-pn__item::before{ content:''; position:absolute; left:0; top:.75em; width:9px; height:1px;
+  background:var(--cynober); }
+
 /* ── Ustawienia (taby + listy) ── */
 /* min-width:0 + max-width:100% to nie ozdoba: bez nich kontener flex rośnie do sumy
    szerokości zakładek zamiast je przewijać i rozpycha stronę w poziomie. Ujawniła to

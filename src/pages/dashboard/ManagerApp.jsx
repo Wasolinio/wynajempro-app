@@ -21,6 +21,7 @@ import { toCount, guestsTotal } from '../../utils/guestCount';
 import { isTaskDue, daysToAnchor, taskDueDate, isCleaningTemplate, templateTiming } from '../../utils/taskSchedule';
 import { recurrenceLabel } from '../../utils/taskRecurrence';
 import { toDateStr } from '../../utils/addToCalendar';
+import { PATCH_NOTES } from '../../data/patchNotes';
 
 // Modale w stylu V4 (własne)
 import ProfitabilityReportModal from './modals/ProfitabilityReportModal';
@@ -28,6 +29,7 @@ import DailyReportModal from './modals/DailyReportModal';
 import AddEditEntryModal from './modals/AddEditEntryModal';
 import DeleteConfirmModal from './modals/DeleteConfirmModal';
 import SettingsModal from './modals/SettingsModal';
+import PatchNotesModal from './modals/PatchNotesModal';
 import PaywallScreen from '../../components/PaywallScreen';
 import CompleteProfileScreen from '../../components/CompleteProfileScreen';
 import FloatingTaskWidget from '../../components/FloatingTaskWidget';
@@ -106,6 +108,7 @@ export default function ManagerApp() {
     tasks, addTask, updateTask, deleteTask, toggleTaskDone,
     isAccessLocked, handleSubscribe, handleManageSubscription,
     isSyncing, handleSyncCalendars,
+    lastSeenPatchNote, markPatchNotesSeen, profileLoaded,
   } = useWynajem();
 
   // ── UI ──
@@ -120,6 +123,33 @@ export default function ManagerApp() {
   const [settingsTab, setSettingsTab] = useState('sync');
   const [itemToDelete, setItemToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // ── E4: patch noty „Co nowego" ──
+  // Baseline = data z lastSeenPatchNote (pierwsze 10 znaków id to zawsze 'RRRR-MM-DD'),
+  // a bez tego pola — data rejestracji konta (user.metadata.creationTime). Porównanie
+  // OSTRE: wpisu z dnia rejestracji świeże konto nie widzi. Brak obu dat = nic nie
+  // pokazujemy (bezpieczny domyślny stan, m.in. dla atrap w testach).
+  const [showPatchNotes, setShowPatchNotes] = useState(false);
+  const patchNotesZamkniete = useRef(false); // raz zamknięte w tej sesji nie wraca
+  const nowePatchNoty = useMemo(() => {
+    const baseline = lastSeenPatchNote
+      ? String(lastSeenPatchNote).slice(0, 10)
+      : toDateStr(user?.metadata?.creationTime);
+    if (!baseline) return [];
+    return PATCH_NOTES.filter((n) => n.date > baseline).slice(0, 5);
+  }, [lastSeenPatchNote, user]);
+  useEffect(() => {
+    // dopiero gdy dane panelu SĄ wczytane, i to łącznie ze snapshotem PROFILU —
+    // bramka na samym `loading` (gaśnie w listenerze rentals) przepuszczała błysk
+    // popupu na zimnym cache, zanim dojechał lastSeenPatchNote (przegląd 2026-08-31)
+    if (loading || !profileLoaded || patchNotesZamkniete.current) return;
+    if (nowePatchNoty.length > 0) setShowPatchNotes(true);
+  }, [loading, profileLoaded, nowePatchNoty]);
+  const zamknijPatchNoty = useCallback(() => {
+    patchNotesZamkniete.current = true;
+    setShowPatchNotes(false);
+    markPatchNotesSeen(PATCH_NOTES[0]?.id); // fire-and-forget — catch siedzi w akcji kontekstu
+  }, [markPatchNotesSeen]);
 
   const [editingId, setEditingId] = useState(null);
   const [editingTaskId, setEditingTaskId] = useState(null); // edycja dokumentu z kolekcji tasks (partia 2)
@@ -923,6 +953,9 @@ export default function ManagerApp() {
         editingId={editingId} editingTaskId={editingTaskId} newRental={newRental} setNewRental={setNewRental} handleRentalChange={handleRentalChange}
         properties={properties} sources={sources} categories={categories} />
       {itemToDelete && <DeleteConfirmModal onCancel={() => setItemToDelete(null)} onConfirm={confirmDelete} />}
+      {/* E4: patch noty — montowane po bramkach loading/paywall/profil, więc nie przykryją
+          żadnego z ekranów blokujących; automatycznych popupów panel poza tym nie ma */}
+      <PatchNotesModal show={showPatchNotes} entries={nowePatchNoty} onClose={zamknijPatchNoty} />
 
       {/* ── Dolny pasek nawigacji (mobile <980px, X12) ── */}
       <nav className="wpd-bottombar" aria-label="Nawigacja">

@@ -62,10 +62,10 @@ export const useFirebaseData = (user, selectedYear) => {
     enabled: !!user,
   });
 
-  const { data: profile = { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null } } = useQuery({
+  const { data: profile = { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null, lastSeenPatchNote: null } } = useQuery({
     queryKey: ['profile', user?.uid],
     // Najważniejsze z trzech: od tych wartości zależy, czy pokaże się ekran blokady.
-    queryFn: zachowaj(['profile', user?.uid], { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null }),
+    queryFn: zachowaj(['profile', user?.uid], { accountStatus: 'trialing', trialEndsAt: null, scheduledDeletionAt: null, lastSeenPatchNote: null }),
     staleTime: Infinity,
     enabled: !!user,
   });
@@ -80,11 +80,19 @@ export const useFirebaseData = (user, selectedYear) => {
     enabled: !!user,
   });
 
+  // E4: czy snapshot profilu DOJECHAŁ (a nie tylko: czy skończył się loading rentals).
+  // Popup „Co nowego" nie może się otwierać na wartościach domyślnych profilu — na
+  // zimnym cache rentals potrafi wygrać wyścig z profilem i popup błyskał userowi,
+  // który wszystko widział (przegląd 2026-08-31, finding 2).
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  useEffect(() => { setProfileLoaded(false); }, [user?.uid]);
+
   useEffect(() => {
     if (!user) return;
-    
+
     // Subskrypcja Profilu Użytkownika
     const unsubProfile = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+      setProfileLoaded(true); // także gałąź self-heal: wiemy już, co jest (a czego nie ma) w profilu
       if (docSnap.exists()) {
         const data = docSnap.data();
         queryClient.setQueryData(['profile', user.uid], {
@@ -93,6 +101,8 @@ export const useFirebaseData = (user, selectedYear) => {
           accountStatus: data.status || data.accountStatus || 'trialing',
           trialEndsAt: data.trialEndsAt ? (data.trialEndsAt.toDate ? data.trialEndsAt.toDate() : new Date(data.trialEndsAt)) : null,
           scheduledDeletionAt: data.scheduledDeletionAt ? (data.scheduledDeletionAt.toDate ? data.scheduledDeletionAt.toDate() : new Date(data.scheduledDeletionAt)) : null,
+          // E4: id najnowszego widzianego patch nota („Co nowego"); brak pola = nigdy nie widział
+          lastSeenPatchNote: data.lastSeenPatchNote || null,
         });
       } else {
         // SELF-HEAL: Brak dokumentu usera (stare konta zepsute błędem).
@@ -198,5 +208,5 @@ export const useFirebaseData = (user, selectedYear) => {
     };
   }, [user, queryClient, selectedYear]);
 
-  return { rentals, settings, profile, tasks, loading };
+  return { rentals, settings, profile, tasks, loading, profileLoaded };
 };

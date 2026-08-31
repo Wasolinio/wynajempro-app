@@ -22,12 +22,24 @@ export const WynajemProvider = ({ children }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   
   // Custom Hook pobierający dane (wymaga useEffect/onAuthStateChanged powyżej? Lepiej wewnątrz)
-  const { rentals, settings, profile, tasks, loading } = useFirebaseData(user, selectedYear);
+  const { rentals, settings, profile, tasks, loading, profileLoaded } = useFirebaseData(user, selectedYear);
 
   // STANY SUBSKRYPCJI
   const accountStatus = profile?.accountStatus;
   const trialEndsAt = profile?.trialEndsAt;
   const scheduledDeletionAt = profile?.scheduledDeletionAt;
+  // E4: id najnowszego widzianego patch nota („Co nowego"); null = nie widział żadnego.
+  // Źródłem pierwszym jest profil (per konto), ale reguła update na users/{uid} porównuje
+  // `status` wprost — na koncie historycznym BEZ tego pola porównanie nieistniejącego
+  // klucza to deny i zapis odbija (przegląd 2026-08-31, finding 1). Dla takich kont
+  // działa zapasowy zapis w localStorage (per urządzenie, klucz z uid) — popup nie wraca
+  // wiecznie. Id zaczyna się datą ISO, więc porządek leksykograficzny = chronologiczny.
+  const lastSeenPatchNote = useMemo(() => {
+    let zapasowy = null;
+    try { zapasowy = user ? localStorage.getItem(`wynajempro:pn:${user.uid}`) : null; } catch { /* np. tryb prywatny */ }
+    const kandydaci = [profile?.lastSeenPatchNote, zapasowy].filter(Boolean).map(String);
+    return kandydaci.length ? kandydaci.sort().at(-1) : null;
+  }, [profile?.lastSeenPatchNote, user]);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [isBillingPortalLoading, setIsBillingPortalLoading] = useState(false);
 
@@ -213,6 +225,21 @@ export const WynajemProvider = ({ children }) => {
     }
   }, [user]);
 
+  // E4: patch noty „Co nowego" — zapamiętanie najnowszego widzianego wpisu w profilu.
+  // Fire-and-forget z catch: błąd zapisu nie może położyć panelu. Na koncie kanonicznym
+  // reguła update przepuszcza to pole (blokuje tylko status/trialEndsAt/pola Stripe);
+  // koncie historycznemu bez `status` reguła odbije KAŻDY update (porównanie
+  // nieistniejącego klucza = deny), więc catch dopisuje zapasowy ślad w localStorage —
+  // bez niego popup wracałby takim kontom przy każdym wejściu (przegląd 2026-08-31).
+  const markPatchNotesSeen = useCallback((id) => {
+    if (!user || !id) return;
+    updateDoc(doc(db, 'users', user.uid), { lastSeenPatchNote: id })
+      .catch((err) => {
+        console.warn('Nie udało się zapisać widzianych patch notów w profilu:', err);
+        try { localStorage.setItem(`wynajempro:pn:${user.uid}`, id); } catch { /* brak localStorage — trudno */ }
+      });
+  }, [user]);
+
   // STRIPE / PAYWALL
   const isAccessLocked = useCallback(() => {
     if (accountStatus === 'active') return false;
@@ -310,7 +337,9 @@ export const WynajemProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     user, loading, rentals, settings, profile, tasks,
+    profileLoaded,
     accountStatus, trialEndsAt, scheduledDeletionAt,
+    lastSeenPatchNote, markPatchNotesSeen,
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear, setSelectedYear,
@@ -321,7 +350,9 @@ export const WynajemProvider = ({ children }) => {
     db // Wystawienie DB jeśli modal będzie robił bezpośredni update (lepiej nie, ale na razie tak)
   }), [
     user, loading, rentals, settings, profile, tasks,
+    profileLoaded,
     accountStatus, trialEndsAt, scheduledDeletionAt,
+    lastSeenPatchNote, markPatchNotesSeen,
     isCheckoutLoading, isBillingPortalLoading,
     templates, properties, sources, categories, syncLinks, taxSettings, hostProfile, recurringCosts,
     selectedYear,
