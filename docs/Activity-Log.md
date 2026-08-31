@@ -4,6 +4,20 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-08-31
+
+### C2 domknięte — komplet banerów marki z generatorem, dokument identyfikacji miał w banerach stary znak
+- 🎯 **Decyzja właściciela:** „zajmij się C2 i potem E4, ja zajmę się rozsyłaniem zaproszeń" — banery są zależnością E5 (sociale = więcej testerów).
+- ✅ **10 nowych formatów w `docs/marketing/banery/`** (commit `ffd6785`): OG danymi, IG post/story, FB cover/post, LinkedIn cover/post, Google Ads ×3. Generator `scripts/build-social-banners.mjs` (`npm run banery:build`) renderuje z dokumentu identyfikacji po `id` w prawdziwych pikselach (bramka wymiarów z nagłówka IHDR — wszystkie piksel w piksel) i przy okazji odcinki serii „NOWE W PANELU" ze źródeł `grafiki/src/` — **domyka dziurę po skrypcie renderu serii, który 28.08 został w scratchpadzie** (ta sama lekcja co przy `og:build`).
+- 🔥 **Dokument identyfikacji ma w banerach wyłącznie STARY znak (trzy paski 17/17/11)** — 35 wystąpień, monogram W tylko w sekcji wyboru kierunku. Trzy grafiki serii opublikowane 28.08 na FB niosły stary znak, bo szablon przepisano 1:1. Generator podmienia znak w locie (zachowując schemat kolorów kontekstu), źródła serii poprawione u siebie; soczewka przeglądu potwierdziła pikselowo, że sygnatura nie trafia w żaden nie-logo SVG.
+- 🛑 **Bloker z przeglądu: grafika podatkowa serii liczyła 19% z podstawy, której nie było na karcie.** Widz liczy 19% × 86 400 (jedyna widoczna kwota) i dostaje inny wynik niż pokazane 12 397,50 zł — a to grafika o wiarygodności liczenia podatków. Naprawa u źródła: wiersz „Dochód po kosztach 65 250,00 zł" jawnie na karcie (19% × 65 250 = 12 397,50 liczy się na oczach); zszedł wiersz progu ryczałtu, który liniowego nie dotyczy.
+- 🛡️ **Świadome odstępstwa eksportu od dokumentu — spisane w nagłówku skryptu, skrypt jest ich źródłem prawdy:** monogram W zamiast pasków · nazewnictwo X24 („w systemie"→„w aplikacji" w li-post, „System do zarządzania"→„Aplikacja…" w li-cover) · **obietnica przycięta do mechanizmu** (wzorzec X26): „Koniec z overbookingiem."→„Koniec z Excelem." (ad-300x250), badge „BEZ OVERBOOKINGU"→„BOOKING + AIRBNB" (fb-post — domyka też „jeden slogan i jeden dowód") · story z wolnymi dolnymi 250 px (własna reguła dokumentu, której jego layout nie egzekwował) · li-post w skali roku (8,5% przy 84 600 zł/kwartał nie przetrwałoby kontaktu z księgową na LinkedIn) · kursywa Newsreader na „Cały" w coverze FB (sekcja 08) · `og-typo` poza zestawem (kanon z aktualnym leadem = `public/og-image.png`).
+- ✅ **Weryfikacja przeglądem 13 agentów** (10 banerów vs spec sekcji 10–16 + soczewki: seria, copy całego zestawu, kod skryptu): blokery i ważne naprawione; z przeglądu skryptu weszły bramki fail-closed (dwustronna kontrola data-props, kontrola resztek starego znaku per baner, rozjazd manifestu serii z katalogiem, szersza bramka fontów, zerowanie border-radius — kremowe piksele w rogach adów na ciemnych placementach).
+- ⚖️ **Zostawione świadomie 1:1 z dokumentem** (odnotowane w `docs/marketing/banery/README.md`): fb-cover trzyma logo i początek nagłówka POZA polem bezpiecznym 820×312 (na telefonie tekst się utnie — jego własny overlay tego nie wyłapał; jeśli cover pójdzie na stronę, mobilny podgląd zweryfikować przed użyciem) · zieleń #2F6B53 na atramencie w story (kontrast ~2,7:1) · brak kursywy w formatach Ads (dokument konsekwentnie z niej tam rezygnuje) · stopki z warunkiem próby (usankcjonowane wprost regułą sekcji 12).
+- 📌 Wersje typograficzno-danowe story i covera (`photoSlots:false`) — nie mamy licencjonowanych zdjęć; z README katalogu wiadomo, jak wrócić do wariantów ze zdjęciem. [[Projects/Roadmap]] C2 → ✅; następny krok ścieżki socialowej to E5 (decyzja właściciela o kanałach).
+
+---
+
 ## 2026-08-29
 
 ### Zdjęcia przy zadaniach zdjęte — funkcja bez ani jednego użytkownika nie warta długu prawnego (ADR-028)

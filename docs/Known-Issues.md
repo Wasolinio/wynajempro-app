@@ -400,7 +400,7 @@ się jedna, nie dwie: **brak zmiennych `VITE_FIREBASE_*` na runnerze**. Objawia�
 postaciach — brak `apiKey` wywracał start aplikacji (22 testy), brak `measurementId` psuł
 jedną asercję zgód (6 testów).
 
-### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, OTWARTE)
+### 17. `syncICalCalendars` odrzucana na bramce Cloud Run — przycisk „Synchronizacja" nie działa (2026-08-24, NAPRAWIONE tego samego dnia)
 
 **Objaw:** kliknięcie „Synchronizacja" w panelu kończy się komunikatem „Wystąpił błąd podczas
 synchronizacji kalendarzy". W logach funkcji:
