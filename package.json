@@ -12,6 +12,7 @@
     "help:build": "node scripts/build-help-articles.mjs",
     "legal:build": "node scripts/build-legal.mjs",
     "og:build": "node scripts/build-og-image.mjs",
+    "banery:build": "node scripts/build-social-banners.mjs",
     "deploy": "npm run build && firebase deploy",
     "test:prod": "playwright test --config=playwright.prod.config.js",
     "test:e2e": "cross-env VITE_USE_EMULATORS=true playwright test --workers=2",

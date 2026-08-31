@@ -65,3 +65,7 @@ docs/.obsidian/cache
 
 # czytelne kopie dokumentów (generowane: npm run docs:docx)
 docs/docx/
+
+# Plik tymczasowy generatora banerów (scripts/build-social-banners.mjs) — zostaje
+# w _design-reference tylko po twardym przerwaniu procesu; nie commitować.
+_design-reference/design_handoff_identyfikacja_v2/.__eksport-tmp.dc.html

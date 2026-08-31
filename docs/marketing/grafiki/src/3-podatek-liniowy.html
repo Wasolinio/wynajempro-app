@@ -17,7 +17,7 @@
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <span class="mono" style="background:#17150F;color:#F3EFE5;font-size:20px;font-weight:600;padding:12px 20px;border-radius:3px;letter-spacing:.14em">NOWE W PANELU</span>
     <div style="display:flex;align-items:center;gap:14px">
-      <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><rect x="9" y="10" width="17" height="4.5" rx="2.25" fill="#F3EFE5"/><rect x="14" y="17.75" width="17" height="4.5" rx="2.25" fill="#D9492B"/><rect x="9" y="25.5" width="11" height="4.5" rx="2.25" fill="#F3EFE5"/></svg>
+      <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="8" fill="#17150F"/><path d="M9 11.5 L14.5 28.5 L20 15.5" fill="none" stroke="#F3EFE5" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 15.5 L25.5 28.5 L31 11.5" fill="none" stroke="#D9492B" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div style="display:flex;align-items:baseline;font-weight:800;font-size:26px;letter-spacing:-.025em">Wynajem<span class="mono" style="font-weight:500;font-size:13px;background:#17150F;color:#F3EFE5;padding:2px 6px;margin-left:4px">PRO</span></div>
     </div>
   </div>
@@ -31,16 +31,17 @@
       <span style="font-size:26px">Przychód od stycznia</span>
       <span class="mono" style="font-size:26px;color:#524C3F">86 400,00 zł</span>
     </div>
+    <!-- Dochód jest na karcie JAWNIE, bo 19% liczy się od niego, a nie od przychodu.
+         Bez tego wiersza czytelnik liczy 19% × 86 400 i wychodzi mu co innego niż na
+         grafice — bloker z przeglądu 2026-08-31 (grafika o podatkach musi się liczyć
+         na oczach widza). Zastąpił wiersz progu ryczałtu, który liniowego nie dotyczy. -->
+    <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:24px 34px;border-bottom:1px solid #EFE9DA;align-items:center">
+      <span style="font-size:26px">Dochód po kosztach</span>
+      <span class="mono" style="font-size:26px;color:#524C3F">65 250,00 zł</span>
+    </div>
     <div style="display:grid;grid-template-columns:1fr auto;gap:20px;padding:24px 34px;border-bottom:1px solid #EFE9DA;align-items:center">
       <span style="font-size:26px">Do odłożenia · liniowy 19%</span>
       <span class="mono" style="font-size:26px;font-weight:600;color:#2F6B53">12 397,50 zł</span>
-    </div>
-    <div style="padding:24px 34px;border-bottom:1px solid #EFE9DA">
-      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:14px">
-        <span style="font-size:26px">Próg ryczałtu · 100 000 zł</span>
-        <span class="mono" style="font-size:26px;color:#9A7B12">86%</span>
-      </div>
-      <div style="height:16px;background:#EFE9DA;border-radius:4px;overflow:hidden"><div style="width:86%;height:16px;background:#C99A2E"></div></div>
     </div>
     <div style="padding:24px 34px">
       <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:14px">
