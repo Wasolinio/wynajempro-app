@@ -19,6 +19,36 @@ Zasada: pozycja schodzi z listy dopiero po potwierdzeniu wykonania przez właśc
 
 ## Operacje do wykonania (konsola / decyzja „działaj")
 
+### 13, 14, 16 → projekt „Domki Rus" (przeniesione 2026-09-07)
+Zlecenia toru B (oferty na Bookingu i Airbnb, przeorganizowanie portali pod 2027, karta
+decyzji po porównaniu kanałów) żyją teraz w osobnym projekcie:
+`/Users/wasolinio/Desktop/Domki Rus/Zlecenia.md`. Tu zostają wyłącznie sprawy aplikacji.
+
+### 15. 🟠 Materiały i decyzje do uwiarygodnienia landingu (nowe 2026-09-03)
+**Skąd:** Twoje polecenie „uwiarygodnić landing, żeby nie przypominał AI slop" i plan 6 kroków
+z [[strategy/Analiza-konkurencji-Smoobu-i-rynek-2026-08-31]] §7. Część bez Twoich materiałów
+jest **gotowa w kodzie** ([[Projects/Roadmap]] **E8**: zrzuty prawdziwego panelu zamiast makiet,
+tiki zdjęte, `/co-nowego`, daty z danych) i czeka na zgodę na deploy. Reszta to artefakty,
+których agent nie ma prawa wymyślić: zdjęcia, twarz, nazwisko na stronie, liczby.
+**Instrukcja krok po kroku:** [[Projects/Instrukcje-wlasciciela]] sekcja **10** (pełna treść
+była też w czacie 2026-09-03).
+**Twoje ręce:**
+1. **3–5 zdjęć domku** — własne, poziome, min. 1600 px, w dzień, bez filtrów; bez osób,
+   tablic rejestracyjnych, kartki z hasłem Wi-Fi i czytelnego QR. Ta sama sesja obsłuży
+   zdjęcia wnętrz do Airbnb (R1 z Plan-domki-portale (projekt Domki Ruś)).
+2. **1 zdjęcie twarzy** (kwadrat lub 4:5, min. 800 px) — tylko jeśli chcesz być twarzą.
+3. **Jeden mail zwrotny z decyzjami (a)–(g)**: (a) nazwisko na landingu, (b) wizerunek,
+   (c) nazwa „Domki Letniskowe Ruś" i precyzja miejsca, (d) „odpisuję osobiście" w FAQ,
+   (e) pierwsza osoba w karcie „Z praktyki", (f) zakres „1–20 obiektów" na stronie,
+   (g) ocena Airbnb 5,0 przy 5 opiniach (rekomendacja: jeszcze nie).
+4. **Dwa zdania „dlaczego to zbudowałem"** — propozycja w Instrukcjach, poprawiasz własnymi słowami.
+5. **Liczby**: miesiąc startu prac (git mówi: kwiecień 2026), od kiedy Ruś chodzi na
+   WynajemPRO, liczba kont z dostępem bety i obiektów w nich (odczyt z `/admin`, z datą stanu).
+6. **Zgoda na deploy** `hosting:app` po przeglądzie kodu.
+**Agent po Twoim „tak":** konwersja zdjęć do WebP i wstawienie przez `src/data/landingProof.js`,
+blok założyciela, linia operatora w stopce, sekcja „Z bety", wzór maila o zgodę testera na
+cytat od `legal`. Bez materiałów strona nie pokazuje ani pustych ramek, ani atrap.
+
 ### 9. ✅ Strony gościa naprawione — WYKONANE 2026-08-13
 **Wynik:** przyczyną był **wyłączony dostawca „Anonymous"** w Authentication → Sign-in method.
 Po włączeniu przewodnik otwiera się na telefonie (potwierdzone przez właściciela w incognito),

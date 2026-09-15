@@ -10,6 +10,13 @@
 - Porządek w kodzie zrobiony: jedna wersja produkcyjna, stare wersje w `/_legacy`.
   Vault Obsidiana = `docs/` (porządek 2026-08-27; start: `docs/Home.md`)
 
+## Domki Ruś = OSOBNY PROJEKT (od 2026-09-07)
+Biznes wynajmu właściciela (Booking, Airbnb, cennik, sezon, maile do gości) żyje w
+`/Users/wasolinio/Desktop/Domki Rus` (własny CLAUDE.md, vault, dziennik, zlecenia, skill
+`domki-rus`). **Tu nie pracujemy nad domkami**; gdy właściciel poprosi o coś z tego obszaru,
+wskaż tamten projekt. W aplikacji zostaje tylko to, co dotyczy produktu (np. dług iCal X29
+w Backlogu, zdjęcia domków na landingu przez `landingProof.js`).
+
 ## Struktura
 Mapa żywego kodu: **`src/README.md`**. Kod archiwalny (stare wersje/prototypy): **`/_legacy`** (poza buildem).
 Materiały projektowe/brand: **`/_design-reference`**.

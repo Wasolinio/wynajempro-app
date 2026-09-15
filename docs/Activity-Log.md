@@ -4,7 +4,76 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-09-07
+
+### Tor B wyodrębniony do osobnego projektu „Domki Rus"
+- 🎯 **Polecenie właściciela:** „wyodrębnij wszystkie pliki związane z pracą z Bookingiem i Airbnb oraz ogólnie z domkami na wynajem do jednego folderu; chcę, żebyś pracował osobno na tych projektach". Nowy projekt: `/Users/wasolinio/Desktop/Domki Rus` (własny `CLAUDE.md`, `Home.md`, `Dziennik.md`, `Zlecenia.md`, generator `.docx`, skill `domki-rus`, własna pamięć agenta).
+- ✅ **Przeniesione (nie kopiowane):** 7 dokumentów toru B ze `strategy/` (Plan-domki-portale, Plan-rozwoju-2027, Audyt-Booking-Airbnb, Benchmark-domki-basen, pakiety Bookinga i Airbnb, Booking-vs-Airbnb-sezon-2026) razem z kopiami `.docx`; wpisy dziennika toru B z 2026-09-01 (trzy pierwsze), 09-02, 09-04, 09-05, 09-06 i 09-07 → `Dziennik.md`; zlecenia #13, #14 i #16 → `Zlecenia.md`. Żaden z przeniesionych plików nie był jeszcze w gicie aplikacji.
+- 📌 **Zostały w aplikacji** (dotyczą produktu, nie domków): `Sciezka-API-Booking-Airbnb`, `Rezerwacje-z-maila`, analizy konkurencji, plan BedBooking, X11, symulacja rentowności; zlecenie #15 (materiały do landingu); wpis w Backlogu o imporcie iCal z Bookinga (X29), bo to dług aplikacji.
+- 🛑 **Wikilinki do przeniesionych dokumentów w tym vaulcie zamienione na tekst z dopiskiem „(projekt Domki Ruś)"**; w nowym vaulcie linki do dokumentów aplikacji zamienione na tekst „(vault WynajemPRO)". Skill `domki-rus` istnieje teraz w dwóch miejscach: kopia w projekcie jest źródłem prawdy, wersję w aplikacji Claude właściciel może usunąć z listy skilli.
+
+---
+
+## 2026-09-03
+
+### Humanizacja landingu — zrzuty prawdziwego panelu zamiast makiet, tiki generatora zdjęte, „Co nowego" publicznie (kod gotowy, nie wydane)
+- 🎯 **Zlecenie właściciela:** „Zajmijmy się uwiarygodnieniem landingu, aby nie przypominał AI slop". Podstawa: diagnoza i plan 6 kroków z [[strategy/Analiza-konkurencji-Smoobu-i-rynek-2026-08-31]] §7. Przebieg: workflow rozpoznawczy (4 odczyty: audyt tików i makiet — 15 numerowanych etykiet, 8 kursyw, 55 wymyślonych liczb; inwentarz faktów z pokryciem w źródłach; ograniczenia e2e/SEO/PWA; wykonalność zrzutów) → 3 propozycje projektowe → 2 sędziów. Werdykty rozbieżne co do zwycięzcy („redakcja" 35 vs „dowody" 34), zgodne co do planu: wdrożona część wspólna (A), materiały właściciela (B) czekają na decyzje. Roadmapa: **E8**.
+- ✅ **Generator zrzutów panelu jako trwały artefakt repo** (trzecia powtórka lekcji z OG i banerów: eksport bez skryptu w repo nie daje się odtworzyć): `playwright.zrzuty.config.js` (osobny config, dziedziczy webServer z bazowego, **poza CI** — rendering zależny od maszyny), `scripts/zrzuty/dane-demo.js` (TODAY = 2026-09-03 jako jedna stała, daty względne; 33 rezerwacje, 6 kosztów, 6 zadań; 3 obiekty od drzew; goście pospolici lub rodzinni; źródła tylko Booking.com / Airbnb / Strona www / Z polecenia; konto „Trzy Sosny"), `scripts/zrzuty/panel.zrzut.js` (zegar przypięty PRZED goto, bramka fontów przez `document.fonts.load`, popup „Co nowego" wykluczony asercją, widget zadań ukryty CSS-em, WebP przez canvas w Chromium, bo w środowisku nie ma enkoderów). `npm run zrzuty:build` → 4 pliki 107–115 KB w `src/assets/landing/` + manifest `src/data/zrzutyPanelu.js` (data stanu, alt-y). 🛑 Dwie pułapki z pierwszego uruchomienia: zaległe zadania z szablonów z całego lata zawyżały „Do posprzątania" (3 zamiast 1) i licznik zadań (63 pozycje) — zestaw odhacza zadania zakończonych pobytów; KPI Finansów złapane w klatce animacji wjazdu (30 870 zamiast 31 360) — asercja na sumę miesiąca liczoną w zestawie zamiast timeoutu. Każda liczba na zrzucie jest wynikiem kodu panelu, nie ręcznym wpisem (wrzesień po sierpniu na minusie to uczciwa sezonowość).
+- ✅ **Scroll-demo przepisane** (`LandingScrollDemo.jsx`): 5 makiet HTML z wymyślonymi gośćmi, ręcznym „▲ 12%", adresem `app.wynajempro.pl`, badge'em „WYSŁANY" i bramką czasową kodu → 4 zrzuty (Pulpit, Kalendarz, **Zadania zamiast Obiektów**, Finanse) z importów statycznych (brak pliku = błąd builda, nigdy cichy powrót do makiety); etykieta „zrzut z aplikacji · dane przykładowe" w chrome, podpis ze stanem z manifestu, linia z datą ostatniej zmiany i linkiem do `/co-nowego`; zero cieni, bez kropek macOS, bez ramki highlightu. Cztery nieprawdy w krokach wycięte (`src/data/landingDemo.js`): „automatyczne wiadomości", „PDF jednym kliknięciem", „synchronizacja pilnuje terminów", ekran Obiekty z polami spoza modelu. Chunk LandingPage 96 → 61 KB.
+- ✅ **Landing** (`LandingPage.jsx`): 10 etykiet sekcji bez numerów, oba podpisy „RYS." out, kursywa Newsreader tylko w H1; hero bez „▲ 12% VS 2025", z etykietą „dane przykładowe" i nazwami z zestawu demo; stopki kart funkcji (tag-strzałka-tag, „+33 280 zł") out; „premium", „bez stresu", „2 minuty", „ukryte haczyki", „bądźmy szczerzy", „jesteśmy jedynym miejscem", „w pełni responsywny", „Mniej chaosu. Więcej wynajmu.", „raz w miesiącu", „Anulujesz jednym kliknięciem", „Szyfrowana baza" out; blok „× kontra ✓" → jedna lista; makieta telefonu w stanie PRZED akceptacją z tekstami 1:1 z `GuestGuideView` (poprzednia pokazywała kod i hasło odsłonięte oraz mapę, której produkt nie osadza); nowa sekcja „Co nowego" (3 ostatnie wpisy); Baza wiedzy z datami wpisów (pole `date` istniało w `blogPosts.js`, nie było renderowane); stopka z opisem nazwanych kanałów i linią dat z danych. CSS: martwe reguły wycięte.
+- ✅ **`/co-nowego`** (`CoNowegoPage.jsx` na LegalLayout): te same `PATCH_NOTES` co popup E4, daty z rokiem, link w stopce i menu mobilnym, sitemap (+ brakujący `/dpa`). **`src/utils/dataPl.js`** — formatowanie dat współdzielone z popupem (modal przepięty). **`src/data/legalMeta.js`** — nowy lekki plik z `build-legal.mjs` (slug, wersja, data), bo `legalDocs.js` ma 69 KB i nie ma prawa wejść do paczki landingu. **`src/data/landingProof.js`** — PHOTOS/FOUNDER/BETA puste → bloków nie ma w DOM (nigdy pusta ramka ani stock).
+- ✅ **Bramki (2026-09-03):** lint 0 · build OK · pełna suita e2e 243/244 z jednym czerwonym **własnym** testem (stopka ma dwa linki do „Co nowego", selektor bez `.first()`), po poprawce spec 3/3 → komplet zielony · nowe specy: `co-nowego.spec` (3), `landing-demo.spec` przepisany pod zrzuty (5: aktywny `<img>` i `src`, obraz naprawdę załadowany, `boxShadow: none`) · podgląd pełnostronicowy 1280 i 375 px obejrzany sekcja po sekcji. Liczby sprzed przeglądu — stan końcowy po poprawkach niżej.
+- ✅ **Przegląd `code-reviewer` (trzecia próba — dwie pierwsze padły na przeciążeniu API 529): „wymaga poprawek", zero blokerów bezpieczeństwa i RODO, 4 ważne + 3 drobne, wszystkie naniesione:** (1) brak zabezpieczenia na pustą listę patch not i brak wpisu w `legalMeta` — stopka i podpis pod demo wyłożyłyby cały landing, mimo że obok stoi właściwy wzorzec `landingProof.js`; teraz linia znika zamiast rzucać; (2) FAQ o telefonie obiecywało „zadanie zapiszesz jednym przyciskiem", a w produkcie przycisk otwiera menu (Google / Apple) i zapis potwierdza aplikacja kalendarza — przepisane; (3) jedno zdanie o dacie obowiązywania Regulaminu **i** Polityki brało datę tylko z Regulaminu — teraz każdy dokument ze swoją datą z `legalMeta`; (4) lead newslettera węższy niż klauzula zgody (checkbox mówi o poradach i informacjach) — lead wyrównany do klauzuli, `ZGODA_WERSJA` bez zmian; drobne: martwe `.wp4-tag--amber/--airbnb`, twarde spacje w kwotach FAQ (kod U+00A0 w wyrażeniu — encje nie działają w atrybucie), przycisk makiety telefonu w stanie disabled jak w produkcie. Recenzent potwierdził dowodowo: FAQ Q3 (skala, liniowy 19%, limit VAT), „Konto usuwasz sam, od razu, bez karencji" (Regulamin §11 + `deleteAccount`), teksty makiety telefonu 1:1 z `GuestGuideView`, krok 01, alarm kolizji, zestaw demo w allowliście `isValidRental` i bez PII, generator poza CI, `/co-nowego` z jednym h1.
+- 🛑 **Po poprawkach wyszły dwa własne błędy:** cudzysłów zamykający ASCII wewnątrz atrybutu JSX (FAQ Q5) wyłożył build i połowę suity na nieskompilowanym pliku — string przeniesiony do wyrażenia; wyścig w helperze `scrollToPanelTop` (landing to leniwy chunk, `getElementById('panel')` zwracał `null`) — `waitFor()` przed przewinięciem, 3 przebiegi z rzędu 5/5. **Stan końcowy: lint 0 · build OK · pełna suita e2e 244/244 (2,7 min).**
+- ⚖️ **Czego zmiana NIE robi — decyzje właściciela** (zlecenie **#15** w [[Projects/Zlecenia-wlasciciela]], instrukcja sekcja 10 w [[Projects/Instrukcje-wlasciciela]]): pierwsza osoba i nazwa „Domki Letniskowe Ruś" w karcie „Z praktyki", zdjęcia domków, blok założyciela, linia operatora w stopce, FAQ „kto odpisuje", liczby i cytaty z bety, ocena Airbnb. Sędziowie różnili się tylko tym, czy pierwsza osoba wchodzi od razu — wybrany wariant ostrożny: to publiczne zobowiązanie właściciela, nie agenta. Zdanie o anulowaniu subskrypcji wraca po wznowieniu ścieżki Stripe.
+- ⏳ **Nie wydane** — deploy `hosting:app` wyłącznie za zgodą właściciela (skill `deploy`). Przy deployu: dopisać `/co-nowego` do `e2e-prod/smoke.spec.js` (wcześniej spec byłby czerwony co godzinę) i odświeżyć `lastmod` „/" w sitemap. Iteracja 2 w [[Projects/Backlog]]: zrzuty mobilne w trybie compact, 5. ekran Rezerwacja, zrzut przewodnika z fixture'a zamiast makiety telefonu, sezonowe przesunięcie TODAY.
+- 📌 **Rytuał:** zmiana widoków Pulpit / Kalendarz / Finanse / Zadania = `npm run zrzuty:build` i commit zrzutów razem z kodem (dopisane do skilla `deploy`); inaczej landing zacznie kłamać o produkcie, czyli wróci to, czego się tu pozbywamy. Commit tylko na polecenie właściciela ([[Team-Playbook]]).
+
+---
+
+## 2026-09-01
+
+### Żywe próbki maili z konta właściciela — trzy założenia analizy zweryfikowane rzeczywistością
+- 🎯 **Właściciel dostarczył 5 próbek** ze swojego konta gospodarza (2 zapisy stron Gmaila Airbnb, 2 Booking + 2 surowe .eml: anulacja Booking i potwierdzenie Airbnb). Ustalenia dopisane jako załączniki A–C do [[strategy/Rezerwacje-z-maila-2026-09-01]]; próbki zostają POZA repo (dane gości).
+- 🔥 **Asymetria portali ODWRÓCONA względem badania:** Airbnb wysyła maile BOGATE (gość z weryfikacją, daty z godzinami, rozbicie gości, kod, pełne rozliczenie z prowizją i „Zarabiasz" — kompletny wpis `rentals` z danymi dla modułu podatkowego), a Booking — UBOGIE wskaźniki (treść: tylko numer + link do Extranetu; daty wyłącznie w temacie; twardo sprawdzone — zero „Zameldowanie"/„Cena" w całym pliku). Konsekwencja projektowa: dla Bookinga mail = natychmiastowy zapalnik wpisu „oczekuje na szczegóły", który iCal kompletuje w ciągu godziny; uczciwa obietnica per portal różna.
+- ✅ **Model bezpieczeństwa potwierdzony w nagłówkach .eml:** DKIM pass (`d=booking.com s=bk` / podwójny Airbnb), DMARC p=REJECT; koperta Bookinga to `mailer.booking.com` — dowód, że po forwardzie weryfikować DKIM, nie SPF. **Obie wiadomości mają część text/plain** — parser bez HTML-a. Klucze mapowania obiektów w mailach: `hotel_id` (Booking, w linku Extranetu) i room id (Airbnb).
+- 🛑 **Korekta własnego wniosku (errata w załączniku A):** teza „mail zachowuje 3% na Airbnb" była za mocna — jedno konto właściciela nosi OBA modele prowizji naraz (3,0%+VAT na starszej rezerwacji, 15,5%+VAT i zerowa opłata gościa na rezerwacji z 25.07.2026); migracja Airbnb na host-only postępuje także bez API. Wniosek dla parsera: procent prowizji czytać z maila per rezerwacja.
+- ⏳ Brakujące do kompletu: Airbnb anulacja/zmiana, Booking modyfikacja; do sprawdzenia na żywym feedzie: czy UID zdarzeń iCal Bookinga zawiera `res_id` (dopasowanie mail↔iCal byłoby trywialne). Pułapka parsera potwierdzona: daty Airbnb bez roku (wnioskowanie z nagłówka Date).
+
+### „Rezerwacje z e-maila" przeanalizowane: szczebel 2 drabiny synchronizacji, warunkowo TAK
+- 🎯 **Pytanie właściciela:** powrót do dawnego pomysłu — wyciąganie rezerwacji Booking/Airbnb z maili powiadomień + poszukanie innych alternatyw (śladu pomysłu w docs nie było — analiza od zera). Wynik: [[strategy/Rezerwacje-z-maila-2026-09-01]] (+ `.docx`). Workflow 6 agentów: treść maili / technika / rynek i prawo / pozostałe alternatywy → strategia → krytyk.
+- 🔥 **Werdykt: budować warunkowo jako szczebel 2** (1 = iCal co 1 h · 2 = mail: natychmiast + imię gościa + kwota, jednokierunkowo · 3 = Channex: dwukierunkowość). Żelazna zasada: **mail tworzy, iCal rekonsyliuje** — mail nigdy nie jest jedynym źródłem (duzi wyszli z tej ścieżki przez zawodność, nie prawo). MVP: **Booking-only** (mail bogaty i stabilny, alias e-mail gościa, dodatkowy odbiorca wprost w Extranecie), Airbnb = faza 2 (kanał opt-out, systematycznie zubażany, tylko forward). Technika: adres wrzutowy per konto + Mailgun Routes (free w becie) + parser szablonowy BEZ LLM (dane gościa do zewnętrznego modelu = powierzenie bez DPA); OAuth Gmail odpada (restricted scope → coroczny audyt CASA $500–4500); DKIM-gate (oba portale DMARC p=reject), biała lista nadawców, surowiec TTL 30 dni. Cennik: **w bazowym 29,99** (chroni czystą linię przyszłego Sync 59,99 = dwukierunkowość). Komunikacja: wolno „wpadają same, zwykle w minutę", nadal NIE wolno „koniec z overbookingiem".
+- 🛑 **Trzy blokery krytyka przed budową (sekcja 6 dokumentu):** (1) kanał „dodatkowy odbiorca w Extranecie Booking" NIEZWERYFIKOWANY na żywym koncie — na nim stoi łatwy onboarding targetu 50+; test 10 min na koncie właściciela, instrukcja przekazana w czacie; (2) **paywall przekierowań polskich skrzynek** (ustalenie krytyka ze źródłami: WP i o2 — forward tylko w płatnej poczcie, Onet — tylko w Plus, darmowa Interia) — zabija wariant forwardowy dla części targetu; (3) **przedefiniować miernik bety nr 3 PRZED startem funkcji** — mail zaspokoi część próśb o „prawdziwą synchronizację" i zatruje bramkę decyzji o Channexie, jeśli miernika nie rozbijemy na „niech wpadają same" vs „chcę push cen".
+- 🛡️ **Projekt uczciwości wymuszony przez krytyka** (parser łamie się cicho i wszystkim naraz): globalna metryka pokrycia (odsetek wpisów iCal z wcześniejszym mailem — spadek = zmiana szablonu, alarm do właściciela), adopcja jako audyt ekstrakcji, **odwrotna rekoncyliacja widm** (wpis email bez adopcji przez iCal po N h = „niepotwierdzony przez portal" — inaczej anulacja bez maila zostawia widmo na zawsze), walidacja pól, status rury w UI.
+- ⚖️ **Pozostałe alternatywy — komplet werdyktów NIE:** scraping extranetu (custody haseł, 2FA, ToS), nieoficjalne API, parsowanie push z telefonu (restricted w Google Play), skracanie iCal (portale regenerują feed co 2–12 h — częstsze odpytywanie zwraca ten sam plik), Google Calendar/SMS. Warunkowo: wtyczka przeglądarki jako ręczny importer (wzorzec OwnerRez Channel Bridge — sami porzucili Airbnb) i Zapier (tylko jako pomost; jako test popytu dałby fałszywy negatyw u targetu 50+). Kandydat dopisany do [[Projects/Backlog]].
+
+### Ścieżka do API Booking/Airbnb rozstrzygnięta: buy przez agregator, build zamknięty przez same portale
+- 🎯 **Pytanie właściciela:** „jak zbudować API Booking i Airbnb, żeby być bardziej konkurencyjnym?". Wynik: [[strategy/Sciezka-API-Booking-Airbnb-2026-09-01]] (+ `.docx`). Workflow 6 agentów: program Booking.com / dostęp Airbnb / agregatory / architektura (agent czytał nasz kod) → strategia → krytyk.
+- 🔥 **Ustalenie zmieniające pytanie:** droga bezpośrednia jest dziś ZAMKNIĘTA przez same portale — Booking.com wstrzymał nabór partnerów connectivity do odwołania, Airbnb nie przyjmuje wniosków (zapraszają sami, kryterium = wolumen podaży). Jedyna wykonalna ścieżka: **agregator white-label** — rekomendowany Channex.io (Airbnb Preferred+ 2024, publiczny cennik: 130 USD/mies platforma + 0,50 USD/obiekt, webhooki, restrykcje, chat, samodzielna certyfikacja techniczna u nich zamiast u OTA).
+- 🛑 **Niewygodna prawda o Airbnb:** podpięcie przez API przenosi gospodarza przymusowo na prowizję host-only **15,5%** (zamiast ~3%; potwierdzone m.in. w pomocy BedBookinga) — dla mikro-gospodarza to często antywartość; realna wartość API = głównie Booking.com. Konsekwencja produktowa: wybór API/iCal per portal + ostrzeżenie przed podpięciem.
+- 🛡️ **Rekomendacja cenowa (propozycja do decyzji właściciela):** drugi PŁASKI plan „Sync" 59,99 zł/mies bez limitu obiektów; baza 29,99 nietknięta; zapis do konstytucji cennika: żadnych modułów wewnątrz planów. Rachunek po korekcie krytyka (VAT od importu usług, +23% bez odliczenia [mechanika do potwierdzenia z księgową]): obiekt ~2,30 zł, platforma ~590 zł/mies, próg rentowności ~36 kont Sync. ⚠️ Plan 59,99 przyspiesza wyczerpanie limitu działalności nierejestrowanej — kolejny argument za E2.
+- ⚖️ **Bramki z poprzednich analiz ZOSTAJĄ:** start budowy dopiero po (1) sygnale z bety (miernik nr 3 — prośby o prawdziwą synchronizację), (2) odwieszeniu Stripe, (3) ~40–50 płacących kontach. Krytyk wyciął z listy „na teraz" pracę przemycaną przed bramkami (edytor cennika per noc, sandbox) — zostały tylko: **migracja `rentals.property`→`propertyId`** (naprawa realnego buga: zmiana nazwy obiektu zrywa mapowanie eksportu iCal — `functions/index.js:935`), projekt pól pod allowlistę (papier) i mail na connectivity@booking.com (monitoring reopeningu).
+- 📌 Architektura z kodu: blok zerowy = brak cennika per noc i restrykcji w modelu danych (potwierdzone w `SettingsModal.jsx`/regułach); webhook przez Admin SDK omija reguły → wspólny walidator wg wzorca lustrzanego testera; nowe pola muszą wejść do allowlisty `isValidRental` (pułapka walidacji po merge'u, lekcja X26); alarm kolizji zostaje jako siatka bezpieczeństwa. Kandydaci dopisani do [[Projects/Backlog]].
+
+### Plan konkurencyjny wobec BedBookinga — z korektą samego celu
+- 🎯 **Pytanie właściciela:** „skoro BedBooking jest naszym największym konkurentem, jak z nim wygrać?". Wynik: [[strategy/Plan-konkurencyjny-BedBooking-2026-09-01]] (+ `.docx`). Metoda jak w poprzednich analizach: 2 badaczy (słabości z recenzji Google Play/App Store + plan darmowy/eksport/lock-in) → 2 niezależne plany strategiczne → recenzja adwersaryjna. Przebieg z przygodami: pierwsza próba padła na limicie sesji po fazie badawczej — wznowienie z cache dokończyło strategię następnego dnia.
+- 🔥 **Werdykt krytyka przyjęty jako rama planu: „wygrana z BedBookingiem" to źle postawiony cel.** Właściwe pytanie: czy istnieje segment gotów płacić za papierologię — cel launchu (rzędu 100–150 kont) nie wymaga odebrania im ani jednego klienta; wygrywamy z niekonsumpcją (Excel), a BedBooking to pula leadów w momentach podatności (degradacja po trialu Maxa, dodanie 2.–3. obiektu) i ryzyko odwetu.
+- 🛑 **Amunicja z ich recenzji (z cytatami i źródłami w dokumencie):** 20-godzinna przerwa synchronizacji → overbooking → kara 237 zł od Airbnb; „błąd synchronizacji nr 5" sam anuluje rezerwacje (artykuł pomocny dla 0 z 28); trauma podwyżki 35→215 zł/mies z 2023 (najpopularniejsza negatywna recenzja — nasza odpowiedź: founding members „cena zapisana na 12 mies."); ich integracja Airbnb wymusza prowizję 15,5% host-only, nowe rezerwacje Airbnb weryfikują raz na dobę; plan Free to zamrażarka danych (funkcje premium zablokowane), lock-in w dystrybucji, nie w danych — eksport CSV przyzwoity, ale [niepewne] czy działa poza planami płatnymi.
+- ⚖️ **Rozstrzygnięcia sprzeczności między planami (za krytykiem):** nie celujemy w zadomowionych na Free (porównania wyłącznie paid-vs-paid); widżet kalendarza na stronę gospodarza WYCIĘTY z fazy 1 (boisko booking engine); migracja „przeprowadzka w 10 minut" tylko dla niezależnych od API, z uczciwym odsiewem; SEO podatkowe zdegradowane z głównego klina do wsparcia (w SERP-ach konkurujemy z Infaktem, nie z BedBookingiem).
+- 🔴 **Ślepe plamki wywleczone przez krytyka — sprawy właściciela:** (1) limit działalności nierejestrowanej wyczerpuje się przy ~120 płacących kontach [orientacyjnie] → próg rentowności JDG+ZUS policzyć PRZED celami launchu (spina się z zaległym E2); (2) granica odpowiedzialności modułu podatkowego i doradztwa podatkowego → `legal` przed kampanią; (3) szczyt pytań podatkowych (luty–kwiecień) trafi w zawieszony kanał supportu; (4) Stripe bez daty wznowienia = plan pozostaje listą życzeń; (5) odwet nie musi być featurem (rabat sezonowy, pismo o stronę porównawczą).
+- 📌 Fazy: BETA = pomiar 4 mierników czarnego scenariusza + humanizacja landingu · LAUNCH = social proof sprint (każdy tester: imię, zdjęcie, cytat) + founding members w traumę podwyżek · PO LAUNCHU = przejęcia chirurgiczne (strona porównawcza rzetelna wg art. 16 ust. 3 u.z.n.k., brzmienia przez `legal`; importer CSV dopiero po weryfikacji eksportu). Kandydat do Backlogu: importer CSV z BedBookinga (warunkowy).
+
+---
+
 ## 2026-08-31
+
+### Analiza Smoobu, BedBookinga i rynku mikro + diagnoza „AI slop" landingu
+- 🎯 **Zlecenie właściciela** (kontynuacja analizy IdoBooking, ta sama metoda): Smoobu + inne podobne produkty + frontend (ich strony i kalendarze) + odpowiedź na feedback z bety „strona wygląda jak AI slop". Wynik: [[strategy/Analiza-konkurencji-Smoobu-i-rynek-2026-08-31]] (+ `.docx`).
+- 🔎 **Przebieg:** cenniki Smoobu i BedBookinga odczytane na żywo (zrzuty ekranu), workflow 8 agentów (5 badaczy: oferta/technologia/rynek Smoobu, konkurenci PL, konkurenci globalni → 2 soczewki → recenzent adwersaryjny). Sekcja frontendowa napisana bezpośrednio na zrzutach — w tym **zrzuty własnego panelu (Pulpit + Kalendarz) z atrap** przez tymczasowy spec Playwright (usunięty po użyciu, drzewo czyste). Workflow padł raz na deserializacji `args` (dojechały jako string) — naprawa 1 linią (`JSON.parse` fallback) i wznowienie z cache 4 ukończonych badaczy.
+- 🔥 **Najważniejsze ustalenia:** (1) głównym rywalem o naszego klienta jest **BedBooking** (polski, 4,6★ przy 4,39 tys. opinii w Google Play, API Booking/Airbnb, plan darmowy po trialu, model per-pokój: Pro dla 3 pokoi ~1 675 zł brutto/rok vs nasze 359,88), nie Smoobu ani IdoBooking; (2) **Guest Guide Smoobu nie ma żadnej bramki** — Wi-Fi/kody widzi każdy z linkiem, podpis w ich check-inie to pole formularza niepowiązane z warunkami → nasz wyróżnik „sekrety po dowodowej akceptacji" pozostaje unikalny; (3) **teza podatkowa potwierdzona** wobec BedBooking/Hotres/KWHotel + 7 graczy globalnych — bezpieczne brzmienie: „jedyny polski system dla wynajmujących, który sam wylicza podatek gospodarza" (bez „jedyni na rynku"); (4) rynek mikro dryfuje do wejścia za 0 zł (free tiery, prowizje) — zderzenie z naszym abonamentem od pierwszego dnia nazwane w dokumencie.
+- 🛑 **Diagnoza „AI slop":** krem + szeryfowa kursywa + cynober to najbardziej rozpoznawalny klaster stylistyki generowanej, a landing nie ma ANI JEDNEGO artefaktu rzeczywistości (zdjęcia, nazwiska, prawdziwej liczby, prawdziwego zrzutu) — strona, na której wszystko mogło być wygenerowane, czyta się jako wygenerowana. Panel problemu nie ma (zrzuty: kalendarz typograficznie najczystszy w stawce). Plan uczłowieczenia w 6 krokach w dokumencie (sekcja 7); nie wymieniamy palety ani fontów — dodajemy rzeczywistość.
+- ⚖️ **Czego analiza nie rozstrzyga:** popyt na moduł podatkowy i bramkę dowodową to wciąż dwa niezweryfikowane założenia — recenzent sformułował czarny scenariusz „BedBooking już wygrał tego klienta" z czterema miernikami falsyfikacji wpisanymi pod betę; poza betą otwarte: plan darmowy BedBookinga od środka, wycena Hotres, ryzyko prawne modułu podatkowego (pytanie do `legal`), kanały sprzedaży polskiego mikro-gospodarza.
+- 📌 Kandydaci do [[Projects/Backlog]]: auto-zadania z rezerwacji iCal, tryb tylko-do-odczytu po trialu, kalendarz zajętości do osadzenia, konfigurator ceny na cenniku, humanizacja landingu (6 kroków). Deklaracja z dokumentu: **social proof z bety to deliverable równie ważny jak bugfixy** — nie mamy żadnej waluty zaufania (ocen/odznak), beta jest jedyną mennicą.
 
 ### Analiza konkurencji IdoBooking — finalny dokument strategiczny, szkic obalony w połowie faktów
 - 🎯 **Zlecenie właściciela:** analiza porównawcza z idobooking.com — oferta, technologia, co skopiować, co robimy lepiej, z zastrzeżeniem różnicy targetu. Wynik: [[strategy/Analiza-konkurencji-IdoBooking-2026-08-31]] (+ kopia `.docx` wygenerowana).
@@ -160,6 +229,8 @@ Project timeline and key milestones.
 - 📌 **Integracja z kalendarzem telefonu → [[Projects/Backlog]]** jako pomysł niezaplanowany (do roadmapy wejdzie osobną decyzją, zgodnie z metodologią). Zapisana z naturalną ścieżką techniczną — kanał subskrypcyjny iCal na wzór istniejącego `exportIcal` dla rezerwacji — i z granicą do zbadania przed jakąkolwiek obietnicą: interwał odświeżania subskrybowanego kalendarza narzuca aplikacja kalendarza, a przypomnienia z pliku część aplikacji ignoruje.
 - ⚖️ **Czego decyzja nie zmienia:** eksport rezerwacji iCal (`exportIcal`) i eksport CSV/PDF raportu dla księgowego działają jak dotąd — decyzja dotyczy wyłącznie zakładki Zadania.
 
+---
+
 ## 2026-08-27
 
 ### Brief dla Coworka: wyszukanie 20–40 kandydatów na testerów — profil, sygnały rozpoznawcze, granice
@@ -201,6 +272,8 @@ Project timeline and key milestones.
 - ✅ **Harmonogram: LaunchAgent `com.wynajempro.msgcheck`** (kopia źródłowa w `scripts/`), co 3 h w godz. 7:47–22:47 — trwałe, przeżywa restart Maca i nie zależy od żadnej sesji agenta. Odrzucone: `CronCreate` (żyje tylko do końca sesji, maks. 7 dni) i rutyny chmurowe (brak uwierzytelnienia Firebase poza tą maszyną).
 - 🔥 **Pułapka launchd złapana na teście, nie w nocy:** pierwszy przebieg spod launchd padł timeoutem — minimalny `PATH` launchd nie zna node'a, więc shebang `#!/usr/bin/env node` bin-shima firebase nie wstaje. Naprawa: spawn przez `process.execPath` + bezpośrednia ścieżka `firebase-tools/lib/bin/firebase.js`, do tego jawny `PATH` w plist. 📌 **Wniosek: automat spod launchd testuje się przez `launchctl start`, nie ręcznym uruchomieniem z terminala — to inne środowisko.**
 - ✅ **Przetestowane wszystkie trzy ścieżki:** baseline (pierwszy przebieg nie straszy zaległościami), powiadomienie (stan cofnięty do 01.08 → „1 nowe zgłoszenie + 1 testowe" na ekranie właściciela), cisza („bez zmian") — ostatnia z prawdziwego kontekstu launchd.
+
+---
 
 ## 2026-08-26
 
@@ -551,6 +624,8 @@ Project timeline and key milestones.
 - ✅ **Weryfikacja końcowa (2026-08-24)**: **e2e 191/191**, **functions 33/33**, lint 0 w kodzie aplikacji, build OK, `firestore.rules` kompiluje się. **Recenzent stwierdził wprost: szóstej tury przeglądu silnika nie potrzeba.**
 - ⏳ **Jak domknąć ostatnie założenie bez ruszania rezerwacji gościa**: przy najbliższej naturalnej modyfikacji (gość przedłuży pobyt, właściciel zmieni coś w extranecie) pobrać feed i porównać `UID` ze stanem sprzed zmiany. Jeśli się utrzyma — założenie potwierdzone; jeśli nie — modyfikacja produkuje parę „zniknęła + nowa", którą obsługujemy jak wyżej.
 
+---
+
 ## 2026-08-22
 
 ### X26 — synchronizacja iCal przepisana: klucz na UID, uzgadnianie zamiast dopisywania, wykrywanie kolizji
@@ -644,6 +719,8 @@ Project timeline and key milestones.
 - 🛑 **`npm run lint` na całym projekcie zwraca dziś 16 błędów i ani jeden nie pochodzi z kodu aplikacji.** Wszystkie są w `design_handoff_identyfikacja_v2/` — pakiecie handoffu wrzuconym do **katalogu głównego repo** 22.08 o 12:33. `eslint.config.js` ma w `globalIgnores` `_design-reference`, ale nie katalog główny, więc `image-slot.js` i `support.js` z pakietu wchodzą pod lint jak kod produkcyjny. **Naprawa to przeniesienie pakietu do `_design-reference/`** — czyli tam, gdzie CLAUDE.md każe trzymać materiały projektowe. Nie ruszam tego sam: to plik właściciela i jego decyzja, czy ta kopia w ogóle ma zostać w repo (`/_design-reference` ma już starszą wersję tego samego dokumentu). ⚠️ **Do czasu przeniesienia bramka „lint 0" przed deployem będzie fałszywie czerwona.**
 - ⚠️ **NIEWDROŻONE** — zmiany siedzą w drzewie roboczym. Deploy dopiero po domknięciu punktów 2 i 3, żeby nie wydawać landingu trzy razy w tygodniu.
 
+---
+
 ## 2026-08-21
 
 ### Landing: sekcja o naszym tonie głosu, dwa twierdzenia bez pokrycia i dziura w numeracji
@@ -723,6 +800,8 @@ Project timeline and key milestones.
 - 📌 **Przy okazji, o kolejności**: sandbox i konto docelowe **nie mogą działać równolegle** — jedna funkcja weryfikuje podpis jednym sekretem. Endpoint w sandboxie od teraz dostaje 400 i można go skasować.
 - ⏸ **Zostaje do sprawdzenia**: (1) test płatności na koncie docelowym — czy checkout w ogóle się otwiera i czy pokazuje 29,99 zł; (2) czy konto przeszło **pełną aktywację w Stripe** (dane firmy, rachunek) — na pulpicie „Pay out funds" jest przygaszone, a bez aktywacji karta klienta zostanie odrzucona mimo poprawnego kodu; (3) `invoice.payment_action_required` nie jest obsługiwane — przy 3D Secure na odnowieniu płatność degraduje się do `invoice.payment_failed` po kilku dniach zamiast od razu poinformować klienta.
 
+---
+
 ## 2026-08-20
 
 ### Webhook Stripe odrzucał 100% zdarzeń — biały znak w sekrecie
@@ -774,6 +853,8 @@ Project timeline and key milestones.
 - ✅ **Prawdziwy stan projektu po naprawie** (2026-08-20): **2 konta** (1 trialing, 1 active, oba z potwierdzonym adresem), 129 sesji gości, 28 rezerwacji na 2 kontach, 1 przewodnik, 3 podpisy gości, 1 zgłoszenie, 1 zapis do newslettera. Zero zaległości, zero zaplanowanych usunięć, zero wygasłych trialów, zero przewodników bez właściciela.
 - ✅ **Weryfikacja**: lint 0, build OK, **e2e 174/174** (+2 nowe testy pilnujące, że sesje gości nie wracają do kont ani do lejka), `node --test` 9/9, tester na produkcji przechodzi z jednym ostrzeżeniem — właśnie o 14 dokumentach-widmach.
 - ⚖️ **Wniosek o samej procedurze**: to jest dowód, po co istnieje krok „uruchom na produkcji przed wdrożeniem". Kod przeszedł lint, build, 172 testy e2e, testy jednostkowe i pełny przegląd bezpieczeństwa — a mimo to **pokazywał liczby oderwane od rzeczywistości**, bo żadne z tych narzędzi nie wie, co siedzi w prawdziwym Firebase Auth. Bez emulatora nie było innej drogi, żeby to zobaczyć.
+
+---
 
 ## 2026-08-19
 
@@ -868,6 +949,8 @@ Project timeline and key milestones.
 - ⏸ **Rekomendacja: osobny widok wydruku NIE TERAZ** (koszt ok. dnia, efekt osiągnięty bez ruszania routingu; wartość pojawi się przy innym marginesie lub formacie papieru dla raportu). ⚖️ Numeracji „strona X z Y" **nie da się** zrobić żadną z dróg — Chrome ignoruje pola `@page`; potrzebna byłaby paginacja w JS.
 - 📌 **Drobiazg dla następnej osoby piszącej test druku**: `page.pdf()` wywołane od razu po otwarciu modalu łapie klatkę animacji `wpd-dialog-in` i papier wychodzi wyblakły. Liczba stron jest wtedy poprawna, ale zrzuty nieczytelne — trzeba odczekać ok. 900 ms.
 
+---
+
 ## 2026-08-18
 
 ### Raport rentowności rozbudowany — partie A i B (klasyfikacja, źródła, statystyki, rejestr, metodyka)
@@ -926,6 +1009,8 @@ Project timeline and key milestones.
 - 📌 **Korekta ustalenia z wczoraj**: pisownia „WynajemPro" w mailu **nie jest** w szablonie — treść używa zmiennej `%APP_NAME%`, którą Google podstawia z publicznej nazwy projektu. Instrukcja mówiła „popraw w tym samym edytorze"; poprawione. Nazwa nadawcy (`WynajemPRO`) i adres (`noreply@wynajempro.com`) są już prawidłowe.
 - ⏸ **Dwie ścieżki do decyzji właściciela**: (1) zgłoszenie do wsparcia Firebase o zdjęcie ograniczenia — tanie, ale na cudzym zegarze i bez gwarancji; (2) **własna wysyłka poczty** — funkcja generuje `oobCode` przez Admin SDK, a my wysyłamy **swój** e-mail z linkiem na `wynajempro.com/auth/action`, całkowicie omijając szablony Google. Druga daje kontrolę nad treścią maila (dziś to szablon Google z `%APP_NAME%`), ale wymaga dostawcy poczty, konfiguracji SPF/DKIM na domenie i **dopisania podprocesora do Polityki i DPA**. Spina się z pozycją „Powiadomienia e-mail" z [[Projects/Backlog]].
 - ⚖️ **Czego to NIE psuje**: weryfikacja adresu **działa** — link dochodzi, konto się potwierdza. Problemem jest zaufanie i marka przy pierwszym kontakcie klienta z produktem, nie sprawność mechanizmu.
+
+---
 
 ## 2026-08-17
 
@@ -1340,6 +1425,8 @@ Project timeline and key milestones.
 - ✅ **PUSH + DEPLOY hosting (2026-07-22, `--only hosting`, decyzja właściciela „push i deploy")**: commity `8bda769`+`e133e2f`+`0948414` wypchnięte, build świeży (PWA 32 wpisy), release OK. Weryfikacja live: sitemapa 14×`wynajempro.com` / 0×`moje-domki` (także serwowana z domeny firebase — dokładnie pożądany sygnał cross-domain), robots z kompletem `Disallow` i `Sitemap:` na kanonicznej, `og:url` na kanonicznej, logika canonical potwierdzona w bundlu `index-CxG5_cHP.js`, obie domeny HTTP 200. **Część 1 X9 live.** Następny ruch właściciela: GSC property + zgłoszenie sitemapy ([[Zlecenia-wlasciciela]]).
 - 📌 **Otwarte**: rozjazd `wynajempro.pl` vs `.com` w fallbackach Stripe (`functions/index.js:154,410` — martwe w praktyce, nadpisywane originem frontu); reszta X9 = audyt indeksowalności SPA (initial HTML to pusty root — do decyzji prerender/SSG), meta/title per podstrona (SeoTags gotowy do rozbudowy), JSON-LD, wpisy bloga w sitemapie, plan treści.
 
+---
+
 ## 2026-07-21
 
 ### X1 — centrum pomocy osadzone w aplikacji + naprawy #10/#11 z przeglądu treści
@@ -1372,6 +1459,8 @@ Project timeline and key milestones.
 - ⏱️ Po drodze: macOS odciął dostęp do plików (ochrona Pulpitu) — właściciel nadał uprawnienia, praca wznowiona bez strat.
 - ⏸ Czeka: commit + deploy hosting na słowo właściciela.
 
+---
+
 ## 2026-07-16
 
 ### F2 — retencja porzuconych triali: 90 dni (decyzja właściciela) + re-review
@@ -1400,6 +1489,8 @@ Project timeline and key milestones.
 - ✅ **GitHub** (3 commity): `7c8ee78` feat(security) N5 F1/F3+A/B (functions+klient), `e211c8d` feat(dashboard) X4+X14+X16+reguły N3/N5, `2cbc1fc` docs. Push origin main.
 - ✅ **Firebase deploy** (`firestore:rules,hosting,functions`): **nowa funkcja `deleteGuide` utworzona**, 9 funkcji zaktualizowanych (m.in. deleteExpiredAccountsData pełne usunięcie, deleteUserAccount kolejność Auth→dok), reguły released (guides delete:false, `guests`, `recurringCosts`), hosting released. storage.rules nietknięte → bez promptu IAM. Bramka: lint 0, build, e2e 30/30, reguły dry-run.
 - ⏸ **Smoke testy właściciela**: (1) dodanie rezerwacji z liczbą gości, (2) dodanie/edycja/usunięcie kosztu stałego w Finansach, (3) Raport rentowności → **Drukuj/PDF** i **eksport CSV**, (4) usunięcie przewodnika (idzie teraz przez callable). Po deployu dane powierzone są faktycznie usuwane → odblokowana bramka publikacji dokumentów N4.
+
+---
 
 ## 2026-07-15
 
@@ -1444,6 +1535,8 @@ Project timeline and key milestones.
 - 🐛→✅ **„W przewodnikach nie działa wgrywanie zdjęcia"** — odtworzone w sesji właściciela (Chrome, wstrzyknięty testowy PNG 70 B): `storage/unauthorized` na gałęzi `!exists` (nowy przewodnik). Eliminacja wskazała **brak roli cross-service** `firebaserules.firestoreServiceAgent` dla agenta Storage — **potwierdzone zrzutem z konsoli IAM** (agent miał tylko domyślną rolę); prompt CLI przy N2 nie zadziałał skutecznie; funkcja martwa od deployu storage.rules (09.07), niezauważona, bo smoke N2 nie objął uploadu. **NAPRAWIONE**: właściciel nadał rolę ręcznie w IAM → ponowny test na żywo (upload okładki) przeszedł, zero błędów w konsoli → [[Known-Issues]] #9 zamknięte. Przy okazji smoke test N3: dodanie/usunięcie rezerwacji z formularza zadziałało (świeżo naprawiona ścieżka create). Drobiazg: 1 testowy plik 70 B osierocony w Storage (przewodnik anulowany bez zapisu) → dług „osierocone pliki Storage" w Backlogu
 - 📋 **Raport `legal` N5 (przepływy danych osobowych)**: dostęp OK po naprawach technicznych; cykl życia — 🔴 F1 czyszczenie karencyjne nie usuwa danych powierzonych (bloker publikacji dokumentów N4!), 🟡 F2–F7 (m.in. porzucone triale bez retencji, osierocone podpisy po skasowaniu przewodnika, klauzule informacyjne /kontakt i publicContact, rozjazdy dokumentów po 2026-07-10); wsad dla prawnika: `docs/legal/Uwagi-N5-dla-prawnika.md`; zadania #21 (F1+F3) i #22 (F4/F5/#8)
 
+---
+
 ## 2026-07-10
 
 ### N4 u prawnika → start równoległych strumieni (N5-tech + X1)
@@ -1469,6 +1562,8 @@ Project timeline and key milestones.
 - ✅ Nowy test regresyjny e2e (luka z przeglądu): dodanie rezerwacji z formularza → asercja czystego dokumentu w mocku (bez sentineli deleteField, kwoty jako liczby); panel-v2 6/6
 - ✅ **Tester lustrzany na produkcji: 16/16 dokumentów przechodzi** (2 przebiegi): pierwszy wykrył 4 stare rezerwacje z legacy polem `id` w dokumencie (stare wersje aplikacji je pisały; obecna odcina) → dopuszczone w allowliście jak w guides, bez dotykania danych; hipoteza `property`-jako-mapa NIE potwierdziła się. Kryterium „istniejące dane przechodzą" — udowodnione
 - ✅ **Commit (`beafb13`) + DEPLOY wykonane** (decyzja właściciela): firestore:rules (kompilacja czysta, bez warningów) + hosting z fixem dodawania wpisów (bez niego smoke test padłby na starym bugu). Czeka: smoke test właściciela
+
+---
 
 ## 2026-07-07
 
@@ -1776,4 +1871,3 @@ When adding updates:
 ---
 
 **Related**: [[Projects/Milestones]], [[Known-Issues]], [[Decisions]]
-

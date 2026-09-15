@@ -4,7 +4,8 @@
 > Ten plik mówi **JAK** — klik po kliku, komenda po komendzie.
 > Stan planowania nadal żyje w [[Projects/Roadmap]] (jedyne źródło prawdy).
 >
-> **Wersja:** 2026-08-17 — plan tygodnia przepisany na stan po 13.08 (cztery pozycje zeszły
+> **Wersja:** 2026-09-03 — dopisana sekcja **10** (materiały i decyzje do landingu, zlecenie #15).
+> (Poprzednia: 2026-08-17 — plan tygodnia przepisany na stan po 13.08 (cztery pozycje zeszły
 > z listy), sekcja 6 przepisana pod decyzję o **działalności nierejestrowanej**, dopisane
 > dwie nowe sekcje krok po kroku: **8** (App Check dla Storage i Functions) i **9**
 > (szablony e-maili Auth).
@@ -17,6 +18,79 @@
 > ⚠️ **Numery sekcji to identyfikatory, NIE kolejność.** Numeracja 1–7 zostaje nietknięta,
 > bo odwołują się do niej [[Known-Issues]] #13 i wpisy w [[Activity-Log]] — przenumerowanie
 > unieważniłoby tamte odesłania. Kolejność wykonania daje tabela niżej.
+
+---
+
+## 10. Materiały i decyzje do landingu (zlecenie #15, 2026-09-03)
+
+> Landing ma już prawdziwe zrzuty panelu, publiczne „Co nowego" i daty z danych — to poszło
+> bez Ciebie. Poniżej to, czego agent **nie może zrobić za Ciebie**: zdjęcia, twarz, Twoje
+> nazwisko na stronie, liczby. Zasada: dopóki czegoś nie dostarczysz, strona **nie pokazuje
+> w tym miejscu niczego** — żadnej pustej ramki, stocku ani wymyślonej liczby.
+
+### 10a. Zdjęcia domku (3–5 sztuk)
+**Jak:** telefon wystarczy. Poziome (3:2 albo 4:3), min. 1600 px szerokości, w dzień,
+bez filtrów, bez HDR i bez „ulepszaczy" AI. Zestaw: (1) domek z zewnątrz z jeziorem lub
+działką w tle, (2) taras albo miejsce na ognisko, (3) salon z kuchnią, (4) sypialnia,
+(5) opcjonalnie detal operacyjny: skrytka na klucze lub kod QR przewodnika w domku,
+**bez widocznego kodu i bez czytelnego QR**.
+**Czego w kadrze nie ma:** osób (gości, wspólników), tablic rejestracyjnych, dokumentów,
+kartki z hasłem Wi-Fi, sąsiednich posesji pozwalających ustalić numer działki.
+**Prawa:** tylko zdjęcia własne. Nie bierz zdjęć z galerii Booking/Airbnb, jeśli robił je
+fotograf bez przeniesienia praw.
+**Jak przesłać:** wrzuć pliki do katalogu `_design-reference/zdjecia-rus/` (albo prześlij
+w czacie). HEIC z iPhone'a jest w porządku — agent konwertuje.
+**Do każdego zdjęcia jedno zdanie podpisu:** miejsce + miesiąc, np. „Ruś nad Jeziorem
+Ruskim, sierpień 2026". Precyzja miejsca wg Twojej decyzji (c) niżej.
+**Synergia:** R1 z planu domków i tak wymaga 3–4 zdjęć na pomieszczenie do Airbnb — jedna
+sesja obsłuży oba cele.
+
+### 10b. Zdjęcie twarzy (1 sztuka, opcjonalnie)
+Kwadrat lub 4:5, min. 800×800 px, naturalne światło, patrzysz w obiektyw albo lekko obok,
+tło neutralne albo domek/jezioro. Bez filtrów, bez generatora, bez wycinania z grupowego
+zdjęcia. Może być czarno-białe. **Tylko jeśli decyzja (b) niżej brzmi „tak".**
+
+### 10c. Jeden mail zwrotny z decyzjami (a)–(g)
+Skopiuj, uzupełnij i odeślij (albo wklej w czacie):
+
+```
+(a) Imię i nazwisko na landingu (jest już publiczne w Regulaminie): TAK / NIE
+(b) Moje zdjęcie na landingu: TAK / NIE
+(c) Nazwa „Domki Letniskowe Ruś" na stronie: TAK / NIE
+    Precyzja miejsca: „nad Jeziorem Ruskim, Warmia" / „Ruś k. Morąga" / tylko „Warmia i Mazury"
+(d) W FAQ zdanie „Odpisuję osobiście, mailem, zwykle w ciągu 24–48 godzin roboczych": TAK / NIE
+(e) Karta „Z praktyki" w pierwszej osobie („Zbudowałem to przy własnym domku…"): TAK / NIE
+(f) Zakres na stronie: „1 domek czy 20 apartamentów" zostaje / zmienić na „1–15 obiektów"
+(g) Ocena Airbnb 5,0 (5 opinii, stan na 1.09.2026) na stronie: TAK / NIE
+    (rekomendacja: NIE — mała próba czyta się jako wątły dowód; wracamy przy większej liczbie opinii)
+```
+
+### 10d. Dwa zdania „dlaczego to zbudowałem"
+Propozycja złożona z faktów, które już są w repo (post na LinkedIn 28.08, brief produktowy):
+
+> Prowadzę Domki Letniskowe Ruś nad Jeziorem Ruskim i sam obsługuję gości. WynajemPRO
+> powstało, bo arkusz przestał nadążać za rezerwacjami z Bookingu, Airbnb i telefonu.
+
+Popraw własnymi słowami — tekst ma brzmieć jak Ty, nie jak agent. Maks. dwa zdania,
+bez przymiotników ocennych, bez obietnic efektu. Na stronie pojawi się dopiero przy
+decyzji (a) = TAK, obok nazwiska i roli „gospodarz · Domki Letniskowe Ruś".
+
+### 10e. Liczby
+1. **Miesiąc startu prac nad aplikacją** — git mówi „kwiecień 2026" (pierwszy commit
+   14.04.2026); potwierdź albo popraw.
+2. **Od kiedy Ruś chodzi na WynajemPRO** (miesiąc i rok) — nie ma tego w repo.
+3. **Liczby z bety**: w `/admin` policz konta z nadanym dostępem bety i liczbę obiektów
+   w tych kontach; podaj z datą stanu. Agent od 26.08 nie czyta kont w Firebase.
+4. **Cytaty testerów** — na razie żadnych. Jeśli chcesz je mieć, `legal` przygotuje wzór
+   maila o zgodę (treść + imię + miejscowość, prawo wycofania); odpowiedzi archiwizujesz.
+
+### 10f. Zgoda na deploy
+Po przeglądzie kodu (`code-reviewer`) agent poprosi o zgodę na `firebase deploy --only
+hosting:app`. Zmiany są w kodzie, ale **na produkcję nie idą bez Twojego „tak"**.
+
+**Gotowe, gdy:** masz w jednym miejscu zdjęcia (10a), ewentualnie twarz (10b), odesłany
+blok decyzji (10c), poprawione dwa zdania (10d) i liczby (10e).
+**Odeślij mi:** pliki + wypełniony blok z 10c + zdania z 10d + liczby z 10e.
 
 ---
 
