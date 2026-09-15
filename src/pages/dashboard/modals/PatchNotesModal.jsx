@@ -1,22 +1,15 @@
 import React from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { useDialogA11y } from './useDialogA11y';
+import { formatujDatePl } from '../../../utils/dataPl';
 
 /* E4: popup „Co nowego" — patch noty z src/data/patchNotes.js (plik generowany
    z docs/marketing/patch-notes.md). Wzorzec 1:1 jak DailyReportModal. Rodzic podaje
    już przefiltrowane wpisy (nowsze niż lastSeenPatchNote / data rejestracji, maks 5)
    i JEDEN handler zamknięcia — X, klik w tło, Escape i „Rozumiem" robią to samo:
-   zapis lastSeenPatchNote + zamknięcie. */
-
-// „29 sierpnia" po polsku; rok dopisujemy tylko, gdy wpis nie jest z bieżącego roku.
-// Parsowanie ręczne (bez new Date('RRRR-MM-DD')), żeby strefa czasowa nie przesunęła dnia.
-const formatujDate = (dateStr) => {
-  const [y, m, d] = String(dateStr).split('-').map(Number);
-  if (!y || !m || !d) return dateStr;
-  const opts = { day: 'numeric', month: 'long' };
-  if (y !== new Date().getFullYear()) opts.year = 'numeric';
-  return new Date(y, m - 1, d).toLocaleDateString('pl-PL', opts);
-};
+   zapis lastSeenPatchNote + zamknięcie.
+   Format daty („29 sierpnia", rok tylko gdy inny niż bieżący) dzieli z publiczną
+   stroną /co-nowego — src/utils/dataPl.js. */
 
 function PatchNotesModal({ show, entries, onClose }) {
   const open = show && entries.length > 0;
@@ -41,7 +34,7 @@ function PatchNotesModal({ show, entries, onClose }) {
         <div className="wpd-dialog__body">
           {entries.map((wpis) => (
             <section className="wpd-pn__sec" key={wpis.id}>
-              <p className="wpd-pn__date">{formatujDate(wpis.date)}</p>
+              <p className="wpd-pn__date">{formatujDatePl(wpis.date)}</p>
               <h3 className="wpd-pn__title">{wpis.title}</h3>
               <ul className="wpd-pn__list">
                 {wpis.items.map((punkt, i) => (

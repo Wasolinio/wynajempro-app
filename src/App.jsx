@@ -31,6 +31,8 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 // Publiczne celowo: użytkownik odcięty ekranem blokady też musi trafić do instrukcji.
 const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
 const HelpArticlePage = lazy(() => import('./pages/HelpArticlePage'));
+// Publiczny dziennik zmian — te same patch noty co popup „Co nowego" w panelu (E4).
+const CoNowegoPage = lazy(() => import('./pages/CoNowegoPage'));
 const GuestGuideView = lazy(() => import('./pages/GuestGuideView'));
 const ReviewPageView = lazy(() => import('./pages/ReviewPageView'));
 
@@ -144,6 +146,7 @@ export default function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/pomoc" element={<HelpCenterPage />} />
               <Route path="/pomoc/:slug" element={<HelpArticlePage />} />
+              <Route path="/co-nowego" element={<CoNowegoPage />} />
               <Route path="/guide/:guideId" element={<GuestGuideView />} />
               <Route path="/opinie/:pageId" element={<ReviewPageView />} />
 

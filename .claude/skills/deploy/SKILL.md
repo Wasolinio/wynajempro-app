@@ -42,6 +42,14 @@ Zawsze:
    Jeśli są czerwone, rozstrzygnij `git stash`, czy zależą od Twojej zmiany, czy są zastane.
    Zastane awarie wymień z nazwy w raporcie — nie chowaj ich pod „reszta bez zmian".
 
+4. **Zrzuty panelu na landingu** (od 2026-09-03): jeśli zmiana dotknęła widoków
+   Pulpit, Kalendarz, Finanse lub Zadania — `npm run zrzuty:build` (generator
+   `scripts/zrzuty/`, poza CI), obejrzyj PNG w `test-results/zrzuty/`, commituj
+   `src/assets/landing/*.webp` i `src/data/zrzutyPanelu.js` razem z kodem. Landing
+   pokazuje te zrzuty jako produkt; bez regeneracji zacznie o nim kłamać.
+5. **Nowa trasa publiczna** trafia do `e2e-prod/smoke.spec.js` dopiero **razem z deployem**
+   — spec chodzi co godzinę po żywej produkcji i byłby czerwony do wydania.
+
 Dodatkowo dla reguł: cała procedura ze skilla `reguly` **przed** tym krokiem.
 Dodatkowo dla functions: przegląd `code-reviewer`, bo functions mają dostęp administracyjny.
 

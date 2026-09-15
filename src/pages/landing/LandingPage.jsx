@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Lock, Phone } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { blogPosts } from '../../data/blogPosts';
+import { formatujDatePl } from '../../utils/dataPl';
+import { PATCH_NOTES } from '../../data/patchNotes';
+import { legalMeta } from '../../data/legalMeta';
+import { PHOTOS, FOUNDER, BETA } from '../../data/landingProof';
 import LandingScrollDemo from './LandingScrollDemo';
 
 // Kategoria wpisu → kolor tagu zgodny z paletą marki
@@ -80,6 +84,14 @@ const FaqItem = ({ q, a }) => (
    klauzuli w formularzu = zmiana tej daty. */
 const ZGODA_WERSJA = '2026-08-19';
 
+// Daty z danych, nie z ręki: legalMeta.js (npm run legal:build) i patchNotes.js
+// (npm run patchnotes:build) odświeżają się same przy każdym wydaniu.
+const REGULAMIN = legalMeta.find((d) => d.slug === 'regulamin');
+const POLITYKA = legalMeta.find((d) => d.slug === 'prywatnosc');
+// Pusta lista patch not (błąd generatora, wyczyszczony plik) ma ukryć linię, nie wyłożyć strony
+// — ten sam wzorzec co PHOTOS/FOUNDER/BETA niżej (przegląd code-reviewer 2026-09-03).
+const OSTATNIA_ZMIANA = PATCH_NOTES[0]?.date;
+
 export default function LandingPage() {
   const [consent, setConsent] = useState(false);
   const [email, setEmail] = useState('');
@@ -144,7 +156,7 @@ export default function LandingPage() {
         consent: true,
         consentVersion: ZGODA_WERSJA,
       });
-      setNote('Dziękujemy — otrzymasz nasze poradniki.');
+      setNote('Dziękujemy. Napiszemy, gdy będzie coś wartego wysłania.');
       setNoteErr(false);
       setEmail('');
       setConsent(false);
@@ -195,6 +207,7 @@ export default function LandingPage() {
               <a href="#faq" onClick={closeMenu}>FAQ</a>
               <Link to="/blog" onClick={closeMenu}>Baza wiedzy</Link>
               <Link to="/pomoc" onClick={closeMenu}>Centrum pomocy</Link>
+              <Link to="/co-nowego" onClick={closeMenu}>Co nowego</Link>
               <Link to="/kontakt" onClick={closeMenu}>Kontakt</Link>
             </nav>
             {/* Poniżej 560px tekstowy „Zaloguj się" znika z topbaru, więc panel jest
@@ -272,7 +285,7 @@ export default function LandingPage() {
             <div className="wp4-panel">
               <div className="wp4-panel__head">
                 <span className="wp4-label">Zysk netto · 2026</span>
-                <span className="wp4-tag wp4-tag--green">▲ 12% VS 2025</span>
+                <span className="wp4-label wp4-label--faint">dane przykładowe</span>
               </div>
               <div className="wp4-kpi">69 520 zł</div>
               <div className="wp4-hairline" />
@@ -286,12 +299,12 @@ export default function LandingPage() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Apartament Centrum</td>
+                    <td>Domek Cisowy</td>
                     <td className="wp4-num">38 400 zł</td>
                     <td className="wp4-num wp4-num--green">33 280 zł</td>
                   </tr>
                   <tr>
-                    <td>Domek nad jeziorem</td>
+                    <td>Domek Modrzewiowy</td>
                     <td className="wp4-num">46 200 zł</td>
                     <td className="wp4-num wp4-num--green">36 240 zł</td>
                   </tr>
@@ -305,7 +318,6 @@ export default function LandingPage() {
                 </tfoot>
               </table>
             </div>
-            <p className="wp4-fig">RYS. 1 — Panel zysku netto</p>
           </div>
         </div>
       </section>
@@ -319,9 +331,17 @@ export default function LandingPage() {
           Teraz mówią o czytelniku, a każde twierdzenie ma pokrycie w kodzie. ────────────── */}
       <section className="wp4-values">
         <div className="wp4-container">
-          <div className="wp4-values__grid">
+          <div className={`wp4-values__grid${PHOTOS.length ? ' wp4-values__grid--photos' : ''}`}>
             <article>
-              <span className="wp4-label">01 · Z praktyki</span>
+              {/* Zdjęcia własnych domków właściciela — dopiero po materiałach i zgodzie (c);
+                  bez plików figure nie istnieje w DOM (landingProof.js) */}
+              {PHOTOS.length > 0 && (
+                <figure className="wp4-photo">
+                  <img src={PHOTOS[0].src} alt={PHOTOS[0].alt} width={PHOTOS[0].width} height={PHOTOS[0].height} loading="lazy" decoding="async" />
+                  <figcaption className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</figcaption>
+                </figure>
+              )}
+              <span className="wp4-label">Z praktyki</span>
               <h3 className="wp4-h3">Zbudowane przy własnych domkach</h3>
               <p className="wp4-body">
                 Panel wyrósł z arkusza, w którym przestały się mieścić
@@ -330,7 +350,7 @@ export default function LandingPage() {
               </p>
             </article>
             <article>
-              <span className="wp4-label">02 · Dowód przy sporze</span>
+              <span className="wp4-label">Dowód przy sporze</span>
               <h3 className="wp4-h3">Masz ślad, że gość znał zasady</h3>
               <p className="wp4-body">
                 Gość potwierdza w przewodniku regulamin i instrukcję PPOŻ,
@@ -340,7 +360,7 @@ export default function LandingPage() {
               </p>
             </article>
             <article>
-              <span className="wp4-label">03 · Zanim zapłacisz</span>
+              <span className="wp4-label">Zanim zapłacisz</span>
               <h3 className="wp4-h3">Po 14&nbsp;dniach nic się nie pobiera</h3>
               <p className="wp4-body">
                 Konto zakładasz e-mailem albo kontem Google i przez dwa tygodnie
@@ -349,6 +369,21 @@ export default function LandingPage() {
               </p>
             </article>
           </div>
+          {/* Blok założyciela — po decyzjach (a), (b), (e) i akceptacji dwóch zdań słowo po słowie;
+              h3/p, nigdy h1 (smoke produkcji: dokładnie jeden h1 na stronie) */}
+          {FOUNDER && (
+            <div className="wp4-founder">
+              {FOUNDER.photo && (
+                <img className="wp4-founder__photo" src={FOUNDER.photo} alt={FOUNDER.photoAlt || ''} width={96} height={120} loading="lazy" decoding="async" />
+              )}
+              <div>
+                <p className="wp4-founder__name">{FOUNDER.name}</p>
+                <span className="wp4-label wp4-label--faint">{FOUNDER.role}</span>
+                <p className="wp4-body">{FOUNDER.text}</p>
+                <Link to="/regulamin" className="wp4-link wp4-link--strong">Dane operatora w Regulaminie →</Link>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -356,7 +391,7 @@ export default function LandingPage() {
       <section className="wp4-section" id="funkcje">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Funkcje · 04</span>
+            <span className="wp4-label">Funkcje</span>
             <h2 className="wp4-h2">Wszystko, co składa się na spokojny wynajem</h2>
             <p className="wp4-lead wp4-lead--narrow">
               Funkcje, które zdejmują z Twoich barków najwięcej powtarzalnej
@@ -382,13 +417,6 @@ export default function LandingPage() {
                 bezpośrednie blokują terminy w portalach. Gdy mimo to dwa portale
                 sprzedadzą ten sam termin, panel mówi o tym na pulpicie.
               </p>
-              <div className="wp4-feature__foot">
-                <span className="wp4-tag wp4-tag--booking">BOOKING</span>
-                <span className="wp4-flow" aria-hidden="true">⇄</span>
-                <span className="wp4-tag wp4-tag--cynober">WYNAJEM PRO</span>
-                <span className="wp4-flow" aria-hidden="true">⇄</span>
-                <span className="wp4-tag wp4-tag--airbnb">AIRBNB</span>
-              </div>
             </article>
 
             <article className="wp4-feature">
@@ -398,40 +426,27 @@ export default function LandingPage() {
                 Przychód, koszty i prowizje portali w jednym miejscu. Widzisz,
                 ile naprawdę zostaje w kieszeni po odliczeniu Booking i Airbnb.
               </p>
-              <div className="wp4-feature__foot">
-                <span className="wp4-mini-num wp4-mini-num--green">+33 280 zł</span>
-                <span className="wp4-label wp4-label--faint">zysk / obiekt</span>
-              </div>
             </article>
 
             <article className="wp4-feature">
               <span className="wp4-label">Goście</span>
-              <h3 className="wp4-h3">Cyfrowy przewodnik gościa premium</h3>
+              <h3 className="wp4-h3">Cyfrowy przewodnik gościa</h3>
               <p className="wp4-body">
                 Wysyłasz gościowi jeden link albo wieszasz kod QR w obiekcie.
                 Dojazd, zasady i instrukcje widzi od razu, a hasło do Wi-Fi i kod
                 do drzwi odsłaniają się dopiero, gdy potwierdzi regulamin
                 i instrukcję PPOŻ.
               </p>
-              <div className="wp4-feature__foot">
-                <span className="wp4-tag wp4-tag--green">KOD PO AKCEPTACJI</span>
-                <span className="wp4-label wp4-label--faint">z zapisanym śladem</span>
-              </div>
             </article>
 
             <article className="wp4-feature">
               <span className="wp4-label">Podatki</span>
-              <h3 className="wp4-h3">Ryczałt rozliczony bez stresu</h3>
+              <h3 className="wp4-h3">Ryczałt policzony przy każdej rezerwacji</h3>
               <p className="wp4-body">
                 Aplikacja pilnuje progu 100&nbsp;000&nbsp;zł i sama przełącza stawkę
                 z 8,5% na 12,5%. To zestawienie dla Ciebie i dla księgowego,
                 nie deklaracja podatkowa.
               </p>
-              <div className="wp4-feature__foot">
-                <span className="wp4-tag wp4-tag--amber">RYCZAŁT 8,5%</span>
-                <span className="wp4-flow" aria-hidden="true">→</span>
-                <span className="wp4-tag wp4-tag--amber">12,5%</span>
-              </div>
             </article>
           </div>
         </div>
@@ -441,9 +456,9 @@ export default function LandingPage() {
       <section className="wp4-section wp4-section--alt" id="przewodnik">
         <div className="wp4-container wp4-guide">
           <div className="wp4-guide__copy">
-            <span className="wp4-label">Przewodnik gościa · 05</span>
+            <span className="wp4-label">Przewodnik gościa</span>
             <h2 className="wp4-h2">
-              Wszystko, czego gość potrzebuje — <em>zanim zapyta</em>
+              Wszystko, czego gość potrzebuje, zanim zapyta
             </h2>
             <p className="wp4-body">
               Jedna strona z dojazdem, zasadami, instrukcją PPOŻ i poleconymi
@@ -465,32 +480,27 @@ export default function LandingPage() {
             <div className="wp4-phone">
               <div className="wp4-phone__notch" aria-hidden="true" />
               <div className="wp4-phone__screen">
-                {/* Nagłówek — placeholder "papier milimetrowy" z etykietą */}
+                {/* Stan PRZED akceptacją regulaminu — dokładnie ten, który sekcja sprzedaje:
+                    sekrety zablokowane, teksty 1:1 z GuestGuideView (Lock, „Dane dostępowe
+                    zablokowane", dwie zgody, „Odkryj dane dostępowe", „Kontakt z gospodarzem").
+                    Poprzednia makieta pokazywała kod i hasło ODSŁONIĘTE oraz mapę, której
+                    produkt nie osadza. Nazwa obiektu z zestawu demo, jawnie „dane przykładowe". */}
                 <div className="wp4-phone__head">
                   <span className="wp4-label">Twój przewodnik</span>
-                  <h3 className="wp4-phone__title">Domki Letniskowe</h3>
-                  <span className="wp4-label wp4-label--faint">Domek nr 2 · Mazury</span>
+                  <h3 className="wp4-phone__title">Domek Cisowy</h3>
+                  <span className="wp4-label wp4-label--faint">dane przykładowe</span>
                 </div>
 
                 <div className="wp4-phone__body">
                   <p className="wp4-phone__hello">
-                    Cześć! Witamy w obiekcie. Poniżej najważniejsze informacje,
-                    które ułatwią Ci pobyt.
+                    Cześć! Poniżej dojazd, zasady i to, co przyda się w trakcie pobytu.
                   </p>
 
-                  {/* Kod do skrytki */}
-                  <div className="wp4-gcard">
-                    <span className="wp4-label">Kod do skrytki na klucze</span>
-                    <div className="wp4-pin">4921</div>
-                  </div>
-
-                  {/* Wi-Fi */}
-                  <div className="wp4-gcard">
-                    <span className="wp4-label">Sieć Wi-Fi</span>
-                    <p className="wp4-gcard__name">Domek_WiFi_5G</p>
-                    <p className="wp4-gcard__row">
-                      Hasło: <code className="wp4-code">Wiosna2026!</code>
-                    </p>
+                  {/* Dane dostępowe — zablokowane do akceptacji (GuestGuideView) */}
+                  <div className="wp4-gcard wp4-gcard--locked">
+                    <Lock className="wp4-gcard__ic" aria-hidden="true" strokeWidth={1.5} />
+                    <p className="wp4-gcard__name">Dane dostępowe zablokowane</p>
+                    <p className="wp4-gcard__row">Zaakceptuj regulamin poniżej, aby odsłonić hasło Wi-Fi i kod do drzwi.</p>
                   </div>
 
                   {/* Warto wiedzieć */}
@@ -503,23 +513,27 @@ export default function LandingPage() {
                     </ul>
                   </div>
 
-                  {/* Dojazd — placeholder graph-paper z pinezką */}
+                  {/* Dojazd — w produkcie tekst od gospodarza i link, nie osadzona mapa */}
                   <div className="wp4-gcard">
                     <span className="wp4-label">Jak dojechać</span>
-                    <div className="wp4-minimap">
-                      <span className="wp4-minimap__pin" aria-hidden="true" />
-                    </div>
+                    <p className="wp4-gcard__row">Opis dojazdu i link do nawigacji wpisuje gospodarz.</p>
+                  </div>
+
+                  {/* Akceptacja — dwie zgody 1:1 z GuestGuideView */}
+                  <div className="wp4-gcard wp4-gcard--accept">
+                    <span className="wp4-label">Regulamin obiektu i instrukcja PPOŻ</span>
+                    <p className="wp4-gcard__row">Potwierdź zapoznanie się z dokumentami.</p>
+                    <p className="wp4-gcard__check"><span className="wp4-gcard__box" aria-hidden="true" />Potwierdzam zapoznanie się i akceptację Regulaminu obiektu.</p>
+                    <p className="wp4-gcard__check"><span className="wp4-gcard__box" aria-hidden="true" />Potwierdzam zapoznanie się i akceptację Instrukcji bezpieczeństwa PPOŻ.</p>
+                    <span className="wp4-btn wp4-btn--primary wp4-btn--sm wp4-btn--full wp4-btn--muted">Odkryj dane dostępowe</span>
                   </div>
                 </div>
 
                 <div className="wp4-phone__foot">
-                  <span className="wp4-btn wp4-btn--primary wp4-btn--sm wp4-btn--full">
-                    Skontaktuj się z gospodarzem
-                  </span>
+                  <span className="wp4-gcard__contact"><Phone aria-hidden="true" strokeWidth={1.5} /> Kontakt z gospodarzem</span>
                 </div>
               </div>
             </div>
-            <p className="wp4-fig">RYS. 3 — Cyfrowy przewodnik gościa</p>
           </div>
         </div>
       </section>
@@ -531,16 +545,16 @@ export default function LandingPage() {
       <section className="wp4-section wp4-section--alt" id="jak-to-dziala">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Szybki start · 06</span>
-            <h2 className="wp4-h2">Od rejestracji do pierwszej rezerwacji w 2 minuty</h2>
+            <span className="wp4-label">Szybki start</span>
+            <h2 className="wp4-h2">Od rejestracji do pierwszej rezerwacji w trzech krokach</h2>
           </div>
           <div className="wp4-steps">
             <article className="wp4-step">
               <span className="wp4-step__num">01</span>
               <h3 className="wp4-h3">Załóż darmowe konto</h3>
               <p className="wp4-body">
-                Podaj e-mail i hasło. Bez podpinania karty i ukrytych haczyków —
-                dostajesz 14 dni na pełne testy.
+                Podaj e-mail i hasło (adres potwierdzisz linkiem z wiadomości) albo
+                wejdź kontem Google. Karty nie podajesz, masz 14 dni na testy.
               </p>
             </article>
             <article className="wp4-step">
@@ -567,10 +581,8 @@ export default function LandingPage() {
       <section className="wp4-section" id="dla-kogo">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Dla kogo · 07</span>
-            <h2 className="wp4-h2">
-              Aplikacja szyta na miarę, <em>nie hotelowy moloch</em>
-            </h2>
+            <span className="wp4-label">Dla kogo</span>
+            <h2 className="wp4-h2">Dla gospodarza, który obsługuje gości sam</h2>
             <p className="wp4-lead wp4-lead--narrow">
               Prowadzisz domki albo apartamenty obok pracy, bez recepcji
               i bez asystentki. Systemy hotelowe liczą sobie za pokój i mają
@@ -578,32 +590,16 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="wp4-compare">
-            <div className="wp4-compare__col">
-              <span className="wp4-label">Tradycyjne systemy</span>
-              <ul className="wp4-xlist">
-                <li>Przeładowany interfejs pełen opcji, których nigdy nie użyjesz</li>
-                <li>Koszty od kilkuset do kilku tysięcy złotych rocznie</li>
-                <li>Skomplikowane generowanie raportów „hotelowych"</li>
-                <li>Brak polskiego ryczałtu i funkcji pod mały wynajem</li>
-              </ul>
-            </div>
-            <div className="wp4-compare__col wp4-compare__col--ink">
-              <div className="wp4-plan__badge">
-                <Logo onInk />
-              </div>
-              <ul className="wp4-checklist wp4-checklist--ink">
-                <li>Czytelny pulpit z gotową listą zadań na dany dzień</li>
-                {/* „Automatyczne" usunięte 2026-08-21 — ta sama nieprawda co w hero:
-                    przewodnik tworzysz w kreatorze i sam udostępniasz link albo kod QR.
-                    Automatyczne jest odsłonięcie danych PO akceptacji regulaminu, nie
-                    powstawanie przewodnika. */}
-                <li>Przewodnik dla gości z osobnym linkiem na każdy obiekt</li>
-                <li>Zautomatyzowane podatki i podsumowanie miesiąca jednym kliknięciem</li>
-                <li>Stała, niska cena niezależnie od liczby rezerwacji</li>
-              </ul>
-            </div>
-          </div>
+          {/* Do 2026-09-03 stał tu blok „× tradycyjne systemy / ✓ WynajemPRO": jeden z najbardziej
+              rozpoznawalnych klocków generowanych landingów, z twierdzeniami o rynku bez źródła
+              („koszty od kilkuset do kilku tysięcy złotych rocznie"). Zostaje lead (opisuje
+              czytelnika) i jedna lista tego, co produkt naprawdę robi. */}
+          <ul className="wp4-checklist wp4-checklist--wide">
+            <li>Pulpit z listą zadań na dziś i alarmem, gdy dwa terminy nachodzą na siebie</li>
+            <li>Przewodnik dla gości z osobnym linkiem na każdy obiekt</li>
+            <li>Ryczałt liczony przy każdej rezerwacji, przegląd miesiąca i raport roczny w Finansach</li>
+            <li>Stała cena za konto, niezależnie od liczby rezerwacji i obiektów</li>
+          </ul>
         </div>
       </section>
 
@@ -611,7 +607,7 @@ export default function LandingPage() {
       <section className="wp4-section wp4-section--alt" id="cennik">
         <div className="wp4-container">
           <div className="wp4-section__head">
-            <span className="wp4-label">Cennik · 08</span>
+            <span className="wp4-label">Cennik</span>
             <h2 className="wp4-h2">Zwraca się szybciej niż jedna doba najmu</h2>
             <p className="wp4-lead wp4-lead--narrow">
               Zero prowizji od rezerwacji. Stała opłata, bez limitów obiektów
@@ -637,20 +633,20 @@ export default function LandingPage() {
               </p>
               <ul className="wp4-checklist wp4-checklist--ink">
                 <li>Nielimitowana liczba obiektów i rezerwacji</li>
-                <li>Automatyczne raporty i podatki (ryczałt)</li>
+                <li>Podatek liczony przy rezerwacji, zestawienie CSV dla księgowej</li>
                 <li>Interaktywny kalendarz z synchronizacją iCal</li>
-                <li>Cyfrowy przewodnik gościa premium</li>
-                <li>Szyfrowana baza w chmurze, bez ukrytych prowizji</li>
+                <li>Cyfrowy przewodnik gościa z kodem po akceptacji regulaminu</li>
+                <li>Konto usuwasz sam, od razu, bez karencji</li>
               </ul>
               <Link to="/login" className="wp4-btn wp4-btn--paper">Zacznij 14-dniowy test</Link>
               <p className="wp4-plan__note">
-                <span className="wp4-dot wp4-dot--green" /> Bez danych karty. Anulujesz jednym kliknięciem.
+                <span className="wp4-dot wp4-dot--green" /> Bez danych karty przy rejestracji.
               </p>
             </div>
 
             <div className="wp4-plan">
               <span className="wp4-label">Dlaczego stała cena?</span>
-              <h3 className="wp4-h3">Rozwijasz biznes bez kary za sukces</h3>
+              <h3 className="wp4-h3">Drugi domek nie kosztuje więcej</h3>
               <p className="wp4-body">
                 Inni każą Ci płacić za każdy pokój lub pobierają prowizję od
                 obrotu. U nas dodajesz kolejne obiekty bez dodatkowych kosztów.
@@ -670,7 +666,7 @@ export default function LandingPage() {
       <section className="wp4-section" id="faq">
         <div className="wp4-container wp4-faq">
           <div className="wp4-faq__head">
-            <span className="wp4-label">FAQ · 09</span>
+            <span className="wp4-label">FAQ</span>
             <h2 className="wp4-h2">Często zadawane pytania</h2>
           </div>
           <div className="wp4-faq__list">
@@ -680,11 +676,11 @@ export default function LandingPage() {
             />
             <FaqItem
               q="Czy aplikacja chroni przed overbookingiem (Booking, Airbnb)?"
-              a="Pomaga, ale bądźmy szczerzy co do granic. Synchronizacja iCal ściąga rezerwacje z portali do jednego kalendarza i odsyła Twoje rezerwacje bezpośrednie z powrotem, więc terminy blokują się nawzajem. Nie jest to jednak ochrona natychmiastowa: portale odświeżają importowane kalendarze co kilka godzin i tego opóźnienia nie da się obejść żadnym programem. Dlatego robimy drugą rzecz, o którą sam iCal nie zadba — jesteśmy jedynym miejscem, gdzie leżą rezerwacje ze wszystkich portali naraz, więc gdy dwa terminy zaczną na siebie nachodzić, zobaczysz o tym alarm na pulpicie i zdążysz zareagować."
+              a="Pomaga, ale ma granicę. Synchronizacja iCal ściąga rezerwacje z portali do jednego kalendarza i odsyła Twoje rezerwacje bezpośrednie z powrotem, więc terminy blokują się nawzajem. Nie jest to ochrona natychmiastowa: portale odświeżają importowane kalendarze co kilka godzin i tego opóźnienia nie obejdzie żaden program. Dlatego robimy drugą rzecz, o którą sam iCal nie zadba: u nas leżą rezerwacje ze wszystkich portali naraz, więc gdy dwa terminy zaczną na siebie nachodzić, zobaczysz alarm na pulpicie i zdążysz zareagować."
             />
             <FaqItem
               q="Czy aplikacja wylicza polskie podatki (ryczałt)?"
-              a="Tak. Aplikacja powstała z myślą o polskich realiach. Wspiera m.in. automatyczne wyliczanie ryczałtu 8,5% wraz z przejściem na próg 12,5% po przekroczeniu 100 000 zł."
+              a={"Tak. Ryczałt 8,5% liczy przy każdej rezerwacji i sam przechodzi na 12,5% po przekroczeniu 100\u00A0000\u00A0zł przychodu w roku. Od sierpnia 2026 liczy też skalę i podatek liniowy 19% i pilnuje limitu zwolnienia z VAT 240\u00A0000\u00A0zł. To zestawienie pomocnicze dla Ciebie i księgowej, nie deklaracja."}
             />
             <FaqItem
               q="Mam 5 domków. Czy abonament będzie droższy?"
@@ -692,7 +688,7 @@ export default function LandingPage() {
             />
             <FaqItem
               q="Czy aplikacja działa na telefonie?"
-              a="Tak, WynajemPRO jest w pełni responsywny. Z powodzeniem dodasz rezerwację, sprawdzisz kalendarz i koszty ze smartfona, będąc w drodze."
+              a={"Tak. Panel działa w przeglądarce telefonu, bez instalowania. Dodasz rezerwację, sprawdzisz kalendarz i koszty, a zadanie dodasz do kalendarza telefonu przyciskiem „Dodaj do kalendarza\" (Google Calendar albo kalendarz Apple)."}
             />
             <FaqItem
               q="Co, gdy będę potrzebować pomocy?"
@@ -702,13 +698,45 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ───────────────────────── Co nowego ─────────────────────────
+          Dowód życia produktu bez nowych danych: te same PATCH_NOTES, które zasilają popup
+          „Co nowego" w panelu (docs/marketing/patch-notes.md → npm run patchnotes:build).
+          Pionowa lista bez kart — celowo łamie rytm równych siatek. */}
+      <section className="wp4-section wp4-section--line" id="co-nowego">
+        <div className="wp4-container">
+          <div className="wp4-section__head">
+            <span className="wp4-label">Co nowego</span>
+            <h2 className="wp4-h2">Ostatnie zmiany w panelu</h2>
+            <p className="wp4-lead wp4-lead--narrow">
+              Te same wpisy, które panel pokazuje po zalogowaniu. Daty są datami wydania.
+            </p>
+          </div>
+          <ol className="wp4-changelog">
+            {PATCH_NOTES.slice(0, 3).map((wpis) => (
+              <li key={wpis.id} className="wp4-changelog__item">
+                <span className="wp4-label wp4-label--faint">{formatujDatePl(wpis.date, { zRokiem: 'zawsze' })}</span>
+                <h3 className="wp4-h3">{wpis.title}</h3>
+                <p className="wp4-body">{wpis.items[0]}</p>
+              </li>
+            ))}
+          </ol>
+          <Link to="/co-nowego" className="wp4-link wp4-link--strong">Wszystkie zmiany →</Link>
+          {/* Liczby z bety — wyłącznie od właściciela (odczyt /admin), z datą stanu; bez nich brak w DOM */}
+          {BETA && (
+            <p className="wp4-beta wp4-label wp4-label--faint">
+              W becie: {BETA.hosts} gospodarzy · {BETA.properties} obiektów · stan na {formatujDatePl(BETA.asOf, { zRokiem: 'zawsze' })}
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* ───────────────────────── Baza wiedzy / blog ───────────────────────── */}
       <section className="wp4-section wp4-section--alt" id="blog">
         <div className="wp4-container">
           <div className="wp4-blog__head">
             <div>
-              <span className="wp4-label">Baza wiedzy · 10</span>
-              <h2 className="wp4-h2">Ucz się od praktyków</h2>
+              <span className="wp4-label">Baza wiedzy</span>
+              <h2 className="wp4-h2">O iCal, ryczałcie i pytaniach gości</h2>
             </div>
             <Link to="/blog" className="wp4-link wp4-link--strong">
               Wszystkie wpisy →
@@ -722,7 +750,7 @@ export default function LandingPage() {
                   <span className={`wp4-tag ${CATEGORY_TAG[post.category] || 'wp4-tag--cynober'}`}>
                     {post.category}
                   </span>
-                  <span className="wp4-label wp4-label--faint">{post.readTime}</span>
+                  <span className="wp4-label wp4-label--faint">{formatujDatePl(post.date, { zRokiem: 'zawsze', miesiac: 'short' })} · {post.readTime}</span>
                 </div>
                 <h3 className="wp4-post__title">{post.title}</h3>
                 <p className="wp4-body wp4-post__excerpt">{post.excerpt}</p>
@@ -737,11 +765,11 @@ export default function LandingPage() {
       <section className="wp4-cta">
         <div className="wp4-container wp4-cta__inner">
           <h2 className="wp4-cta__title">
-            Mniej chaosu.<br />Więcej wynajmu.
+            Sprawdź na własnych rezerwacjach.
           </h2>
           <p className="wp4-cta__lead">
-            Raz w miesiącu wyślemy Ci konkretne triki na więcej rezerwacji
-            bezpośrednich i niższe koszty. Zero spamu.
+            Zostaw adres, jeśli chcesz dostawać wiadomości o nowościach w panelu
+            i porady dla gospodarzy. Bez stałego cyklu i bez reklam.
           </p>
 
           <form className="wp4-news" onSubmit={handleSubscribe}>
@@ -752,7 +780,7 @@ export default function LandingPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="anna@wynajempro.com"
+                placeholder="twoj@adres.pl"
               />
             </label>
             <button type="submit" className="wp4-btn wp4-btn--primary wp4-btn--lg" disabled={submitting}>
@@ -800,10 +828,11 @@ export default function LandingPage() {
             <div className="wp4-footer__brand">
               <Logo />
               <p className="wp4-body wp4-footer__about">
-                Aplikacja dla właścicieli nieruchomości na wynajem
-                krótkoterminowy. Jeden kalendarz na wszystkie portale, policzony
-                zysk i przewodnik dla gościa.
+                Aplikacja dla właścicieli domków i apartamentów na wynajem
+                krótkoterminowy. Jeden kalendarz dla Bookingu, Airbnb i rezerwacji
+                bezpośrednich. Zysk policzony po prowizjach i podatku.
               </p>
+              {FOUNDER?.footerLine && <p className="wp4-body wp4-footer__about">{FOUNDER.footerLine}</p>}
             </div>
             <div className="wp4-footer__col">
               <span className="wp4-label">Produkt</span>
@@ -816,6 +845,7 @@ export default function LandingPage() {
               <span className="wp4-label">Zasoby</span>
               <Link to="/pomoc">Centrum pomocy</Link>
               <Link to="/blog">Baza wiedzy</Link>
+              <Link to="/co-nowego">Co nowego</Link>
               <a href="#faq">FAQ</a>
               <a href="#panel">Demo panelu</a>
             </div>
@@ -832,6 +862,14 @@ export default function LandingPage() {
           <div className="wp4-footer__bottom">
             <span className="wp4-label wp4-label--faint">
               © {new Date().getFullYear()} WynajemPRO · dla polskich gospodarzy
+            </span>
+            {/* Każdy dokument ze SWOJĄ datą (Polityka zmienia się częściej niż Regulamin) —
+                zdanie łączące oba pod jedną datą skłamałoby przy pierwszej rewizji Polityki */}
+            <span className="wp4-label wp4-label--faint wp4-footer__facts">
+              {REGULAMIN?.effective && <>Regulamin obowiązuje od {REGULAMIN.effective}</>}
+              {POLITYKA?.effective && <>{' · '}Polityka prywatności od {POLITYKA.effective}</>}
+              {OSTATNIA_ZMIANA && <>{' · '}Ostatnia zmiana w panelu: {formatujDatePl(OSTATNIA_ZMIANA, { zRokiem: 'zawsze' })}</>}
+              {' · '}<Link to="/co-nowego">Co nowego</Link>
             </span>
           </div>
         </div>
@@ -851,7 +889,7 @@ const CSS = `
   --cynober:#D9492B; --cynober-hover:#C23E22;
   --green:#2F6B53; --granat:#234B7A; --amber:#C99A2E;
   --hairline:#DDD5C3; --inner:#EFE9DA;
-  --tint-cynober:#F6E5DF; --tint-green:#E7EDE7; --tint-amber:#FBF1D9;
+  --tint-cynober:#F6E5DF; --tint-green:#E7EDE7; --tint-amber:#FBF1D9; --tint-granat:#E8EDF4;
   /* --faint/--label: minimum 4.5:1 (WCAG AA) na --paper dla mikro-etykiet */
   --muted:#524C3F; --faint:#716951; --label:#746C54;
   --ink-on:#E4DDCE; --ink-faint:#8C8576; --ink-label:#6B6555; --ink-line:#2C2920;
@@ -874,7 +912,6 @@ const CSS = `
 .wp4-display em{ font-family:'Newsreader', serif; font-style:italic; font-weight:400; letter-spacing:-.02em; }
 .wp4-accent{ color:var(--cynober); }
 .wp4-h2{ font-weight:700; font-size:34px; line-height:1.1; letter-spacing:-.03em; margin:0; }
-.wp4-h2 em{ font-family:'Newsreader', serif; font-style:italic; font-weight:400; }
 .wp4-h3{ font-weight:700; font-size:20px; line-height:1.2; letter-spacing:-.02em; margin:12px 0 8px; }
 .wp4-lead{ font-size:19px; line-height:1.6; color:var(--muted); margin:0 0 32px; max-width:46ch; }
 .wp4-lead--narrow{ margin:16px 0 0; font-size:18px; }
@@ -916,6 +953,7 @@ const CSS = `
 .wp4-btn--primary{ background:var(--cynober); color:#fff; }
 .wp4-btn--primary:hover{ background:var(--cynober-hover); }
 .wp4-btn--primary:disabled{ opacity:.6; cursor:default; }
+.wp4-btn--muted{ opacity:.6; } /* makieta: stan disabled bez formularza */
 .wp4-btn--ghost{ background:transparent; color:var(--ink); border-color:var(--hairline); }
 .wp4-btn--ghost:hover{ border-color:var(--ink); }
 .wp4-btn--paper{ background:var(--paper); color:var(--ink); }
@@ -936,27 +974,18 @@ const CSS = `
   border:1px solid var(--hairline); color:var(--muted); white-space:nowrap;
 }
 .wp4-tag--green{ color:var(--green); background:var(--tint-green); border-color:#D7E2DA; }
-.wp4-tag--amber{ color:var(--amber); background:var(--tint-amber); border-color:#EFE2C2; }
 .wp4-tag--cynober{ color:var(--cynober); background:var(--tint-cynober); border-color:#EBD3CB; }
 .wp4-tag--booking{ color:var(--granat); border-color:#C9D3E0; }
-.wp4-tag--airbnb{ color:var(--cynober); border-color:#EBD3CB; }
-.wp4-flow{ font-family:'IBM Plex Mono', monospace; color:var(--faint); font-size:13px; }
 
 .wp4-chan{ font-weight:700; font-size:15px; }
 .wp4-chan--airbnb{ color:var(--cynober); }
 .wp4-chan--booking{ color:var(--granat); }
 
-.wp4-mini-num{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:15px; color:var(--ink); }
-.wp4-mini-num--green{ color:var(--green); }
 
 .wp4-dot{ display:inline-block; width:8px; height:8px; border-radius:2px; vertical-align:middle; margin-right:4px; }
 .wp4-dot--green{ background:var(--green); }
 
 .wp4-hairline{ height:1px; background:var(--hairline); margin:16px 0; }
-.wp4-fig{
-  font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
-  text-transform:uppercase; color:var(--faint); margin:12px 0 0;
-}
 
 /* ── Top bar ── */
 .wp4-topbar{ position:sticky; top:0; z-index:50; background:rgba(243,239,229,.85);
@@ -1031,11 +1060,26 @@ const CSS = `
 /* ── Wartości ── */
 .wp4-values{ border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); padding:64px 0; }
 .wp4-values__grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:40px; }
+/* jedyna sekcja łamiąca równą siatkę — dopiero razem ze zdjęciami właściciela (landingProof.js) */
+.wp4-values__grid--photos{ grid-template-columns:1.4fr 1fr 1fr; }
+.wp4-photo{ margin:0 0 20px; }
+.wp4-photo img{ display:block; width:100%; height:auto; border:1px solid var(--hairline); border-radius:4px; }
+.wp4-photo figcaption{ margin-top:8px; }
+.wp4-founder{ display:flex; gap:20px; align-items:flex-start; margin-top:40px; padding-top:32px; border-top:1px solid var(--hairline); }
+.wp4-founder__photo{ width:96px; height:120px; object-fit:cover; border:1px solid var(--hairline); border-radius:4px; flex:0 0 96px; }
+.wp4-founder__name{ font-weight:700; font-size:17px; margin:0 0 4px; color:var(--ink); }
+.wp4-founder .wp4-body{ margin:10px 0 8px; max-width:60ch; }
 .wp4-values article .wp4-label{ margin-bottom:14px; }
 
 /* ── Sekcje ── */
 .wp4-section{ padding:84px 0; }
 .wp4-section--alt{ background:var(--surface); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); }
+.wp4-section--line{ border-top:1px solid var(--hairline); }
+.wp4-changelog{ list-style:none; margin:0 0 24px; padding:0; max-width:62ch; border-top:1px solid var(--hairline); }
+.wp4-changelog__item{ padding:20px 0; border-bottom:1px solid var(--hairline); }
+.wp4-changelog__item .wp4-h3{ margin:6px 0; }
+.wp4-changelog__item .wp4-body{ font-size:15px; }
+.wp4-beta{ display:block; margin:24px 0 0; text-transform:none; letter-spacing:.02em; }
 .wp4-section__head{ margin-bottom:48px; max-width:62ch; }
 .wp4-section__head .wp4-label{ margin-bottom:16px; }
 .wp4-section__head .wp4-h2{ max-width:20ch; }
@@ -1046,7 +1090,6 @@ const CSS = `
 .wp4-feature{ padding:32px; border-right:1px solid var(--hairline); border-bottom:1px solid var(--hairline); background:var(--surface); }
 .wp4-feature:nth-child(2n){ border-right:none; }
 .wp4-feature:nth-last-child(-n+2){ border-bottom:none; }
-.wp4-feature__foot{ display:flex; align-items:center; gap:10px; margin-top:20px; flex-wrap:wrap; }
 
 /* ── Checklisty ── */
 .wp4-checklist{ list-style:none; margin:24px 0; padding:0; }
@@ -1057,6 +1100,7 @@ const CSS = `
 }
 .wp4-checklist--ink li{ color:var(--ink-on); }
 .wp4-checklist--ink li::before{ border-color:var(--paper); background:transparent; }
+.wp4-checklist--wide{ max-width:62ch; margin:0; }
 
 /* ── Panel — apple-scroll demo (X2 v2, import z Claude Design) ── */
 .wp4-sd button:focus-visible{ outline:2px solid var(--cynober); outline-offset:2px; }
@@ -1078,10 +1122,7 @@ const CSS = `
 .wp4-phone__screen{ background:var(--paper); border-radius:30px; overflow:hidden;
   height:100%; display:flex; flex-direction:column; }
 
-.wp4-phone__head{ flex-shrink:0; padding:34px 20px 18px; border-bottom:1px solid var(--hairline);
-  background-image:linear-gradient(var(--inner) 1px, transparent 1px),
-                   linear-gradient(90deg, var(--inner) 1px, transparent 1px);
-  background-size:18px 18px; background-color:var(--paper); }
+.wp4-phone__head{ flex-shrink:0; padding:34px 20px 18px; border-bottom:1px solid var(--hairline); background:var(--paper); }
 .wp4-phone__title{ font-weight:800; font-size:22px; letter-spacing:-.025em; margin:8px 0 6px; }
 
 .wp4-phone__body{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;
@@ -1091,22 +1132,21 @@ const CSS = `
 
 .wp4-gcard{ background:var(--surface); border:1px solid var(--hairline); border-radius:4px; padding:14px; }
 .wp4-gcard .wp4-label{ font-size:10px; }
-.wp4-pin{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:30px;
-  letter-spacing:.32em; color:var(--ink); margin-top:6px; font-variant-numeric:tabular-nums; }
 .wp4-gcard__name{ font-weight:700; font-size:15px; margin:6px 0 4px; }
 .wp4-gcard__row{ font-size:13px; color:var(--muted); margin:0; }
-.wp4-code{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink);
-  background:var(--inner); border:1px solid var(--hairline); border-radius:3px; padding:1px 6px; }
 .wp4-checklist--tight{ margin:10px 0 0; }
 .wp4-checklist--tight li{ font-size:13px; margin-bottom:8px; padding-left:20px; }
 .wp4-checklist--tight li::before{ top:6px; width:8px; height:8px; }
 
-.wp4-minimap{ position:relative; height:88px; margin-top:10px; border-radius:3px; border:1px solid var(--hairline);
-  background-image:linear-gradient(var(--inner) 1px, transparent 1px),
-                   linear-gradient(90deg, var(--inner) 1px, transparent 1px);
-  background-size:14px 14px; background-color:var(--paper); }
-.wp4-minimap__pin{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:14px; height:14px; border-radius:50% 50% 50% 0; background:var(--cynober); rotate:-45deg; }
+.wp4-gcard--locked{ text-align:center; }
+.wp4-gcard__ic{ width:22px; height:22px; color:var(--amber); display:block; margin:0 auto 8px; }
+.wp4-gcard--accept{ background:var(--tint-granat); border-color:#C9D3E0; }
+.wp4-gcard__check{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; font-weight:500; color:var(--ink);
+  margin:10px 0 0; background:var(--surface); border:1px solid var(--hairline); border-radius:4px; padding:10px; }
+.wp4-gcard__box{ width:14px; height:14px; border:1px solid var(--hairline); border-radius:3px; flex:0 0 14px; margin-top:2px; background:#fff; }
+.wp4-gcard--accept .wp4-btn{ margin-top:12px; }
+.wp4-gcard__contact{ display:flex; align-items:center; justify-content:center; gap:8px; font-weight:600; font-size:14px; color:var(--ink); }
+.wp4-gcard__contact svg{ width:16px; height:16px; color:var(--cynober); }
 
 .wp4-phone__foot{ flex-shrink:0; padding:12px 16px; border-top:1px solid var(--hairline); background:var(--surface); }
 .wp4-btn--full{ width:100%; }
@@ -1121,14 +1161,6 @@ const CSS = `
   letter-spacing:.08em; color:var(--cynober); }
 
 /* ── Porównanie ── */
-.wp4-compare{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-.wp4-compare__col{ border:1px solid var(--hairline); border-radius:4px; padding:32px; background:var(--paper); }
-.wp4-compare__col--ink{ background:var(--ink); border-color:var(--ink); }
-.wp4-compare__col .wp4-label{ margin-bottom:20px; }
-.wp4-compare__col--ink .wp4-plan__badge{ margin-bottom:20px; }
-.wp4-xlist{ list-style:none; margin:0; padding:0; }
-.wp4-xlist li{ position:relative; padding-left:24px; margin-bottom:14px; color:var(--faint); font-size:16px; }
-.wp4-xlist li::before{ content:'\\00d7'; position:absolute; left:2px; top:-1px; color:var(--faint); font-weight:700; }
 
 /* ── Cennik ── */
 .wp4-pricing{ display:grid; grid-template-columns:1.1fr .9fr; gap:20px; align-items:stretch; }
@@ -1211,6 +1243,9 @@ const CSS = `
 .wp4-footer__col button{ padding:0; border:0; background:none; font-family:inherit; text-align:left; cursor:pointer; }
 .wp4-footer__bottom{ display:flex; align-items:center; justify-content:space-between; gap:16px;
   margin-top:48px; padding-top:24px; border-top:1px solid var(--hairline); flex-wrap:wrap; }
+.wp4-footer__facts{ text-transform:none; letter-spacing:.02em; }
+.wp4-footer__facts a{ color:var(--faint); text-decoration:underline; text-underline-offset:2px; }
+.wp4-footer__facts a:hover{ color:var(--ink); }
 
 /* ── Responsywność ── */
 @media (max-width:1040px){
@@ -1224,7 +1259,9 @@ const CSS = `
   .wp4-guide{ grid-template-columns:1fr; gap:40px; justify-items:center; }
   .wp4-guide__copy{ justify-self:start; }
   .wp4-values__grid{ grid-template-columns:1fr; gap:32px; }
-  .wp4-features,.wp4-compare,.wp4-pricing,.wp4-blog__grid{ grid-template-columns:1fr; }
+  .wp4-features,.wp4-pricing,.wp4-blog__grid{ grid-template-columns:1fr; }
+  .wp4-values__grid--photos{ grid-template-columns:1fr; }
+  .wp4-founder{ flex-direction:column; }
   .wp4-feature{ border-right:none; }
   .wp4-feature:nth-last-child(2){ border-bottom:1px solid var(--hairline); }
   .wp4-post{ border-right:none; border-bottom:1px solid var(--hairline); }

@@ -221,4 +221,11 @@ const banner = `// PLIK GENEROWANY — NIE EDYTUJ RĘCZNIE.
 // Filtr publikacyjny (adnotacje robocze NIE przechodzą): scripts/build-legal.mjs
 `;
 writeFileSync(OUT, `${banner}\nexport const legalDocs = ${JSON.stringify(docs, null, 2)};\n`, 'utf8');
-console.log(`OK: ${docs.map((d) => `${d.slug} (${d.blocks.length} bloków)`).join(', ')} -> src/data/legalDocs.js`);
+
+// Lekki plik z samą metryką (slug, etykieta, wersja, data obowiązywania) — dla miejsc,
+// które mają pokazać „obowiązuje od …" bez wciągania 69 KB treści do swojej paczki
+// (stopka landingu, 2026-09-03). Ta sama data co na stronach dokumentów, z jednego przebiegu.
+const OUT_META = join(OUT, '..', 'legalMeta.js');
+const meta = docs.map(({ slug, label, version, effective }) => ({ slug, label, version, effective }));
+writeFileSync(OUT_META, `${banner}\nexport const legalMeta = ${JSON.stringify(meta, null, 2)};\n`, 'utf8');
+console.log(`OK: ${docs.map((d) => `${d.slug} (${d.blocks.length} bloków)`).join(', ')} -> src/data/legalDocs.js (+ legalMeta.js)`);

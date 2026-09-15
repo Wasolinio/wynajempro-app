@@ -52,6 +52,15 @@ test.describe('Strony publiczne odpowiadają i mają treść', () => {
     await page.goto('/prywatnosc');
     await expect(page.getByRole('button', { name: /wycofaj zgodę na cookies/i })).toBeVisible();
   });
+
+  test('Co nowego: publiczny dziennik zmian ma wpisy', async ({ page }) => {
+    // Trasa od 2026-09-15 (E8). Landing linkuje ją ze stopki i z sekcji „Co nowego",
+    // a treść to te same patch noty, które panel pokazuje po zalogowaniu (E4).
+    const odpowiedz = await page.goto('/co-nowego');
+    expect(odpowiedz.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: /co nowego/i })).toBeVisible();
+    await expect(page.locator('main h2').first()).toBeVisible();
+  });
 });
 
 test('Service worker działa w trybie „prompt", nie „autoUpdate"', async ({ request }) => {
