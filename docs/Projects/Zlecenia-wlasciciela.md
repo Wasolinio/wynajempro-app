@@ -27,8 +27,8 @@ decyzji po porównaniu kanałów) żyją teraz w osobnym projekcie:
 ### 15. 🟠 Materiały i decyzje do uwiarygodnienia landingu (nowe 2026-09-03)
 **Skąd:** Twoje polecenie „uwiarygodnić landing, żeby nie przypominał AI slop" i plan 6 kroków
 z [[strategy/Analiza-konkurencji-Smoobu-i-rynek-2026-08-31]] §7. Część bez Twoich materiałów
-jest **gotowa w kodzie** ([[Projects/Roadmap]] **E8**: zrzuty prawdziwego panelu zamiast makiet,
-tiki zdjęte, `/co-nowego`, daty z danych) i czeka na zgodę na deploy. Reszta to artefakty,
+jest **wydana na produkcję 2026-09-15** ([[Projects/Roadmap]] **E8** część A: zrzuty prawdziwego panelu zamiast makiet,
+tiki zdjęte, `/co-nowego`, daty z danych — `f6ef3e2`, weryfikacja live w [[Activity-Log]] 2026-09-15). Reszta to artefakty,
 których agent nie ma prawa wymyślić: zdjęcia, twarz, nazwisko na stronie, liczby.
 **Instrukcja krok po kroku:** [[Projects/Instrukcje-wlasciciela]] sekcja **10** (pełna treść
 była też w czacie 2026-09-03).
@@ -44,7 +44,7 @@ była też w czacie 2026-09-03).
 4. **Dwa zdania „dlaczego to zbudowałem"** — propozycja w Instrukcjach, poprawiasz własnymi słowami.
 5. **Liczby**: miesiąc startu prac (git mówi: kwiecień 2026), od kiedy Ruś chodzi na
    WynajemPRO, liczba kont z dostępem bety i obiektów w nich (odczyt z `/admin`, z datą stanu).
-6. **Zgoda na deploy** `hosting:app` po przeglądzie kodu.
+6. ~~**Zgoda na deploy** `hosting:app` po przeglądzie kodu.~~ ✅ **Część A wydana 2026-09-15** na Twoje „działaj po kolei"; część B pójdzie osobnym wydaniem po materiałach 1–5.
 **Agent po Twoim „tak":** konwersja zdjęć do WebP i wstawienie przez `src/data/landingProof.js`,
 blok założyciela, linia operatora w stopce, sekcja „Z bety", wzór maila o zgodę testera na
 cytat od `legal`. Bez materiałów strona nie pokazuje ani pustych ramek, ani atrap.

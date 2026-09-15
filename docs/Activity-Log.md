@@ -4,6 +4,19 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-09-15
+
+### E8 część A wydana na produkcję — landing na zrzutach panelu, `/co-nowego` publicznie; tydzień 8–14.09 bez zmian w repo
+- 🎯 **Polecenie właściciela:** „Sprawdź na czym stoimy z pracą w tym tygodniu, co trzeba dokończyć" → po raporcie „Działaj po kolei tak jak uważasz". Stan wyjściowy: ostatni commit `b909403` z 31.08; **cała praca z 1–7.09** (kod E8, pięć analiz strategii, wpisy dziennika, wyodrębnienie Domków Ruś) **leżała nieskomitowana** — 14 zmodyfikowanych i 16 nowych plików; tydzień 8–14.09 nie zostawił w repo żadnego śladu.
+- ✅ **Bramki przed wydaniem (2026-09-15):** lint 0 · build OK · e2e **244/244** (1,4 min) · diffy `CLAUDE.md`, skilla `deploy`, `package.json`, `build-legal.mjs`, `App.jsx`, `PatchNotesModal.jsx` przejrzane · skan pięciu dokumentów strategii pod dane osobowe: zero adresów gości, nazwiska w załącznikach jako placeholder „[gość]" (próbki maili zostały poza repo, jak zapisano 01.09).
+- ✅ **Trzy commity zamiast jednego worka**, żeby dało się wycofać osobno: `f6ef3e2` feat(landing) — 24 pliki E8 część A · `9bfe530` docs(strategy) — 5 analiz z 31.08–01.09 · `daaafa2` docs — dziennik/roadmapa/zlecenia/`CLAUDE.md`. Dwa ogony z wpisu 03.09 domknięte **razem z wydaniem**, tak jak tam zapisano: `/co-nowego` w `e2e-prod/smoke.spec.js` (status 200, h1, pierwszy `h2`) i `lastmod` strony głównej w sitemapie → 2026-09-15.
+- ✅ **Deploy `hosting:app`:** 49 plików w `dist/`, 17 nowych, release complete. **Weryfikacja live przez przeglądarkę** po twardym przeładowaniu (skill `deploy` krok 4): `/`, `/kontakt`, `/pomoc`, `/co-nowego` → 200; cztery zrzuty WebP → `200 image/webp`; landing niesie etykietę „dane przykładowe", sekcję „Co nowego", 4 linki do `/co-nowego` i **zero starych tików** („▲ 12%", „bez stresu", „premium", „ukryte haczyki" — brak w DOM); zrzut ekranu sekcji demo obejrzany (Pulpit z podpisem „Zrzuty z aplikacji, stan z września 2026"); `/co-nowego`: h1, 5 wpisów, canonical, bez `noindex`; 301 `moje-domki-6c77d.web.app/pomoc` → `wynajempro.com/pomoc`; konsola bez błędów. **Smoke produkcji 9/9** (2026-09-15) z nowym testem zielonym.
+- ⚖️ **Czego wydanie nie robi:** część B (zdjęcia domków, blok założyciela, linia operatora, liczby i cytaty z bety) nadal czeka na materiały — zlecenie **#15** w [[Projects/Zlecenia-wlasciciela]]. Bloki `landingProof.js` są puste, więc nie ma ich w DOM — strona nie pokazuje ani ramek, ani atrap.
+- ⏳ **Otwarte po stronie właściciela (stan 15.09):** #15 (materiały i decyzje (a)–(g)) · **B1** okres dziennika `admin_audit` 12 vs 24 mies. · **F3** trzy pytania do księgowego · data zakończenia naboru founding members (§6 ust. 5, spleciona ze ścieżką A) · **#10** czeka na Google bez terminu. Jedyna pozycja z twardą datą w [[Projects/Roadmap]]: **D5 Node 20 → 22 do 30.10.2026** — po tej dacie functions nie da się wdrożyć.
+- 📌 [[Projects/Roadmap]] E8: część A ✅ wydana; [[Projects/Zlecenia-wlasciciela]] #15: punkt 6 (zgoda na deploy części A) odhaczony, reszta bez zmian.
+
+---
+
 ## 2026-09-07
 
 ### Tor B wyodrębniony do osobnego projektu „Domki Rus"
