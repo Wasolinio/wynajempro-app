@@ -75,6 +75,12 @@ Weryfikuj narzędziami przeglądarki (`preview_start` na `https://wynajempro.com
    Ten błąd oznacza, że stary SW prosi o nieistniejący hash chunku.
 4. **Przekierowanie 301** ze starej domeny z zachowaniem ścieżki.
 5. Dla zmian w treści: sprawdź, że nowy tekst faktycznie jest na stronie, a nie tylko w `dist/`.
+6. **Dla zmian wizualnych: obejrzyj zrzut ekranu zmienionej sekcji PO OSTATNIEJ zmianie** — przed
+   deployem lokalnie i po deployu na produkcji, przy szerokości desktopowej i 375 px. Pomiar DOM
+   i odczyt tekstów nie zastępują obejrzenia (lekcja z 2026-09-17: dopisek dodany po zrzucie
+   rozciągnął kolumnę i wydanie „zgadzało się w DOM", a wyglądało źle). Gdy panel przeglądarki
+   jest ukryty albo zrzuty wychodzą puste, zrób zrzut elementu Playwrightem
+   (`page.locator('.sekcja').screenshot()`), baner cookies chowając stylem, nie kliknięciem.
 
 Zmiany w regułach weryfikuje się inaczej — smoke testem uprawnień (krok 6 skilla `reguly`),
 nie przeglądarką.
