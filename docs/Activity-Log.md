@@ -4,6 +4,26 @@ Project timeline and key milestones.
 
 ---
 
+## 2026-09-17
+
+### Karta „Z praktyki" i FAQ „odpisuję osobiście" wydane na produkcję
+- 🎯 **Zgoda właściciela w czacie:** „tak, wdrażaj" — po obejrzeniu dokładnego brzmienia karty i odpowiedzi w FAQ (wpis niżej opisuje stan sprzed zgody i zostaje w pierwotnym brzmieniu).
+- ✅ **Commit `ffc22c0`** (`LandingPage.jsx`, `landingProof.js`) → `npm run build` → **deploy `hosting:app`**: 4 nowe pliki, release complete.
+- ✅ **Weryfikacja live przez przeglądarkę** (aktualizacja service workera + przeładowanie): w DOM nagłówek „Zbudowałem to przy własnych domkach" i oba zdania karty słowo w słowo, FAQ kończy się „Odpisuję osobiście, mailem, zwykle w ciągu 24–48 godzin roboczych."; **zero starych brzmień** („Zbudowane przy", „Odpowiadamy po polsku", „u gospodarza, który"); bloku `.wp4-founder` i oceny Airbnb brak — zgodnie z (a), (b), (g); `/`, `/kontakt`, `/pomoc`, `/co-nowego` → 200; konsola bez błędów. **Smoke produkcji 9/9** (2026-09-17), w tym 301 ze starej domeny.
+- ⚖️ Przeglądu `code-reviewer` nie było — zmiana to trzy zdania tekstu bez logiki; prawdziwość sprawdzona u źródła (obietnica 24–48 h identyczna jak na `/kontakt` i w centrum pomocy, fakty karty z materiałów właściciela).
+- ⏳ **Zostaje z #15:** zdjęcia domków + precyzja miejsca w podpisach, liczby z `/admin`.
+
+### Decyzje (a)–(g) do landingu podjęte — karta „Z praktyki" w pierwszej osobie, FAQ „odpisuję osobiście" (kod gotowy, nie wydane)
+- 🎯 **Odpowiedź właściciela w czacie** na blok decyzji ze zlecenia **#15**: (a) nazwisko **NIE** · (b) zdjęcie twarzy **NIE** · (c) nazwa „Domki Letniskowe Ruś" **TAK** · (d) „odpisuję osobiście" w FAQ **TAK** · (e) pierwsza osoba w karcie „Z praktyki" **TAK** · (f) „1 domek czy 20 apartamentów" **zostaje** · (g) ocena Airbnb **NIE**.
+- ✅ **Naniesione w `LandingPage.jsx`:** karta „Z praktyki" — nagłówek „Zbudowałem to przy własnych domkach", treść „Prowadzę Domki Letniskowe Ruś i sam obsługuję gości. Panel wyrósł z arkusza, w którym przestały mi się mieścić rezerwacje z Bookingu, Airbnb i telefonu." (fakty z propozycji 10d w [[Projects/Instrukcje-wlasciciela]], czyli z posta LinkedIn 28.08 i briefu); FAQ „Co, gdy będę potrzebować pomocy?" kończy się zdaniem z decyzji (d), słowo w słowo.
+- 🛡️ **Dlaczego (d) nie jest nową obietnicą:** „24–48 godzin roboczych" stoi już na `/kontakt` (`ContactPage.jsx:96`) i w centrum pomocy (`docs/support/README.md`, `rozwiazywanie-problemow.md`) — landing mówi to samo co produkt, zmienia się tylko osoba.
+- 📌 **`src/data/landingProof.js` dostał zapis decyzji:** `FOUNDER = null` jest teraz **decyzją, nie luką** — (a) i (b) = NIE, więc blok założyciela i linia operatora z nazwiskiem w stopce nie powstają bez nowej decyzji. Bez tego zapisu następna sesja wzięłaby puste pole za zaległość. Dwa zdania z 10d są bezprzedmiotowe jako osobny blok; ich treść zasiliła kartę.
+- ✅ **Bramki (2026-09-17):** lint 0 · build OK · e2e **244/244** (1,7 min). Żaden test ani artykuł pomocy nie cytował starych brzmień (sprawdzone grepem po `e2e/`, `e2e-prod/`, `src/`, `docs/support/`).
+- ⏳ **Nie zacommitowane i nie wydane** — [[Team-Playbook]]: commit i deploy na wyraźne polecenie, a zgoda z 15.09 dotyczyła tamtego wydania. Dokładne brzmienie karty pokazane właścicielowi w czacie, bo to jego publiczna wypowiedź w pierwszej osobie.
+- ⏳ **Zostaje z #15:** zdjęcia domków (3–5) i **precyzja miejsca** w ich podpisach — druga połowa decyzji (c), bez odpowiedzi; potrzebna dopiero przy zdjęciach · liczby z `/admin` z datą stanu.
+
+---
+
 ## 2026-09-15
 
 ### E8 część A wydana na produkcję — landing na zrzutach panelu, `/co-nowego` publicznie; tydzień 8–14.09 bez zmian w repo

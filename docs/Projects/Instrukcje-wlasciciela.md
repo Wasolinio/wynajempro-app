@@ -51,6 +51,10 @@ tło neutralne albo domek/jezioro. Bez filtrów, bez generatora, bez wycinania z
 zdjęcia. Może być czarno-białe. **Tylko jeśli decyzja (b) niżej brzmi „tak".**
 
 ### 10c. Jeden mail zwrotny z decyzjami (a)–(g)
+> ✅ **DECYZJE PODJĘTE 2026-09-17:** (a) NIE · (b) NIE · (c) TAK · (d) TAK · (e) TAK · (f) zostaje · (g) NIE.
+> Skutek: 10b (zdjęcie twarzy) i 10d (dwa zdania jako blok założyciela) **odpadają**; zostają 10a (zdjęcia
+> + precyzja miejsca w podpisach — jedyna część (c) bez odpowiedzi) i 10e (liczby z `/admin`).
+
 Skopiuj, uzupełnij i odeślij (albo wklej w czacie):
 
 ```
