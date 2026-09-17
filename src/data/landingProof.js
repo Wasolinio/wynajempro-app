@@ -52,7 +52,7 @@ export const PHOTOS = [
     width: 1200,
     height: 800,
     alt: 'Drewniany domek letniskowy z zadaszonym tarasem na ogrodzonej działce, widok z drona',
-    caption: 'Domki Letniskowe Ruś, Warmia i Mazury · własne ujęcie z drona',
+    caption: 'Domki Letniskowe Ruś · Warmia i Mazury · ujęcie z drona',
     // Dopisek na prośbę właściciela (2026-09-17), jego słowami. ⚠️ Niesie termin: wiosną 2027
     // zdjęcie i to zdanie są do wymiany (Backlog, iteracja 2 pkt 8) — po terminie zacznie kłamać.
     note: 'To zdjęcie z początków mojej przygody z wynajmem. Nowe, już z dwoma domkami, dodam wiosną 2027, kiedy skończą się prace przy basenach.',

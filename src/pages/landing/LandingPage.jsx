@@ -169,6 +169,22 @@ export default function LandingPage() {
     }
   };
 
+  /* Pierwsza osoba i nazwa „Domki Letniskowe Ruś" — decyzje właściciela (c) i (e) z 2026-09-17.
+     Bez nazwiska i bez zdjęcia twarzy: (a) i (b) = NIE. To publiczna wypowiedź właściciela
+     w pierwszej osobie — każda zmiana słów wymaga jego akceptacji. Jedna treść, dwa układy:
+     blok ze zdjęciem albo (bez zdjęcia) pierwsza z trzech kart. */
+  const praktyka = (
+    <>
+      <span className="wp4-label">Z praktyki</span>
+      <h3 className="wp4-h3">Zbudowałem to przy własnych domkach</h3>
+      <p className="wp4-body">
+        Prowadzę Domki Letniskowe Ruś i sam obsługuję gości. Panel
+        wyrósł z arkusza, w którym przestały mi się mieścić rezerwacje
+        z Bookingu, Airbnb i telefonu.
+      </p>
+    </>
+  );
+
   return (
     <div className="wp4">
       <style>{CSS}</style>
@@ -331,32 +347,27 @@ export default function LandingPage() {
           Teraz mówią o czytelniku, a każde twierdzenie ma pokrycie w kodzie. ────────────── */}
       <section className="wp4-values">
         <div className="wp4-container">
-          <div className={`wp4-values__grid${PHOTOS.length ? ' wp4-values__grid--photos' : ''}`}>
-            <article>
-              {/* Zdjęcia własnych domków właściciela — dopiero po materiałach i zgodzie (c);
-                  bez plików figure nie istnieje w DOM (landingProof.js) */}
-              {PHOTOS.length > 0 && (
-                <figure className="wp4-photo">
-                  <img src={PHOTOS[0].src} alt={PHOTOS[0].alt} width={PHOTOS[0].width} height={PHOTOS[0].height} loading="lazy" decoding="async" />
-                  <figcaption>
-                    <span className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</span>
-                    {/* Dopisek właściciela (zdanie, nie etykieta) — zwykłą czcionką, bo wersaliki
-                        mono są czytelne tylko przy kilku słowach */}
-                    {PHOTOS[0].note && <p className="wp4-photo__note">{PHOTOS[0].note}</p>}
-                  </figcaption>
-                </figure>
-              )}
-              {/* Pierwsza osoba i nazwa „Domki Letniskowe Ruś" — decyzje właściciela (c) i (e)
-                  z 2026-09-17. Bez nazwiska i bez zdjęcia: (a) i (b) = NIE. To publiczna
-                  wypowiedź właściciela w pierwszej osobie — każda zmiana słów wymaga jego akceptacji. */}
-              <span className="wp4-label">Z praktyki</span>
-              <h3 className="wp4-h3">Zbudowałem to przy własnych domkach</h3>
-              <p className="wp4-body">
-                Prowadzę Domki Letniskowe Ruś i sam obsługuję gości. Panel
-                wyrósł z arkusza, w którym przestały mi się mieścić rezerwacje
-                z Bookingu, Airbnb i telefonu.
-              </p>
-            </article>
+          {/* Układ v2 (2026-09-17, po uwadze właściciela): zdjęcie z historią to OSOBNY poziomy blok,
+              a nie pierwsza z trzech kolumn. W wersji v1 zdjęcie + podpis + dopisek rozciągały
+              pierwszą kolumnę na ponad dwukrotną wysokość pozostałych — dwie karty wisiały nad pustką,
+              a „Z praktyki" spadała pod zgięcie. Oba wiersze mają tę samą siatkę 1fr 1fr, żeby
+              krawędzie kolumn schodziły się w pionie. Bez zdjęcia (PHOTOS puste) wraca równa trójka. */}
+          {PHOTOS.length > 0 && (
+            <div className="wp4-story">
+              {/* Zdjęcie własnego domku właściciela — bez pliku figure nie istnieje w DOM (landingProof.js) */}
+              <figure className="wp4-photo">
+                <img src={PHOTOS[0].src} alt={PHOTOS[0].alt} width={PHOTOS[0].width} height={PHOTOS[0].height} loading="lazy" decoding="async" />
+                <figcaption className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</figcaption>
+              </figure>
+              <article className="wp4-story__text">
+                {praktyka}
+                {/* Dopisek właściciela (zdanie, nie etykieta) — zwykłą czcionką pod hairline */}
+                {PHOTOS[0].note && <p className="wp4-photo__note">{PHOTOS[0].note}</p>}
+              </article>
+            </div>
+          )}
+          <div className={`wp4-values__grid${PHOTOS.length ? ' wp4-values__grid--two' : ''}`}>
+            {PHOTOS.length === 0 && <article>{praktyka}</article>}
             <article>
               <span className="wp4-label">Dowód przy sporze</span>
               <h3 className="wp4-h3">Masz ślad, że gość znał zasady</h3>
@@ -1068,12 +1079,18 @@ const CSS = `
 /* ── Wartości ── */
 .wp4-values{ border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); padding:64px 0; }
 .wp4-values__grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:40px; }
-/* jedyna sekcja łamiąca równą siatkę — dopiero razem ze zdjęciami właściciela (landingProof.js) */
-.wp4-values__grid--photos{ grid-template-columns:1.4fr 1fr 1fr; }
-.wp4-photo{ margin:0 0 20px; }
+/* Ze zdjęciem właściciela (landingProof.js): blok „zdjęcie | historia", pod nim dwie karty.
+   Oba wiersze na tej samej siatce 1fr 1fr i z tą samą przerwą — krawędzie kolumn się schodzą. */
+.wp4-story{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+.wp4-story + .wp4-values__grid{ margin-top:48px; padding-top:40px; border-top:1px solid var(--hairline); }
+.wp4-values__grid--two{ grid-template-columns:1fr 1fr; gap:56px; }
+.wp4-values__grid--two .wp4-body{ max-width:52ch; }
+.wp4-story__text .wp4-h3{ font-size:28px; line-height:1.15; margin:14px 0 12px; }
+.wp4-story__text .wp4-body{ font-size:17px; max-width:48ch; }
+.wp4-photo{ margin:0; }
 .wp4-photo img{ display:block; width:100%; height:auto; border:1px solid var(--hairline); border-radius:4px; }
-.wp4-photo figcaption{ margin-top:8px; }
-.wp4-photo__note{ margin:6px 0 0; font-size:14px; line-height:1.5; color:var(--muted); }
+.wp4-photo figcaption{ margin-top:10px; }
+.wp4-photo__note{ margin:20px 0 0; padding-top:16px; border-top:1px solid var(--hairline); font-size:14px; line-height:1.55; color:var(--faint); max-width:48ch; }
 .wp4-founder{ display:flex; gap:20px; align-items:flex-start; margin-top:40px; padding-top:32px; border-top:1px solid var(--hairline); }
 .wp4-founder__photo{ width:96px; height:120px; object-fit:cover; border:1px solid var(--hairline); border-radius:4px; flex:0 0 96px; }
 .wp4-founder__name{ font-weight:700; font-size:17px; margin:0 0 4px; color:var(--ink); }
@@ -1269,7 +1286,9 @@ const CSS = `
   .wp4-guide__copy{ justify-self:start; }
   .wp4-values__grid{ grid-template-columns:1fr; gap:32px; }
   .wp4-features,.wp4-pricing,.wp4-blog__grid{ grid-template-columns:1fr; }
-  .wp4-values__grid--photos{ grid-template-columns:1fr; }
+  .wp4-story{ grid-template-columns:1fr; gap:24px; }
+  .wp4-values__grid--two{ grid-template-columns:1fr; gap:32px; }
+  .wp4-story__text .wp4-h3{ font-size:24px; }
   .wp4-founder{ flex-direction:column; }
   .wp4-feature{ border-right:none; }
   .wp4-feature:nth-last-child(2){ border-bottom:1px solid var(--hairline); }

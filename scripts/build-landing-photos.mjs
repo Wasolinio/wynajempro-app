@@ -27,12 +27,14 @@ const JAKOSC = 0.72;
 
 /* kadr = prostokąt wycinany ze źródła (px źródła); szer × wys = rozmiar wyniku.
    rus-dron-domek-0151.jpg: klatka 1:51 z filmu właściciela (4K, 3840×2160) — domek na wprost,
-   auto schowane za budynkiem, zabudowa sąsiadów tylko w dalekim tle. Kadr 3:2. */
+   auto schowane za budynkiem, zabudowa sąsiadów tylko w dalekim tle. Kadr 3:2.
+   Kadr v3 (2026-09-17, po uwadze właściciela „tragicznie wygląda"): domek zajmuje 2/3 szerokości,
+   nad nim linia lasu i niebo — wcześniejsze kadry miały pół obrazu trawnika. */
 const ZDJECIA = [
   {
     zrodlo: 'rus-dron-domek-0151.jpg',
     wynik: 'rus-domek-z-drona.webp',
-    kadr: { x: 1100, y: 215, w: 1800, h: 1200 },
+    kadr: { x: 1200, y: 60, w: 1620, h: 1080 },
     szer: 1200,
     wys: 800,
   },
