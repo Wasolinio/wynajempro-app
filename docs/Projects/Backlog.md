@@ -116,3 +116,4 @@
 - ~~Prioritization Matrix / Roadmap by Quarter / estymaty godzinowe~~ — zastąpione przez [[Projects/Roadmap]].
 
 **Related:** [[Projects/Roadmap]] · [[Known-Issues]] · [[Projects/Milestones]]
+- **Podbicie `firebase-admin`/`firebase-functions` do najnowszych wersji** (2026-09-17, po migracji na Node 22 w D5) — CLI ostrzega o breaking changes przy `firebase-functions@latest`; obecne wersje (`firebase-admin@13.10.0`, `firebase-functions@6.6.0`) działają poprawnie na Node 22, więc podbicie nie jest pilne, ale warto zrobić osobno, z własnym przeglądem `code-reviewer` — nie mieszać z migracją środowiska.

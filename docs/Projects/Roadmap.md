@@ -118,7 +118,7 @@ Znak (kierunek C) i komplet ikon wdrożone 21.08. Zostaje z handoffu:
 | **D2** | **Przegląd dostępności panelu administratora** | agent `designer` przerwany limitem sesji; otwarte: kontrasty klas `.wpa-*`, obsługa klawiaturą wierszy tabeli kont, dostępne nazwy ikon |
 | **D3** | **Przegląd commita `6942496`** (X20–X23 z równoległej sesji) | praca nieprzejrzana przeze mnie; wydzielona osobno, żeby dała się wycofać |
 | **D4** | `invoice.payment_action_required` — 3D Secure przy odnowieniu | dziś degraduje się do `payment_failed` po kilku dniach zamiast od razu informować klienta |
-| **D5** | **Node 20 → 22** | twarda data: **30.10.2026** wyłączenie środowiska, po niej nie da się wdrożyć funkcji |
+| **D5** | ✅ **ZAMKNIĘTE 2026-09-17** — **Node 20 → 22**, wszystkie 14 funkcji (`47c44c5`, `firebase deploy --only functions`), `functions:list` potwierdza `nodejs22`, smoke `exportIcal`/`stripeWebhook` żywe. Zależności nie podbite (już zgodne). Szczegóły [[Activity-Log]] 2026-09-17 | twarda data była: **30.10.2026** — domknięte 43 dni wcześniej |
 | **D6** | Decyzja o App Check na logowaniu ([[Known-Issues]] #17) | wymuszanie chroni przed botami, ale czyni z reCAPTCHA pojedynczy punkt awarii wejścia do produktu |
 
 ### Ścieżka E — zlecenia właściciela z 23.08. Wchodzą do tygodnia od 24.08
