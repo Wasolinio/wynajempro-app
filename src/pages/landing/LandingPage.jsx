@@ -341,12 +341,15 @@ export default function LandingPage() {
                   <figcaption className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</figcaption>
                 </figure>
               )}
+              {/* Pierwsza osoba i nazwa „Domki Letniskowe Ruś" — decyzje właściciela (c) i (e)
+                  z 2026-09-17. Bez nazwiska i bez zdjęcia: (a) i (b) = NIE. To publiczna
+                  wypowiedź właściciela w pierwszej osobie — każda zmiana słów wymaga jego akceptacji. */}
               <span className="wp4-label">Z praktyki</span>
-              <h3 className="wp4-h3">Zbudowane przy własnych domkach</h3>
+              <h3 className="wp4-h3">Zbudowałem to przy własnych domkach</h3>
               <p className="wp4-body">
-                Panel wyrósł z arkusza, w którym przestały się mieścić
-                rezerwacje z kilku kanałów naraz. Powstał u gospodarza, który
-                obsługuje swoje domki sam.
+                Prowadzę Domki Letniskowe Ruś i sam obsługuję gości. Panel
+                wyrósł z arkusza, w którym przestały mi się mieścić rezerwacje
+                z Bookingu, Airbnb i telefonu.
               </p>
             </article>
             <article>
@@ -692,7 +695,7 @@ export default function LandingPage() {
             />
             <FaqItem
               q="Co, gdy będę potrzebować pomocy?"
-              a="Masz centrum pomocy z instrukcjami krok po kroku i formularz kontaktowy. Odpowiadamy po polsku, mailem."
+              a="Masz centrum pomocy z instrukcjami krok po kroku i formularz kontaktowy. Odpisuję osobiście, mailem, zwykle w ciągu 24–48 godzin roboczych."
             />
           </div>
         </div>

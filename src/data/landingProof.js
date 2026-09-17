@@ -26,6 +26,19 @@
   Cytaty testerów: dopiero po pisemnej zgodzie każdej osoby (wzór maila od agenta legal),
   nigdy z komentarzy w grupie FB ani z plików testerów.
 */
+/*
+  DECYZJE WŁAŚCICIELA (a)–(g) z 2026-09-17 — czytaj, zanim cokolwiek tu wypełnisz:
+    (a) nazwisko na landingu: NIE · (b) zdjęcie twarzy: NIE
+        → FOUNDER zostaje null Z DECYZJI, nie z braku materiału. Nie wypełniać
+          (ani bloku założyciela, ani footerLine z nazwiskiem) bez nowej decyzji.
+    (c) nazwa „Domki Letniskowe Ruś": TAK · (e) pierwsza osoba w karcie „Z praktyki": TAK
+        → naniesione wprost w LandingPage.jsx (karta „Z praktyki").
+    (d) FAQ „Odpisuję osobiście, mailem, zwykle w ciągu 24–48 godzin roboczych": TAK → w FAQ.
+    (f) zakres „1 domek czy 20 apartamentów": ZOSTAJE.
+    (g) ocena Airbnb 5,0 przy 5 opiniach: NIE — wracamy przy większej liczbie opinii.
+  NADAL OTWARTE: pliki zdjęć domków + precyzja miejsca w podpisach (część decyzji (c),
+  bez odpowiedzi) → PHOTOS; liczby z /admin z datą stanu → BETA.
+*/
 export const PHOTOS = [];
 export const FOUNDER = null;
 export const BETA = null;
