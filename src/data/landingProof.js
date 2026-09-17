@@ -36,9 +36,27 @@
     (d) FAQ „Odpisuję osobiście, mailem, zwykle w ciągu 24–48 godzin roboczych": TAK → w FAQ.
     (f) zakres „1 domek czy 20 apartamentów": ZOSTAJE.
     (g) ocena Airbnb 5,0 przy 5 opiniach: NIE — wracamy przy większej liczbie opinii.
-  NADAL OTWARTE: pliki zdjęć domków + precyzja miejsca w podpisach (część decyzji (c),
-  bez odpowiedzi) → PHOTOS; liczby z /admin z datą stanu → BETA.
+  Precyzja miejsca: „Warmia i Mazury" (2026-09-17). NADAL OTWARTE: liczby z /admin z datą stanu → BETA.
 */
-export const PHOTOS = [];
+import rusDomekZDrona from '../assets/landing/rus-domek-z-drona.webp';
+
+/* Zdjęcie 1: kadr 1:51 z filmu z drona dostarczonego przez właściciela 2026-09-17
+   (npm run zdjecia:build, kadr zapisany w scripts/build-landing-photos.mjs). Bez osób,
+   bez czytelnych tablic; zabudowa sąsiadów tylko w rogu dalekiego tła.
+   Prawa potwierdzone przez właściciela 2026-09-17: materiał własny, sam latał dronem.
+   Precyzja miejsca (druga połowa decyzji (c)): „Warmia i Mazury" — nie zawężać w podpisach
+   ani w alt-ach. Daty nagrania właściciel nie podał, więc podpis jej nie zawiera. */
+export const PHOTOS = [
+  {
+    src: rusDomekZDrona,
+    width: 1200,
+    height: 800,
+    alt: 'Drewniany domek letniskowy z zadaszonym tarasem na ogrodzonej działce, widok z drona',
+    caption: 'Domki Letniskowe Ruś, Warmia i Mazury · własne ujęcie z drona',
+    // Dopisek na prośbę właściciela (2026-09-17), jego słowami. ⚠️ Niesie termin: wiosną 2027
+    // zdjęcie i to zdanie są do wymiany (Backlog, iteracja 2 pkt 8) — po terminie zacznie kłamać.
+    note: 'To zdjęcie z początków mojej przygody z wynajmem. Nowe, już z dwoma domkami, dodam wiosną 2027, kiedy skończą się prace przy basenach.',
+  },
+];
 export const FOUNDER = null;
 export const BETA = null;

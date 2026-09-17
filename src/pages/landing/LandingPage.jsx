@@ -338,7 +338,12 @@ export default function LandingPage() {
               {PHOTOS.length > 0 && (
                 <figure className="wp4-photo">
                   <img src={PHOTOS[0].src} alt={PHOTOS[0].alt} width={PHOTOS[0].width} height={PHOTOS[0].height} loading="lazy" decoding="async" />
-                  <figcaption className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</figcaption>
+                  <figcaption>
+                    <span className="wp4-label wp4-label--faint">{PHOTOS[0].caption}</span>
+                    {/* Dopisek właściciela (zdanie, nie etykieta) — zwykłą czcionką, bo wersaliki
+                        mono są czytelne tylko przy kilku słowach */}
+                    {PHOTOS[0].note && <p className="wp4-photo__note">{PHOTOS[0].note}</p>}
+                  </figcaption>
                 </figure>
               )}
               {/* Pierwsza osoba i nazwa „Domki Letniskowe Ruś" — decyzje właściciela (c) i (e)
@@ -1068,6 +1073,7 @@ const CSS = `
 .wp4-photo{ margin:0 0 20px; }
 .wp4-photo img{ display:block; width:100%; height:auto; border:1px solid var(--hairline); border-radius:4px; }
 .wp4-photo figcaption{ margin-top:8px; }
+.wp4-photo__note{ margin:6px 0 0; font-size:14px; line-height:1.5; color:var(--muted); }
 .wp4-founder{ display:flex; gap:20px; align-items:flex-start; margin-top:40px; padding-top:32px; border-top:1px solid var(--hairline); }
 .wp4-founder__photo{ width:96px; height:120px; object-fit:cover; border:1px solid var(--hairline); border-radius:4px; flex:0 0 96px; }
 .wp4-founder__name{ font-weight:700; font-size:17px; margin:0 0 4px; color:var(--ink); }
