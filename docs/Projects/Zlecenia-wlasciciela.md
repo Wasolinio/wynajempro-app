@@ -33,7 +33,7 @@ których agent nie ma prawa wymyślić: zdjęcia, twarz, nazwisko na stronie, li
 **Instrukcja krok po kroku:** [[Projects/Instrukcje-wlasciciela]] sekcja **10** (pełna treść
 była też w czacie 2026-09-03).
 **Twoje ręce:**
-1. **3–5 zdjęć domku** — własne, poziome, min. 1600 px, w dzień, bez filtrów; bez osób,
+1. ✅ **ZROBIONE 2026-09-17** — materiały dostarczone (12 zdjęć + film 4K z drona), prawa potwierdzone („moje, sam latałem dronem"), precyzja miejsca „Warmia i Mazury", kadr 1:51 z filmu **wydany na produkcję** (`0fbc5ad`) z Twoim dopiskiem o zdjęciu z początków wynajmu. 📌 Wiosną 2027 podmiana na nowe zdjęcia dwóch domków (po basenach). Pierwotnie: **3–5 zdjęć domku** — własne, poziome, min. 1600 px, w dzień, bez filtrów; bez osób,
    tablic rejestracyjnych, kartki z hasłem Wi-Fi i czytelnego QR. Ta sama sesja obsłuży
    zdjęcia wnętrz do Airbnb (R1 z Plan-domki-portale (projekt Domki Ruś)).
 2. ~~**1 zdjęcie twarzy** (kwadrat lub 4:5, min. 800 px) — tylko jeśli chcesz być twarzą.~~ ✅ **Odpada** — decyzja (b) = NIE (2026-09-17).
